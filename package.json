@@ -1,0 +1,43 @@
+{
+  "name": "minesweeper",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "copy-static": "cpx static/**/ dist/",
+    "gzip": "gzip -k9nr dist",
+    "build": "rollup -c && npm run copy-static && npm run gzip",
+    "serve": "http-server dist -c0 -g",
+    "fmt": "prettier --write 'src/**/*.{ts,tsx}' *.{js,json,md} && npm run lintfix",
+    "lint": "tslint -t verbose -c tslint.json 'src/**/*.{ts,tsx}'",
+    "lintfix": "tslint -t verbose -c tslint.json --fix 'src/**/*.{ts,tsx}'",
+    "fmt_test": "test $(prettier -l 'src/**/*.{ts,tsx}' *.{js,json,md} | wc -l) -eq 0",
+    "test": "npm run fmt_test && npm run lint && npm run build"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test"
+    }
+  },
+  "author": "Surma <surma@surma.link>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "actor-helpers": "git+https://github.com/PolymerLabs/actor-helpers.git#master",
+    "cpx": "^1.5.0",
+    "idb-keyval": "^3.1.0",
+    "immer": "^2.0.0",
+    "preact": "^8.3.1",
+    "rimraf": "^2.6.2",
+    "rollup": "^1.1.2",
+    "rollup-plugin-loadz0r": "^0.6.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-terser": "^4.0.4",
+    "rollup-plugin-typescript2": "^0.19.2",
+    "typescript": "^3.1.3"
+  },
+  "devDependencies": {
+    "husky": "^1.3.1",
+    "prettier": "^1.16.4",
+    "tslint": "^5.12.1"
+  }
+}
