@@ -11,18 +11,13 @@
  * limitations under the License.
  */
 
-import { Realm } from "actor-helpers/src/realm/Realm.js";
-import { PostMessageBridge } from "actor-helpers/src/bridge/PostMessageBridge.js";
+export const enum State { Pending, Playing, Lost, Won }
 
-import PreactAdapter from "./actors/adapters/preact";
+export const enum Tag { None, Flag, Mark }
 
-async function bootstrap() {
-  const realm = new Realm();
-  realm.hookup("ui", new PreactAdapter());
-
-  const worker = new Worker("worker.js");
-  const bridge = new PostMessageBridge(worker);
-  bridge.install(realm);
+export interface Cell {
+  hasMine: boolean;
+  tag: Tag;
+  revealed: boolean;
+  touching: number;
 }
-
-bootstrap();

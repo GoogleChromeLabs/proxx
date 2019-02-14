@@ -1,24 +1,22 @@
 /**
- * @license
- * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { Patch, produce } from "immer";
 
-import { Actor, lookup } from "actor-helpers/src/actor/Actor.js";
+import { Actor } from "actor-helpers/src/actor/Actor.js";
 import {
   generateUniqueId,
   processResponse,
-  Request,
   Response,
   sendRequest,
   sendResponse
@@ -93,8 +91,8 @@ export const defaultState: State = {
 };
 
 export default class StateActor extends Actor<Message> {
-  private storage = lookup("storage");
-  private pubsub = lookup("state.pubsub");
+  private storageReady?: Promise<void>;
+  private statePubSubReady?: Promise<void>;
   private _state: State = defaultState;
 
   get state() {
@@ -103,13 +101,17 @@ export default class StateActor extends Actor<Message> {
 
   set state(val) {
     this._state = val;
-    this.storage.send({
-      todos: this._state.items,
-      type: StorageMessageType.SAVE
-    });
+    this.storageReady!.then(() =>
+      this.realm!.send("storage", {
+        todos: this._state.items,
+        type: StorageMessageType.SAVE
+      })
+    );
   }
 
   async init() {
+    this.storageReady = this.realm!.lookup("storage");
+    this.statePubSubReady = this.realm!.lookup("state.pubsub");
     this.loadState();
   }
 
@@ -150,7 +152,7 @@ export default class StateActor extends Actor<Message> {
   }
 
   async [MessageType.REQUEST_STATE](msg: RequestStateMessage) {
-    sendResponse(msg, {
+    sendResponse(this, msg, {
       state: this.state
     });
   }
@@ -169,16 +171,17 @@ export default class StateActor extends Actor<Message> {
     );
   }
 
-  private sendPatches(patches: Patch[]) {
-    this.pubsub.send({
+  private async sendPatches(patches: Patch[]) {
+    await this.statePubSubReady!;
+    this.send("state.pubsub", {
       payload: patches,
       type: PubSubMessageType.PUBLISH
     });
   }
 
   private async loadState() {
-    const response = await sendRequest(this.storage, {
-      requester: this.actorName!,
+    await this.storageReady!;
+    const response = await sendRequest(this, "storage", {
       type: StorageMessageType.LOAD_REQUEST
     });
     this.state = produce<State>(

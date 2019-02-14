@@ -1,22 +1,21 @@
 /**
- * @license
- * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { applyPatches, Patch } from "immer";
 
 import { h, render } from "preact";
 
-import { Actor, lookup } from "actor-helpers/src/actor/Actor.js";
+import { Actor } from "actor-helpers/src/actor/Actor.js";
 import {
   processResponse,
   sendRequest
@@ -43,15 +42,18 @@ export type Message = PublishMessage;
 
 export default class PreactAdapter extends Actor<Message> {
   private state: State = defaultState;
-  private stateActor = lookup("state");
-  private pubsubActor = lookup("state.pubsub");
+  private stateActorReady?: Promise<void>;
 
   async init() {
     // Subscribe to state updates
-    this.pubsubActor.send({
-      actorName: this.actorName!,
-      type: PubSubMessageType.SUBSCRIBE
+    this.realm!.lookup("state.pubsub").then(() => {
+      this.realm!.send("state.pubsub", {
+        actorName: this.actorName!,
+        type: PubSubMessageType.SUBSCRIBE
+      });
     });
+
+    this.stateActorReady = this.realm!.lookup("state");
 
     this.loadState();
   }
@@ -96,7 +98,7 @@ export default class PreactAdapter extends Actor<Message> {
     if (!uid) {
       return;
     }
-    this.stateActor.send({
+    this.realm!.send("state", {
       type: StateMessageType.DELETE_TODO,
       uid
     });
@@ -111,7 +113,7 @@ export default class PreactAdapter extends Actor<Message> {
     if (!uid) {
       return;
     }
-    this.stateActor.send({
+    this.realm!.send("state", {
       type: StateMessageType.TOGGLE_TODO,
       uid
     });
@@ -119,14 +121,15 @@ export default class PreactAdapter extends Actor<Message> {
 
   private newItem() {
     const title = (document.querySelector("#new")! as HTMLInputElement).value;
-    this.stateActor.send({
+    this.realm!.send("state", {
       title,
       type: StateMessageType.CREATE_TODO
     });
   }
 
   private async loadState() {
-    const response = (await sendRequest(this.stateActor, {
+    await this.stateActorReady!;
+    const response = (await sendRequest("state", {
       requester: this.actorName!,
       type: StateMessageType.REQUEST_STATE
     })) as StateMessage;

@@ -1,31 +1,39 @@
 /**
- * @license
- * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import { ActorHandle, lookup } from "actor-helpers/src/actor/Actor.js";
+import { ValidActorMessageName, Actor } from "actor-helpers/src/actor/Actor";
 
-export interface Response {
-  requestId: RequestId;
-}
 declare global {
   interface RequestNameMap {}
   interface RequestNameResponsePairs {}
 }
 
+interface RequestWrapper<T> {
+  original: T;
+  requester: ValidActorMessageName;
+  requestId: string;
+}
+
+const secretMarker = "___reqresmarker";
+
+interface ResponseWrapper<T> {
+  original: T;
+  requestId: string;
+  [secretMarker]: true;
+}
+
 type ValidRequestName = keyof RequestNameMap;
 type PromiseResolver = (x: any) => void;
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-type ValidActorName = keyof ActorMessageType;
 export type RequestId = string;
 
 const waitingRequesters = new Map<RequestId, PromiseResolver>();
@@ -36,32 +44,34 @@ export function generateUniqueId(): RequestId {
     .join("");
 }
 
-export interface Request {
-  requester: string;
+interface Request {
+  requester: ValidActorMessageName;
   requestId: RequestId;
 }
 
 export function sendRequest<
-  T extends ValidActorName,
+  T extends ValidActorMessageName,
   R extends ValidRequestName
 >(
-  handle: ActorHandle<T>,
-  request: Omit<ActorMessageType[T] & Request, "requestId">
+  sourceActor: Actor<any>,
+  actorName: T,
+  request: ActorMessageType[T]
 ): Promise<RequestNameResponsePairs[R]> {
   return new Promise(resolve => {
     const requestId = generateUniqueId();
     // @ts-ignore
-    const augmentedRequest: ActorMessageType[T] & Request = {
+    const augmentedRequest: RequestWrapper<ActorMessageType[T]> = {
       ...request,
-      requestId
+      requester: sourceActor.actorName!,
+      requestId,
     };
     waitingRequesters.set(requestId, resolve);
-    handle.send(augmentedRequest);
+    sourceActor.realm!.send(actorName, augmentedRequest as any);
   });
 }
 
-function isResponse(x: any): x is Response {
-  return "requestId" in x && waitingRequesters.has(x.requestId);
+function isResponse(x: any): x is ResponseWrapper<any> {
+  return secretMarker in x && waitingRequesters.has(x.requestId);
 }
 
 export function processResponse(msg: any): boolean {
@@ -70,20 +80,22 @@ export function processResponse(msg: any): boolean {
   }
   if (waitingRequesters.has(msg.requestId)) {
     const resolver = waitingRequesters.get(msg.requestId)!;
-    resolver(msg);
+    resolver(msg.original);
   }
   return true;
 }
 
 export async function sendResponse<R extends ValidRequestName>(
+  sourceActor: Actor<any>,
   req: RequestNameMap[R],
-  resp: Omit<RequestNameResponsePairs[R], "requestId">
+  resp: RequestNameResponsePairs[R]
 ) {
-  // @ts-ignore
-  const actor = lookup(req.requester);
-  actor.send({
-    // @ts-ignore
+  const augmentedResponse: ResponseWrapper<RequestNameResponsePairs[R]> = {
     ...resp,
     requestId: req.requestId
+    [secretMarker]: true
+  }
+  // @ts-ignore
+  sourceActor.realm!.send(req.requester, {
   });
 }

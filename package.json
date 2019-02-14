@@ -22,7 +22,7 @@
   "author": "Surma <surma@surma.link>",
   "license": "Apache-2.0",
   "dependencies": {
-    "actor-helpers": "git+https://github.com/PolymerLabs/actor-helpers.git#master",
+    "actor-helpers": "git+https://github.com/PolymerLabs/actor-helpers.git#surma-postmessage-realm",
     "cpx": "^1.5.0",
     "idb-keyval": "^3.1.0",
     "immer": "^2.0.0",

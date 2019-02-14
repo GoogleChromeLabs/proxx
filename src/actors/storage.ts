@@ -1,22 +1,21 @@
 /**
- * @license
- * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import { get, set } from "idb-keyval";
 
 import { Actor } from "actor-helpers/src/actor/Actor.js";
 
-import { Request, Response, sendResponse } from "../utils/request-response.js";
+import { sendResponse } from "../utils/request-response.js";
 
 import { Todo } from "../types.js";
 
@@ -43,14 +42,14 @@ export interface SaveMessage {
   todos: Todo[];
 }
 
-export type LoadRequestMessage = {
+export interface LoadRequestMessage {
   type: MessageType.LOAD_REQUEST;
-} & Request;
+};
 
-export type LoadResponseMessage = {
+export interface LoadResponseMessage {
   type: MessageType.LOAD_RESPONSE;
   todos: Todo[];
-} & Response;
+};
 
 export type Message = SaveMessage | LoadRequestMessage;
 
@@ -62,7 +61,7 @@ export default class StorageActor extends Actor<Message> {
 
   async [MessageType.LOAD_REQUEST](msg: LoadRequestMessage) {
     const todos = (await get("todos")) as Todo[];
-    sendResponse(msg, {
+    sendResponse(this, msg, {
       todos: todos || []
     });
   }
