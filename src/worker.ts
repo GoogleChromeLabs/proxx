@@ -14,9 +14,9 @@
 import { PostMessageBridge } from "actor-helpers/src/bridge/PostMessageBridge.js";
 import { Realm } from "actor-helpers/src/realm/Realm.js";
 
-import PubSubActor from "./actors/pubsub.js";
-import StateActor from "./actors/state.js";
-import StorageActor from "./actors/storage.js";
+import PubSubActor from "./actors/pubsub/index.js";
+import StateActor from "./actors/state/index.js";
+import StorageActor from "./actors/storage/index.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 

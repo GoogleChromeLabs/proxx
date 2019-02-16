@@ -24,13 +24,13 @@ import {
 import {
   MessageType as PubSubMessageType,
   PublishMessage
-} from "../../pubsub.js";
+} from "../../pubsub/types.js";
 import {
   defaultState,
   MessageType as StateMessageType,
   State,
   StateMessage
-} from "../../state.js";
+} from "../../state/types.js";
 
 declare global {
   interface ActorMessageType {
@@ -66,7 +66,6 @@ export default class PreactAdapter extends Actor<Message> {
   }
 
   [PubSubMessageType.PUBLISH](msg: PublishMessage) {
-    console.log("Got a publish");
     this.state = applyPatches(this.state, msg.payload as Patch[]);
     this.render(this.state);
   }
@@ -121,7 +120,6 @@ export default class PreactAdapter extends Actor<Message> {
 
   private newItem() {
     const title = (document.querySelector("#new")! as HTMLInputElement).value;
-    console.log("Sending new item", title);
     this.realm!.send("state", {
       title,
       type: StateMessageType.CREATE_TODO

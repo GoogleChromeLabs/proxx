@@ -19,17 +19,28 @@ import {
   processResponse,
   sendRequest,
   sendResponse
-} from "../utils/request-response.js";
+} from "../../utils/request-response.js";
 import {
   Message as PubSubMessage,
   MessageType as PubSubMessageType
-} from "./pubsub.js";
+} from "../pubsub/types.js";
+
+import {
+  CreateMessage,
+  defaultState,
+  DeleteMessage,
+  Message,
+  MessageType,
+  RequestStateMessage,
+  State,
+  StateMessage,
+  ToggleMessage
+} from "./types.js";
+
 import {
   LoadResponseMessage,
   MessageType as StorageMessageType
-} from "./storage.js";
-
-import { Todo } from "../types.js";
+} from "../storage/types.js";
 
 declare global {
   interface ActorMessageType {
@@ -43,51 +54,6 @@ declare global {
     RequestStateMessage: StateMessage;
   }
 }
-
-export enum MessageType {
-  CREATE_TODO,
-  DELETE_TODO,
-  TOGGLE_TODO,
-  REQUEST_STATE
-}
-
-export interface CreateMessage {
-  type: MessageType.CREATE_TODO;
-  title: string;
-}
-
-export interface DeleteMessage {
-  type: MessageType.DELETE_TODO;
-  uid: string;
-}
-
-export interface ToggleMessage {
-  type: MessageType.TOGGLE_TODO;
-  uid: string;
-}
-
-export interface RequestStateMessage {
-  type: MessageType.REQUEST_STATE;
-}
-
-export interface StateMessage {
-  state: State;
-}
-
-export type Message =
-  | CreateMessage
-  | DeleteMessage
-  | ToggleMessage
-  | RequestStateMessage
-  | LoadResponseMessage;
-
-export interface State {
-  items: Todo[];
-}
-
-export const defaultState: State = {
-  items: []
-};
 
 export default class StateActor extends Actor<Message> {
   private storageReady?: Promise<void>;
@@ -171,9 +137,7 @@ export default class StateActor extends Actor<Message> {
   }
 
   private async sendPatches(patches: Patch[]) {
-    console.log("Waiting for pubsub");
     await this.statePubSubReady!;
-    console.log("Pubsub ready");
     this.send("state.pubsub", {
       payload: patches,
       type: PubSubMessageType.PUBLISH

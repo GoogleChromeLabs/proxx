@@ -15,9 +15,17 @@ import { get, set } from "idb-keyval";
 
 import { Actor } from "actor-helpers/src/actor/Actor.js";
 
-import { sendResponse } from "../utils/request-response.js";
+import { sendResponse } from "../../utils/request-response.js";
 
-import { Todo } from "../types.js";
+import { Todo } from "../../types.js";
+
+import {
+  LoadRequestMessage,
+  LoadResponseMessage,
+  Message,
+  MessageType,
+  SaveMessage
+} from "./types.js";
 
 declare global {
   interface ActorMessageType {
@@ -30,27 +38,6 @@ declare global {
     LoadRequestMessage: LoadResponseMessage;
   }
 }
-
-export enum MessageType {
-  SAVE,
-  LOAD_REQUEST,
-  LOAD_RESPONSE
-}
-
-export interface SaveMessage {
-  type: MessageType.SAVE;
-  todos: Todo[];
-}
-
-export interface LoadRequestMessage {
-  type: MessageType.LOAD_REQUEST;
-}
-
-export interface LoadResponseMessage {
-  todos: Todo[];
-}
-
-export type Message = SaveMessage | LoadRequestMessage;
 
 export default class StorageActor extends Actor<Message> {
   async onMessage(msg: Message) {
