@@ -11,15 +11,14 @@
  * limitations under the License.
  */
 
-import { ValidActorMessageName, Actor } from "actor-helpers/src/actor/Actor";
+import { Actor, ValidActorMessageName } from "actor-helpers/src/actor/Actor";
 
 declare global {
   interface RequestNameMap {}
   interface RequestNameResponsePairs {}
 }
 
-interface RequestWrapper<T> {
-  original: T;
+interface Request {
   requester: ValidActorMessageName;
   requestId: string;
 }
@@ -60,10 +59,10 @@ export function sendRequest<
   return new Promise(resolve => {
     const requestId = generateUniqueId();
     // @ts-ignore
-    const augmentedRequest: RequestWrapper<ActorMessageType[T]> = {
+    const augmentedRequest: ActorMessageType[T] & Request = {
       ...request,
-      requester: sourceActor.actorName!,
       requestId,
+      requester: sourceActor.actorName!
     };
     waitingRequesters.set(requestId, resolve);
     sourceActor.realm!.send(actorName, augmentedRequest as any);
@@ -90,12 +89,12 @@ export async function sendResponse<R extends ValidRequestName>(
   req: RequestNameMap[R],
   resp: RequestNameResponsePairs[R]
 ) {
+  const augmentedRequest = req as RequestNameMap[R] & Request;
   const augmentedResponse: ResponseWrapper<RequestNameResponsePairs[R]> = {
-    ...resp,
-    requestId: req.requestId
+    original: resp,
+    requestId: augmentedRequest.requestId,
     [secretMarker]: true
-  }
+  };
   // @ts-ignore
-  sourceActor.realm!.send(req.requester, {
-  });
+  sourceActor.realm!.send(req.requester, augmentedResponse);
 }

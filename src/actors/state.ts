@@ -17,7 +17,6 @@ import { Actor } from "actor-helpers/src/actor/Actor.js";
 import {
   generateUniqueId,
   processResponse,
-  Response,
   sendRequest,
   sendResponse
 } from "../utils/request-response.js";
@@ -67,13 +66,13 @@ export interface ToggleMessage {
   uid: string;
 }
 
-export type RequestStateMessage = {
+export interface RequestStateMessage {
   type: MessageType.REQUEST_STATE;
-} & Request;
+}
 
-export type StateMessage = {
+export interface StateMessage {
   state: State;
-} & Response;
+}
 
 export type Message =
   | CreateMessage
@@ -172,7 +171,9 @@ export default class StateActor extends Actor<Message> {
   }
 
   private async sendPatches(patches: Patch[]) {
+    console.log("Waiting for pubsub");
     await this.statePubSubReady!;
+    console.log("Pubsub ready");
     this.send("state.pubsub", {
       payload: patches,
       type: PubSubMessageType.PUBLISH

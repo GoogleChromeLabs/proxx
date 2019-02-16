@@ -54,7 +54,6 @@ export default class PreactAdapter extends Actor<Message> {
     });
 
     this.stateActorReady = this.realm!.lookup("state");
-
     this.loadState();
   }
 
@@ -67,6 +66,7 @@ export default class PreactAdapter extends Actor<Message> {
   }
 
   [PubSubMessageType.PUBLISH](msg: PublishMessage) {
+    console.log("Got a publish");
     this.state = applyPatches(this.state, msg.payload as Patch[]);
     this.render(this.state);
   }
@@ -121,6 +121,7 @@ export default class PreactAdapter extends Actor<Message> {
 
   private newItem() {
     const title = (document.querySelector("#new")! as HTMLInputElement).value;
+    console.log("Sending new item", title);
     this.realm!.send("state", {
       title,
       type: StateMessageType.CREATE_TODO
@@ -129,8 +130,7 @@ export default class PreactAdapter extends Actor<Message> {
 
   private async loadState() {
     await this.stateActorReady!;
-    const response = (await sendRequest("state", {
-      requester: this.actorName!,
+    const response = (await sendRequest(this, "state", {
       type: StateMessageType.REQUEST_STATE
     })) as StateMessage;
     this.state = response.state;

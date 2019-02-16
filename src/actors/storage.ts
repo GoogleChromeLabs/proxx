@@ -44,12 +44,11 @@ export interface SaveMessage {
 
 export interface LoadRequestMessage {
   type: MessageType.LOAD_REQUEST;
-};
+}
 
 export interface LoadResponseMessage {
-  type: MessageType.LOAD_RESPONSE;
   todos: Todo[];
-};
+}
 
 export type Message = SaveMessage | LoadRequestMessage;
 
