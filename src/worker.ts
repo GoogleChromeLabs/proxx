@@ -16,7 +16,6 @@ import { Realm } from "actor-helpers/src/realm/Realm.js";
 
 import PubSubActor from "./actors/pubsub/index.js";
 import StateActor from "./actors/state/index.js";
-import StorageActor from "./actors/storage/index.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 
@@ -26,4 +25,3 @@ bridge.install(realm);
 
 realm.hookup("state", new StateActor());
 realm.hookup("state.pubsub", new PubSubActor());
-realm.hookup("storage", new StorageActor());

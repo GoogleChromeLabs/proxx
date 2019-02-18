@@ -1,26 +1,22 @@
-import { Todo } from "../../types.js";
-import { LoadResponseMessage } from "../storage/types.js";
+import { Cell, State as GameState, Tag } from "../../gamelogic/types.js";
+
+import MinesweeperGame from "../../gamelogic/index.js";
 
 export enum MessageType {
-  CREATE_TODO,
-  DELETE_TODO,
-  TOGGLE_TODO,
+  MARK_FIELD,
+  REVEAL_FIELD,
   REQUEST_STATE
 }
 
-export interface CreateMessage {
-  type: MessageType.CREATE_TODO;
-  title: string;
+export interface MarkFieldMessage {
+  type: MessageType.MARK_FIELD;
+  coordinates: [number, number];
+  tag: Tag;
 }
 
-export interface DeleteMessage {
-  type: MessageType.DELETE_TODO;
-  uid: string;
-}
-
-export interface ToggleMessage {
-  type: MessageType.TOGGLE_TODO;
-  uid: string;
+export interface RevealFieldMessage {
+  type: MessageType.REVEAL_FIELD;
+  coordinates: [number, number];
 }
 
 export interface RequestStateMessage {
@@ -28,20 +24,23 @@ export interface RequestStateMessage {
 }
 
 export interface StateMessage {
-  state: State;
+  // state: State;
+  state: MinesweeperGame;
 }
 
 export type Message =
-  | CreateMessage
-  | DeleteMessage
-  | ToggleMessage
-  | RequestStateMessage
-  | LoadResponseMessage;
+  | MarkFieldMessage
+  | RevealFieldMessage
+  | RequestStateMessage;
 
-export interface State {
-  items: Todo[];
-}
+// export interface State {
+//   gameState: GameState;
+//   grid: Cell[][];
+// }
 
-export const defaultState: State = {
-  items: []
-};
+export type State = MinesweeperGame;
+
+// export const defaultState: State = {
+//   gameState: GameState.Pending,
+//   grid: [],
+// };

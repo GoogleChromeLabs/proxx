@@ -11,36 +11,32 @@
  * limitations under the License.
  */
 
-import { Patch, produce } from "immer";
+import { immerable, Patch, produce } from "immer";
 
 import { Actor } from "actor-helpers/src/actor/Actor.js";
 import {
-  generateUniqueId,
   processResponse,
   sendRequest,
   sendResponse
 } from "../../utils/request-response.js";
+
 import {
   Message as PubSubMessage,
   MessageType as PubSubMessageType
 } from "../pubsub/types.js";
 
 import {
-  CreateMessage,
-  defaultState,
-  DeleteMessage,
+  MarkFieldMessage,
   Message,
   MessageType,
   RequestStateMessage,
+  RevealFieldMessage,
   State,
-  StateMessage,
-  ToggleMessage
+  StateMessage
 } from "./types.js";
 
-import {
-  LoadResponseMessage,
-  MessageType as StorageMessageType
-} from "../storage/types.js";
+import MinesweeperGame from "../../gamelogic/index.js";
+import { Tag } from "../../gamelogic/types.js";
 
 declare global {
   interface ActorMessageType {
@@ -56,28 +52,12 @@ declare global {
 }
 
 export default class StateActor extends Actor<Message> {
-  private storageReady?: Promise<void>;
+  private game: MinesweeperGame = new MinesweeperGame(10, 10, 10);
   private statePubSubReady?: Promise<void>;
-  private _state: State = defaultState;
-
-  get state() {
-    return this._state;
-  }
-
-  set state(val) {
-    this._state = val;
-    this.storageReady!.then(() =>
-      this.realm!.send("storage", {
-        todos: this._state.items,
-        type: StorageMessageType.SAVE
-      })
-    );
-  }
 
   async init() {
-    this.storageReady = this.realm!.lookup("storage");
     this.statePubSubReady = this.realm!.lookup("state.pubsub");
-    this.loadState();
+    (this.game as any)[immerable] = true;
   }
 
   async onMessage(msg: Message) {
@@ -88,52 +68,43 @@ export default class StateActor extends Actor<Message> {
     this[msg.type](msg);
   }
 
-  async [MessageType.CREATE_TODO](msg: CreateMessage) {
-    this.state = produce<State>(
-      this.state,
+  async [MessageType.MARK_FIELD](msg: MarkFieldMessage) {
+    this.game = produce<MinesweeperGame>(
+      this.game!,
       draft => {
-        draft.items.push({
-          done: false,
-          title: msg.title,
-          uid: generateUniqueId()
-        });
+        console.log(draft);
+        this.game.tag.call(
+          draft,
+          msg.coordinates[0],
+          msg.coordinates[1],
+          msg.tag
+        );
       },
-      p => this.sendPatches(p)
+      patches => {
+        console.log("Mark patches", patches);
+        this.sendPatches(patches);
+      }
     );
   }
 
-  async [MessageType.DELETE_TODO](msg: DeleteMessage) {
-    this.state = produce<State>(
-      this.state,
+  async [MessageType.REVEAL_FIELD](msg: RevealFieldMessage) {
+    this.game = produce<MinesweeperGame>(
+      this.game!,
       draft => {
-        const idx = draft.items.findIndex(item => item.uid === msg.uid);
-        if (idx === -1) {
-          return;
-        }
-        draft.items.splice(idx, 1);
+        draft.reveal(msg.coordinates[0], msg.coordinates[1]);
+        draft.attemptSurroundingReveal(msg.coordinates[0], msg.coordinates[1]);
       },
-      p => this.sendPatches(p)
+      patches => {
+        console.log("Reveal patches", patches);
+        this.sendPatches(patches);
+      }
     );
   }
 
   async [MessageType.REQUEST_STATE](msg: RequestStateMessage) {
     sendResponse(this, msg, {
-      state: this.state
+      state: this.game
     });
-  }
-
-  async [MessageType.TOGGLE_TODO](msg: ToggleMessage) {
-    this.state = produce<State>(
-      this.state,
-      draft => {
-        const item = draft.items.find(item => item.uid === msg.uid);
-        if (!item) {
-          return;
-        }
-        item.done = !item.done;
-      },
-      p => this.sendPatches(p)
-    );
   }
 
   private async sendPatches(patches: Patch[]) {
@@ -142,19 +113,5 @@ export default class StateActor extends Actor<Message> {
       payload: patches,
       type: PubSubMessageType.PUBLISH
     });
-  }
-
-  private async loadState() {
-    await this.storageReady!;
-    const response = await sendRequest(this, "storage", {
-      type: StorageMessageType.LOAD_REQUEST
-    });
-    this.state = produce<State>(
-      this.state,
-      draft => {
-        draft.items = (response as LoadResponseMessage).todos;
-      },
-      p => this.sendPatches(p)
-    );
   }
 }

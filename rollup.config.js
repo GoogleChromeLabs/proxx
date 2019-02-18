@@ -24,7 +24,7 @@ export default {
       }
     }),
     nodeResolve(),
-    loadz0r(),
-    terser()
+    loadz0r()
+    // terser()
   ]
 };

@@ -180,6 +180,7 @@ export default class MinesweeperGame {
    * @param objsCloned Objects that don't need cloning again.
    */
   private _cloneUpwards(x: number, y: number, objsCloned: WeakSet<any>) {
+    return;
     // Grid
     if (!objsCloned.has(this.grid)) {
       this.grid = this.grid.slice();

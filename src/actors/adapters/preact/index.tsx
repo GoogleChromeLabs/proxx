@@ -26,11 +26,13 @@ import {
   PublishMessage
 } from "../../pubsub/types.js";
 import {
-  defaultState,
+  // defaultState,
   MessageType as StateMessageType,
   State,
   StateMessage
 } from "../../state/types.js";
+
+import { Tag } from "../../../gamelogic/types.js";
 
 declare global {
   interface ActorMessageType {
@@ -41,7 +43,7 @@ declare global {
 export type Message = PublishMessage;
 
 export default class PreactAdapter extends Actor<Message> {
-  private state: State = defaultState;
+  private state?: State;
   private stateActorReady?: Promise<void>;
 
   async init() {
@@ -52,6 +54,8 @@ export default class PreactAdapter extends Actor<Message> {
         type: PubSubMessageType.SUBSCRIBE
       });
     });
+
+    this.click = this.click.bind(this);
 
     this.stateActorReady = this.realm!.lookup("state");
     this.loadState();
@@ -67,62 +71,54 @@ export default class PreactAdapter extends Actor<Message> {
 
   [PubSubMessageType.PUBLISH](msg: PublishMessage) {
     this.state = applyPatches(this.state, msg.payload as Patch[]);
-    this.render(this.state);
+    this.render(this.state!);
   }
 
   private render(state: State) {
     render(
-      <main onChange={e => this.toggleItem(e)}>
-        {state.items.map(item => (
-          <label data-uid={item.uid}>
-            <input type="checkbox" checked={item.done} />
-            {item.title}
-            <button onClick={e => this.deleteItem(e)}>-</button>
-          </label>
+      <table>
+        {state.grid.map((row, y) => (
+          <tr>
+            {row.map((cell, x) => (
+              <td data-x={x} data-y={y} onClick={this.click}>
+                {cell.revealed
+                  ? cell.hasMine
+                    ? "B"
+                    : cell.touching
+                  : cell.tag !== Tag.None
+                  ? "F"
+                  : "?"}
+              </td>
+            ))}
+          </tr>
         ))}
-        <input type="text" id="new" />
-        <button onClick={() => this.newItem()}>+</button>
-      </main>,
+      </table>,
       document.body,
       document.body.firstChild as any
     );
   }
 
-  private deleteItem(e: Event) {
-    const label = (e.target as HTMLElement).closest("label");
-    if (!label) {
-      return;
+  private click(ev: MouseEvent) {
+    const { x, y } = (ev.target! as HTMLElement).dataset;
+    if (ev.shiftKey) {
+      this.mark(Number(x), Number(y));
+    } else {
+      this.reveal(Number(x), Number(y));
     }
-    const uid = label.dataset.uid!;
-    if (!uid) {
-      return;
-    }
+  }
+
+  private reveal(x: number, y: number) {
     this.realm!.send("state", {
-      type: StateMessageType.DELETE_TODO,
-      uid
+      coordinates: [Number(x), Number(y)],
+      type: StateMessageType.REVEAL_FIELD
     });
   }
 
-  private toggleItem(e: Event) {
-    const label = (e.target as HTMLElement).closest("label");
-    if (!label) {
-      return;
-    }
-    const uid = label.dataset.uid!;
-    if (!uid) {
-      return;
-    }
+  private mark(x: number, y: number) {
     this.realm!.send("state", {
-      type: StateMessageType.TOGGLE_TODO,
-      uid
-    });
-  }
-
-  private newItem() {
-    const title = (document.querySelector("#new")! as HTMLInputElement).value;
-    this.realm!.send("state", {
-      title,
-      type: StateMessageType.CREATE_TODO
+      coordinates: [Number(x), Number(y)],
+      tag: Tag.Mark,
+      type: StateMessageType.MARK_FIELD
     });
   }
 
@@ -132,6 +128,7 @@ export default class PreactAdapter extends Actor<Message> {
       type: StateMessageType.REQUEST_STATE
     })) as StateMessage;
     this.state = response.state;
+    console.log(this.state);
     this.render(this.state);
   }
 }
