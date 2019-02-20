@@ -45,8 +45,15 @@ declare global {
   }
 }
 
+const BOARD_SIZE = 100;
+const DENSITY = 0.1;
+
 export default class StateActor extends Actor<Message> {
-  private game: MinesweeperGame = new MinesweeperGame(10, 10, 10);
+  private game: MinesweeperGame = new MinesweeperGame(
+    BOARD_SIZE,
+    BOARD_SIZE,
+    Math.floor(BOARD_SIZE * BOARD_SIZE * DENSITY)
+  );
   private statePubSub?: Promise<ActorHandle<"state.pubsub">>;
 
   async init() {

@@ -13,6 +13,13 @@
 
 import { Cell, State, Tag } from "./types.js";
 
+export interface Cell {
+  hasMine: boolean;
+  tag: Tag;
+  revealed: boolean;
+  touching: number;
+}
+
 function newCell(): Cell {
   return {
     hasMine: false,
@@ -77,7 +84,7 @@ export default class MinesweeperGame {
       throw Error("Cell flagged");
     }
 
-    this._reveal(x, y, new WeakSet());
+    this._reveal(x, y);
   }
 
   tag(x: number, y: number, tag: Tag) {
@@ -180,6 +187,7 @@ export default class MinesweeperGame {
    * @param objsCloned Objects that don't need cloning again.
    */
   private _cloneUpwards(x: number, y: number, objsCloned: WeakSet<any>) {
+    // Hacky fix for ImmerJS
     return;
     // Grid
     if (!objsCloned.has(this.grid)) {
@@ -231,61 +239,60 @@ export default class MinesweeperGame {
    * @param y
    * @param objsCloned A weakmap to track which objects have already been cloned.
    */
-  private _reveal(x: number, y: number, objsCloned: WeakSet<any>) {
-    // Cloning the objects, but then just mutating from there on, so this.grid
-    // appears to be immutable from the outside.
-    // Yeah, bit of a cheat.
-    this._cloneUpwards(x, y, objsCloned);
-    const cell = this.grid[y][x];
+  private _reveal(x: number, y: number, objsCloned = new WeakSet()) {
+    // The set contains the cell position as if it were a single flat array.
+    const revealSet = new Set<number>([x + y * this._width]);
 
-    if (cell.revealed) {
-      throw Error("Cell already revealed");
-    }
+    for (const value of revealSet) {
+      const x = value % this._width;
+      const y = (value - x) / this._width;
 
-    cell.revealed = true;
+      this._cloneUpwards(x, y, objsCloned);
+      const cell = this.grid[y][x];
 
-    if (cell.hasMine) {
-      this._endGame(State.Lost);
-      return;
-    }
-
-    this._toReveal -= 1;
-
-    if (this._toReveal === 0) {
-      this._endGame(State.Won);
-      // Although the game is over, we still continue to calculate the touching value.
-    }
-
-    let touching = 0;
-    const maybeReveal: Array<[number, number]> = [];
-
-    // Go around the surrounding squares
-    for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
-      const nextCell = this.grid[nextY][nextX];
-
-      if (nextCell.hasMine) {
-        touching += 1;
+      if (cell.revealed) {
+        throw Error("Cell already revealed");
       }
-      if (nextCell.tag === Tag.Flag) {
+      cell.revealed = true;
+
+      if (cell.hasMine) {
+        this._endGame(State.Lost);
+        return;
+      }
+
+      this._toReveal -= 1;
+
+      if (this._toReveal === 0) {
+        this._endGame(State.Won);
+        // Although the game is over, we still continue to calculate the touching value.
+      }
+
+      let touching = 0;
+      const maybeReveal: number[] = [];
+
+      // Go around the surrounding squares
+      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+        const nextCell = this.grid[nextY][nextX];
+
+        if (nextCell.hasMine) {
+          touching += 1;
+        }
+        if (nextCell.tag === Tag.Flag || nextCell.revealed) {
+          continue;
+        }
+        maybeReveal.push(nextX + nextY * this._width);
+      }
+
+      cell.touching = touching;
+
+      // Don't reveal the surrounding squares if this is touching a mine.
+      if (touching !== 0) {
         continue;
       }
-      maybeReveal.push([nextX, nextY]);
-    }
 
-    cell.touching = touching;
-
-    // Don't reveal the surrounding squares if this is touching a mine.
-    if (touching !== 0) {
-      return;
-    }
-
-    // Reveal the surrounding squares, unless already revealed
-    for (const [nextX, nextY] of maybeReveal) {
-      const nextCell = this.grid[nextY][nextX];
-      if (nextCell.revealed) {
-        continue;
+      for (const num of maybeReveal) {
+        revealSet.add(num);
       }
-      this._reveal(nextX, nextY, objsCloned);
     }
   }
 }
