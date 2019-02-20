@@ -15,7 +15,7 @@ import { applyPatches, Patch } from "immer";
 
 import { h, render } from "preact";
 
-import { Actor } from "actor-helpers/src/actor/Actor.js";
+import { Actor, ActorHandle } from "actor-helpers/src/actor/Actor.js";
 import {
   processResponse,
   sendRequest
@@ -44,12 +44,12 @@ export type Message = PublishMessage;
 
 export default class PreactAdapter extends Actor<Message> {
   private state?: State;
-  private stateActorReady?: Promise<void>;
+  private stateActor?: Promise<ActorHandle<"state">>;
 
   async init() {
     // Subscribe to state updates
-    this.realm!.lookup("state.pubsub").then(() => {
-      this.realm!.send("state.pubsub", {
+    this.realm!.lookup("state.pubsub").then(pubsubActor => {
+      pubsubActor.send({
         actorName: this.actorName!,
         type: PubSubMessageType.SUBSCRIBE
       });
@@ -57,7 +57,7 @@ export default class PreactAdapter extends Actor<Message> {
 
     this.click = this.click.bind(this);
 
-    this.stateActorReady = this.realm!.lookup("state");
+    this.stateActor = this.realm!.lookup("state");
     this.loadState();
   }
 
@@ -107,15 +107,15 @@ export default class PreactAdapter extends Actor<Message> {
     }
   }
 
-  private reveal(x: number, y: number) {
-    this.realm!.send("state", {
+  private async reveal(x: number, y: number) {
+    (await this.stateActor!).send({
       coordinates: [Number(x), Number(y)],
       type: StateMessageType.REVEAL_FIELD
     });
   }
 
-  private mark(x: number, y: number) {
-    this.realm!.send("state", {
+  private async mark(x: number, y: number) {
+    (await this.stateActor!).send({
       coordinates: [Number(x), Number(y)],
       tag: Tag.Mark,
       type: StateMessageType.MARK_FIELD
@@ -123,12 +123,11 @@ export default class PreactAdapter extends Actor<Message> {
   }
 
   private async loadState() {
-    await this.stateActorReady!;
-    const response = (await sendRequest(this, "state", {
+    const stateActor = await this.stateActor!;
+    const response = (await sendRequest(this, stateActor, {
       type: StateMessageType.REQUEST_STATE
     })) as StateMessage;
     this.state = response.state;
-    console.log(this.state);
     this.render(this.state);
   }
 }

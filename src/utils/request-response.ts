@@ -11,7 +11,11 @@
  * limitations under the License.
  */
 
-import { Actor, ValidActorMessageName } from "actor-helpers/src/actor/Actor";
+import {
+  Actor,
+  ActorHandle,
+  ValidActorMessageName
+} from "actor-helpers/src/actor/Actor";
 
 declare global {
   interface RequestNameMap {}
@@ -53,7 +57,7 @@ export function sendRequest<
   R extends ValidRequestName
 >(
   sourceActor: Actor<any>,
-  actorName: T,
+  actor: ActorHandle<T>,
   request: ActorMessageType[T]
 ): Promise<RequestNameResponsePairs[R]> {
   return new Promise(resolve => {
@@ -65,7 +69,7 @@ export function sendRequest<
       requester: sourceActor.actorName!
     };
     waitingRequesters.set(requestId, resolve);
-    sourceActor.realm!.send(actorName, augmentedRequest as any);
+    sourceActor.realm!.send(actor.actorName, augmentedRequest as any);
   });
 }
 

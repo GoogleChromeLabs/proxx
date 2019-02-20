@@ -13,12 +13,8 @@
 
 import { immerable, Patch, produce } from "immer";
 
-import { Actor } from "actor-helpers/src/actor/Actor.js";
-import {
-  processResponse,
-  sendRequest,
-  sendResponse
-} from "../../utils/request-response.js";
+import { Actor, ActorHandle } from "actor-helpers/src/actor/Actor.js";
+import { processResponse, sendResponse } from "../../utils/request-response.js";
 
 import {
   Message as PubSubMessage,
@@ -31,12 +27,10 @@ import {
   MessageType,
   RequestStateMessage,
   RevealFieldMessage,
-  State,
   StateMessage
 } from "./types.js";
 
 import MinesweeperGame from "../../gamelogic/index.js";
-import { Tag } from "../../gamelogic/types.js";
 
 declare global {
   interface ActorMessageType {
@@ -53,10 +47,12 @@ declare global {
 
 export default class StateActor extends Actor<Message> {
   private game: MinesweeperGame = new MinesweeperGame(10, 10, 10);
-  private statePubSubReady?: Promise<void>;
+  private statePubSub?: Promise<ActorHandle<"state.pubsub">>;
 
   async init() {
-    this.statePubSubReady = this.realm!.lookup("state.pubsub");
+    this.statePubSub = this.realm!.lookup("state.pubsub");
+
+    // Make the game instance work with ImmerJS
     (this.game as any)[immerable] = true;
   }
 
@@ -80,10 +76,7 @@ export default class StateActor extends Actor<Message> {
           msg.tag
         );
       },
-      patches => {
-        console.log("Mark patches", patches);
-        this.sendPatches(patches);
-      }
+      patches => this.sendPatches(patches)
     );
   }
 
@@ -94,10 +87,7 @@ export default class StateActor extends Actor<Message> {
         draft.reveal(msg.coordinates[0], msg.coordinates[1]);
         draft.attemptSurroundingReveal(msg.coordinates[0], msg.coordinates[1]);
       },
-      patches => {
-        console.log("Reveal patches", patches);
-        this.sendPatches(patches);
-      }
+      patches => this.sendPatches(patches)
     );
   }
 
@@ -108,8 +98,7 @@ export default class StateActor extends Actor<Message> {
   }
 
   private async sendPatches(patches: Patch[]) {
-    await this.statePubSubReady!;
-    this.send("state.pubsub", {
+    (await this.statePubSub!).send({
       payload: patches,
       type: PubSubMessageType.PUBLISH
     });

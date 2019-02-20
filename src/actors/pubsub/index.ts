@@ -11,7 +11,11 @@
  * limitations under the License.
  */
 
-import { Actor, ValidActorMessageName } from "actor-helpers/src/actor/Actor.js";
+import {
+  Actor,
+  ActorHandle,
+  ValidActorMessageName
+} from "actor-helpers/src/actor/Actor.js";
 
 import {
   Message,
@@ -21,8 +25,7 @@ import {
 } from "./types.js";
 
 interface Subscriber {
-  name: ValidActorMessageName;
-  ready: Promise<void>;
+  actor: ActorHandle<ValidActorMessageName>;
 }
 
 export default class PubSubActor extends Actor<Message> {
@@ -34,19 +37,16 @@ export default class PubSubActor extends Actor<Message> {
   }
 
   async [MessageType.SUBSCRIBE](msg: SubscribeMessage) {
-    const ready = this.realm!.lookup(msg.actorName as any);
-    this.subscribers.push({
-      name: msg.actorName,
-      ready
-    });
+    const actor = await this.realm!.lookup(msg.actorName as any);
+    this.subscribers.push({ actor });
   }
 
   async [MessageType.PUBLISH](msg: PublishMessage) {
-    for (const { name, ready } of this.subscribers) {
-      if (name === msg.sourceActorName) {
+    for (const { actor } of this.subscribers) {
+      if (actor.actorName === msg.sourceActorName) {
         continue;
       }
-      ready.then(() => this.realm!.send(name, msg));
+      actor.send(msg);
     }
   }
 }
