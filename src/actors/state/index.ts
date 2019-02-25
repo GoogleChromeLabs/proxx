@@ -71,17 +71,11 @@ export default class StateActor extends Actor<Message> {
     this[msg.type](msg);
   }
 
-  async [MessageType.MARK_FIELD](msg: MarkFieldMessage) {
+  async [MessageType.FLAG_FIELD](msg: MarkFieldMessage) {
     this.game = produce<MinesweeperGame>(
       this.game!,
       draft => {
-        console.log(draft);
-        this.game.tag.call(
-          draft,
-          msg.coordinates[0],
-          msg.coordinates[1],
-          msg.tag
-        );
+        draft.tag(msg.coordinates[0], msg.coordinates[1], msg.tag);
       },
       patches => this.sendPatches(patches)
     );

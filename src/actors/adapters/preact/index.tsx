@@ -34,6 +34,12 @@ import {
 
 import { Tag } from "../../../gamelogic/types.js";
 
+import Row from "./components/row/index.js";
+
+import { bind } from "../../../utils/bind.js";
+
+import { Action } from "./components/cell/index.js";
+
 declare global {
   interface ActorMessageType {
     ui: Message;
@@ -55,8 +61,6 @@ export default class PreactAdapter extends Actor<Message> {
       });
     });
 
-    this.click = this.click.bind(this);
-
     this.stateActor = this.realm!.lookup("state");
     this.loadState();
   }
@@ -77,20 +81,13 @@ export default class PreactAdapter extends Actor<Message> {
   private render(state: State) {
     render(
       <table>
-        {state.grid.map((row, y) => (
-          <tr>
-            {row.map((cell, x) => (
-              <td data-x={x} data-y={y} onClick={this.click}>
-                {cell.revealed
-                  ? cell.hasMine
-                    ? "B"
-                    : cell.touching
-                  : cell.tag !== Tag.None
-                  ? "F"
-                  : "?"}
-              </td>
-            ))}
-          </tr>
+        {state.grid.map((row, i) => (
+          // tslint:disable-next-line:jsx-no-lambda
+          <Row
+            key={i}
+            row={row}
+            onClick={(col, action) => this.click(i, col, action)}
+          />
         ))}
       </table>,
       document.body,
@@ -98,12 +95,17 @@ export default class PreactAdapter extends Actor<Message> {
     );
   }
 
-  private click(ev: MouseEvent) {
-    const { x, y } = (ev.target! as HTMLElement).dataset;
-    if (ev.shiftKey) {
-      this.mark(Number(x), Number(y));
-    } else {
-      this.reveal(Number(x), Number(y));
+  @bind
+  private click(row: number, col: number, action: Action) {
+    switch (action) {
+      case Action.Flag: {
+        this.flag(col, row);
+        break;
+      }
+      case Action.Reveal: {
+        this.reveal(col, row);
+        break;
+      }
     }
   }
 
@@ -114,11 +116,11 @@ export default class PreactAdapter extends Actor<Message> {
     });
   }
 
-  private async mark(x: number, y: number) {
+  private async flag(x: number, y: number) {
     (await this.stateActor!).send({
       coordinates: [Number(x), Number(y)],
       tag: Tag.Mark,
-      type: StateMessageType.MARK_FIELD
+      type: StateMessageType.FLAG_FIELD
     });
   }
 

@@ -3,13 +3,13 @@ import { Cell, State as GameState, Tag } from "../../gamelogic/types.js";
 import MinesweeperGame from "../../gamelogic/index.js";
 
 export enum MessageType {
-  MARK_FIELD,
+  FLAG_FIELD,
   REVEAL_FIELD,
   REQUEST_STATE
 }
 
 export interface MarkFieldMessage {
-  type: MessageType.MARK_FIELD;
+  type: MessageType.FLAG_FIELD;
   coordinates: [number, number];
   tag: Tag;
 }
