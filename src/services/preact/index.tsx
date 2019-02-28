@@ -14,7 +14,7 @@
 import { ProxyResult, proxyValue } from "comlinkjs";
 import { h, render } from "preact";
 
-import StateActor, { State } from "../state.js";
+import StateService, { State } from "../state.js";
 
 import Row from "./components/row/index.js";
 
@@ -23,13 +23,13 @@ import { forEach } from "../../utils/streams.js";
 
 import { Action } from "./components/cell/index.js";
 
-export default class PreactActor {
-  constructor(private stateActor: ProxyResult<StateActor>) {
+export default class PreactService {
+  constructor(private stateService: ProxyResult<StateService>) {
     const stateStream = new ReadableStream<State>({
       async start(controller: ReadableStreamDefaultController<State>) {
         // Make initial render ASAP
-        controller.enqueue(await stateActor.state);
-        stateActor.subscribe(
+        controller.enqueue(await stateService.state);
+        stateService.subscribe(
           proxyValue((state: State) => controller.enqueue(state))
         );
       }
@@ -58,11 +58,11 @@ export default class PreactActor {
   private async click(row: number, col: number, action: Action) {
     switch (action) {
       case Action.Flag: {
-        await this.stateActor.flag(col, row);
+        await this.stateService.flag(col, row);
         break;
       }
       case Action.Reveal: {
-        await this.stateActor.reveal(col, row);
+        await this.stateService.reveal(col, row);
         break;
       }
     }

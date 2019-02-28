@@ -12,13 +12,13 @@
  */
 
 import { expose } from "comlinkjs";
-import StateActor from "./actors/state.js";
+import StateService from "./services/state.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 
 expose(
   {
-    stateActor: new StateActor()
+    stateService: new StateService()
   },
   self
 );

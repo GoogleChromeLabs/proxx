@@ -22,7 +22,7 @@ export interface State {
 const BOARD_SIZE = 100;
 const DENSITY = 0.1;
 
-export default class StateActor {
+export default class StateService {
   private port = new MessageChannel().port1;
 
   private game: MinesweeperGame = new MinesweeperGame(

@@ -13,15 +13,15 @@
 
 import { proxy } from "comlinkjs";
 
-import PreactAdapter from "./actors/preact";
+import PreactService from "./services/preact";
 
 async function bootstrap() {
   const worker = new Worker("worker.js");
 
-  const { stateActor } = proxy(worker);
+  const { stateService } = proxy(worker);
 
   // tslint:disable-next-line:no-unused-expression
-  new PreactAdapter(stateActor);
+  new PreactService(stateService);
 }
 
 bootstrap();
