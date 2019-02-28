@@ -11,22 +11,29 @@
  * limitations under the License.
  */
 
-import { ValidActorMessageName } from "actor-helpers/src/actor/Actor.js";
+import { Component, h } from "preact";
+import { Cell } from "../../../../gamelogic/types.js";
+import GridCell, { Action } from "../cell/index.js";
 
-export enum MessageType {
-  SUBSCRIBE,
-  PUBLISH
+interface State {}
+
+interface Props {
+  row: Cell[];
+  onClick(x: number, action: Action): void;
 }
 
-export interface SubscribeMessage {
-  type: MessageType.SUBSCRIBE;
-  actorName: ValidActorMessageName;
-}
+export default class Row extends Component<Props, State> {
+  shouldComponentUpdate(nextProps: Props) {
+    return this.props.row !== nextProps.row;
+  }
 
-export interface PublishMessage {
-  type: MessageType.PUBLISH;
-  sourceActorName?: ValidActorMessageName;
-  payload: {};
+  render({ row, onClick }: Props) {
+    return (
+      <tr>
+        {row.map((cell, i) => (
+          <GridCell key={i} onClick={onClick.bind(this, i)} cell={cell} />
+        ))}
+      </tr>
+    );
+  }
 }
-
-export type Message = SubscribeMessage | PublishMessage;

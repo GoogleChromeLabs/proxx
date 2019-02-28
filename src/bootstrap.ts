@@ -11,19 +11,17 @@
  * limitations under the License.
  */
 
-import { PostMessageBridge } from "actor-helpers/src/bridge/PostMessageBridge.js";
-import { Realm } from "actor-helpers/src/realm/Realm.js";
+import { proxy } from "comlinkjs";
 
-import PreactAdapter from "./actors/adapters/preact";
+import PreactAdapter from "./actors/preact";
 
 async function bootstrap() {
   const worker = new Worker("worker.js");
 
-  const realm = new Realm();
-  const bridge = new PostMessageBridge(worker);
-  bridge.install(realm);
+  const { stateActor } = proxy(worker);
 
-  realm.hookup("ui", new PreactAdapter());
+  // tslint:disable-next-line:no-unused-expression
+  new PreactAdapter(stateActor);
 }
 
 bootstrap();

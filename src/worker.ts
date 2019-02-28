@@ -11,17 +11,14 @@
  * limitations under the License.
  */
 
-import { PostMessageBridge } from "actor-helpers/src/bridge/PostMessageBridge.js";
-import { Realm } from "actor-helpers/src/realm/Realm.js";
-
-import PubSubActor from "./actors/pubsub/index.js";
-import StateActor from "./actors/state/index.js";
+import { expose } from "comlinkjs";
+import StateActor from "./actors/state.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 
-const realm = new Realm();
-const bridge = new PostMessageBridge(self);
-bridge.install(realm);
-
-realm.hookup("state", new StateActor());
-realm.hookup("state.pubsub", new PubSubActor());
+expose(
+  {
+    stateActor: new StateActor()
+  },
+  self
+);

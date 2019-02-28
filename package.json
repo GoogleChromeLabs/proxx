@@ -22,10 +22,9 @@
   "author": "Surma <surma@surma.link>",
   "license": "Apache-2.0",
   "dependencies": {
-    "actor-helpers": "git+https://github.com/PolymerLabs/actor-helpers.git#surma-postmessage-realm",
+    "comlinkjs": "^3.2.0",
     "cpx": "^1.5.0",
     "idb-keyval": "^3.1.0",
-    "immer": "^2.0.0",
     "preact": "^8.3.1",
     "rimraf": "^2.6.2",
     "rollup": "^1.1.2",
@@ -33,7 +32,7 @@
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-typescript2": "^0.19.2",
-    "typescript": "^3.1.3"
+    "typescript": "^3.3.3333"
   },
   "devDependencies": {
     "husky": "^1.3.1",

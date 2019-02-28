@@ -12,8 +12,8 @@
  */
 
 import { Component, h } from "preact";
-import { Cell, Tag } from "../../../../../gamelogic/types.js";
-import { bind } from "../../../../../utils/bind.js";
+import { Cell, Tag } from "../../../../gamelogic/types.js";
+import { bind } from "../../../../utils/bind.js";
 
 interface State {}
 
