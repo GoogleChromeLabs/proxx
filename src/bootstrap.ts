@@ -15,8 +15,11 @@ import { proxy } from "comlinkjs";
 
 import PreactService from "./services/preact";
 
+// @ts-ignore
+import BoomfieldWorker from "worker!./worker.js";
+
 async function bootstrap() {
-  const worker = new Worker("worker.js");
+  const worker = new BoomfieldWorker() as Worker;
 
   const { stateService } = proxy(worker);
 
