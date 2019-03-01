@@ -15,6 +15,7 @@ import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
+import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -24,7 +25,9 @@ export default {
   output: {
     dir: "dist",
     format: "amd",
-    sourcemap: true
+    sourcemap: true,
+    entryFileNames: "[name]-[hash].js",
+    chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
     typescript({
@@ -38,6 +41,7 @@ export default {
     }),
     nodeResolve(),
     loadz0r(),
-    terser()
+    terser(),
+    entrypointHashmanifest()
   ]
 };

@@ -28,6 +28,7 @@
     "preact": "^8.3.1",
     "rimraf": "^2.6.2",
     "rollup": "^1.1.2",
+    "rollup-plugin-entrypoint-hashmanifest": "^0.1.1",
     "rollup-plugin-loadz0r": "^0.6.0",
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-terser": "^4.0.4",
