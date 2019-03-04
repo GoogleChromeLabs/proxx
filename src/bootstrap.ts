@@ -16,10 +16,13 @@ import { proxy } from "comlinkjs";
 import PreactService from "./services/preact";
 
 async function bootstrap() {
-  const worker: Worker = new Worker(await import(
+  const worker: Worker = new Worker(
     // @ts-ignore
-    "worker!./worker.js"
-   ));
+    import("./worker.js")
+  );
+
+  // @ts-ignore
+  await import("yourmum.js");
 
   const { stateService } = proxy(worker);
 
