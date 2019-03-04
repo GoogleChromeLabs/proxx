@@ -1,15 +1,15 @@
+import { getDefaultCompilerOptions } from "typescript";
+
 const walker = require("acorn-walk");
 const MagicString = require("magic-string");
 
-function generate_uuid() {
-  return new Array(4)
-    .fill(0)
-    .map(() => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16))
-    .join("-");
-}
+const defaultOpts = {
+  marker: "_____TROLOLOLOL",
+  filenameRegexp: /["'][^.]+\.js["']/
+};
 
-export default function() {
-  const placeholders = new Set();
+export default function(opts) {
+  opts = {...defaultOpts, ...opts};
   return {
     transform(code, id) {
       const ast = this.parse(code);
@@ -42,10 +42,8 @@ export default function() {
       // Remove the saved `import` calls and generate a source map.
       const ms = new MagicString(code);
       importCalls.forEach(node => {
-        const uuid = generate_uuid();
-        placeholders.add(uuid);
-        ms.appendLeft(node.start, `"${uuid}_start" +`);
-        ms.appendRight(node.end, `+ "${uuid}_end"`);
+        ms.appendLeft(node.start, `"${opts.marker}_start" +`);
+        ms.appendRight(node.end, `+ "${opts.marker}_end"`);
       });
       return {
         code: ms.toString(),
@@ -55,13 +53,13 @@ export default function() {
     renderChunk(code) {
       debugger;
       const magicCode = new MagicString(code);
-      for(const uuid of placeholders) {
-        const matcher = new RegExp(`${uuid}_start.+${uuid}_end`);
+      const matcher = new RegExp(`${opts.marker}_start.+?${opts.marker}_end`, "g");
+      while(true) {
         const match = matcher.exec(code);
         if(!match) {
-          continue
+          break;
         }
-        const newFilename = /chunk-[^.]+\.js/.exec(match)[0];
+        const newFilename = opts.filenameRegexp.exec(match[0])[0];
         magicCode.overwrite(match.index, match.index + match[0].length, newFilename)
       }
       return {
