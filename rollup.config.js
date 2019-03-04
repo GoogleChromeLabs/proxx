@@ -16,7 +16,7 @@ import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
 import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
-import bundleTypeScriptWorker from "./bundleTypeScriptWorker.js";
+import bundleWorker from "./bundle-worker.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -40,7 +40,7 @@ export default {
         }
       }
     }),
-    bundleTypeScriptWorker(),
+    bundleWorker(),
     nodeResolve(),
     loadz0r(),
     // terser(),
