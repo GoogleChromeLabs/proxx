@@ -25,9 +25,8 @@ export default function(opts) {
         Import(node) {}
       });
 
-      // Collect all import calls that are inside a Worker constructor call
-      // inside this array.
-      const importCalls = [];
+      // Collect all the worker calls in this array.
+      const newWorkerCalls = [];
       walker.simple(
         ast,
         {
@@ -35,24 +34,22 @@ export default function(opts) {
             if (node.callee.name !== "Worker") {
               return;
             }
-            if (node.arguments[0].callee.type !== "Import") {
-              return;
-            }
-            importCalls.push(node.arguments[0]);
+            newWorkerCalls.push(node.arguments[0]);
           }
         },
         newBase
       );
 
-      // Surround the import call with markers so we can find it later. We can’t
-      // just save the offsets as Rollup might process the import statements for
-      // CommonJS or AMD or something. Additionally, the filename will most
-      // likely change.
+      // Surround the worker constructor call with markers so we can find it
+      // later and inject a dynamic import so that Rollup has to create an edge
+      // in the dependency graph. We have to use markers as the import might get
+      // processed by Rollup for AMD/CommonJS or something and the file name
+      // will be changed by Rollup as well.
       const ms = new MagicString(code);
-      importCalls.forEach(node => {
+      newWorkerCalls.forEach(node => {
         // Insert marker
-        ms.appendLeft(node.start, `"${opts.marker}_start" +`);
-        ms.appendRight(node.end, `+ "${opts.marker}_end"`);
+        ms.appendLeft(node.start, `"${opts.marker}_start" +import(`);
+        ms.appendRight(node.end, `)+ "${opts.marker}_end"`);
       });
       return {
         code: ms.toString(),
@@ -73,8 +70,8 @@ export default function(opts) {
         }
         // Extract the new filename that has to be somewhere between these markers.
         const newFilename = opts.filenameRegexp.exec(match[0])[0];
-        // Replace the entire dynamic import with just the filename, which will
-        // leave the file with a normal `new Worker(<filename>)` call.
+        // Replace the marked section with just the filename, which will
+        // leave the file with a normal `new Worker(<new filename>)` call.
         magicCode.overwrite(
           match.index,
           match.index + match[0].length,
