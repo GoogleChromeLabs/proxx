@@ -3,14 +3,12 @@ const walker = require("acorn-walk");
 
 // Astring doesn’t have a default generator for dynamic import, so we are fixing
 // that here.
-
 const generator = Object.assign(
   {},
   astring.baseGenerator,
   {
     Import(node, state) {
-      // debugger;
-      // state.write('import');
+      state.write('import');
     }
   }
 );
@@ -46,13 +44,14 @@ export default function() {
               return;
             }
             // debugger;
-            // node.arguments[0] = node.arguments[0].arguments[0];
+            node.arguments[0] = node.arguments[0].arguments[0];
           }
         },
         newBase
       );
-      debugger;
+      // debugger;
       const code = astring.generate(ast, {generator});
+      debugger;
       return {code, ast};
     }
   };
