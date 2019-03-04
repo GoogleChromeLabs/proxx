@@ -9,7 +9,7 @@ function generate_uuid() {
 }
 
 export default function() {
-  const placeholderMap = new Map();
+  const placeholders = new Set();
   return {
     transform(code, id) {
       const ast = this.parse(code);
@@ -33,19 +33,17 @@ export default function() {
             if (node.arguments[0].callee.type !== "Import") {
               return;
             }
-            debugger;
             // Save the location of the import() call
             importCalls.push(node.arguments[0]);
           }
         },
         newBase
       );
-      debugger;
       // Remove the saved `import` calls and generate a source map.
       const ms = new MagicString(code);
       importCalls.forEach(node => {
         const uuid = generate_uuid();
-        placeholderMap.set(uuid, node.arguments[0].value);
+        placeholders.add(uuid);
         ms.appendLeft(node.start, `"${uuid}_start" +`);
         ms.appendRight(node.end, `+ "${uuid}_end"`);
       });
@@ -55,10 +53,21 @@ export default function() {
       };
     },
     renderChunk(code) {
-      for(const [uuid, filename] of placeholderMap.entries()) {
-        code = code.replace(new RegExp(`${uuid}_start.+${uuid}_end`), filename);
+      debugger;
+      const magicCode = new MagicString(code);
+      for(const uuid of placeholders) {
+        const matcher = new RegExp(`${uuid}_start.+${uuid}_end`);
+        const match = matcher.exec(code);
+        if(!match) {
+          continue
+        }
+        const newFilename = /chunk-[^.]+\.js/.exec(match)[0];
+        magicCode.overwrite(match.index, match.index + match[0].length, newFilename)
       }
-      return code;
+      return {
+        code: magicCode.toString(),
+        map: magicCode.generateMap({hires: true})
+      };
     }
   };
 }
