@@ -42,7 +42,15 @@ export default {
     }),
     bundleWorker(),
     nodeResolve(),
-    loadz0r(),
+    loadz0r({
+      prependLoader: (chunk, inputs) => {
+        return (
+          Object.keys(chunk.modules).some(moduleName =>
+            /worker\.[jt]s$/.test(moduleName)
+          ) || loadz0r.isEntryModule(chunk, inputs)
+        );
+      }
+    }),
     // terser(),
     entrypointHashmanifest()
   ]

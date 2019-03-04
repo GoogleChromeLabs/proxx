@@ -52,6 +52,7 @@ export default function(opts) {
       // likely change.
       const ms = new MagicString(code);
       importCalls.forEach(node => {
+        // Insert marker
         ms.appendLeft(node.start, `"${opts.marker}_start" +`);
         ms.appendRight(node.end, `+ "${opts.marker}_end"`);
       });
