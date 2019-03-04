@@ -31,7 +31,7 @@
     "rimraf": "^2.6.2",
     "rollup": "^1.1.2",
     "rollup-plugin-entrypoint-hashmanifest": "^0.1.1",
-    "rollup-plugin-loadz0r": "file:../../../github.com/surma/rollup-plugin-loadz0r",
+    "rollup-plugin-loadz0r": "^0.7.0",
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-typescript2": "^0.19.2",
