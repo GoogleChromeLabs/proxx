@@ -31,6 +31,7 @@ export default {
     chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
+    bundleTypeScriptWorker(),
     typescript({
       // Make sure we are using our version of TypeScript.
       typescript: require("typescript"),
@@ -41,9 +42,8 @@ export default {
       }
     }),
     nodeResolve(),
-    bundleTypeScriptWorker(),
     loadz0r(),
-    terser(),
+    // terser(),
     entrypointHashmanifest()
   ]
 };
