@@ -1,5 +1,3 @@
-import { getDefaultCompilerOptions } from "typescript";
-
 const walker = require("acorn-walk");
 const MagicString = require("magic-string");
 
