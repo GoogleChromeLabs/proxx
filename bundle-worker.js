@@ -7,7 +7,7 @@ const defaultOpts = {
   marker: "_____TROLOLOLOL",
   // Regexp that finds the new chunk filename in between the markers after
   // Rollup has done it’s thing.
-  filenameRegexp: /["'][^"']+\.js["']/
+  filenameRegexp: /(["']).+?\.js\1/
 };
 
 export default function(opts) {
