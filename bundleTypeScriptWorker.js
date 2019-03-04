@@ -1,22 +1,10 @@
-const astring = require("astring");
 const walker = require("acorn-walk");
 const MagicString = require("magic-string");
 
-// Astring doesn’t have a default generator for dynamic import, so we are fixing
-// that here.
-const generator = Object.assign(
-  {},
-  astring.baseGenerator,
-  {
-    Import(node, state) {
-      state.write('import');
-    }
-  }
-);
-
-function uuid() {
+function generate_uuid() {
   return new Array(4)
-    .map(i => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16))
+    .fill(0)
+    .map(() => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(16))
     .join("-");
 }
 
@@ -45,8 +33,9 @@ export default function() {
             if (node.arguments[0].callee.type !== "Import") {
               return;
             }
+            debugger;
             // Save the location of the import() call
-            importCalls.push(node.arguments[0].callee);
+            importCalls.push(node.arguments[0]);
           }
         },
         newBase
@@ -54,13 +43,22 @@ export default function() {
       debugger;
       // Remove the saved `import` calls and generate a source map.
       const ms = new MagicString(code);
-      importCalls.forEach(({start, end}) => {
-        ms.remove(start, end);
+      importCalls.forEach(node => {
+        const uuid = generate_uuid();
+        placeholderMap.set(uuid, node.arguments[0].value);
+        ms.appendLeft(node.start, `"${uuid}_start" +`);
+        ms.appendRight(node.end, `+ "${uuid}_end"`);
       });
       return {
         code: ms.toString(),
         map: ms.generateMap({hires: true})
       };
+    },
+    renderChunk(code) {
+      for(const [uuid, filename] of placeholderMap.entries()) {
+        code = code.replace(new RegExp(`${uuid}_start.+${uuid}_end`), filename);
+      }
+      return code;
     }
   };
 }

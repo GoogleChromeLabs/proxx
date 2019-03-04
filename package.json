@@ -23,7 +23,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "acorn-walk": "^6.1.1",
-    "astring": "^1.3.1",
     "comlinkjs": "^3.2.0",
     "cpx": "^1.5.0",
     "idb-keyval": "^3.1.0",
