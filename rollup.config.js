@@ -15,8 +15,8 @@ import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
+import workz0r from "rollup-plugin-workz0r";
 import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
-import bundleWorker from "./bundle-worker.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -40,15 +40,20 @@ export default {
         }
       }
     }),
-    bundleWorker(),
+    workz0r(),
     nodeResolve(),
     loadz0r({
+      // `prependLoader` will be called for every chunk. If it returns `true`,
+      // the loader code will be prepended.
       prependLoader: (chunk, inputs) => {
-        return (
-          Object.keys(chunk.modules).some(moduleName =>
-            /worker\.[jt]s$/.test(moduleName)
-          ) || loadz0r.isEntryModule(chunk, inputs)
-        );
+        // If the filename ends with `worker`, prepend the loader.
+        if (
+          Object.keys(chunk.modules).some(mod => /worker\.[jt]s$/.test(mod))
+        ) {
+          return true;
+        }
+        // If not, fall back to the default behavior.
+        return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
     terser(),
