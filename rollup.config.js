@@ -15,8 +15,8 @@ import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
-import workz0r from "rollup-plugin-workz0r";
 import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
+import chunkNamePlugin from "./chunk-name-plugin.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -38,9 +38,13 @@ export default {
         compilerOptions: {
           sourceMap: true
         }
-      }
+      },
+      // We need to set this so we can use async functions in our
+      // plugin code. :shurg:
+      // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
+      clean: true
     }),
-    workz0r(),
+    chunkNamePlugin(),
     nodeResolve(),
     loadz0r({
       // `prependLoader` will be called for every chunk. If it returns `true`,
@@ -56,7 +60,7 @@ export default {
         return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
-    terser(),
+    // terser(),
     entrypointHashmanifest()
   ]
 };

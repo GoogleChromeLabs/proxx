@@ -35,7 +35,6 @@
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-typescript2": "^0.19.2",
-    "rollup-plugin-workz0r": "^0.2.0",
     "typescript": "^3.3.3333"
   },
   "devDependencies": {
