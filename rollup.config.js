@@ -15,16 +15,20 @@ import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
+import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
+import chunkNamePlugin from "./chunk-name-plugin.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
 
 export default {
-  input: ["src/bootstrap.ts", "src/worker.ts"],
+  input: "src/bootstrap.ts",
   output: {
     dir: "dist",
     format: "amd",
-    sourcemap: true
+    sourcemap: true,
+    entryFileNames: "[name]-[hash].js",
+    chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
     typescript({
@@ -34,10 +38,29 @@ export default {
         compilerOptions: {
           sourceMap: true
         }
+      },
+      // We need to set this so we can use async functions in our
+      // plugin code. :shurg:
+      // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
+      clean: true
+    }),
+    chunkNamePlugin(),
+    nodeResolve(),
+    loadz0r({
+      // `prependLoader` will be called for every chunk. If it returns `true`,
+      // the loader code will be prepended.
+      prependLoader: (chunk, inputs) => {
+        // If the filename ends with `worker`, prepend the loader.
+        if (
+          Object.keys(chunk.modules).some(mod => /worker\.[jt]s$/.test(mod))
+        ) {
+          return true;
+        }
+        // If not, fall back to the default behavior.
+        return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
-    nodeResolve(),
-    loadz0r(),
-    terser()
+    // terser(),
+    entrypointHashmanifest()
   ]
 };
