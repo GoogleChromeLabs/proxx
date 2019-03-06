@@ -26,14 +26,12 @@ export default function chunkNamePlugin(opts) {
   return {
     name: "chunk-name-plugin",
     async resolveId(id, importer) {
-      if (id.startsWith(opts.prefix)) {
-        const newId = await this.resolveId(
-          id.slice(opts.prefix.length),
-          importer
-        );
-        return opts.prefix + newId;
+      if (!id.startsWith(opts.prefix)) {
+        return null;
       }
-      return null;
+      const path = id.slice(opts.prefix.length);
+      const newId = await this.resolveId(path, importer);
+      return opts.prefix + newId;
     },
     load(id) {
       if (!id.startsWith(opts.prefix)) {
