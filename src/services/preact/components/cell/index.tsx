@@ -39,19 +39,19 @@ export const enum Action {
 const Item = ({ cell, onUnrevealedClick, onTouchingClick }: ItemProps) => {
   if (!cell.revealed) {
     return (
-      <button onClick={onUnrevealedClick}>
-        {cell.tag === Tag.Flag ? "Flagged" : "Not revealed"}
+      <button onClick={onUnrevealedClick} class="unrevealed">
+        {cell.tag === Tag.Flag ? "🚩" : " "}
       </button>
     );
   }
   if (cell.hasMine) {
-    return <div>Mine</div>;
+    return <button class="mine">💣</button>;
   }
   if (cell.touching) {
-    return <button onClick={onTouchingClick}>{cell.touching}</button>;
+    return <button onClick={onTouchingClick} class={`touching touching-${cell.touching}`}>{cell.touching}</button>;
   }
 
-  return <div />;
+  return <button class="empty" />;
 };
 
 export default class GridCell extends Component<Props, State> {
