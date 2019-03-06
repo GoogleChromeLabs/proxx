@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+const MagicString = require("magic-string");
+
 const defaultOpts = {
   prefix: "chunk-name:",
   marker: "___TROLOLOLO",
@@ -58,7 +60,12 @@ export default function chunkNamePlugin(opts) {
       if (!chunkNameMatch) {
         this.error("Could not find a chunk name in between markers");
       }
-      return code.slice(0, startIdx) + chunkNameMatch[0] + code.slice(endIdx);
+      const ms = new MagicString(code);
+      ms.overwrite(startIdx, endIdx, chunkNameMatch[0]);
+      return {
+        code: ms.toString(),
+        map: ms.generateMap({ hires: true })
+      };
     }
   };
 }
