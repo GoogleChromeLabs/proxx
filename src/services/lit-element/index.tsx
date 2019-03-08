@@ -26,7 +26,7 @@ export const enum Action {
   RevealSurrounding
 }
 
-export default class PreactService {
+export default class LitService {
   constructor(private stateService: ProxyResult<StateService>) {
     const stateStream = new ReadableStream<State>({
       async start(controller: ReadableStreamDefaultController<State>) {

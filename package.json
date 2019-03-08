@@ -26,7 +26,7 @@
     "comlinkjs": "^3.2.0",
     "ejs": "^2.6.1",
     "idb-keyval": "^3.1.0",
-    "lit-element": "^2.0.1",
+    "lit-html": "^1.0.0",
     "magic-string": "^0.25.2",
     "preact": "^8.3.1",
     "rimraf": "^2.6.2",
