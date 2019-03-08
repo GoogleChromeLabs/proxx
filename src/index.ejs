@@ -1,11 +1,46 @@
-<!doctype html>
+<!doctype html
+<head>
 <style>
+  :root {
+    --size: 20px;
+  }
+
+  html {
+    touch-action: manipulation;
+  }
+
+  html, body, table, tr, td, tbody, thead, button {
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+  table {
+    border-spacing: 0;
+  }
+  td {
+    width: var(--size);
+    height: var(--size);
+    line-height: 0;
+  }
+  button {
+    background-color: none;
+    outline: none;
+    width: var(--size);
+    height: var(--size);
+    border: 1px solid black;
+  }
   label {
     display: block;
   }
+  .revealed {
+    background-color: red;
+  }
+  .tile {
+    will-change: transform;
+  }
 </style>
+<meta name="viewport" width="device-width, initial-scale=1.0"/>
+</head>
 
 <script src="<%= hashmanifest["src/bootstrap.ts"]; %>" defer></script>
-<body>
-
-</body>
+<body></body>

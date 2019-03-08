@@ -49,13 +49,13 @@ export default class LitService {
       if (!cell.revealed) {
         return html`
           <button row=${row} col=${col} tag=${cell.tag}>
-            ${cell.tag === Tag.Flag ? "Flagged" : "Not revealed"}
+            ${cell.tag === Tag.Flag ? "F" : ""}
           </button>
         `;
       }
       if (cell.hasMine) {
         return html`
-          <div>Mine</div>
+          <div>M</div>
         `;
       }
       if (cell.touching) {
@@ -87,7 +87,7 @@ export default class LitService {
   }
 
   @bind
-  private async onUnrevealedClick(event: MouseEvent) {
+  private onUnrevealedClick(event: MouseEvent) {
     if (event.target instanceof HTMLButtonElement === false) {
       return;
     }
@@ -101,13 +101,13 @@ export default class LitService {
       if (!event.shiftKey) {
         return;
       }
-      await this.stateService.reveal(col, row);
+      this.stateService.reveal(col, row);
       return;
     }
 
     if (event.shiftKey) {
       if (tag === Tag.None) {
-        await this.stateService.flag(col, row);
+        this.stateService.flag(col, row);
       }
       return;
     }
@@ -116,6 +116,6 @@ export default class LitService {
       return;
     }
 
-    await this.stateService.reveal(col, row);
+    this.stateService.reveal(col, row);
   }
 }
