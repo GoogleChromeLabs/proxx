@@ -13,7 +13,7 @@
 
 import { proxy } from "comlinkjs";
 
-import PreactService from "./services/preact";
+import LitElementService from "./services/lit-element";
 
 // @ts-ignore
 import workerURL from "chunk-name:./worker.js";
@@ -24,7 +24,7 @@ async function bootstrap() {
   const { stateService } = proxy(worker);
 
   // tslint:disable-next-line:no-unused-expression
-  new PreactService(stateService);
+  new LitElementService(stateService);
 }
 
 bootstrap();
