@@ -21,7 +21,8 @@ export const enum State {
 export const enum Tag {
   None,
   Flag,
-  Mark
+  Mark,
+  Touching
 }
 
 export interface Cell {

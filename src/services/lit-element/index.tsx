@@ -48,12 +48,7 @@ export default class LitService {
     const renderCell = (cell: Cell, row: number, col: number) => {
       if (!cell.revealed) {
         return html`
-          <button
-            @click=${this.onUnrevealedClick}
-            row=${row}
-            col=${col}
-            tag=${cell.tag}
-          >
+          <button row=${row} col=${col} tag=${cell.tag}>
             ${cell.tag === Tag.Flag ? "Flagged" : "Not revealed"}
           </button>
         `;
@@ -65,14 +60,14 @@ export default class LitService {
       }
       if (cell.touching) {
         return html`
-          <button @click=${this.onTouchingClick}>${cell.touching}</button>
+          <button tag=${Tag.Touching}>${cell.touching}</button>
         `;
       }
     };
 
     render(
       html`
-        <table>
+        <table @click=${this.onUnrevealedClick}>
           ${state.grid.map(
             (row, rowId) => html`
               <tr key=${rowId}>
@@ -93,13 +88,22 @@ export default class LitService {
 
   @bind
   private async onUnrevealedClick(event: MouseEvent) {
-    if (event.target == null) {
+    if (event.target instanceof HTMLButtonElement === false) {
       return;
     }
-    const button = event.target as HTMLElement;
-    const row = parseInt(button.getAttribute("row") || "0", 10);
-    const col = parseInt(button.getAttribute("col") || "0", 10);
-    const tag = parseInt(button.getAttribute("teg") || "0", 10);
+
+    const target = event.target as HTMLButtonElement;
+    const row = parseInt(target.getAttribute("row") || "0", 10);
+    const col = parseInt(target.getAttribute("col") || "0", 10);
+    const tag = parseInt(target.getAttribute("tag") || "0", 10);
+
+    if (tag === Tag.Touching) {
+      if (!event.shiftKey) {
+        return;
+      }
+      await this.stateService.reveal(col, row);
+      return;
+    }
 
     if (event.shiftKey) {
       if (tag === Tag.None) {
@@ -112,22 +116,6 @@ export default class LitService {
       return;
     }
 
-    await this.stateService.reveal(col, row);
-  }
-
-  @bind
-  private async onTouchingClick(event: MouseEvent) {
-    if (event.target == null) {
-      return;
-    }
-
-    const button = event.target as HTMLElement;
-    const row = parseInt(button.getAttribute("row") || "0", 10);
-    const col = parseInt(button.getAttribute("col") || "0", 10);
-
-    if (!event.shiftKey) {
-      return;
-    }
     await this.stateService.reveal(col, row);
   }
 }
