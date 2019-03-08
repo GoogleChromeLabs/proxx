@@ -1,4 +1,4 @@
-<!doctype html
+<!doctype html>
 <head>
 <style>
   :root {
@@ -32,6 +32,19 @@
   label {
     display: block;
   }
+  button[revealed="true"][mine="true"]{
+    visibility: visible !important;
+    background: none;
+    border: none;
+  }
+  button[revealed="true"][tag="3"] {
+    visibility: visible !important;
+    background: none;
+    border: none;
+  }
+  button[revealed="true"] {
+    visibility: hidden;
+  }
   .revealed {
     background-color: red;
   }
@@ -39,8 +52,8 @@
     will-change: transform;
   }
 </style>
-<meta name="viewport" width="device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 
 <script src="<%= hashmanifest["src/bootstrap.ts"]; %>" defer></script>
-<body></body>
+<body><table id="board"></table></body>

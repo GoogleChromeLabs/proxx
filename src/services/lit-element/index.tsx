@@ -15,6 +15,7 @@ import { ProxyResult, proxyValue } from "comlinkjs";
 import StateService, { State } from "../state.js";
 
 import { html, render } from "lit-html";
+import { cache } from "lit-html/directives/cache";
 import { Cell, Tag } from "src/gamelogic/types.js";
 import { bind } from "../../utils/bind.js";
 import { forEach } from "../../utils/streams.js";
@@ -27,6 +28,7 @@ export const enum Action {
 }
 
 export default class LitService {
+  private _table: HTMLTableElement | null;
   constructor(private stateService: ProxyResult<StateService>) {
     const stateStream = new ReadableStream<State>({
       async start(controller: ReadableStreamDefaultController<State>) {
@@ -38,51 +40,52 @@ export default class LitService {
       }
     });
     forEach(stateStream, async state => this.render(state));
+
+    this._table = document.getElementById("board") as HTMLTableElement;
+    if (this._table) {
+      this._table.addEventListener("click", this.onUnrevealedClick);
+    }
   }
 
   private render(state: State) {
-    if (document.body === null) {
+    if (this._table === null) {
       return;
     }
 
-    const renderCell = (cell: Cell, row: number, col: number) => {
-      if (!cell.revealed) {
-        return html`
-          <button row=${row} col=${col} tag=${cell.tag}>
-            ${cell.tag === Tag.Flag ? "F" : ""}
-          </button>
-        `;
-      }
-      if (cell.hasMine) {
-        return html`
-          <div>M</div>
-        `;
-      }
-      if (cell.touching) {
-        return html`
-          <button tag=${Tag.Touching}>${cell.touching}</button>
-        `;
-      }
-    };
-
     render(
       html`
-        <table @click=${this.onUnrevealedClick}>
-          ${state.grid.map(
-            (row, rowId) => html`
-              <tr key=${rowId}>
-                ${row.map(
-                  (cell, cellId) =>
-                    html`
-                      <td>${renderCell(cell, rowId, cellId)}</td>
-                    `
-                )}
-              </tr>
-            `
-          )}
-        </table>
+        ${state.grid.map(
+          (row, rowId) => html`
+            <tr key=${rowId}>
+              ${row.map(
+                (cell, colId) =>
+                  html`
+                    <td>
+                      <button
+                        row=${rowId}
+                        col=${colId}
+                        revealed=${cell.revealed}
+                        mine=${cell.hasMine}
+                        tag=${cell.touching > 0 ? Tag.Touching : cell.tag}
+                      >
+                        ${!cell.revealed
+                          ? cell.tag === Tag.Flag
+                            ? "F"
+                            : ""
+                          : cell.hasMine
+                          ? "M"
+                          : cell.touching > 0
+                          ? cell.touching
+                          : ""}
+                      </button>
+                    </td>
+                  `
+              )}
+            </tr>
+          `
+        )}
       `,
-      document.body
+      this._table
     );
   }
 
