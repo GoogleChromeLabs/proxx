@@ -7,5 +7,6 @@ async function run() {
   const template = fs.readFileSync("src/index.ejs").toString();
   const output = ejs.render(template, { hashmanifest, pkg });
   fs.writeFileSync("dist/index.html", output);
+  fs.writeFileSync("dist/raw.html", fs.readFileSync("src/raw.html").toString());
 }
 run();

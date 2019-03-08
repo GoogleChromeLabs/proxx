@@ -70,27 +70,21 @@ export default class LitService {
       }
     };
 
-    const rows = state.grid.map((row, i) => {
-      // tslint:disable-next-line:jsx-no-lambda
-      const cells = row.map(
-        (cell, idx) => html`
-          <td>
-            ${renderCell(cell, i, idx)}
-          </td>
-        `
-      );
-
-      return html`
-        <tr key=${i}>
-          ${cells}
-        </tr>
-      `;
-    });
-
     render(
       html`
         <table>
-          ${rows}
+          ${state.grid.map(
+            (row, rowId) => html`
+              <tr key=${rowId}>
+                ${row.map(
+                  (cell, cellId) =>
+                    html`
+                      <td>${renderCell(cell, rowId, cellId)}</td>
+                    `
+                )}
+              </tr>
+            `
+          )}
         </table>
       `,
       document.body
