@@ -41,43 +41,67 @@ export default class PreactService {
   }
 
   private render(state: State) {
-    if (document.body === null) { return; }
+    if (document.body === null) {
+      return;
+    }
 
     const renderCell = (cell: Cell, row: number, col: number) => {
       if (!cell.revealed) {
-        return  html`<button @click=${this.onUnrevealedClick} row=${row} col=${col} tag=${cell.tag}>
-          ${(cell.tag === Tag.Flag) ? "Flagged" : "Not revealed"}
-        </button>`;
+        return html`
+          <button
+            @click=${this.onUnrevealedClick}
+            row=${row}
+            col=${col}
+            tag=${cell.tag}
+          >
+            ${cell.tag === Tag.Flag ? "Flagged" : "Not revealed"}
+          </button>
+        `;
       }
       if (cell.hasMine) {
-        return html`<div>Mine</div>`;
+        return html`
+          <div>Mine</div>
+        `;
       }
       if (cell.touching) {
-        return html`<button @click=${this.onTouchingClick}>${cell.touching}</button>`;
+        return html`
+          <button @click=${this.onTouchingClick}>${cell.touching}</button>
+        `;
       }
     };
 
     const rows = state.grid.map((row, i) => {
       // tslint:disable-next-line:jsx-no-lambda
-      const cells = row.map((cell, idx) => html`<td>
-       ${renderCell(cell, i, idx)}
-      </td>`);
+      const cells = row.map(
+        (cell, idx) => html`
+          <td>
+            ${renderCell(cell, i, idx)}
+          </td>
+        `
+      );
 
-      return html`<tr
-        key=${i}>
-        ${cells}
-        </tr>`;
+      return html`
+        <tr key=${i}>
+          ${cells}
+        </tr>
+      `;
     });
 
     render(
-      html`<table>${rows}</table>`,
+      html`
+        <table>
+          ${rows}
+        </table>
+      `,
       document.body
     );
   }
 
   @bind
   private async onUnrevealedClick(event: MouseEvent) {
-    if (event.target == null) { return; }
+    if (event.target == null) {
+      return;
+    }
     const button = event.target as HTMLElement;
     const row = parseInt(button.getAttribute("row") || "0", 10);
     const col = parseInt(button.getAttribute("col") || "0", 10);
@@ -99,7 +123,9 @@ export default class PreactService {
 
   @bind
   private async onTouchingClick(event: MouseEvent) {
-    if (event.target == null) { return; }
+    if (event.target == null) {
+      return;
+    }
 
     const button = event.target as HTMLElement;
     const row = parseInt(button.getAttribute("row") || "0", 10);
