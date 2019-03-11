@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { ProxyResult, proxyValue } from "comlinkjs";
+import { proxy, Remote } from "comlink";
 import { h, render } from "preact";
 
 import StateService, { State } from "../state.js";
@@ -24,13 +24,13 @@ import { forEach } from "../../utils/streams.js";
 import { Action } from "./components/cell/index.js";
 
 export default class PreactService {
-  constructor(private stateService: ProxyResult<StateService>) {
+  constructor(private stateService: Remote<StateService>) {
     const stateStream = new ReadableStream<State>({
       async start(controller: ReadableStreamDefaultController<State>) {
         // Make initial render ASAP
         controller.enqueue(await stateService.state);
         stateService.subscribe(
-          proxyValue((state: State) => controller.enqueue(state))
+          proxy((state: State) => controller.enqueue(state))
         );
       }
     });

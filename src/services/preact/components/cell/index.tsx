@@ -48,7 +48,14 @@ const Item = ({ cell, onUnrevealedClick, onTouchingClick }: ItemProps) => {
     return <button class="mine">💣</button>;
   }
   if (cell.touching) {
-    return <button onClick={onTouchingClick} class={`touching touching-${cell.touching}`}>{cell.touching}</button>;
+    return (
+      <button
+        onClick={onTouchingClick}
+        class={`touching touching-${cell.touching}`}
+      >
+        {cell.touching}
+      </button>
+    );
   }
 
   return <button class="empty" />;

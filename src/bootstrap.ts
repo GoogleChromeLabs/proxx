@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { proxy } from "comlinkjs";
+import { wrap } from "comlink";
 
 import PreactService from "./services/preact";
 
@@ -21,7 +21,7 @@ import workerURL from "chunk-name:./worker.js";
 async function bootstrap() {
   const worker = new Worker(workerURL);
 
-  const { stateService } = proxy(worker);
+  const { stateService } = wrap(worker);
 
   // tslint:disable-next-line:no-unused-expression
   new PreactService(stateService);
