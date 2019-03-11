@@ -23,7 +23,7 @@ import { forEach } from "../../utils/streams.js";
 
 import { Action } from "./components/cell/index.js";
 
-import { table } from "./style.css";
+import { gameTable } from "./style.css";
 
 export default class PreactService {
   constructor(private stateService: ProxyResult<StateService>) {
@@ -41,7 +41,7 @@ export default class PreactService {
 
   private render(state: State) {
     render(
-      <table class={table}>
+      <table class={gameTable}>
         {state.grid.map((row, i) => (
           // tslint:disable-next-line:jsx-no-lambda
           <Row

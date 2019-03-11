@@ -41,7 +41,7 @@ export default {
       },
       //extract: true,
       namedExports(name) {
-        return name.replace(/-\d/g, val => val.slice(1).toUppercase());
+        return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
       }
     }),
     typescript({
