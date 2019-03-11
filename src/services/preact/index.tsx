@@ -23,6 +23,9 @@ import { forEach } from "../../utils/streams.js";
 
 import { Action } from "./components/cell/index.js";
 
+// @ts-ignore
+import { table } from "./style.css";
+
 export default class PreactService {
   constructor(private stateService: ProxyResult<StateService>) {
     const stateStream = new ReadableStream<State>({
@@ -39,7 +42,7 @@ export default class PreactService {
 
   private render(state: State) {
     render(
-      <table>
+      <table class={table}>
         {state.grid.map((row, i) => (
           // tslint:disable-next-line:jsx-no-lambda
           <Row
