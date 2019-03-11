@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { ProxyResult, proxyValue } from "comlinkjs";
+import { proxy, Remote } from "comlink";
 import StateService, { State } from "../state.js";
 
 import { html, render } from "lit-html";
@@ -30,13 +30,13 @@ export const enum Action {
 export default class LitService {
   private _table: HTMLTableElement | null;
   private _state: State | null = null;
-  constructor(private stateService: ProxyResult<StateService>) {
+  constructor(private stateService: Remote<StateService>) {
     const stateStream = new ReadableStream<State>({
       async start(controller: ReadableStreamDefaultController<State>) {
         // Make initial render ASAP
         controller.enqueue(await stateService.state);
         stateService.subscribe(
-          proxyValue((state: State) => controller.enqueue(state))
+          proxy((state: State) => controller.enqueue(state))
         );
       }
     });
