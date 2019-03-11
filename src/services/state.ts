@@ -19,6 +19,16 @@ export interface State {
   grid: Cell[][];
 }
 
+export interface StatePatch {
+  changedCells: CellPatch[];
+}
+
+export interface CellPatch {
+  x: number;
+  y: number;
+  cell: Cell;
+}
+
 const BOARD_SIZE = 40;
 const DENSITY = 0.1;
 
@@ -47,13 +57,32 @@ export default class StateService {
       f(ev.detail)) as any);
   }
 
+  patchSubscribe(f: (p: StatePatch) => void) {
+    this.port.addEventListener("statepatch", ((ev: CustomEvent) =>
+      f(ev.detail)) as any);
+  }
+
   flag(x: number, y: number) {
     this.game.tag(x, y, Tag.Flag);
     this.notify();
   }
 
   reveal(x: number, y: number) {
-    this.game.reveal(x, y);
+    let changedCells: CellPatch[] = [];
+    this.game.reveal(x, y, (x, y, cell) => {
+      changedCells.push({ x, y, cell });
+      if (changedCells.length >= 10) {
+        const patch: StatePatch = { changedCells };
+        const ev = new CustomEvent("statepatch", { detail: patch });
+        this.port.dispatchEvent(ev);
+        changedCells = [];
+      }
+    });
+    if (changedCells.length > 0) {
+      const patch: StatePatch = { changedCells };
+      const ev = new CustomEvent("statepatch", { detail: patch });
+      this.port.dispatchEvent(ev);
+    }
     this.notify();
   }
 }

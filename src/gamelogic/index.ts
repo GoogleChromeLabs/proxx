@@ -29,6 +29,8 @@ function newCell(): Cell {
   };
 }
 
+type RevealCellCallback = (x: number, y: number, cell: Cell) => void;
+
 export default class MinesweeperGame {
   get state() {
     return this._state;
@@ -70,7 +72,7 @@ export default class MinesweeperGame {
       );
   }
 
-  reveal(x: number, y: number) {
+  reveal(x: number, y: number, onRevealCell?: RevealCellCallback) {
     if (this._state === State.Pending) {
       this._placeMines(x, y);
       this.startTime = Date.now();
@@ -84,7 +86,7 @@ export default class MinesweeperGame {
       throw Error("Cell flagged");
     }
 
-    this._reveal(x, y);
+    this._reveal(x, y, new WeakSet(), onRevealCell);
   }
 
   tag(x: number, y: number, tag: Tag) {
@@ -187,7 +189,7 @@ export default class MinesweeperGame {
    * @param objsCloned Objects that don't need cloning again.
    */
   private _cloneUpwards(x: number, y: number, objsCloned: WeakSet<any>) {
-    // Hacky fix for ImmerJS
+    // We don’t need immutability in the worker currently.
     return;
     // Grid
     if (!objsCloned.has(this.grid)) {
@@ -239,7 +241,12 @@ export default class MinesweeperGame {
    * @param y
    * @param objsCloned A weakmap to track which objects have already been cloned.
    */
-  private _reveal(x: number, y: number, objsCloned = new WeakSet()) {
+  private _reveal(
+    x: number,
+    y: number,
+    objsCloned = new WeakSet(),
+    onRevealCell?: RevealCellCallback
+  ) {
     // The set contains the cell position as if it were a single flat array.
     const revealSet = new Set<number>([x + y * this._width]);
 
@@ -266,6 +273,9 @@ export default class MinesweeperGame {
         this._endGame(State.Won);
         // Although the game is over, we still continue to calculate the touching value.
       }
+      if (onRevealCell) {
+        onRevealCell(x, y, cell);
+      }
 
       let touching = 0;
       const maybeReveal: number[] = [];
@@ -281,6 +291,9 @@ export default class MinesweeperGame {
           continue;
         }
         maybeReveal.push(nextX + nextY * this._width);
+        if (onRevealCell) {
+          onRevealCell(nextX, nextY, nextCell);
+        }
       }
 
       cell.touching = touching;

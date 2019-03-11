@@ -14,7 +14,7 @@
 import { proxy, Remote } from "comlink";
 import { h, render } from "preact";
 
-import StateService, { State } from "../state.js";
+import StateService, { State, StatePatch } from "../state.js";
 
 import Row from "./components/row/index.js";
 
@@ -23,24 +23,40 @@ import { forEach } from "../../utils/streams.js";
 
 import { Action } from "./components/cell/index.js";
 
+import { Cell } from "../../gamelogic/types.js";
+
+import { changeCell } from "../../utils/immutable.js";
+
 export default class PreactService {
+  private grid: Cell[][] = [];
   constructor(private stateService: Remote<StateService>) {
-    const stateStream = new ReadableStream<State>({
-      async start(controller: ReadableStreamDefaultController<State>) {
+    const patchStream = new ReadableStream<StatePatch>({
+      start: async (controller: ReadableStreamDefaultController) => {
+        const state = await stateService.state;
+        this.grid = state.grid;
         // Make initial render ASAP
-        controller.enqueue(await stateService.state);
-        stateService.subscribe(
-          proxy((state: State) => controller.enqueue(state))
+        this.render(this.grid);
+        stateService.patchSubscribe(
+          proxy((state: StatePatch) => controller.enqueue(state))
         );
       }
     });
-    forEach(stateStream, async state => this.render(state));
+    forEach(patchStream, async patch => await this.onStatePatch(patch));
   }
 
-  private render(state: State) {
+  private async onStatePatch(patch: StatePatch) {
+    const objsCloned = new WeakSet();
+    for (const { x, y, cell } of patch.changedCells) {
+      this.grid = changeCell(this.grid, x, y, objsCloned);
+      this.grid[y][x] = cell;
+    }
+    this.render(this.grid);
+  }
+
+  private render(state: Cell[][]) {
     render(
       <table>
-        {state.grid.map((row, i) => (
+        {state.map((row, i) => (
           // tslint:disable-next-line:jsx-no-lambda
           <Row
             key={i}
