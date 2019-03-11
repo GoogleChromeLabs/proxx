@@ -13,16 +13,10 @@
 
 import { Cell, State, Tag } from "./types.js";
 
-export interface Cell {
-  hasMine: boolean;
-  tag: Tag;
-  revealed: boolean;
-  touching: number;
-}
-
-function newCell(): Cell {
+function newCell(id: number): Cell {
   return {
     hasMine: false,
+    id,
     revealed: false,
     tag: Tag.None,
     touching: -1
@@ -63,10 +57,10 @@ export default class MinesweeperGame {
 
     this.grid = Array(_height)
       .fill(undefined)
-      .map(() =>
+      .map((_, rowIdx) =>
         Array(_width)
           .fill(undefined)
-          .map(() => newCell())
+          .map((_, cellIdx) => newCell(rowIdx * _width + cellIdx))
       );
   }
 

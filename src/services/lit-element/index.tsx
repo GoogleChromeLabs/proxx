@@ -15,7 +15,7 @@ import { ProxyResult, proxyValue } from "comlinkjs";
 import StateService, { State } from "../state.js";
 
 import { html, render } from "lit-html";
-import { cache } from "lit-html/directives/cache";
+import { repeat } from "lit-html/directives/repeat";
 import { Cell, Tag } from "src/gamelogic/types.js";
 import { bind } from "../../utils/bind.js";
 import { forEach } from "../../utils/streams.js";
@@ -29,6 +29,7 @@ export const enum Action {
 
 export default class LitService {
   private _table: HTMLTableElement | null;
+  private _state: State | null = null;
   constructor(private stateService: ProxyResult<StateService>) {
     const stateStream = new ReadableStream<State>({
       async start(controller: ReadableStreamDefaultController<State>) {
@@ -39,7 +40,10 @@ export default class LitService {
         );
       }
     });
-    forEach(stateStream, async state => this.render(state));
+    forEach(stateStream, async state => {
+      this._state = state;
+      this.render(state); // Future: Render function might just pull from state.
+    });
 
     this._table = document.getElementById("board") as HTMLTableElement;
     if (this._table) {
@@ -52,21 +56,31 @@ export default class LitService {
       return;
     }
 
+    if (this._state === null) {
+      return;
+    }
+
+    let rowCount = 0;
+
     render(
       html`
-        ${state.grid.map(
+        ${repeat(
+          state.grid,
+          row => rowCount++,
           (row, rowId) => html`
-            <tr key=${rowId}>
-              ${row.map(
-                (cell, colId) =>
+            <tr>
+              ${repeat(
+                row,
+                cell => cell.id,
+                (cell, cellId) =>
                   html`
                     <td>
                       <button
                         row=${rowId}
-                        col=${colId}
-                        revealed=${cell.revealed}
-                        mine=${cell.hasMine}
-                        tag=${cell.touching > 0 ? Tag.Touching : cell.tag}
+                        col=${cellId}
+                        ?revealed=${cell.revealed}
+                        ?mine=${cell.hasMine}
+                        ?touching=${cell.touching > 0}
                       >
                         ${!cell.revealed
                           ? cell.tag === Tag.Flag
@@ -95,12 +109,20 @@ export default class LitService {
       return;
     }
 
+    if (this._state === null) {
+      return;
+    }
+
     const target = event.target as HTMLButtonElement;
     const row = parseInt(target.getAttribute("row") || "0", 10);
     const col = parseInt(target.getAttribute("col") || "0", 10);
-    const tag = parseInt(target.getAttribute("tag") || "0", 10);
 
-    if (tag === Tag.Touching) {
+    const cell: Cell = this._state.grid[row][col];
+
+    const tag = cell.tag;
+    const touching = cell.touching;
+
+    if (touching > 0) {
       if (!event.shiftKey) {
         return;
       }

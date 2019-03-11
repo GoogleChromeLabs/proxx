@@ -21,12 +21,12 @@ export const enum State {
 export const enum Tag {
   None,
   Flag,
-  Mark,
-  Touching
+  Mark
 }
 
 export interface Cell {
   hasMine: boolean;
+  id: number;
   tag: Tag;
   revealed: boolean;
   touching: number;

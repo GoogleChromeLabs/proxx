@@ -32,17 +32,17 @@
   label {
     display: block;
   }
-  button[revealed="true"][mine="true"]{
+  button[revealed][mine]{
     visibility: visible !important;
     background: none;
     border: none;
   }
-  button[revealed="true"][tag="3"] {
+  button[revealed][touching] {
     visibility: visible !important;
     background: none;
     border: none;
   }
-  button[revealed="true"] {
+  button[revealed] {
     visibility: hidden;
   }
   .revealed {
