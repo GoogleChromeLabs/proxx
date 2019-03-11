@@ -15,7 +15,6 @@ import { proxy } from "comlinkjs";
 
 import PreactService from "./services/preact";
 
-// @ts-ignore
 import workerURL from "chunk-name:./worker.js";
 
 async function bootstrap() {
