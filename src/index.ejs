@@ -1,11 +1,15 @@
 <!doctype html>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <% for(const file of fs.readdirSync('dist').filter(f => f.endsWith('.js'))) { %>
   <link rel="preload" href="<%=file;%>" as="script">
 <% } %>
 <style>
   :root {
     --size: 20px;
+  }
+  html {
+    touch-action: manipulation;
   }
   label {
     display: block;
@@ -27,7 +31,8 @@
   td {
     border: 1px solid rgba(0, 0, 0, 0.4);
   }
-  td > * {
+  .cell {
+    outline: none;
     background-color: #bbb;
     width: var(--size);
     height: var(--size);
