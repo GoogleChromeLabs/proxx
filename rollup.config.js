@@ -35,7 +35,6 @@ export default {
   plugins: [
     cssModuleTypes(),
     postcss({
-      // extract: true,
       minimize: true,
       modules: {
         generateScopedName: "[hash:base64:5]"

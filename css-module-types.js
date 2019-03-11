@@ -10,21 +10,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import DtsCreator from 'typed-css-modules';
-import find from 'find';
-import { join } from 'path';
+import DtsCreator from "typed-css-modules";
+import find from "find";
+import { join } from "path";
 
 export default function cssModuleTypes() {
   return {
-    name: 'css-module-types',
+    name: "css-module-types",
     async buildStart() {
       const creator = new DtsCreator({ camelCase: true });
 
       const files = await new Promise(resolve => {
-        find.file(/\.css$/, join(__dirname, 'src'), resolve);
+        find.file(/\.css$/, join(__dirname, "src"), resolve);
       });
 
-      const promises = files.map(async (file) => {
+      const promises = files.map(async file => {
         this.addWatchFile(file);
         const content = await creator.create(file);
         await content.writeFile();
@@ -37,5 +37,5 @@ export default function cssModuleTypes() {
       const content = await creator.create(id);
       await content.writeFile();
     }
-  }
+  };
 }
