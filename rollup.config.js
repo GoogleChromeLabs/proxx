@@ -18,6 +18,7 @@ import loadz0r from "rollup-plugin-loadz0r";
 import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
 import chunkNamePlugin from "./chunk-name-plugin.js";
 import postcss from "rollup-plugin-postcss";
+import cssModuleTypes from "./css-module-types.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -32,7 +33,9 @@ export default {
     chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
+    cssModuleTypes(),
     postcss({
+      // extract: true,
       minimize: true,
       modules: {
         generateScopedName: "[hash:base64:5]"
