@@ -12,30 +12,35 @@
  */
 import DtsCreator from "typed-css-modules";
 import find from "find";
-import { join } from "path";
 
-export default function cssModuleTypes() {
+function newCreator() {
+  return new DtsCreator({ camelCase: true });
+}
+
+async function writeTypes(file, creator = newCreator()) {
+  const content = await creator.create(file);
+  await content.writeFile();
+}
+
+export default function cssModuleTypes(root) {
   return {
     name: "css-module-types",
     async buildStart() {
-      const creator = new DtsCreator({ camelCase: true });
+      const creator = newCreator();
 
       const files = await new Promise(resolve => {
-        find.file(/\.css$/, join(__dirname, "src"), resolve);
+        find.file(/\.css$/, root, resolve);
       });
 
       const promises = files.map(async file => {
         this.addWatchFile(file);
-        const content = await creator.create(file);
-        await content.writeFile();
+        await writeTypes(file, creator);
       });
 
       await Promise.all(promises);
     },
     async watchChange(id) {
-      const creator = new DtsCreator({ camelCase: true });
-      const content = await creator.create(id);
-      await content.writeFile();
+      await writeTypes(id);
     }
   };
 }

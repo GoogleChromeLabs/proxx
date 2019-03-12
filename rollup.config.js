@@ -33,7 +33,7 @@ export default {
     chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
-    cssModuleTypes(),
+    cssModuleTypes("src"),
     postcss({
       minimize: true,
       modules: {
