@@ -13,6 +13,7 @@
 
 import { wrap } from "comlink";
 
+import CanvasService from "./services/canvas";
 import LitService from "./services/lit-element";
 
 // @ts-ignore
@@ -24,7 +25,7 @@ async function bootstrap() {
   const { stateService } = wrap(worker);
 
   // tslint:disable-next-line:no-unused-expression
-  new LitService(stateService);
+  new CanvasService(stateService);
 }
 
 bootstrap();
