@@ -16,7 +16,6 @@ import StateService from "./services/state.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 
-console.log("OHAI");
 expose(
   {
     stateService: new StateService()

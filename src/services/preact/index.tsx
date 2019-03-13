@@ -38,6 +38,7 @@ export default class PreactService {
   }
 
   private render(state: State) {
+    const main = document.querySelector("main")!;
     render(
       <table>
         {state.grid.map((row, i) => (
@@ -49,8 +50,8 @@ export default class PreactService {
           />
         ))}
       </table>,
-      document.body,
-      document.body.firstChild as any
+      main,
+      main.firstChild as any
     );
   }
 
