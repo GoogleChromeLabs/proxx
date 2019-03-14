@@ -13,7 +13,6 @@
 
 import { wrap } from "comlink";
 
-// @ts-ignore
 import workerURL from "chunk-name:./worker.js";
 
 const logEl = document.querySelector("#log")!;

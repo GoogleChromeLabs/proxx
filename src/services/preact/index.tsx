@@ -23,6 +23,8 @@ import { forEach } from "../../utils/streams.js";
 
 import { Action } from "./components/cell/index.js";
 
+import { gameTable } from "./style.css";
+
 export default class PreactService {
   constructor(private stateService: Remote<StateService>) {
     const stateStream = new ReadableStream<State>({
@@ -40,7 +42,7 @@ export default class PreactService {
   private render(state: State) {
     const main = document.querySelector("main")!;
     render(
-      <table>
+      <table class={gameTable}>
         {state.grid.map((row, i) => (
           // tslint:disable-next-line:jsx-no-lambda
           <Row

@@ -27,6 +27,7 @@
     "acorn-walk": "^6.1.1",
     "comlink": "^4.0.0-alpha.4",
     "ejs": "^2.6.1",
+    "find": "^0.3.0",
     "idb-keyval": "^3.1.0",
     "lit-html": "^1.0.0",
     "magic-string": "^0.25.2",
@@ -36,8 +37,10 @@
     "rollup-plugin-entrypoint-hashmanifest": "^0.1.1",
     "rollup-plugin-loadz0r": "^0.7.0",
     "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-typescript2": "^0.19.2",
+    "typed-css-modules": "^0.4.2",
     "typescript": "^3.3.3333"
   },
   "devDependencies": {

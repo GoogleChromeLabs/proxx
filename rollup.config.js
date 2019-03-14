@@ -17,6 +17,8 @@ import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
 import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
 import chunkNamePlugin from "./chunk-name-plugin.js";
+import postcss from "rollup-plugin-postcss";
+import cssModuleTypes from "./css-module-types.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -31,6 +33,17 @@ export default {
     chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
+    cssModuleTypes("src"),
+    postcss({
+      minimize: true,
+      modules: {
+        generateScopedName: "[hash:base64:5]"
+      },
+      //extract: true,
+      namedExports(name) {
+        return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
+      }
+    }),
     typescript({
       // Make sure we are using our version of TypeScript.
       typescript: require("typescript"),
