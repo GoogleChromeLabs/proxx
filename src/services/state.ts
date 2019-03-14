@@ -19,7 +19,7 @@ export interface State {
   grid: Cell[][];
 }
 
-const BOARD_SIZE = 100;
+const BOARD_SIZE = 40;
 const DENSITY = 0.1;
 
 export default class StateService {

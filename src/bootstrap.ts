@@ -11,17 +11,33 @@
  * limitations under the License.
  */
 
-import { proxy } from "comlinkjs";
+import { wrap } from "comlink";
 
 import PreactService from "./services/preact";
 
+// @ts-ignore
+import workerURL from "chunk-name:./worker.js";
+
+const logEl = document.querySelector("#log")!;
+function log(msg: string) {
+  logEl.innerHTML += `${msg}\n`;
+}
+
 async function bootstrap() {
-  const worker = new Worker("worker.js");
+  log("Booting!");
+  try {
+    const worker = new Worker(workerURL);
+    worker.addEventListener("error", e => {
+      log(`Worker error: ${e.toString()}`);
+    });
 
-  const { stateService } = proxy(worker);
+    const { stateService } = wrap(worker);
 
-  // tslint:disable-next-line:no-unused-expression
-  new PreactService(stateService);
+    // tslint:disable-next-line:no-unused-expression
+    new PreactService(stateService);
+  } catch (e) {
+    log(`Caught throw: ${e.message}\n${e.stack}`);
+  }
 }
 
 bootstrap();
