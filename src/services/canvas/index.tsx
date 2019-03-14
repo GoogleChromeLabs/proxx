@@ -12,13 +12,9 @@
  */
 
 import { proxy, Remote } from "comlink";
-import StateService, { State } from "../state.js";
-
-import { html, render } from "lit-html";
-import { repeat } from "lit-html/directives/repeat";
 import { Cell, Tag } from "src/gamelogic/types.js";
-import { bind } from "../../utils/bind.js";
 import { forEach } from "../../utils/streams.js";
+import StateService, { State } from "../state.js";
 
 export const enum Action {
   Reveal,
@@ -29,6 +25,7 @@ export const enum Action {
 
 export default class CanvasService {
   private _canvas: HTMLCanvasElement | null;
+  private _context: CanvasRenderingContext2D | null | undefined;
   private _state: State | null = null;
   constructor(private stateService: Remote<StateService>) {
     const stateStream = new ReadableStream<State>({
@@ -47,12 +44,17 @@ export default class CanvasService {
 
     this._canvas = document.getElementById("board") as HTMLCanvasElement;
     if (this._canvas) {
-      this._canvas.addEventListener("click", this.onUnrevealedClick);
+      this._canvas.addEventListener("click", this.onUnrevealedClick.bind(this));
+      this._context = this._canvas.getContext("2d");
     }
   }
 
   private render(state: State) {
     if (this._canvas === null) {
+      return;
+    }
+
+    if (this._context === null || this._context === undefined) {
       return;
     }
 
@@ -62,17 +64,13 @@ export default class CanvasService {
 
     const cellHeight = 10;
     const cellWidth = 10;
-    this._canvas.width = this._state.grid.length * cellWidth;
-    this._canvas.height = this._state.grid.length * cellHeight;
-
-    const context: CanvasRenderingContext2D | null = this._canvas.getContext("2d");
-    if (context == null) {
-      return;
-    }
-
     const x = 0;
     const y = 0;
     const gridSize = this._state.grid.length; // assuming square
+    const context = this._context;
+
+    this._canvas.width = this._state.grid.length * cellWidth;
+    this._canvas.height = this._state.grid.length * cellHeight;
 
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
@@ -85,6 +83,8 @@ export default class CanvasService {
             context.fillStyle = "red";
           } else if (cell.touching > 0) {
             drawText = true;
+          } else if (cell.touching === 0) {
+            context.fillStyle = "white";
           }
         } else {
           if (cell.tag === Tag.Flag) {
@@ -97,18 +97,31 @@ export default class CanvasService {
 
         if (drawText) {
           context.fillStyle = "white";
-          context.fillRect(row * cellWidth, col * cellHeight, cellWidth, cellHeight);
+          context.fillRect(
+            row * cellWidth,
+            col * cellHeight,
+            cellWidth,
+            cellHeight
+          );
           context.fillStyle = "black";
-          context.fillText(cell.touching.toString(), row * cellWidth, (col * cellHeight) + cellHeight);
+          context.textAlign = "center";
+          context.fillText(
+            cell.touching.toString(),
+            row * cellWidth + cellWidth / 2,
+            col * cellHeight + cellHeight
+          );
         } else {
-          context.fillRect(row * cellWidth, col * cellHeight, cellWidth, cellHeight);
+          context.fillRect(
+            row * cellWidth,
+            col * cellHeight,
+            cellWidth,
+            cellHeight
+          );
         }
       }
     }
-
   }
 
-  @bind
   private onUnrevealedClick(event: MouseEvent) {
     if (event.target instanceof HTMLCanvasElement === false) {
       return;
