@@ -19,7 +19,7 @@ export interface State {
   grid: Cell[][];
 }
 
-const BOARD_SIZE = 100;
+const BOARD_SIZE = 40;
 const DENSITY = 0.1;
 
 export default class StateService {
@@ -49,6 +49,11 @@ export default class StateService {
 
   flag(x: number, y: number) {
     this.game.tag(x, y, Tag.Flag);
+    this.notify();
+  }
+
+  unflag(x: number, y: number) {
+    this.game.tag(x, y, Tag.None);
     this.notify();
   }
 

@@ -13,7 +13,7 @@
 
 import { proxy } from "comlinkjs";
 
-import PreactService from "./services/preact";
+import { game } from "./services/preact";
 
 import workerURL from "chunk-name:./worker.js";
 
@@ -22,8 +22,7 @@ async function bootstrap() {
 
   const { stateService } = proxy(worker);
 
-  // tslint:disable-next-line:no-unused-expression
-  new PreactService(stateService);
+  game(stateService);
 }
 
 bootstrap();

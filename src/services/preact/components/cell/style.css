@@ -1,0 +1,9 @@
+.table-cell {
+  padding: 0;
+}
+
+.cell-inner {
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+}

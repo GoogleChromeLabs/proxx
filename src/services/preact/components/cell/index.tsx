@@ -14,6 +14,7 @@
 import { Component, h } from "preact";
 import { Cell, Tag } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
+import { cellInner, tableCell } from "./style.css";
 
 interface State {}
 
@@ -47,7 +48,7 @@ const Item = ({ cell, onUnrevealedClick, onTouchingClick }: ItemProps) => {
   if (cell.hasMine) {
     return <div>Mine</div>;
   }
-  if (cell.touching) {
+  if (cell.touching > 0) {
     return <button onClick={onTouchingClick}>{cell.touching}</button>;
   }
 
@@ -85,13 +86,23 @@ export default class GridCell extends Component<Props, State> {
   }
 
   render({ cell }: Props) {
+    const cellState = !cell.revealed
+      ? cell.tag === Tag.Flag
+        ? "flagged"
+        : "unrevealed"
+      : cell.hasMine
+      ? "mine"
+      : cell.touching;
+
     return (
-      <td>
-        <Item
-          cell={cell}
-          onUnrevealedClick={this.onUnrevealedClick}
-          onTouchingClick={this.onTouchingClick}
-        />
+      <td class={tableCell}>
+        <div class={cellInner} data-state={cellState}>
+          <Item
+            cell={cell}
+            onUnrevealedClick={this.onUnrevealedClick}
+            onTouchingClick={this.onTouchingClick}
+          />
+        </div>
       </td>
     );
   }
