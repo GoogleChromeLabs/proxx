@@ -12,62 +12,41 @@
  */
 
 import { proxy, Remote } from "comlink";
-import { h, render } from "preact";
+import { Component, h, render } from "preact";
 
 import StateService, { State } from "../state.js";
 
-import Row from "./components/row/index.js";
-
-import { bind } from "../../utils/bind.js";
 import { forEach } from "../../utils/streams.js";
+import Game from "./components/game/index.js";
 
-import { Action } from "./components/cell/index.js";
+interface Props {
+  stateService: Remote<StateService>;
+}
 
-import { gameTable } from "./style.css";
-
-export default class PreactService {
-  constructor(private stateService: Remote<StateService>) {
+class PreactService extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
     const stateStream = new ReadableStream<State>({
       async start(controller: ReadableStreamDefaultController<State>) {
         // Make initial render ASAP
-        controller.enqueue(await stateService.state);
-        stateService.subscribe(
+        controller.enqueue(await props.stateService.state);
+        props.stateService.subscribe(
           proxy((state: State) => controller.enqueue(state))
         );
       }
     });
-    forEach(stateStream, async state => this.render(state));
+    forEach(stateStream, async state => this.setState(state));
   }
 
-  private render(state: State) {
-    const main = document.querySelector("main")!;
-    render(
-      <table class={gameTable}>
-        {state.grid.map((row, i) => (
-          // tslint:disable-next-line:jsx-no-lambda
-          <Row
-            key={i}
-            row={row}
-            onClick={(col, action) => this.click(i, col, action)}
-          />
-        ))}
-      </table>,
-      main,
-      main.firstChild as any
-    );
-  }
-
-  @bind
-  private async click(row: number, col: number, action: Action) {
-    switch (action) {
-      case Action.Flag: {
-        await this.stateService.flag(col, row);
-        break;
-      }
-      case Action.Reveal: {
-        await this.stateService.reveal(col, row);
-        break;
-      }
+  render({ stateService }: Props, { grid }: State) {
+    if (!grid) {
+      return <div />;
     }
+    return <Game grid={grid} stateService={stateService} />;
   }
+}
+
+export function game(stateService: Remote<StateService>) {
+  render(<PreactService stateService={stateService} />, document.body, document
+    .body.firstChild as any);
 }

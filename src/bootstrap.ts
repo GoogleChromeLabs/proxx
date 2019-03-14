@@ -32,22 +32,30 @@ async function bootstrap() {
     const uiServiceName = (
       new URL(location.toString()).searchParams.get("ui") || "preact"
     ).toLowerCase();
-    let uiModule;
     switch (uiServiceName) {
       case "preact":
-        uiModule = await import("./services/preact/index.js");
+        {
+          const preactService = await import("./services/preact/index.js");
+          preactService.game(stateService);
+        }
         break;
       case "canvas":
-        uiModule = await import("./services/canvas/index.js");
+        {
+          const canvasService = await import("./services/canvas/index.js");
+          // tslint:disable-next-line:no-unused-expression
+          new canvasService.default(stateService);
+        }
         break;
       case "lit":
-        uiModule = await import("./services/lit-element/index.js");
+        {
+          const litService = await import("./services/lit-element/index.js");
+          // tslint:disable-next-line:no-unused-expression
+          new litService.default(stateService);
+        }
         break;
       default:
         throw Error("Invalid UI service name");
     }
-    // tslint:disable-next-line:no-unused-expression
-    new uiModule.default(stateService);
   } catch (e) {
     log(`Caught throw: ${e.message}\n${e.stack}`);
   }

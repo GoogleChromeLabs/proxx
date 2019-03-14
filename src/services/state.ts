@@ -52,6 +52,11 @@ export default class StateService {
     this.notify();
   }
 
+  unflag(x: number, y: number) {
+    this.game.tag(x, y, Tag.None);
+    this.notify();
+  }
+
   reveal(x: number, y: number) {
     this.game.reveal(x, y);
     this.notify();
