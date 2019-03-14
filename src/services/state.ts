@@ -23,7 +23,7 @@ const BOARD_SIZE = 40;
 const DENSITY = 0.1;
 
 export default class StateService {
-  private port = new MessageChannel().port1;
+  private eventTarget: EventTarget = new MessageChannel().port1;
 
   private game: MinesweeperGame = new MinesweeperGame(
     BOARD_SIZE,
@@ -39,11 +39,11 @@ export default class StateService {
 
   notify() {
     const ev = new CustomEvent("state", { detail: this.state });
-    this.port.dispatchEvent(ev);
+    this.eventTarget.dispatchEvent(ev);
   }
 
   subscribe(f: (state: State) => void) {
-    this.port.addEventListener("state", ((ev: CustomEvent) =>
+    this.eventTarget.addEventListener("state", ((ev: CustomEvent) =>
       f(ev.detail)) as any);
   }
 
