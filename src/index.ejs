@@ -1,9 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<% for(const file of fs.readdirSync('dist').filter(f => f.endsWith('.js'))) { %>
-  <link rel="preload" href="<%=file;%>" as="script">
-<% } %>
 <style>
   :root {
     --size: 20px;
@@ -44,6 +41,35 @@
   td > *.empty {
     background-color: transparent;
   }
+  button {
+    background-color: none;
+    outline: none;
+    width: var(--size);
+    height: var(--size);
+    border: 1px solid black;
+  }
+  label {
+    display: block;
+  }
+  button[revealed][mine]{
+    visibility: visible !important;
+    background: none;
+    border: none;
+  }
+  button[revealed][touching] {
+    visibility: visible !important;
+    background: none;
+    border: none;
+  }
+  button[revealed] {
+    visibility: hidden;
+  }
+  .revealed {
+    background-color: red;
+  }
+  .tile {
+    will-change: transform;
+  }
   <% for(let i = 1; i <= 8; i++) {%>
     td > *.touching-<%=i;%> {
       color: hsl(<%=240 - i/8*240;%>, 100%, 50%);
@@ -52,4 +78,5 @@
 </style>
 <main></main>
 <pre id="log"></pre>
+<table id="board"></table>
 <script src="<%= hashmanifest["src/bootstrap.ts"]; %>" defer></script>

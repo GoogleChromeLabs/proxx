@@ -13,8 +13,6 @@
 
 import { wrap } from "comlink";
 
-import PreactService from "./services/preact";
-
 // @ts-ignore
 import workerURL from "chunk-name:./worker.js";
 
@@ -32,9 +30,25 @@ async function bootstrap() {
     });
 
     const { stateService } = wrap(worker);
-
+    const uiServiceName = (
+      new URL(location.toString()).searchParams.get("ui") || "preact"
+    ).toLowerCase();
+    let uiModule;
+    switch (uiServiceName) {
+      case "preact":
+        uiModule = await import("./services/preact/index.js");
+        break;
+      case "canvas":
+        uiModule = await import("./services/canvas/index.js");
+        break;
+      case "lit":
+        uiModule = await import("./services/lit-element/index.js");
+        break;
+      default:
+        throw Error("Invalid UI service name");
+    }
     // tslint:disable-next-line:no-unused-expression
-    new PreactService(stateService);
+    new uiModule.default(stateService);
   } catch (e) {
     log(`Caught throw: ${e.message}\n${e.stack}`);
   }

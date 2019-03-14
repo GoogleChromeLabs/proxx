@@ -26,6 +26,7 @@ export const enum Tag {
 
 export interface Cell {
   hasMine: boolean;
+  id: number;
   tag: Tag;
   revealed: boolean;
   touching: number;
