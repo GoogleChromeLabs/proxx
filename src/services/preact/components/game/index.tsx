@@ -53,7 +53,6 @@ export default class Game extends Component<Props> {
           {grid.map((row, i) => (
             // tslint:disable-next-line:jsx-no-lambda
             <Row
-              key={i}
               row={row}
               onClick={(col, action) => this.click(i, col, action)}
             />

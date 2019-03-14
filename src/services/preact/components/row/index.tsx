@@ -31,7 +31,7 @@ export default class Row extends Component<Props, State> {
     return (
       <tr>
         {row.map((cell, i) => (
-          <GridCell key={i} onClick={onClick.bind(this, i)} cell={cell} />
+          <GridCell onClick={onClick.bind(this, i)} cell={cell} />
         ))}
       </tr>
     );
