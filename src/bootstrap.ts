@@ -13,8 +13,6 @@
 
 import { wrap } from "comlink";
 
-import "@babel/polyfill/dist/polyfill.js";
-
 import workerURL from "chunk-name:./worker.js";
 
 const logEl = document.querySelector("#log")!;

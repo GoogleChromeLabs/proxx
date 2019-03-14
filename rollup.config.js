@@ -63,16 +63,32 @@ export default {
       babelrc: false,
       presets: [
         [
-          "@babel/env",
+          "@babel/preset-env",
           {
             targets: "last 2 versions, not dead, firefox >= 48",
             modules: false,
-            useBuiltIns: "entry"
+            useBuiltIns: "entry",
+            exclude: [
+              "@babel/plugin-transform-async-to-generator",
+              "@babel/plugin-transform-regenerator"
+            ]
           }
         ]
       ],
       extensions: [".js", ".jsx", ".mjs", ".ts", ".tsx"],
-      plugins: ["@babel/plugin-syntax-dynamic-import"]
+      plugins: [
+        "@babel/plugin-syntax-dynamic-import",
+        [
+          "module:fast-async",
+          {
+            // compiler: {
+            //   promises: false,
+            //   generators: false
+            // },
+            // runtimePatterns: "bootstrap|worker"
+          }
+        ]
+      ]
     }),
     chunkNamePlugin(),
     nodeResolve(),

@@ -31,6 +31,7 @@
     "acorn-walk": "^6.1.1",
     "comlink": "^4.0.0-alpha.4",
     "ejs": "^2.6.1",
+    "fast-async": "^7.0.6",
     "find": "^0.3.0",
     "idb-keyval": "^3.1.0",
     "lit-html": "^1.0.0",
