@@ -7,7 +7,7 @@
     "build:markup": "node ./render_static.js",
     "gzip": "gzip -k9nr dist",
     "build": "rollup -c && npm run build:markup && npm run gzip",
-    "serve": "http-server dist -c60 -g",
+    "serve": "http-server dist -c-1 -g",
     "fmt": "prettier --write 'src/**/*.{ts,tsx}' *.{js,json,md} && npm run lintfix",
     "lint": "tslint -t verbose -c tslint.json 'src/**/*.{ts,tsx}'",
     "lintfix": "tslint -t verbose -c tslint.json --fix 'src/**/*.{ts,tsx}'",

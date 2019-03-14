@@ -37,6 +37,7 @@ export default class MinesweeperGame {
   private _state = State.Pending;
   private _toReveal = 0;
   private _flags = 0;
+  private _gridChanges: Array<[number, number]> = [];
 
   constructor(
     private _width: number,
@@ -64,6 +65,12 @@ export default class MinesweeperGame {
       );
   }
 
+  collectGridChanges() {
+    const changes = this._gridChanges;
+    this._gridChanges = [];
+    return changes;
+  }
+
   reveal(x: number, y: number) {
     if (this._state === State.Pending) {
       this._placeMines(x, y);
@@ -82,21 +89,21 @@ export default class MinesweeperGame {
   }
 
   tag(x: number, y: number, tag: Tag) {
-    const oldCell = this.grid[y][x];
-    if (oldCell.revealed) {
+    const cell = this.grid[y][x];
+    if (cell.revealed) {
       throw Error("Revealed cell cannot be tagged");
     }
-    if (oldCell.tag === tag) {
+    if (cell.tag === tag) {
       return;
     }
 
-    this._cloneUpwards(x, y, new WeakSet());
-    const cell = this.grid[y][x];
+    const oldTag = cell.tag;
     cell.tag = tag;
+    this._gridChanges.push([x, y]);
 
     if (tag === Tag.Flag) {
       this._flags += 1;
-    } else if (oldCell.tag === Tag.Flag) {
+    } else if (oldTag === Tag.Flag) {
       this._flags -= 1;
     }
   }
@@ -133,13 +140,12 @@ export default class MinesweeperGame {
       return false;
     }
 
-    const objsCloned = new WeakSet();
     for (const [nextX, nextY] of maybeReveal) {
       const nextCell = this.grid[nextY][nextX];
       if (nextCell.revealed) {
         continue;
       }
-      this._reveal(nextX, nextY, objsCloned);
+      this._reveal(nextX, nextY);
     }
 
     return true;
@@ -171,33 +177,6 @@ export default class MinesweeperGame {
     }
 
     this._state = State.Playing;
-  }
-
-  /**
-   * This 'avoids' mutating the grid property, so it's easier to identify changes in Preact etc.
-   *
-   * @param x
-   * @param y
-   * @param objsCloned Objects that don't need cloning again.
-   */
-  private _cloneUpwards(x: number, y: number, objsCloned: WeakSet<any>) {
-    // Hacky fix for ImmerJS
-    return;
-    // Grid
-    if (!objsCloned.has(this.grid)) {
-      this.grid = this.grid.slice();
-      objsCloned.add(this.grid);
-    }
-    // Row
-    if (!objsCloned.has(this.grid[y])) {
-      this.grid[y] = this.grid[y].slice();
-      objsCloned.add(this.grid[y]);
-    }
-    // Cell
-    if (!objsCloned.has(this.grid[y][x])) {
-      this.grid[y][x] = { ...this.grid[y][x] };
-      objsCloned.add(this.grid[y][x]);
-    }
   }
 
   private *_iterateSurrounding(
@@ -233,7 +212,7 @@ export default class MinesweeperGame {
    * @param y
    * @param objsCloned A weakmap to track which objects have already been cloned.
    */
-  private _reveal(x: number, y: number, objsCloned = new WeakSet()) {
+  private _reveal(x: number, y: number) {
     // The set contains the cell position as if it were a single flat array.
     const revealSet = new Set<number>([x + y * this._width]);
 
@@ -241,13 +220,13 @@ export default class MinesweeperGame {
       const x = value % this._width;
       const y = (value - x) / this._width;
 
-      this._cloneUpwards(x, y, objsCloned);
       const cell = this.grid[y][x];
 
       if (cell.revealed) {
         throw Error("Cell already revealed");
       }
       cell.revealed = true;
+      this._gridChanges.push([x, y]);
 
       if (cell.hasMine) {
         this._endGame(State.Lost);

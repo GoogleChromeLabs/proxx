@@ -1,0 +1,20 @@
+.game-table {
+  background: #fff;
+  table-layout: fixed;
+  border-spacing: 0;
+  position: relative;
+  opacity: 0;
+}
+
+.container {
+  width: min-content;
+  position: relative;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

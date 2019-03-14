@@ -11,14 +11,15 @@
  * limitations under the License.
  */
 
-import { proxy, Remote } from "comlink";
-import StateService, { State } from "../state.js";
+import { Remote } from "comlink";
+import StateService from "../state.js";
 
 import { html, render } from "lit-html";
 import { repeat } from "lit-html/directives/repeat";
-import { Cell, Tag } from "src/gamelogic/types.js";
+import { Cell, State as GameState, Tag } from "src/gamelogic/types.js";
 import { bind } from "../../utils/bind.js";
-import { forEach } from "../../utils/streams.js";
+import localStateSubscribe from "../local-state-subscribe";
+import "./style.css";
 
 export const enum Action {
   Reveal,
@@ -27,39 +28,32 @@ export const enum Action {
   RevealSurrounding
 }
 
+interface State {
+  grid: Cell[][];
+  flags: number;
+  state: GameState;
+}
+
 export default class LitService {
   private _table: HTMLTableElement | null;
-  private _state: State | null = null;
-  constructor(private stateService: Remote<StateService>) {
-    const stateStream = new ReadableStream<State>({
-      async start(controller: ReadableStreamDefaultController<State>) {
-        // Make initial render ASAP
-        controller.enqueue(await stateService.state);
-        stateService.subscribe(
-          proxy((state: State) => controller.enqueue(state))
-        );
-      }
-    });
-    forEach(stateStream, async state => {
-      this._state = state;
-      this.render(state); // Future: Render function might just pull from state.
+  private _state?: State;
+  constructor(private _stateService: Remote<StateService>) {
+    localStateSubscribe(_stateService, newState => {
+      this._state = newState;
+      this.render();
     });
 
-    this._table = document.getElementById("board") as HTMLTableElement;
-    if (this._table) {
-      this._table.addEventListener("click", this.onUnrevealedClick);
-    }
+    this._table = document.createElement("table");
+    this._table.addEventListener("click", this.onUnrevealedClick);
+    document.querySelector("main")!.appendChild(this._table);
   }
 
-  private render(state: State) {
-    if (this._table === null) {
+  private render() {
+    if (!this._table || !this._state) {
       return;
     }
 
-    if (this._state === null) {
-      return;
-    }
-
+    const state = this._state;
     let rowCount = 0;
 
     render(
@@ -105,11 +99,7 @@ export default class LitService {
 
   @bind
   private onUnrevealedClick(event: MouseEvent) {
-    if (event.target instanceof HTMLButtonElement === false) {
-      return;
-    }
-
-    if (this._state === null) {
+    if (event.target instanceof HTMLButtonElement === false || !this._state) {
       return;
     }
 
@@ -126,13 +116,13 @@ export default class LitService {
       if (!event.shiftKey) {
         return;
       }
-      this.stateService.reveal(col, row);
+      this._stateService.reveal(col, row);
       return;
     }
 
     if (event.shiftKey) {
       if (tag === Tag.None) {
-        this.stateService.flag(col, row);
+        this._stateService.flag(col, row);
       }
       return;
     }
@@ -141,6 +131,6 @@ export default class LitService {
       return;
     }
 
-    this.stateService.reveal(col, row);
+    this._stateService.reveal(col, row);
   }
 }

@@ -35,20 +35,26 @@ async function bootstrap() {
     switch (uiServiceName) {
       case "preact":
         {
-          const preactService = await import("./services/preact/index.js");
+          const preactService = await import("./services/preact/index");
+          preactService.game(stateService);
+        }
+        break;
+      case "preact-canvas":
+        {
+          const preactService = await import("./services/preact-canvas/index");
           preactService.game(stateService);
         }
         break;
       case "canvas":
         {
-          const canvasService = await import("./services/canvas/index.js");
+          const canvasService = await import("./services/canvas/index");
           // tslint:disable-next-line:no-unused-expression
           new canvasService.default(stateService);
         }
         break;
       case "lit":
         {
-          const litService = await import("./services/lit-element/index.js");
+          const litService = await import("./services/lit-element/index");
           // tslint:disable-next-line:no-unused-expression
           new litService.default(stateService);
         }
