@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { proxy, Remote } from "comlink";
+import { proxy, Remote } from "comlink/src/comlink.js";
 import { Cell, Tag } from "src/gamelogic/types.js";
 import { forEach } from "../../utils/streams.js";
 import StateService, { State } from "../state.js";

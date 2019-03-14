@@ -14,7 +14,6 @@
 import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
-import babel from "rollup-plugin-babel";
 import loadz0r from "rollup-plugin-loadz0r";
 import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
 import chunkNamePlugin from "./chunk-name-plugin.js";
@@ -58,37 +57,6 @@ export default {
       // plugin code. :shurg:
       // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
       clean: true
-    }),
-    babel({
-      babelrc: false,
-      presets: [
-        [
-          "@babel/preset-env",
-          {
-            targets: "last 2 versions, not dead, firefox >= 48",
-            modules: false,
-            useBuiltIns: "entry",
-            exclude: [
-              "@babel/plugin-transform-async-to-generator",
-              "@babel/plugin-transform-regenerator"
-            ]
-          }
-        ]
-      ],
-      extensions: [".js", ".jsx", ".mjs", ".ts", ".tsx"],
-      plugins: [
-        "@babel/plugin-syntax-dynamic-import",
-        [
-          "module:fast-async",
-          {
-            // compiler: {
-            //   promises: false,
-            //   generators: false
-            // },
-            // runtimePatterns: "bootstrap|worker"
-          }
-        ]
-      ]
     }),
     chunkNamePlugin(),
     nodeResolve(),

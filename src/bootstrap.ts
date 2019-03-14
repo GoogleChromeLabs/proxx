@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { wrap } from "comlink";
+import { wrap } from "comlink/src/comlink.js";
 
 import workerURL from "chunk-name:./worker.js";
 
