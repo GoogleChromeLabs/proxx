@@ -30,7 +30,7 @@ async function bootstrap() {
 
     const { stateService } = wrap(worker);
     const uiServiceName = (
-      new URL(location.toString()).searchParams.get("ui") || "preact"
+      new URL(location.toString()).searchParams.get("ui") || "preact-canvas"
     ).toLowerCase();
     switch (uiServiceName) {
       case "preact":
