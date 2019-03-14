@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { proxy, Remote } from "comlink";
+import { proxy, Remote } from "comlink/src/comlink.js";
 import { Component, h, render } from "preact";
 
 import StateService, { StateUpdate } from "../state.js";

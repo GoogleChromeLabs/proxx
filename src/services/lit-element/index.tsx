@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { Remote } from "comlink";
+import { Remote } from "comlink/src/comlink.js";
 import StateService from "../state.js";
 
 import { html, render } from "lit-html";

@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { proxy, Remote } from "comlink";
+import { proxy, Remote } from "comlink/src/comlink.js";
 import { Cell, State as GameState } from "../gamelogic/types";
 import StateService, { StateUpdate } from "./state";
 

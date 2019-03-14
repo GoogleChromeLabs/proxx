@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Remote } from "comlink";
+import { Remote } from "comlink/src/comlink.js";
 import { Component, h } from "preact";
 import { Cell } from "../../../../gamelogic/types";
 import { bind } from "../../../../utils/bind.js";

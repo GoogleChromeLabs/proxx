@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { Remote } from "comlink";
+import { Remote } from "comlink/src/comlink.js";
 import { Cell, State as GameState, Tag } from "src/gamelogic/types.js";
 import localStateSubscribe from "../local-state-subscribe";
 import StateService from "../state.js";
@@ -42,7 +42,7 @@ export default class CanvasService {
 
     this._canvas = document.createElement("canvas");
 
-    document.body.append(this._canvas);
+    document.body.appendChild(this._canvas);
 
     if (this._canvas) {
       this._canvas.addEventListener("click", this.onUnrevealedClick.bind(this));
@@ -60,8 +60,8 @@ export default class CanvasService {
     const gridSize = this._state.grid.length; // assuming square
     const context = this._context;
 
-    this._canvas.width = this._state.grid.length * cellWidth;
-    this._canvas.height = this._state.grid.length * cellHeight;
+    this._canvas.width = gridSize * cellWidth;
+    this._canvas.height = gridSize * cellHeight;
 
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
