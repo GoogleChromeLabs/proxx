@@ -28,11 +28,30 @@ export default class CanvasService {
   private _context: CanvasRenderingContext2D | null | undefined;
   private _state: State | null = null;
   constructor(private stateService: Remote<StateService>) {
-    const stateStream = new ReadableStream<State>({
-      async start(controller: ReadableStreamDefaultController<State>) {
+    this.init();
+    this._canvas = document.createElement("canvas");
+    document.body.append(this._canvas);
+    if (this._canvas) {
+      this._canvas.addEventListener("click", this.onUnrevealedClick.bind(this));
+      this._context = this._canvas.getContext("2d");
+    }
+  }
+
+  private async init() {
+    let myReadableStream = ((typeof ReadableStream !== "undefined" &&
+      ReadableStream) as any) as typeof ReadableStream;
+    if (!myReadableStream) {
+      // @ts-ignore
+      const polyfill = await import("web-streams-polyfill");
+      console.log(polyfill);
+      myReadableStream = polyfill.ReadableStream;
+    }
+    console.log(myReadableStream);
+    const stateStream = new myReadableStream<State>({
+      start: async (controller: ReadableStreamDefaultController<State>) => {
         // Make initial render ASAP
-        controller.enqueue(await stateService.state);
-        stateService.subscribe(
+        controller.enqueue(await this.stateService.state);
+        this.stateService.subscribe(
           proxy((state: State) => controller.enqueue(state))
         );
       }
@@ -41,13 +60,6 @@ export default class CanvasService {
       this._state = state;
       this.render(state); // Future: Render function might just pull from state.
     });
-
-    this._canvas = document.createElement("canvas");
-    document.body.append(this._canvas);
-    if (this._canvas) {
-      this._canvas.addEventListener("click", this.onUnrevealedClick.bind(this));
-      this._context = this._canvas.getContext("2d");
-    }
   }
 
   private render(state: State) {

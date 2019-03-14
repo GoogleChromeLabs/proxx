@@ -12,6 +12,9 @@
  */
 
 import { expose } from "comlink";
+
+import "@babel/polyfill/dist/polyfill.js";
+
 import StateService from "./services/state.js";
 
 declare var self: DedicatedWorkerGlobalScope;

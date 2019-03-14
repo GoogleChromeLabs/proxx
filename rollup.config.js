@@ -14,11 +14,13 @@
 import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
+import babel from "rollup-plugin-babel";
 import loadz0r from "rollup-plugin-loadz0r";
 import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
 import chunkNamePlugin from "./chunk-name-plugin.js";
 import postcss from "rollup-plugin-postcss";
 import cssModuleTypes from "./css-module-types.js";
+import { readFileSync, fstat } from "fs";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -57,9 +59,25 @@ export default {
       // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
       clean: true
     }),
+    babel({
+      babelrc: false,
+      presets: [
+        [
+          "@babel/env",
+          {
+            targets: "last 2 versions, not dead, firefox >= 48",
+            modules: false,
+            useBuiltIns: "entry"
+          }
+        ]
+      ],
+      extensions: [".js", ".jsx", ".mjs", ".ts", ".tsx"],
+      plugins: ["@babel/plugin-syntax-dynamic-import"]
+    }),
     chunkNamePlugin(),
     nodeResolve(),
     loadz0r({
+      loader: readFileSync("./loadz0r-loader.ejs").toString(),
       // `prependLoader` will be called for every chunk. If it returns `true`,
       // the loader code will be prepended.
       prependLoader: (chunk, inputs) => {
@@ -73,7 +91,7 @@ export default {
         return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
-    // terser(),
     entrypointHashmanifest()
+    // terser(),
   ]
 };
