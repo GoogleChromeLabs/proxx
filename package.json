@@ -24,9 +24,14 @@
   "author": "Surma <surma@surma.link>",
   "license": "Apache-2.0",
   "dependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/preset-env": "^7.3.4",
     "acorn-walk": "^6.1.1",
     "comlink": "^4.0.0-alpha.4",
     "ejs": "^2.6.1",
+    "fast-async": "^7.0.6",
     "find": "^0.3.0",
     "idb-keyval": "^3.1.0",
     "lit-html": "^1.0.0",
@@ -34,6 +39,7 @@
     "preact": "^8.3.1",
     "rimraf": "^2.6.2",
     "rollup": "^1.1.2",
+    "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-entrypoint-hashmanifest": "^0.1.1",
     "rollup-plugin-loadz0r": "^0.7.0",
     "rollup-plugin-node-resolve": "^4.0.0",
@@ -41,7 +47,8 @@
     "rollup-plugin-terser": "^4.0.4",
     "rollup-plugin-typescript2": "^0.19.2",
     "typed-css-modules": "^0.4.2",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.3.3333",
+    "web-streams-polyfill": "^1.3.2"
   },
   "devDependencies": {
     "http-server": "^0.11.1",
@@ -49,5 +56,10 @@
     "netlify-cli": "^2.8.3",
     "prettier": "^1.16.4",
     "tslint": "^5.12.1"
+  },
+  "babel": {
+    "presets": [
+      "@babel/env"
+    ]
   }
 }

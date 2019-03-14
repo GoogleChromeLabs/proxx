@@ -11,7 +11,8 @@
  * limitations under the License.
  */
 
-import { expose } from "comlink";
+import { expose } from "comlink/src/comlink.js";
+
 import StateService from "./services/state.js";
 
 declare var self: DedicatedWorkerGlobalScope;
