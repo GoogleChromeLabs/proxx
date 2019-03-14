@@ -150,6 +150,10 @@ export default class Game extends Component<Props> {
         await this.props.stateService.reveal(col, row);
         break;
       }
+      case Action.RevealSurrounding: {
+        await this.props.stateService.revealSurrounding(col, row);
+        break;
+      }
     }
   }
 }

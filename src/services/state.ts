@@ -62,6 +62,11 @@ export default class StateService {
     this.notify();
   }
 
+  revealSurrounding(x: number, y: number) {
+    this.game.attemptSurroundingReveal(x, y);
+    this.notify();
+  }
+
   private notify() {
     const ev = new CustomEvent<StateUpdate>("state", {
       detail: this.getUpdate()
