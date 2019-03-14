@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Remote } from "comlink";
+import { Remote } from "comlink/src/comlink.js";
 import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 import StateService, { State } from "../../../state.js";
@@ -30,9 +30,17 @@ export default class Game extends Component<Props> {
   private cellsToRedraw: Set<Element> = new Set();
   private canvasRenderPending = false;
 
-  componentDidMount() {
+  async componentDidMount() {
+    let myResizeObserver;
+    if ("ResizeObserver" in self) {
+      myResizeObserver = (self as any).ResizeObserver;
+    } else {
+      myResizeObserver = await import("resize-observer-polyfill").then(
+        m => m.default
+      );
+    }
     // @ts-ignore
-    new ResizeObserver(() => this.canvasInit()).observe(this.canvas!);
+    new myResizeObserver(() => this.canvasInit()).observe(this.canvas!);
     new MutationObserver(entries => {
       for (const entry of entries) {
         const element = entry.target as HTMLElement;

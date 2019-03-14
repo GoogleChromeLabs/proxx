@@ -11,12 +11,11 @@
  * limitations under the License.
  */
 
-import { proxy, Remote } from "comlink";
+import { proxy, Remote } from "comlink/src/comlink.js";
 import { Component, h, render } from "preact";
 
 import StateService, { State } from "../state.js";
 
-import { forEach } from "../../utils/streams.js";
 import Game from "./components/game/index.js";
 
 interface Props {
@@ -26,16 +25,8 @@ interface Props {
 class PreactService extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const stateStream = new ReadableStream<State>({
-      async start(controller: ReadableStreamDefaultController<State>) {
-        // Make initial render ASAP
-        controller.enqueue(await props.stateService.state);
-        props.stateService.subscribe(
-          proxy((state: State) => controller.enqueue(state))
-        );
-      }
-    });
-    forEach(stateStream, async state => this.setState(state));
+    props.stateService.state.then(state => this.setState(state));
+    props.stateService.subscribe(proxy((state: State) => this.setState(state)));
   }
 
   render({ stateService }: Props, { grid }: State) {

@@ -37,6 +37,7 @@
     "lit-html": "^1.0.0",
     "magic-string": "^0.25.2",
     "preact": "^8.3.1",
+    "resize-observer-polyfill": "^1.5.1",
     "rimraf": "^2.6.2",
     "rollup": "^1.1.2",
     "rollup-plugin-babel": "^4.3.2",
