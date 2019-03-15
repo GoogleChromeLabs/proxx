@@ -13,17 +13,19 @@
 
 import MinesweeperGame from "../gamelogic/index.js";
 
-import { Cell, Tag } from "../gamelogic/types.js";
+import { Cell, State, Tag } from "../gamelogic/types.js";
 
-export interface State {
-  grid: Cell[][];
+export interface StateUpdate {
+  state: State;
+  flags: number;
+  gridChanges: Array<[number, number, Cell]>;
 }
 
 const BOARD_SIZE = 40;
 const DENSITY = 0.1;
 
 export default class StateService {
-  private port = new MessageChannel().port1;
+  private eventTarget: EventTarget = new MessageChannel().port1;
 
   private game: MinesweeperGame = new MinesweeperGame(
     BOARD_SIZE,
@@ -31,20 +33,18 @@ export default class StateService {
     Math.floor(BOARD_SIZE * BOARD_SIZE * DENSITY)
   );
 
-  get state(): State {
+  getFullState() {
     return {
-      grid: this.game.grid
+      flags: this.game.flags,
+      grid: this.game.grid,
+      state: this.game.state
     };
   }
 
-  notify() {
-    const ev = new CustomEvent("state", { detail: this.state });
-    this.port.dispatchEvent(ev);
-  }
-
-  subscribe(f: (state: State) => void) {
-    this.port.addEventListener("state", ((ev: CustomEvent) =>
-      f(ev.detail)) as any);
+  subscribe(callback: (state: StateUpdate) => void) {
+    this.eventTarget.addEventListener("state", (event: Event) => {
+      callback((event as CustomEvent<StateUpdate>).detail);
+    });
   }
 
   flag(x: number, y: number) {
@@ -60,5 +60,27 @@ export default class StateService {
   reveal(x: number, y: number) {
     this.game.reveal(x, y);
     this.notify();
+  }
+
+  revealSurrounding(x: number, y: number) {
+    this.game.attemptSurroundingReveal(x, y);
+    this.notify();
+  }
+
+  private notify() {
+    const ev = new CustomEvent<StateUpdate>("state", {
+      detail: this.getUpdate()
+    });
+    this.eventTarget.dispatchEvent(ev);
+  }
+
+  private getUpdate(): StateUpdate {
+    return {
+      flags: this.game.flags,
+      gridChanges: this.game.collectGridChanges().map(change => {
+        return [change[0], change[1], this.game.grid[change[1]][change[0]]];
+      }) as Array<[number, number, Cell]>,
+      state: this.game.state
+    };
   }
 }

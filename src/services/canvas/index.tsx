@@ -11,10 +11,10 @@
  * limitations under the License.
  */
 
-import { proxy, Remote } from "comlink/src/comlink.js";
-import { Cell, Tag } from "src/gamelogic/types.js";
-import { forEach } from "../../utils/streams.js";
-import StateService, { State } from "../state.js";
+import { Remote } from "comlink/src/comlink.js";
+import { Cell, State as GameState, Tag } from "src/gamelogic/types.js";
+import localStateSubscribe from "../local-state-subscribe";
+import StateService from "../state.js";
 
 export const enum Action {
   Reveal,
@@ -23,67 +23,45 @@ export const enum Action {
   RevealSurrounding
 }
 
+interface State {
+  grid: Cell[][];
+  flags: number;
+  state: GameState;
+}
+
 export default class CanvasService {
+  private _state?: State;
   private _canvas: HTMLCanvasElement | null;
   private _context: CanvasRenderingContext2D | null | undefined;
-  private _state: State | null = null;
-  constructor(private stateService: Remote<StateService>) {
-    this.init();
+
+  constructor(private _stateService: Remote<StateService>) {
+    localStateSubscribe(_stateService, newState => {
+      this._state = newState;
+      this.render();
+    });
+
     this._canvas = document.createElement("canvas");
-    document.body.append(this._canvas);
+
+    document.body.appendChild(this._canvas);
+
     if (this._canvas) {
       this._canvas.addEventListener("click", this.onUnrevealedClick.bind(this));
       this._context = this._canvas.getContext("2d");
     }
   }
 
-  private async init() {
-    let myReadableStream = ((typeof ReadableStream !== "undefined" &&
-      ReadableStream) as any) as typeof ReadableStream;
-    if (!myReadableStream) {
-      // @ts-ignore
-      const polyfill = await import("web-streams-polyfill");
-      console.log(polyfill);
-      myReadableStream = polyfill.ReadableStream;
-    }
-    console.log(myReadableStream);
-    const stateStream = new myReadableStream<State>({
-      start: async (controller: ReadableStreamDefaultController<State>) => {
-        // Make initial render ASAP
-        controller.enqueue(await this.stateService.state);
-        this.stateService.subscribe(
-          proxy((state: State) => controller.enqueue(state))
-        );
-      }
-    });
-    forEach(stateStream, async state => {
-      this._state = state;
-      this.render(state); // Future: Render function might just pull from state.
-    });
-  }
-
-  private render(state: State) {
-    if (this._canvas === null) {
-      return;
-    }
-
-    if (this._context === null || this._context === undefined) {
-      return;
-    }
-
-    if (this._state === null) {
+  private render() {
+    if (this._canvas === null || !this._context || !this._state) {
       return;
     }
 
     const cellHeight = 10;
     const cellWidth = 10;
-    const x = 0;
-    const y = 0;
     const gridSize = this._state.grid.length; // assuming square
     const context = this._context;
 
-    this._canvas.width = this._state.grid.length * cellWidth;
-    this._canvas.height = this._state.grid.length * cellHeight;
+    this._canvas.width = gridSize * cellWidth;
+    this._canvas.height = gridSize * cellHeight;
 
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
@@ -136,17 +114,13 @@ export default class CanvasService {
   }
 
   private onUnrevealedClick(event: MouseEvent) {
-    if (event.target instanceof HTMLCanvasElement === false) {
+    if (event.target instanceof HTMLCanvasElement === false || !this._state) {
       return;
     }
 
-    if (this._state === null) {
-      return;
-    }
-
-    const target = event.target as HTMLCanvasElement;
-    const row = Math.floor(event.x / 10);
-    const col = Math.floor(event.y / 10);
+    const canvasRect = this._canvas!.getBoundingClientRect();
+    const row = Math.floor((event.x - canvasRect.left) / 10);
+    const col = Math.floor((event.y - canvasRect.top) / 10);
 
     const cell: Cell = this._state.grid[row][col];
 
@@ -157,13 +131,13 @@ export default class CanvasService {
       if (!event.shiftKey) {
         return;
       }
-      this.stateService.reveal(col, row);
+      this._stateService.reveal(col, row);
       return;
     }
 
     if (event.shiftKey) {
       if (tag === Tag.None) {
-        this.stateService.flag(col, row);
+        this._stateService.flag(col, row);
       }
       return;
     }
@@ -172,6 +146,6 @@ export default class CanvasService {
       return;
     }
 
-    this.stateService.reveal(col, row);
+    this._stateService.reveal(col, row);
   }
 }
