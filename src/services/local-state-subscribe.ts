@@ -12,7 +12,7 @@
  */
 import { proxy, Remote } from "comlink/src/comlink.js";
 import { Cell, State as GameState } from "../gamelogic/types";
-import StateService, { StateUpdate } from "./state";
+import StateService, { GridChanges, StateUpdate } from "./state";
 
 interface State {
   flags: number;
@@ -53,12 +53,12 @@ function changeCellInGrid(
 
 export default async function localStateSubscribe(
   stateService: Remote<StateService>,
-  callback: (newState: State) => void
+  callback: (newState: State, gridChanges: GridChanges) => void
 ) {
   const initialState = await stateService.getFullState();
   const { flags, state } = initialState;
   let { grid } = initialState;
-  callback({ flags, state, grid });
+  callback({ flags, state, grid }, []);
 
   stateService.subscribe(
     proxy((update: StateUpdate) => {
@@ -69,7 +69,7 @@ export default async function localStateSubscribe(
         grid = changeCellInGrid(grid, x, y, cell, objsCloned);
       }
 
-      callback({ flags, state, grid });
+      callback({ flags, state, grid }, update.gridChanges);
     })
   );
 }

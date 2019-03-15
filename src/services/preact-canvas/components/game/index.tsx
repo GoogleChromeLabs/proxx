@@ -11,10 +11,10 @@
  * limitations under the License.
  */
 import { Remote } from "comlink/src/comlink.js";
-import { Component, h } from "preact";
+import { Component, h, render } from "preact";
 import { Cell } from "../../../../gamelogic/types";
 import { bind } from "../../../../utils/bind.js";
-import StateService from "../../../state.js";
+import StateService, { GridChanges } from "../../../state.js";
 import { Action } from "../cell/index.js";
 import { gameCell } from "../cell/style.css";
 import Row from "../row/index.js";
@@ -23,6 +23,7 @@ import { canvas, container, gameTable } from "./style.css";
 interface Props {
   stateService: Remote<StateService>;
   grid: Cell[][];
+  gridChanges: GridChanges;
 }
 
 export default class Game extends Component<Props> {
@@ -31,6 +32,7 @@ export default class Game extends Component<Props> {
   private table?: HTMLTableElement;
   private cellsToRedraw: Set<Element> = new Set();
   private canvasRenderPending = false;
+  private rows = [] as Row[];
 
   async componentDidMount() {
     let myResizeObserver;
@@ -54,6 +56,18 @@ export default class Game extends Component<Props> {
     }).observe(this.table!, { attributes: true, subtree: true });
   }
 
+  shouldComponentUpdate(nextProps: Props) {
+    if (this.rows.length === 0) {
+      return true;
+    }
+    for (const [x, y, cellProps] of nextProps.gridChanges) {
+      const cell = this.rows[y].cells[x] as any;
+      cell.props.cell = cellProps;
+      render(cell.render(cell.props), cell.base, cell.base.firstChild);
+    }
+    return false;
+  }
+
   render({ grid }: Props) {
     return (
       <div class={container}>
@@ -62,6 +76,7 @@ export default class Game extends Component<Props> {
           {grid.map((row, i) => (
             // tslint:disable-next-line:jsx-no-lambda
             <Row
+              ref={r => this.rows.push(r)}
               row={row}
               onClick={(col, action) => this.click(i, col, action)}
             />

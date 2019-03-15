@@ -24,6 +24,8 @@ interface Props {
 }
 
 export default class Row extends Component<Props, State> {
+  cells = [] as Cell[];
+
   shouldComponentUpdate(nextProps: Props) {
     return this.props.row !== nextProps.row;
   }
@@ -32,7 +34,11 @@ export default class Row extends Component<Props, State> {
     return (
       <tr class={gameRow}>
         {row.map((cell, i) => (
-          <GridCell onClick={onClick.bind(this, i)} cell={cell} />
+          <GridCell
+            ref={r => this.cells.push(r)}
+            onClick={onClick.bind(this, i)}
+            cell={cell}
+          />
         ))}
       </tr>
     );

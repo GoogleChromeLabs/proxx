@@ -15,10 +15,12 @@ import MinesweeperGame from "../gamelogic/index.js";
 
 import { Cell, State, Tag } from "../gamelogic/types.js";
 
+export type GridChanges = Array<[number, number, Cell]>;
+
 export interface StateUpdate {
   state: State;
   flags: number;
-  gridChanges: Array<[number, number, Cell]>;
+  gridChanges: GridChanges;
 }
 
 const BOARD_SIZE = 40;

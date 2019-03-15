@@ -15,7 +15,7 @@ import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render } from "preact";
 import { Cell, State as GameState } from "../../gamelogic/types";
 import localStateSubscribe from "../local-state-subscribe";
-import StateService from "../state.js";
+import StateService, { GridChanges } from "../state.js";
 import Game from "./components/game/index.js";
 
 interface Props {
@@ -26,6 +26,7 @@ interface State {
   grid?: Cell[][];
   flags: number;
   state: GameState;
+  gridChanges?: GridChanges;
 }
 
 class PreactService extends Component<Props, State> {
@@ -37,16 +38,18 @@ class PreactService extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    localStateSubscribe(props.stateService, newState => {
-      this.setState(newState);
+    localStateSubscribe(props.stateService, (newState, gridChanges) => {
+      this.setState({ ...newState, gridChanges });
     });
   }
 
-  render({ stateService }: Props, { grid }: State) {
-    if (!grid) {
+  render({ stateService }: Props, { grid, gridChanges }: State) {
+    if (!grid || !gridChanges) {
       return <div />;
     }
-    return <Game grid={grid} stateService={stateService} />;
+    return (
+      <Game grid={grid} gridChanges={gridChanges} stateService={stateService} />
+    );
   }
 }
 
