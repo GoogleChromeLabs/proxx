@@ -1,9 +1,17 @@
-.table-cell {
-  padding: 0;
-}
-
-.cell-inner {
+.game-cell {
+  display: block;
   width: 20px;
   height: 20px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.button {
+  width: 20px;
+  height: 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  padding: 0;
   overflow: hidden;
 }

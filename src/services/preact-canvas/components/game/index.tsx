@@ -16,7 +16,7 @@ import { Cell } from "../../../../gamelogic/types";
 import { bind } from "../../../../utils/bind.js";
 import StateService from "../../../state.js";
 import { Action } from "../cell/index.js";
-import { cellInner } from "../cell/style.css";
+import { gameCell } from "../cell/style.css";
 import Row from "../row/index.js";
 import { canvas, container, gameTable } from "./style.css";
 
@@ -46,7 +46,7 @@ export default class Game extends Component<Props> {
     new MutationObserver(entries => {
       for (const entry of entries) {
         const element = entry.target as HTMLElement;
-        if (element.classList.contains(cellInner)) {
+        if (element.classList.contains(gameCell)) {
           this.cellsToRedraw.add(element);
         }
       }
@@ -121,7 +121,7 @@ export default class Game extends Component<Props> {
     this.ctx = this.canvas!.getContext("2d")!;
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
 
-    for (const cell of this.table!.querySelectorAll("." + cellInner)) {
+    for (const cell of this.table!.querySelectorAll("." + gameCell)) {
       this.cellsToRedraw.add(cell);
     }
 

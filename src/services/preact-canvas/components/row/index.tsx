@@ -14,6 +14,7 @@
 import { Component, h } from "preact";
 import { Cell } from "../../../../gamelogic/types.js";
 import GridCell, { Action } from "../cell/index.js";
+import { gameRow } from "./style.css";
 
 interface State {}
 
@@ -29,7 +30,7 @@ export default class Row extends Component<Props, State> {
 
   render({ row, onClick }: Props) {
     return (
-      <tr>
+      <tr class={gameRow}>
         {row.map((cell, i) => (
           <GridCell onClick={onClick.bind(this, i)} cell={cell} />
         ))}
