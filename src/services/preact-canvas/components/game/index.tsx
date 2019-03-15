@@ -54,29 +54,31 @@ export default class Game extends Component<Props> {
   private canvasRenderPending = false;
   private buttons = [] as HTMLButtonElement[];
 
-  shouldComponentUpdate(nextProps: Props) {
-    // Can’t do anything without a base
-    if (!this.base) {
-      return true;
-    }
-    // Table has not been created
-    if (this.buttons.length === 0) {
-      this.createTable(nextProps.grid);
-    }
+  componentDidMount() {
+    this.doManualDomHandling(this.props);
+  }
 
-    // Apply patches
-    const width = nextProps.grid[0].length;
-    for (const [x, y, cellProps] of nextProps.gridChanges) {
-      const btn = this.buttons[y * width + x];
-      Game.updateButton(btn, cellProps);
-    }
+  shouldComponentUpdate(nextProps: Props) {
+    this.doManualDomHandling(nextProps);
     return false;
   }
 
   render({ grid }: Props) {
-    // Force a shouldComponentUpdate() call after
-    this.setState({});
     return <div class={containerStyle} />;
+  }
+
+  private doManualDomHandling(props: Props) {
+    // Table has not been created
+    if (this.buttons.length === 0) {
+      this.createTable(props.grid);
+    }
+
+    // Apply patches
+    const width = props.grid[0].length;
+    for (const [x, y, cellProps] of props.gridChanges) {
+      const btn = this.buttons[y * width + x];
+      Game.updateButton(btn, cellProps);
+    }
   }
 
   private createTable(grid: Cell[][]) {
