@@ -14,7 +14,7 @@
 import { Component, h } from "preact";
 import { Cell, Tag } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
-import { cellInner, tableCell } from "./style.css";
+import { button, gameCell } from "./style.css";
 
 interface State {}
 
@@ -40,19 +40,23 @@ export const enum Action {
 const Item = ({ cell, onUnrevealedClick, onTouchingClick }: ItemProps) => {
   if (!cell.revealed) {
     return (
-      <button onClick={onUnrevealedClick} class="cell unrevealed">
-        {cell.tag === Tag.Flag ? "🚩" : " "}
+      <button class={button} onClick={onUnrevealedClick}>
+        {cell.tag === Tag.Flag ? "Flagged" : "Unrevealed"}
       </button>
     );
   }
   if (cell.hasMine) {
-    return <button class="cell mine">💣</button>;
+    return <div>Mine</div>;
   }
   if (cell.touching > 0) {
-    return <button onClick={onTouchingClick}>{cell.touching}</button>;
+    return (
+      <button class={button} onClick={onTouchingClick}>
+        {cell.touching}
+      </button>
+    );
   }
 
-  return <button class="cell empty" />;
+  return null;
 };
 
 export default class GridCell extends Component<Props, State> {
@@ -95,14 +99,12 @@ export default class GridCell extends Component<Props, State> {
       : cell.touching;
 
     return (
-      <td class={tableCell}>
-        <div class={cellInner} data-state={cellState}>
-          <Item
-            cell={cell}
-            onUnrevealedClick={this.onUnrevealedClick}
-            onTouchingClick={this.onTouchingClick}
-          />
-        </div>
+      <td class={gameCell} data-state={cellState}>
+        <Item
+          cell={cell}
+          onUnrevealedClick={this.onUnrevealedClick}
+          onTouchingClick={this.onTouchingClick}
+        />
       </td>
     );
   }

@@ -1,8 +1,7 @@
 .game-table {
   background: #fff;
-  table-layout: fixed;
-  border-spacing: 0;
   position: relative;
+  display: block;
   opacity: 0;
 }
 
