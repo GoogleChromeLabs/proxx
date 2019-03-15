@@ -19,7 +19,8 @@ import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
 import chunkNamePlugin from "./chunk-name-plugin.js";
 import postcss from "rollup-plugin-postcss";
 import cssModuleTypes from "./css-module-types.js";
-import { readFileSync, fstat } from "fs";
+import assetPlugin from "./asset-plugin.js";
+import { readFileSync } from "fs";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -58,6 +59,7 @@ export default {
       // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
       clean: true
     }),
+    assetPlugin(),
     chunkNamePlugin(),
     nodeResolve(),
     loadz0r({

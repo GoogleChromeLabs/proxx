@@ -28,9 +28,13 @@ async function bootstrap() {
       log(`Worker error: ${e.toString()}`);
     });
 
+    const parsedURL = new URL(location.toString());
     const { stateService } = wrap(worker);
+    if (parsedURL.searchParams.has("deterministic")) {
+      await stateService.loadDeterministicField();
+    }
     const uiServiceName = (
-      new URL(location.toString()).searchParams.get("ui") || "preact-canvas"
+      parsedURL.searchParams.get("ui") || "preact-canvas"
     ).toLowerCase();
     switch (uiServiceName) {
       case "preact":

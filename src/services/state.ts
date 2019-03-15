@@ -15,6 +15,9 @@ import MinesweeperGame from "../gamelogic/index.js";
 
 import { Cell, State, Tag } from "../gamelogic/types.js";
 
+// @ts-ignore
+import generatedFieldURL from "asset-url:../gamelogic/generated-field.json";
+
 export type GridChanges = Array<[number, number, Cell]>;
 
 export interface StateUpdate {
@@ -67,6 +70,14 @@ export default class StateService {
   revealSurrounding(x: number, y: number) {
     this.game.attemptSurroundingReveal(x, y);
     this.notify();
+  }
+
+  async loadDeterministicField() {
+    const field = await fetch(generatedFieldURL).then(r => r.json());
+    this.game.grid = field;
+    // tslint:disable-next-line
+    this.game["_state"] = State.Playing;
+    this.game.startTime = Date.now();
   }
 
   private notify() {
