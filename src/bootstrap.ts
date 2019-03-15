@@ -52,6 +52,13 @@ async function bootstrap() {
           new canvasService.default(stateService);
         }
         break;
+      case "canvas-patch":
+        {
+          const canvasService = await import("./services/canvas-patch/index");
+          // tslint:disable-next-line:no-unused-expression
+          new canvasService.default(stateService);
+        }
+        break;
       case "lit":
         {
           const litService = await import("./services/lit-element/index");

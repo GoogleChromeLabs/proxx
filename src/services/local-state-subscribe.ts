@@ -18,6 +18,7 @@ interface State {
   flags: number;
   state: GameState;
   grid: Cell[][];
+  changes: Array<[number, number, Cell]>;
 }
 
 /**
@@ -58,7 +59,12 @@ export default async function localStateSubscribe(
   const initialState = await stateService.getFullState();
   const { flags, state } = initialState;
   let { grid } = initialState;
-  callback({ flags, state, grid });
+  callback({
+    changes: [] as Array<[number, number, Cell]>,
+    flags,
+    grid,
+    state
+  });
 
   stateService.subscribe(
     proxy((update: StateUpdate) => {
@@ -69,7 +75,7 @@ export default async function localStateSubscribe(
         grid = changeCellInGrid(grid, x, y, cell, objsCloned);
       }
 
-      callback({ flags, state, grid });
+      callback({ flags, state, grid, changes: update.gridChanges });
     })
   );
 }
