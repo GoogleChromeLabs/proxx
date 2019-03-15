@@ -139,7 +139,7 @@ export default class Game extends Component<Props> {
     const y = cellRect.top - tableRect.top;
     const { width, height } = cellRect;
     const ctx = this.ctx!;
-    const state = cell.dataset.state!;
+    const state = cell.getAttribute("aria-label")!;
 
     if (state === "unrevealed" || state === "flagged") {
       ctx.fillStyle = "#ccc";
@@ -210,7 +210,7 @@ export default class Game extends Component<Props> {
     const btn = target! as HTMLButtonElement;
     const x = Number(btn.dataset.x);
     const y = Number(btn.dataset.y);
-    const state = btn.dataset.state!.toLowerCase();
+    const state = btn.getAttribute("aria-label")!.toLowerCase();
 
     if (state === "unrevealed" && !shiftKey) {
       await this.props.stateService.reveal(x, y);
@@ -225,7 +225,7 @@ export default class Game extends Component<Props> {
 
   private updateButton(btn: HTMLButtonElement, cell: Cell) {
     btn.setAttribute(
-      "data-state",
+      "aria-label",
       !cell.revealed
         ? cell.tag === Tag.Flag
           ? "flagged"
@@ -234,8 +234,5 @@ export default class Game extends Component<Props> {
         ? "mine"
         : `${cell.touching}`
     );
-
-    // FIXME
-    btn.textContent = btn.dataset.state!;
   }
 }
