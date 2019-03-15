@@ -11,13 +11,11 @@
  * limitations under the License.
  */
 
-import { proxy, Remote } from "comlink/src/comlink.js";
+import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render } from "preact";
-
-import StateService, { StateUpdate } from "../state.js";
-
 import { Cell, State as GameState } from "../../gamelogic/types";
 import localStateSubscribe from "../local-state-subscribe";
+import StateService from "../state.js";
 import Game from "./components/game/index.js";
 
 interface Props {
