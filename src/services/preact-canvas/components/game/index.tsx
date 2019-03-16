@@ -44,6 +44,9 @@ export default class Game extends Component<Props> {
   private cellsToRedraw: Set<HTMLButtonElement> = new Set();
   private canvasRenderPending = false;
   private buttons: HTMLButtonElement[] = [];
+  private cellRect?: ClientRect | DOMRect;
+  private tableRect?: ClientRect | DOMRect;
+  private coordinateMap = new WeakMap<HTMLButtonElement, [number, number]>();
 
   componentDidMount() {
     this.props.gridChangeSubscribe(this.doManualDomHandling);
@@ -93,8 +96,7 @@ export default class Game extends Component<Props> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        button.dataset.x = `${col}`;
-        button.dataset.y = `${row}`;
+        this.coordinateMap.set(button, [col, row]);
         button.onclick = this.click;
         this.updateButton(button, grid[col][row]);
         this.buttons.push(button);
@@ -134,10 +136,13 @@ export default class Game extends Component<Props> {
   }
 
   private drawCell(cell: HTMLButtonElement, tableRect: ClientRect | DOMRect) {
-    const cellRect = cell.getBoundingClientRect();
-    const x = cellRect.left - tableRect.left;
-    const y = cellRect.top - tableRect.top;
-    const { width, height } = cellRect;
+    if (!this.cellRect) {
+      this.cellRect = cell.getBoundingClientRect();
+    }
+    const { width, height } = this.cellRect;
+    const [bx, by] = this.coordinateMap.get(cell);
+    const x = bx * width; // this.cellRect.left - tableRect.left;
+    const y = by * height; // this.cellRect.top - tableRect.top;
     const ctx = this.ctx!;
     const state = cell.getAttribute("aria-label")!;
 
@@ -196,9 +201,11 @@ export default class Game extends Component<Props> {
     }
     this.canvasRenderPending = true;
     requestAnimationFrame(() => {
-      const tableRect = this.table!.getBoundingClientRect();
+      if (!this.tableRect) {
+        this.tableRect = this.table!.getBoundingClientRect();
+      }
       for (const cell of this.cellsToRedraw) {
-        this.drawCell(cell, tableRect);
+        this.drawCell(cell, this.tableRect);
       }
       this.cellsToRedraw.clear();
       this.canvasRenderPending = false;
@@ -208,8 +215,7 @@ export default class Game extends Component<Props> {
   @bind
   private async click({ target, shiftKey }: MouseEvent) {
     const btn = target! as HTMLButtonElement;
-    const x = Number(btn.dataset.x);
-    const y = Number(btn.dataset.y);
+    const [x, y] = this.coordinateMap.get(btn);
     const state = btn.getAttribute("aria-label")!.toLowerCase();
 
     if (state === "unrevealed" && !shiftKey) {
