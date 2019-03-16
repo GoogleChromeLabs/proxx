@@ -60,9 +60,10 @@ export default class Game extends Component<Props> {
       row.map((cell, x) => [x, y, cell] as [number, number, Cell])
     );
     this.doManualDomHandling(flatten(gridChanges));
+    this.canvasInit();
   }
 
-  shouldComponentUpdate(nextProps: Props) {
+  shouldComponentUpdate() {
     return false;
   }
 
@@ -82,7 +83,9 @@ export default class Game extends Component<Props> {
     for (const [x, y, cellProps] of gridChanges) {
       const btn = this.buttons[y * width + x];
       this.updateButton(btn, cellProps);
+      this.cellsToRedraw.add(btn);
     }
+    this.updateCanvas();
   }
 
   private createTable(grid: Cell[][]) {
@@ -112,33 +115,9 @@ export default class Game extends Component<Props> {
     this.canvas.classList.add(canvasStyle);
     this.base!.appendChild(this.canvas);
     this.base!.appendChild(this.table);
-
-    this.observe();
   }
 
-  private async observe() {
-    let myResizeObserver;
-    if ("ResizeObserver" in self) {
-      myResizeObserver = (self as any).ResizeObserver;
-    } else {
-      myResizeObserver = await import("resize-observer-polyfill").then(
-        m => m.default
-      );
-    }
-    // @ts-ignore
-    new myResizeObserver(() => this.canvasInit()).observe(this.canvas!);
-    new MutationObserver(entries => {
-      for (const entry of entries) {
-        const element = entry.target as HTMLElement;
-        if (element.classList.contains(buttonStyle)) {
-          this.cellsToRedraw.add(element as HTMLButtonElement);
-        }
-      }
-      this.updateCanvas();
-    }).observe(this.table!, { attributes: true, subtree: true });
-  }
-
-  private drawCell(cell: HTMLButtonElement, tableRect: ClientRect | DOMRect) {
+  private drawCell(cell: HTMLButtonElement) {
     if (!this.cellRect) {
       this.cellRect = cell.getBoundingClientRect();
     }
@@ -198,20 +177,13 @@ export default class Game extends Component<Props> {
   }
 
   private updateCanvas() {
-    if (this.canvasRenderPending) {
-      return;
+    if (!this.tableRect) {
+      this.tableRect = this.table!.getBoundingClientRect();
     }
-    this.canvasRenderPending = true;
-    requestAnimationFrame(() => {
-      if (!this.tableRect) {
-        this.tableRect = this.table!.getBoundingClientRect();
-      }
-      for (const cell of this.cellsToRedraw) {
-        this.drawCell(cell, this.tableRect);
-      }
-      this.cellsToRedraw.clear();
-      this.canvasRenderPending = false;
-    });
+    for (const cell of this.cellsToRedraw) {
+      this.drawCell(cell);
+    }
+    this.cellsToRedraw.clear();
   }
 
   @bind
