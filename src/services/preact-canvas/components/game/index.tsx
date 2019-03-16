@@ -46,7 +46,10 @@ export default class Game extends Component<Props> {
   private buttons: HTMLButtonElement[] = [];
   private cellRect?: ClientRect | DOMRect;
   private tableRect?: ClientRect | DOMRect;
-  private coordinateMap = new WeakMap<HTMLButtonElement, [number, number]>();
+  private additionalButtonData = new WeakMap<
+    HTMLButtonElement,
+    [number, number, string]
+  >();
 
   componentDidMount() {
     this.props.gridChangeSubscribe(this.doManualDomHandling);
@@ -96,7 +99,7 @@ export default class Game extends Component<Props> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.coordinateMap.set(button, [col, row]);
+        this.additionalButtonData.set(button, [col, row, "unrevealed"]);
         button.onclick = this.click;
         this.updateButton(button, grid[col][row]);
         this.buttons.push(button);
@@ -140,11 +143,10 @@ export default class Game extends Component<Props> {
       this.cellRect = cell.getBoundingClientRect();
     }
     const { width, height } = this.cellRect;
-    const [bx, by] = this.coordinateMap.get(cell);
-    const x = bx * width; // this.cellRect.left - tableRect.left;
-    const y = by * height; // this.cellRect.top - tableRect.top;
+    const [bx, by, state] = this.additionalButtonData.get(cell)!;
+    const x = bx * width;
+    const y = by * height;
     const ctx = this.ctx!;
-    const state = cell.getAttribute("aria-label")!;
 
     if (state === "unrevealed" || state === "flagged") {
       ctx.fillStyle = "#ccc";
@@ -215,8 +217,7 @@ export default class Game extends Component<Props> {
   @bind
   private async click({ target, shiftKey }: MouseEvent) {
     const btn = target! as HTMLButtonElement;
-    const [x, y] = this.coordinateMap.get(btn);
-    const state = btn.getAttribute("aria-label")!.toLowerCase();
+    const [x, y, state] = this.additionalButtonData.get(btn)!;
 
     if (state === "unrevealed" && !shiftKey) {
       await this.props.stateService.reveal(x, y);
@@ -230,15 +231,15 @@ export default class Game extends Component<Props> {
   }
 
   private updateButton(btn: HTMLButtonElement, cell: Cell) {
-    btn.setAttribute(
-      "aria-label",
-      !cell.revealed
-        ? cell.tag === Tag.Flag
-          ? "flagged"
-          : "unrevealed"
-        : cell.hasMine
-        ? "mine"
-        : `${cell.touching}`
-    );
+    const cellState = !cell.revealed
+      ? cell.tag === Tag.Flag
+        ? "flagged"
+        : "unrevealed"
+      : cell.hasMine
+      ? "mine"
+      : `${cell.touching}`;
+
+    btn.setAttribute("aria-label", cellState);
+    this.additionalButtonData.get(btn)![2] = cellState;
   }
 }
