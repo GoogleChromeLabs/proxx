@@ -33,7 +33,7 @@ export default class MinesweeperGame {
   get flags() {
     return this._flags;
   }
-  static EMIT_THRESHOLD = 10;
+  static EMIT_THRESHOLD = 16;
   grid: Cell[][];
   startTime = 0;
   endTime = 0;

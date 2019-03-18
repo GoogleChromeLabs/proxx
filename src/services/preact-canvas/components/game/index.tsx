@@ -175,10 +175,10 @@ export default class Game extends Component<Props> {
       this.cellsToRedraw.add(cell);
     }
 
-    this.startCanvasRenderLoop();
+    this.startCanvasRenderLoop(true);
   }
 
-  private startCanvasRenderLoop() {
+  private startCanvasRenderLoop(hardFlush: boolean = false) {
     if (this.renderLoopRunning) {
       return;
     }
@@ -186,21 +186,24 @@ export default class Game extends Component<Props> {
     if (!this.tableRect) {
       this.tableRect = this.table!.getBoundingClientRect();
     }
-    this.canvasRenderLoop();
+    this.canvasRenderLoop(hardFlush);
   }
 
-  private canvasRenderLoop() {
+  private canvasRenderLoop(hardFlush: boolean) {
     let cnt = 0;
     for (const cell of this.cellsToRedraw) {
       this.drawCell(cell);
       this.cellsToRedraw.delete(cell);
       cnt += 1;
+      if (hardFlush) {
+        continue;
+      }
       if (cnt >= Game.PAINT_THRESHOLD) {
         break;
       }
     }
     if (this.cellsToRedraw.size > 0) {
-      requestAnimationFrame(this.canvasRenderLoop.bind(this));
+      requestAnimationFrame(() => this.canvasRenderLoop(hardFlush));
     } else {
       this.renderLoopRunning = false;
     }
