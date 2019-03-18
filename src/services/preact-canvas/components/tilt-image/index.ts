@@ -13,12 +13,37 @@
 
 import { tiltimage } from "./style.css";
 
+interface AccelerationData {
+  x: number;
+  y: number;
+  z: number;
+}
 export default class TiltImage {
+  smoothing = 10;
   private _el = document.createElement("div");
+  private _accumulated: AccelerationData = { x: 0, y: 0, z: 0 };
 
-  constructor(private path: string, public sensitivity = 0.1) {
+  constructor(private path: string) {
     this._el.classList.add(tiltimage);
-    this._el.style.backgroundImage = "url(http://placekitten.com/g/2000/2000)";
+    this._el.style.backgroundImage = `url(${path})`;
     document.body.appendChild(this._el);
+
+    this.ontilt = this.ontilt.bind(this);
+    window.addEventListener("devicemotion", this.ontilt);
+    this.onrender = this.onrender.bind(this);
+    this.onrender();
+  }
+
+  private ontilt({ acceleration }: DeviceMotionEvent) {
+    this._accumulated.x += acceleration!.x || 0;
+    this._accumulated.y += acceleration!.y || 0;
+  }
+
+  private onrender() {
+    const { x, y, z } = this._accumulated;
+    this._el.style.transform = `translate(${x}px, ${-y}px)`;
+    this._accumulated.x += -this._accumulated.x / this.smoothing;
+    this._accumulated.y += -this._accumulated.y / this.smoothing;
+    requestAnimationFrame(this.onrender);
   }
 }

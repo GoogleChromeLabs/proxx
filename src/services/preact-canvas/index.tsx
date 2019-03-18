@@ -36,7 +36,7 @@ class PreactService extends Component<Props, State> {
     flags: 0,
     state: GameState.Pending
   };
-  private tiltImage = new TiltImage("");
+  private tiltImage = new TiltImage("http://placekitten.com/g/2000/2000");
 
   private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
 

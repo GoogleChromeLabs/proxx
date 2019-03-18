@@ -1,6 +1,6 @@
 .tiltimage {
-  --inset: -5vw;
-  position: absolute;
+  --inset: -10vw;
+  position: fixed;
   top: var(--inset);
   left: var(--inset);
   right: var(--inset);
