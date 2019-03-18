@@ -13,6 +13,7 @@
   display: block;
   width: 20px;
   height: 20px;
+  padding: 0;
   overflow: hidden;
   flex-shrink: 0;
 }
