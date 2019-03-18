@@ -147,12 +147,13 @@ export default class Game extends Component<Props> {
     }
 
     // state is the number touching
-    ctx.fillStyle = "#fff";
-    ctx.strokeStyle = "#eee";
-    ctx.fillRect(x, y, width, height);
-    ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
-    ctx.fillStyle = "#000";
+    ctx.clearRect(x, y, width, height);
     if (Number(state) > 0) {
+      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = "#eee";
+      ctx.fillRect(x, y, width, height);
+      ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+      ctx.fillStyle = "#000";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.font = `${height / 2}px sans-serif`;

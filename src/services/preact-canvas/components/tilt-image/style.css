@@ -1,0 +1,12 @@
+.tiltimage {
+  --inset: -5vw;
+  position: absolute;
+  top: var(--inset);
+  left: var(--inset);
+  right: var(--inset);
+  bottom: var(--inset);
+  will-change: transform;
+  background-size: cover;
+  background-position: 50%;
+  z-index: -1;
+}

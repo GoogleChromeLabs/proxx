@@ -17,6 +17,7 @@ import { Cell, GridChanges, State as GameState } from "../../gamelogic/types";
 import localStateSubscribe from "../local-state-subscribe";
 import StateService from "../state.js";
 import Game from "./components/game/index.js";
+import TiltImage from "./components/tilt-image/index.js";
 
 interface Props {
   stateService: Remote<StateService>;
@@ -35,6 +36,7 @@ class PreactService extends Component<Props, State> {
     flags: 0,
     state: GameState.Pending
   };
+  private tiltImage = new TiltImage("");
 
   private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
 
