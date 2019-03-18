@@ -66,6 +66,10 @@ async function bootstrap() {
       default:
         throw Error("Invalid UI service name");
     }
+
+    if (parsedURL.searchParams.has("square")) {
+      import("./utils/square-spinner.js");
+    }
   } catch (e) {
     log(`Caught throw: ${e.message}\n${e.stack}`);
   }
