@@ -31,3 +31,5 @@ export interface Cell {
   revealed: boolean;
   touching: number;
 }
+
+export type GridChanges = Array<[number, number, Cell]>;

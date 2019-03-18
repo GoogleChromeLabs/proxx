@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { Cell, State, Tag } from "./types.js";
+import { Cell, GridChanges, State, Tag } from "./types.js";
 
 function newCell(id: number): Cell {
   return {
@@ -23,6 +23,8 @@ function newCell(id: number): Cell {
   };
 }
 
+export type ChangeCallback = (changes: GridChanges) => void;
+
 export default class MinesweeperGame {
   get state() {
     return this._state;
@@ -31,6 +33,7 @@ export default class MinesweeperGame {
   get flags() {
     return this._flags;
   }
+  static EMIT_THRESHOLD = 10;
   grid: Cell[][];
   startTime = 0;
   endTime = 0;
@@ -38,6 +41,7 @@ export default class MinesweeperGame {
   private _toReveal = 0;
   private _flags = 0;
   private _gridChanges: Array<[number, number]> = [];
+  private _changeCallback?: ChangeCallback;
 
   constructor(
     private _width: number,
@@ -65,10 +69,8 @@ export default class MinesweeperGame {
       );
   }
 
-  collectGridChanges() {
-    const changes = this._gridChanges;
-    this._gridChanges = [];
-    return changes;
+  subscribe(callback: ChangeCallback) {
+    this._changeCallback = callback;
   }
 
   reveal(x: number, y: number) {
@@ -86,6 +88,7 @@ export default class MinesweeperGame {
     }
 
     this._reveal(x, y);
+    this._emit();
   }
 
   tag(x: number, y: number, tag: Tag) {
@@ -99,13 +102,14 @@ export default class MinesweeperGame {
 
     const oldTag = cell.tag;
     cell.tag = tag;
-    this._gridChanges.push([x, y]);
+    this._pushGridChange(x, y);
 
     if (tag === Tag.Flag) {
       this._flags += 1;
     } else if (oldTag === Tag.Flag) {
       this._flags -= 1;
     }
+    this._emit();
   }
 
   /**
@@ -148,7 +152,28 @@ export default class MinesweeperGame {
       this._reveal(nextX, nextY);
     }
 
+    this._emit();
     return true;
+  }
+
+  private _emit() {
+    if (this._gridChanges.length <= 0) {
+      return;
+    }
+    if (!this._changeCallback) {
+      throw Error("No function present to emit with");
+    }
+    this._changeCallback(
+      this._gridChanges.map(([x, y]) => [x, y, this.grid[y][x]] as any)
+    );
+    this._gridChanges = [];
+  }
+
+  private _pushGridChange(x: number, y: number) {
+    this._gridChanges.push([x, y]);
+    if (this._gridChanges.length >= MinesweeperGame.EMIT_THRESHOLD) {
+      this._emit();
+    }
   }
 
   private _endGame(state: State.Won | State.Lost) {
@@ -226,7 +251,7 @@ export default class MinesweeperGame {
         throw Error("Cell already revealed");
       }
       cell.revealed = true;
-      this._gridChanges.push([x, y]);
+      this._pushGridChange(x, y);
 
       if (cell.hasMine) {
         this._endGame(State.Lost);
@@ -267,5 +292,6 @@ export default class MinesweeperGame {
         revealSet.add(num);
       }
     }
+    this._emit();
   }
 }

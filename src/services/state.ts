@@ -13,12 +13,10 @@
 
 import MinesweeperGame from "../gamelogic/index.js";
 
-import { Cell, State, Tag } from "../gamelogic/types.js";
+import { Cell, GridChanges, State, Tag } from "../gamelogic/types.js";
 
 // @ts-ignore
 import generatedFieldURL from "asset-url:../gamelogic/generated-field.json";
-
-export type GridChanges = Array<[number, number, Cell]>;
 
 export interface StateUpdate {
   state: State;
@@ -38,6 +36,10 @@ export default class StateService {
     Math.floor(BOARD_SIZE * BOARD_SIZE * DENSITY)
   );
 
+  constructor() {
+    this.game.subscribe(this.notify.bind(this));
+  }
+
   getFullState() {
     return {
       flags: this.game.flags,
@@ -54,22 +56,18 @@ export default class StateService {
 
   flag(x: number, y: number) {
     this.game.tag(x, y, Tag.Flag);
-    this.notify();
   }
 
   unflag(x: number, y: number) {
     this.game.tag(x, y, Tag.None);
-    this.notify();
   }
 
   reveal(x: number, y: number) {
     this.game.reveal(x, y);
-    this.notify();
   }
 
   revealSurrounding(x: number, y: number) {
     this.game.attemptSurroundingReveal(x, y);
-    this.notify();
   }
 
   async loadDeterministicField() {
@@ -80,20 +78,15 @@ export default class StateService {
     this.game.startTime = Date.now();
   }
 
-  private notify() {
-    const ev = new CustomEvent<StateUpdate>("state", {
-      detail: this.getUpdate()
-    });
-    this.eventTarget.dispatchEvent(ev);
-  }
-
-  private getUpdate(): StateUpdate {
-    return {
-      flags: this.game.flags,
-      gridChanges: this.game.collectGridChanges().map(change => {
-        return [change[0], change[1], this.game.grid[change[1]][change[0]]];
-      }) as Array<[number, number, Cell]>,
-      state: this.game.state
-    };
+  private notify(gridChanges: GridChanges) {
+    this.eventTarget.dispatchEvent(
+      new CustomEvent<StateUpdate>("state", {
+        detail: {
+          flags: this.game.flags,
+          gridChanges,
+          state: this.game.state
+        }
+      })
+    );
   }
 }

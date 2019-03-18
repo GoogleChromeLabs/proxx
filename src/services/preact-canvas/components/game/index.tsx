@@ -12,8 +12,7 @@
  */
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h } from "preact";
-import { Cell } from "../../../../gamelogic/types";
-import { Tag } from "../../../../gamelogic/types.js";
+import { Cell, Tag } from "../../../../gamelogic/types";
 import { bind } from "../../../../utils/bind.js";
 import StateService, { GridChanges } from "../../../state.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
@@ -38,6 +37,8 @@ interface Props {
 }
 
 export default class Game extends Component<Props> {
+  static PAINT_THRESHOLD = 10;
+
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
@@ -50,6 +51,7 @@ export default class Game extends Component<Props> {
     HTMLButtonElement,
     [number, number, string]
   >();
+  private renderLoopRunning = false;
 
   componentDidMount() {
     this.props.gridChangeSubscribe(this.doManualDomHandling);
@@ -85,7 +87,7 @@ export default class Game extends Component<Props> {
       this.updateButton(btn, cellProps);
       this.cellsToRedraw.add(btn);
     }
-    this.updateCanvas();
+    this.startCanvasRenderLoop();
   }
 
   private createTable(grid: Cell[][]) {
@@ -173,17 +175,35 @@ export default class Game extends Component<Props> {
       this.cellsToRedraw.add(cell);
     }
 
-    this.updateCanvas();
+    this.startCanvasRenderLoop();
   }
 
-  private updateCanvas() {
+  private startCanvasRenderLoop() {
+    if (this.renderLoopRunning) {
+      return;
+    }
+    this.renderLoopRunning = true;
     if (!this.tableRect) {
       this.tableRect = this.table!.getBoundingClientRect();
     }
+    this.canvasRenderLoop();
+  }
+
+  private canvasRenderLoop() {
+    let cnt = 0;
     for (const cell of this.cellsToRedraw) {
       this.drawCell(cell);
+      this.cellsToRedraw.delete(cell);
+      cnt += 1;
+      if (cnt >= Game.PAINT_THRESHOLD) {
+        break;
+      }
     }
-    this.cellsToRedraw.clear();
+    if (this.cellsToRedraw.size > 0) {
+      requestAnimationFrame(this.canvasRenderLoop.bind(this));
+    } else {
+      this.renderLoopRunning = false;
+    }
   }
 
   @bind
