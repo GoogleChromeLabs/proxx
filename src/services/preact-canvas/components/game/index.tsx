@@ -43,7 +43,6 @@ export default class Game extends Component<Props> {
   private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
   private cellsToRedraw: Set<HTMLButtonElement> = new Set();
-  private canvasRenderPending = false;
   private buttons: HTMLButtonElement[] = [];
   private cellRect?: ClientRect | DOMRect;
   private tableRect?: ClientRect | DOMRect;
@@ -87,7 +86,7 @@ export default class Game extends Component<Props> {
       this.updateButton(btn, cellProps);
       this.cellsToRedraw.add(btn);
     }
-    this.startCanvasRenderLoop();
+    this.renderCanvas();
   }
 
   private createTable(grid: Cell[][]) {
@@ -175,38 +174,17 @@ export default class Game extends Component<Props> {
       this.cellsToRedraw.add(cell);
     }
 
-    this.startCanvasRenderLoop(true);
+    this.renderCanvas();
   }
 
-  private startCanvasRenderLoop(hardFlush: boolean = false) {
-    if (this.renderLoopRunning) {
-      return;
-    }
-    this.renderLoopRunning = true;
+  private renderCanvas() {
     if (!this.tableRect) {
       this.tableRect = this.table!.getBoundingClientRect();
     }
-    this.canvasRenderLoop(hardFlush);
-  }
-
-  private canvasRenderLoop(hardFlush: boolean) {
-    let cnt = 0;
     for (const cell of this.cellsToRedraw) {
       this.drawCell(cell);
-      this.cellsToRedraw.delete(cell);
-      cnt += 1;
-      if (hardFlush) {
-        continue;
-      }
-      if (cnt >= Game.PAINT_THRESHOLD) {
-        break;
-      }
     }
-    if (this.cellsToRedraw.size > 0) {
-      requestAnimationFrame(() => this.canvasRenderLoop(hardFlush));
-    } else {
-      this.renderLoopRunning = false;
-    }
+    this.cellsToRedraw.clear();
   }
 
   @bind
