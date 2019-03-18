@@ -13,37 +13,50 @@
 
 import { tiltimage } from "./style.css";
 
-interface AccelerationData {
-  x: number;
-  y: number;
-  z: number;
-}
 export default class TiltImage {
-  smoothing = 10;
   private _el = document.createElement("div");
-  private _accumulated: AccelerationData = { x: 0, y: 0, z: 0 };
+  private _target = [0, 0];
+  private _current = [0, 0];
+  private _started = false;
 
-  constructor(private path: string) {
+  constructor(private path: string, public smoothing = 20) {
     this._el.classList.add(tiltimage);
     this._el.style.backgroundImage = `url(${path})`;
     document.body.appendChild(this._el);
 
     this.ontilt = this.ontilt.bind(this);
+  }
+
+  start() {
+    if (this._started) {
+      return;
+    }
+    this._started = true;
     window.addEventListener("devicemotion", this.ontilt);
     this.onrender = this.onrender.bind(this);
     this.onrender();
   }
 
-  private ontilt({ acceleration }: DeviceMotionEvent) {
-    this._accumulated.x += acceleration!.x || 0;
-    this._accumulated.y += acceleration!.y || 0;
+  stop() {
+    if (!this._started) {
+      return;
+    }
+    this._started = false;
+    window.removeEventListener("devicemotion", this.ontilt);
+  }
+
+  private ontilt({ accelerationIncludingGravity }: DeviceMotionEvent) {
+    this._target[0] = accelerationIncludingGravity!.x!;
+    this._target[1] = accelerationIncludingGravity!.y!;
   }
 
   private onrender() {
-    const { x, y, z } = this._accumulated;
-    this._el.style.transform = `translate(${x}px, ${-y}px)`;
-    this._accumulated.x += -this._accumulated.x / this.smoothing;
-    this._accumulated.y += -this._accumulated.y / this.smoothing;
-    requestAnimationFrame(this.onrender);
+    this._el.style.transform = `translate(${this._current[0]}vmax, ${-this
+      ._current[1]}vmax)`;
+    this._current[0] += (this._target[0] - this._current[0]) / this.smoothing;
+    this._current[1] += (this._target[1] - this._current[1]) / this.smoothing;
+    if (this._started) {
+      requestAnimationFrame(this.onrender);
+    }
   }
 }

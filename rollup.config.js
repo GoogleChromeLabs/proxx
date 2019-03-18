@@ -77,7 +77,7 @@ export default {
         return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
-    entrypointHashmanifest()
-    // terser(),
+    entrypointHashmanifest(),
+    terser()
   ]
 };

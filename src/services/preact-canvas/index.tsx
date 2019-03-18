@@ -19,6 +19,11 @@ import StateService from "../state.js";
 import Game from "./components/game/index.js";
 import TiltImage from "./components/tilt-image/index.js";
 
+// @ts-ignore
+import stars1SVG from "asset-url:../../../images/stars1.svg";
+// @ts-ignore
+import stars2SVG from "asset-url:../../../images/stars2.svg";
+
 interface Props {
   stateService: Remote<StateService>;
 }
@@ -36,12 +41,13 @@ class PreactService extends Component<Props, State> {
     flags: 0,
     state: GameState.Pending
   };
-  private tiltImage = new TiltImage("http://placekitten.com/g/2000/2000");
 
   private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
 
   constructor(props: Props) {
     super(props);
+    new TiltImage(stars1SVG, 20).start();
+    new TiltImage(stars2SVG, 50).start();
 
     localStateSubscribe(props.stateService, (newState, gridChanges) => {
       this.setState(newState);

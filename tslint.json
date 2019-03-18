@@ -14,7 +14,8 @@
     "callable-types": false,
     "no-empty-interface": false,
     "only-arrow-functions": false,
-    "variable-name": [true, "allow-leading-underscore"]
+    "variable-name": [true, "allow-leading-underscore"],
+    "max-classes-per-file": false
   },
   "rulesDirectory": [],
   "linterOptions": {
