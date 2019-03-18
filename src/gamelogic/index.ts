@@ -251,7 +251,6 @@ export default class MinesweeperGame {
         throw Error("Cell already revealed");
       }
       cell.revealed = true;
-      this._pushGridChange(x, y);
 
       if (cell.hasMine) {
         this._endGame(State.Lost);
@@ -282,6 +281,7 @@ export default class MinesweeperGame {
       }
 
       cell.touching = touching;
+      this._pushGridChange(x, y);
 
       // Don't reveal the surrounding squares if this is touching a mine.
       if (touching !== 0) {
