@@ -253,6 +253,7 @@ export default class MinesweeperGame {
       cell.revealed = true;
 
       if (cell.hasMine) {
+        this._pushGridChange(x, y);
         this._endGame(State.Lost);
         return;
       }
@@ -260,6 +261,7 @@ export default class MinesweeperGame {
       this._toReveal -= 1;
 
       if (this._toReveal === 0) {
+        this._pushGridChange(x, y);
         this._endGame(State.Won);
         // Although the game is over, we still continue to calculate the touching value.
       }
