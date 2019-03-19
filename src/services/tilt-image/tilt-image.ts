@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+import isDeviceMotionSupported from "../../feature-detection/device-motion.js";
+import isGenericSensorAccelerometerSupported from "../../feature-detection/generic-sensor-accelerometer.js";
 import { tiltimage } from "./style.css";
 
 export default class TiltImage {
@@ -30,12 +32,14 @@ export default class TiltImage {
     this._ontilt = this._ontilt.bind(this);
   }
 
-  start() {
+  async start() {
     if (this._started) {
       return;
     }
     this._started = true;
-    this._startSensor();
+    if (!(await this._startSensor())) {
+      return;
+    }
     this.onrender = this.onrender.bind(this);
     this.onrender();
   }
@@ -45,34 +49,26 @@ export default class TiltImage {
       return;
     }
     this._started = false;
-    window.removeEventListener("devicemotion", this._ontilt);
-    if (this._accelerometer) {
-      this._accelerometer.stop();
-      this._accelerometer = undefined;
-    }
+    this._stopSensor();
   }
 
   private async _startSensor() {
-    try {
-      await this._attemptInitGenericSensorAPI();
-    } catch (_e) {
-      console.warn(
-        `No Generic Sensor API implemented. Using old DeviceMotion API`
-      );
-      window.addEventListener("devicemotion", this._ontilt);
+    if (await isGenericSensorAccelerometerSupported()) {
+      await this._startGenericSensor();
+      return true;
+    } else if (await isDeviceMotionSupported()) {
+      await this._startDeviceMotion();
+      return true;
     }
+    return false;
   }
-  private async _attemptInitGenericSensorAPI() {
-    if (!("permissions" in navigator)) {
-      throw Error("Not supported");
-    }
-    if (!("Accelerometer" in self)) {
-      throw Error("Not supported");
-    }
-    const result = await navigator.permissions.query({ name: "accelerometer" });
-    if (result.state === "denied") {
-      throw Error("Permission denied");
-    }
+
+  private async _stopSensor() {
+    this._stopGenericSensor();
+    this._stopDeviceMotion();
+  }
+
+  private async _startGenericSensor() {
     this._accelerometer = new Accelerometer({
       frequency: TiltImage.SENSOR_FREQUENCY
     });
@@ -90,6 +86,21 @@ export default class TiltImage {
         }
       } as any);
     };
+  }
+
+  private async _stopGenericSensor() {
+    if (this._accelerometer) {
+      this._accelerometer.stop();
+    }
+    this._accelerometer = undefined;
+  }
+
+  private async _startDeviceMotion() {
+    window.addEventListener("devicemotion", this._ontilt);
+  }
+
+  private async _stopDeviceMotion() {
+    window.removeEventListener("devicemotion", this._ontilt);
   }
 
   private _ontilt({ accelerationIncludingGravity }: DeviceMotionEvent) {
