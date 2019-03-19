@@ -30,6 +30,8 @@
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/polyfill": "^7.2.5",
     "@babel/preset-env": "^7.3.4",
+    "@types/w3c-generic-sensor": "^1.0.2",
+    "@types/w3c-permissions": "^1.0.1",
     "acorn-walk": "^6.1.1",
     "comlink": "^4.0.0-alpha.4",
     "ejs": "^2.6.1",

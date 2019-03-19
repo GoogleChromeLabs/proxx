@@ -9,7 +9,6 @@
     "strict": true,
     "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "moduleResolution": "node",
-    "baseUrl": "./",
-    "types": []
+    "baseUrl": "./"
   }
 }

@@ -14,17 +14,20 @@
 import { tiltimage } from "./style.css";
 
 export default class TiltImage {
+  static SENSOR_FREQUENCY = 10;
+
   private _el = document.createElement("div");
   private _target = [0, 0];
   private _current = [0, 0];
   private _started = false;
+  private _accelerometer?: Accelerometer;
 
   constructor(private path: string, public smoothing = 20) {
     this._el.classList.add(tiltimage);
     this._el.style.backgroundImage = `url(${path})`;
     document.body.appendChild(this._el);
 
-    this.ontilt = this.ontilt.bind(this);
+    this._ontilt = this._ontilt.bind(this);
   }
 
   start() {
@@ -32,7 +35,7 @@ export default class TiltImage {
       return;
     }
     this._started = true;
-    window.addEventListener("devicemotion", this.ontilt);
+    this._startSensor();
     this.onrender = this.onrender.bind(this);
     this.onrender();
   }
@@ -42,17 +45,62 @@ export default class TiltImage {
       return;
     }
     this._started = false;
-    window.removeEventListener("devicemotion", this.ontilt);
+    window.removeEventListener("devicemotion", this._ontilt);
+    if (this._accelerometer) {
+      this._accelerometer.stop();
+      this._accelerometer = undefined;
+    }
   }
 
-  private ontilt({ accelerationIncludingGravity }: DeviceMotionEvent) {
+  private async _startSensor() {
+    try {
+      await this._attemptInitGenericSensorAPI();
+    } catch (_e) {
+      console.warn(
+        `No Generic Sensor API implemented. Using old DeviceMotion API`
+      );
+      window.addEventListener("devicemotion", this._ontilt);
+    }
+  }
+  private async _attemptInitGenericSensorAPI() {
+    if (!("permissions" in navigator)) {
+      throw Error("Not supported");
+    }
+    if (!("Accelerometer" in self)) {
+      throw Error("Not supported");
+    }
+    const result = await navigator.permissions.query({ name: "accelerometer" });
+    if (result.state === "denied") {
+      throw Error("Permission denied");
+    }
+    this._accelerometer = new Accelerometer({
+      frequency: TiltImage.SENSOR_FREQUENCY
+    });
+    this._accelerometer.start();
+    await new Promise((resolve, reject) => {
+      this._accelerometer!.onactivate = resolve;
+      this._accelerometer!.onerror = reject;
+    });
+    this._accelerometer.onreading = () => {
+      this._ontilt({
+        accelerationIncludingGravity: {
+          x: this._accelerometer!.x,
+          y: this._accelerometer!.y,
+          z: this._accelerometer!.z
+        }
+      } as any);
+    };
+  }
+
+  private _ontilt({ accelerationIncludingGravity }: DeviceMotionEvent) {
     this._target[0] = accelerationIncludingGravity!.x!;
     this._target[1] = accelerationIncludingGravity!.y!;
   }
 
   private onrender() {
-    this._el.style.transform = `translate(${this._current[0]}vmax, ${-this
-      ._current[1]}vmax)`;
+    this._el.style.transform = `translate(${-this._current[0]}vmax, ${
+      this._current[1]
+    }vmax)`;
     this._current[0] += (this._target[0] - this._current[0]) / this.smoothing;
     this._current[1] += (this._target[1] - this._current[1]) / this.smoothing;
     if (this._started) {

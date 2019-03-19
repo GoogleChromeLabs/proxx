@@ -52,6 +52,7 @@ export default {
       tsconfigOverride: {
         compilerOptions: {
           sourceMap: true
+          // target: "esnext"
         }
       },
       // We need to set this so we can use async functions in our
