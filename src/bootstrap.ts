@@ -11,68 +11,69 @@
  * limitations under the License.
  */
 
-import { wrap } from "comlink/src/comlink.js";
+import { Remote, wrap } from "comlink/src/comlink.js";
 
 import workerURL from "chunk-name:./worker.js";
+import StateService from "./services/state";
 
 const logEl = document.querySelector("#log")!;
 function log(msg: string) {
   logEl.innerHTML += `${msg}\n`;
 }
 
+const parsedURL = new URL(location.toString());
+
 async function bootstrap() {
-  log("Booting!");
-  try {
-    const worker = new Worker(workerURL);
-    worker.addEventListener("error", e => {
-      log(`Worker error: ${e.toString()}`);
-    });
+  const worker = new Worker(workerURL);
 
-    const parsedURL = new URL(location.toString());
-    const { stateService } = wrap(worker);
-    if (parsedURL.searchParams.has("deterministic")) {
-      await stateService.loadDeterministicField();
-    }
-    const uiServiceName = (
-      parsedURL.searchParams.get("ui") || "preact-canvas"
-    ).toLowerCase();
-    switch (uiServiceName) {
-      case "preact":
-        {
-          const preactService = await import("./services/preact/index");
-          preactService.game(stateService);
-        }
-        break;
-      case "preact-canvas":
-        {
-          const preactService = await import("./services/preact-canvas/index");
-          preactService.game(stateService);
-        }
-        break;
-      case "canvas":
-        {
-          const canvasService = await import("./services/canvas/index");
-          // tslint:disable-next-line:no-unused-expression
-          new canvasService.default(stateService);
-        }
-        break;
-      case "lit":
-        {
-          const litService = await import("./services/lit-element/index");
-          // tslint:disable-next-line:no-unused-expression
-          new litService.default(stateService);
-        }
-        break;
-      default:
-        throw Error("Invalid UI service name");
-    }
+  const { stateService } = wrap(worker);
 
-    if (parsedURL.searchParams.has("square")) {
-      import("./utils/square-spinner.js");
-    }
-  } catch (e) {
-    log(`Caught throw: ${e.message}\n${e.stack}`);
+  if (parsedURL.searchParams.has("deterministic")) {
+    await stateService.loadDeterministicField();
+  }
+  spawnUIService(stateService);
+
+  if (parsedURL.searchParams.has("square")) {
+    import("./utils/square-spinner.js");
+  }
+
+  import("./services/tilt-image/index.js");
+}
+
+async function spawnUIService(stateService: Remote<StateService>) {
+  const uiServiceName = (
+    parsedURL.searchParams.get("ui") || "preact-canvas"
+  ).toLowerCase();
+  switch (uiServiceName) {
+    case "preact":
+      {
+        const preactService = await import("./services/preact/index");
+        preactService.game(stateService);
+      }
+      break;
+    case "preact-canvas":
+      {
+        const preactService = await import("./services/preact-canvas/index");
+        preactService.game(stateService);
+      }
+      break;
+    case "canvas":
+      {
+        const canvasService = await import("./services/canvas/index");
+        // tslint:disable-next-line:no-unused-expression
+        new canvasService.default(stateService);
+      }
+      break;
+    case "lit":
+      {
+        const litService = await import("./services/lit-element/index");
+        // tslint:disable-next-line:no-unused-expression
+        new litService.default(stateService);
+      }
+      break;
+    default:
+      throw Error("Invalid UI service name");
   }
 }
 
-bootstrap();
+bootstrap().catch(e => log(e.toString()));

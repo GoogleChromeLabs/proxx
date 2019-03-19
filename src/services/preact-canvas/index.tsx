@@ -17,12 +17,6 @@ import { Cell, GridChanges, State as GameState } from "../../gamelogic/types";
 import localStateSubscribe from "../local-state-subscribe";
 import StateService from "../state.js";
 import Game from "./components/game/index.js";
-import TiltImage from "./components/tilt-image/index.js";
-
-// @ts-ignore
-import stars1SVG from "asset-url:../../../images/stars1.svg";
-// @ts-ignore
-import stars2SVG from "asset-url:../../../images/stars2.svg";
 
 interface Props {
   stateService: Remote<StateService>;
@@ -46,8 +40,6 @@ class PreactService extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    new TiltImage(stars1SVG, 20).start();
-    new TiltImage(stars2SVG, 50).start();
 
     localStateSubscribe(props.stateService, (newState, gridChanges) => {
       this.setState(newState);
