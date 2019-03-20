@@ -38,21 +38,6 @@ interface Props {
 }
 
 export default class Game extends Component<Props> {
-  static updateButton(btn: HTMLButtonElement, cell: Cell) {
-    btn.setAttribute(
-      "data-state",
-      !cell.revealed
-        ? cell.tag === Tag.Flag
-          ? "flagged"
-          : "unrevealed"
-        : cell.hasMine
-        ? "mine"
-        : `${cell.touching}`
-    );
-
-    // FIXME
-    btn.textContent = btn.dataset.state!;
-  }
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
@@ -90,7 +75,7 @@ export default class Game extends Component<Props> {
     const width = this.props.grid[0].length;
     for (const [x, y, cellProps] of gridChanges) {
       const btn = this.buttons[y * width + x];
-      Game.updateButton(btn, cellProps);
+      this.updateButton(btn, cellProps);
     }
   }
 
@@ -111,7 +96,7 @@ export default class Game extends Component<Props> {
         button.dataset.x = `${col}`;
         button.dataset.y = `${row}`;
         button.onclick = this.click;
-        Game.updateButton(button, grid[col][row]);
+        this.updateButton(button, grid[col][row]);
         this.buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
@@ -236,5 +221,21 @@ export default class Game extends Component<Props> {
     } else if (Number(state) !== Number.NaN && shiftKey) {
       await this.props.stateService.revealSurrounding(x, y);
     }
+  }
+
+  private updateButton(btn: HTMLButtonElement, cell: Cell) {
+    btn.setAttribute(
+      "data-state",
+      !cell.revealed
+        ? cell.tag === Tag.Flag
+          ? "flagged"
+          : "unrevealed"
+        : cell.hasMine
+        ? "mine"
+        : `${cell.touching}`
+    );
+
+    // FIXME
+    btn.textContent = btn.dataset.state!;
   }
 }
