@@ -26,8 +26,9 @@ interface State {
   grid?: Cell[][];
   flags: number;
   state: GameState;
-  gridChanges?: GridChanges;
 }
+
+export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
 
 class PreactService extends Component<Props, State> {
   state: State = {
@@ -35,20 +36,29 @@ class PreactService extends Component<Props, State> {
     state: GameState.Pending
   };
 
+  private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
+
   constructor(props: Props) {
     super(props);
 
     localStateSubscribe(props.stateService, (newState, gridChanges) => {
-      this.setState({ ...newState, gridChanges });
+      this.setState(newState);
+      this.gridChangeSubscribers.forEach(f => f(gridChanges));
     });
   }
 
-  render({ stateService }: Props, { grid, gridChanges }: State) {
-    if (!grid || !gridChanges) {
+  render({ stateService }: Props, { grid }: State) {
+    if (!grid) {
       return <div />;
     }
     return (
-      <Game grid={grid} gridChanges={gridChanges} stateService={stateService} />
+      <Game
+        grid={grid}
+        gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
+          this.gridChangeSubscribers.add(f)
+        }
+        stateService={stateService}
+      />
     );
   }
 }

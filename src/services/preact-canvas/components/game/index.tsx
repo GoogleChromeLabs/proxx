@@ -16,6 +16,12 @@ import { Cell } from "../../../../gamelogic/types";
 import { Tag } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import StateService, { GridChanges } from "../../../state.js";
+import { GridChangeSubscriptionCallback } from "../../index.js";
+
+function flatten<T>(v: T[][]): T[] {
+  return Array.prototype.concat.apply([], v);
+}
+
 import {
   button as buttonStyle,
   canvas as canvasStyle,
@@ -28,7 +34,7 @@ import {
 interface Props {
   stateService: Remote<StateService>;
   grid: Cell[][];
-  gridChanges: GridChanges;
+  gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
 }
 
 export default class Game extends Component<Props> {
@@ -52,36 +58,46 @@ export default class Game extends Component<Props> {
   private table?: HTMLTableElement;
   private cellsToRedraw: Set<HTMLButtonElement> = new Set();
   private canvasRenderPending = false;
-  private buttons = [] as HTMLButtonElement[];
+  private buttons: HTMLButtonElement[] = [];
 
   componentDidMount() {
-    this.doManualDomHandling(this.props);
+    this.props.gridChangeSubscribe(this.doManualDomHandling);
+    this.createTable(this.props.grid);
+    this.canvasInit();
+    // Force initial render
+    const gridChanges = this.props.grid.map((row, y) =>
+      row.map((cell, x) => [x, y, cell] as [number, number, Cell])
+    );
+    this.doManualDomHandling(flatten(gridChanges));
   }
 
   shouldComponentUpdate(nextProps: Props) {
-    this.doManualDomHandling(nextProps);
     return false;
   }
 
-  render({ grid }: Props) {
+  render() {
     return <div class={containerStyle} />;
   }
 
-  private doManualDomHandling(props: Props) {
+  @bind
+  private doManualDomHandling(gridChanges: GridChanges) {
     // Table has not been created
     if (this.buttons.length === 0) {
-      this.createTable(props.grid);
+      this.createTable(this.props.grid);
     }
 
     // Apply patches
-    const width = props.grid[0].length;
-    for (const [x, y, cellProps] of props.gridChanges) {
+    const width = this.props.grid[0].length;
+    for (const [x, y, cellProps] of gridChanges) {
       const btn = this.buttons[y * width + x];
       Game.updateButton(btn, cellProps);
     }
   }
 
   private createTable(grid: Cell[][]) {
+    while (this.base!.firstChild) {
+      this.base!.firstChild.remove();
+    }
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
     for (let row = 0; row < grid.length; row++) {
