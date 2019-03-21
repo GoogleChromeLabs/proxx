@@ -12,7 +12,7 @@
  */
 import { proxy, Remote } from "comlink/src/comlink.js";
 import { Cell, State as GameState } from "../gamelogic/types";
-import StateService, { StateUpdate } from "./state";
+import StateService, { GridChanges, StateUpdate } from "./state";
 
 interface State {
   flags: number;
@@ -20,56 +20,24 @@ interface State {
   grid: Cell[][];
 }
 
-/**
- * This 'avoids' mutating the grid, so it's easier to identify changes in Preact etc.
- *
- * @param x
- * @param y
- * @param newCell
- * @param objsCloned Objects that don't need cloning again.
- */
-function changeCellInGrid(
-  grid: Cell[][],
-  x: number,
-  y: number,
-  newCell: Cell,
-  objsCloned: WeakSet<any>
-): Cell[][] {
-  // Grid
-  if (!objsCloned.has(grid)) {
-    grid = grid.slice();
-    objsCloned.add(grid);
-  }
-  // Row
-  if (!objsCloned.has(grid[y])) {
-    grid[y] = grid[y].slice();
-    objsCloned.add(grid[y]);
-  }
-  // Cell
-  grid[y][x] = newCell;
-
-  return grid;
-}
-
 export default async function localStateSubscribe(
   stateService: Remote<StateService>,
-  callback: (newState: State) => void
+  callback: (newState: State, gridChanges: GridChanges) => void
 ) {
   const initialState = await stateService.getFullState();
   const { flags, state } = initialState;
-  let { grid } = initialState;
-  callback({ flags, state, grid });
+  const { grid } = initialState;
+  callback({ flags, state, grid }, []);
 
   stateService.subscribe(
     proxy((update: StateUpdate) => {
-      const objsCloned = new WeakSet();
       const { flags, state } = update;
 
       for (const [x, y, cell] of update.gridChanges) {
-        grid = changeCellInGrid(grid, x, y, cell, objsCloned);
+        grid[x][y] = cell;
       }
 
-      callback({ flags, state, grid });
+      callback({ flags, state, grid }, update.gridChanges);
     })
   );
 }
