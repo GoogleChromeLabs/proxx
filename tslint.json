@@ -18,10 +18,6 @@
   },
   "rulesDirectory": [],
   "linterOptions": {
-    "exclude": [
-      "./**/node_modules/**",
-      "entrypoint.hashmanifest.*",
-      "./**/style.css.d.ts"
-    ]
+    "exclude": ["./**/node_modules/**"]
   }
 }
