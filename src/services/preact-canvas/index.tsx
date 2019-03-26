@@ -13,12 +13,8 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render } from "preact";
-import {
-  Cell,
-  GridChanges,
-  State as GameState
-} from "../../gamelogic/types.js";
-import StateService from "../state/index.js";
+import { Cell, GridChanges } from "../../gamelogic/types.js";
+import StateService, { State as GameState, StateName } from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import End from "./components/end/index.js";
 import Game from "./components/game/index.js";
@@ -28,18 +24,13 @@ interface Props {
 }
 
 interface State {
-  grid?: Cell[][];
-  flags: number;
   state: GameState;
 }
 
 export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
 
 class PreactService extends Component<Props, State> {
-  state: State = {
-    flags: 0,
-    state: GameState.Pending
-  };
+  state: State = {} as any;
 
   private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
 
@@ -47,32 +38,38 @@ class PreactService extends Component<Props, State> {
     super(props);
 
     localStateSubscribe(props.stateService, (newState, gridChanges) => {
-      this.setState(newState);
-      this.gridChangeSubscribers.forEach(f => f(gridChanges));
+      if (gridChanges) {
+        this.gridChangeSubscribers.forEach(f => f(gridChanges));
+      }
+      this.setState({ state: newState });
     });
   }
 
-  render({ stateService }: Props, { state, grid }: State) {
-    switch (state) {
-      case GameState.Pending:
-        return <h1>NOT IMPLEMENTED</h1>;
-      case GameState.Playing: {
-        if (!grid) {
-          return <div />;
-        }
+  render({ stateService }: Props, { state }: State) {
+    if (!state || !("name" in state)) {
+      return <div />;
+    }
+    switch (state.name) {
+      case StateName.START:
         return (
+          <button onClick={() => stateService.initGame(40, 40, 160)}>
+            Go3
+          </button>
+        );
+      case StateName.WAITING_TO_PLAY:
+      case StateName.PLAYING:
+        return (
+          // TODO: Implement an unsubscribe for when the unmounting happens
           <Game
-            grid={grid}
+            grid={state.grid}
             gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
               this.gridChangeSubscribers.add(f)
             }
             stateService={stateService}
           />
         );
-      }
-      case GameState.Won:
-      case GameState.Lost:
-        return <End state={state} time={0} />;
+      case StateName.END:
+        return <End type={state.endType} />;
     }
   }
 }

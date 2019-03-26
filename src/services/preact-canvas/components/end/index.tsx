@@ -16,16 +16,14 @@ import { State } from "../../../../gamelogic/types.js";
 import { endscreen } from "./style.css";
 
 interface Props {
-  state: State.Lost | State.Won;
-  time: number;
+  type: State.Lost | State.Won;
 }
 
 export default class End extends Component<Props> {
-  render({ state, time }: Props) {
+  render({ type }: Props) {
     return (
       <div class={endscreen}>
-        <h1>You {state === State.Won ? "Won" : "Lost"}</h1>
-        <p>You took ${time} seconds</p>
+        <h1>You {type === State.Won ? "Won" : "Lost"}</h1>
       </div>
     );
   }

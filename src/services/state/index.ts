@@ -13,82 +13,132 @@
 
 import MinesweeperGame from "../../gamelogic/index.js";
 
-import { Cell, GridChanges, State, Tag } from "../../gamelogic/types.js";
+import {
+  Cell,
+  GridChanges,
+  State as LogicGameState,
+  Tag
+} from "../../gamelogic/types.js";
+import { bind } from "../../utils/bind.js";
 
 // @ts-ignore
 import generatedFieldURL from "asset-url:../../gamelogic/generated-field.json";
 
-export interface StateUpdate {
-  state: State;
-  flags: number;
+export const enum UpdateType {
+  FULL_STATE,
+  GRID_PATCH
+}
+
+export interface FullStateUpdate {
+  type: UpdateType.FULL_STATE;
+  newState: State;
+}
+
+// TODO We probably want another InitBoardUpdate so we don’t
+// have to send the unrevealed array.
+
+export interface GridPatchUpdate {
+  type: UpdateType.GRID_PATCH;
   gridChanges: GridChanges;
 }
 
-const BOARD_SIZE = 40;
-const DENSITY = 0.1;
+export type StateUpdate = FullStateUpdate | GridPatchUpdate;
+
+export const enum StateName {
+  START,
+  WAITING_TO_PLAY,
+  PLAYING,
+  END
+}
+
+export interface StartState {
+  name: StateName.START;
+}
+
+export interface WaitingToPlayState {
+  name: StateName.WAITING_TO_PLAY;
+  grid: Cell[][];
+}
+
+export interface PlayingState {
+  name: StateName.PLAYING;
+  grid: Cell[][];
+}
+
+export interface EndState {
+  name: StateName.END;
+  endType: LogicGameState.Won | LogicGameState.Lost;
+}
+
+export type State = StartState | WaitingToPlayState | PlayingState | EndState;
 
 export default class StateService {
-  private eventTarget: EventTarget = new MessageChannel().port1;
+  private _state: State = {
+    name: StateName.START
+  };
 
-  private game: MinesweeperGame = new MinesweeperGame(
-    20,
-    5,
-    5
-    // BOARD_SIZE,
-    // BOARD_SIZE,
-    // Math.floor(BOARD_SIZE * BOARD_SIZE * DENSITY)
-  );
+  private _eventTarget: EventTarget = new MessageChannel().port1;
+  private _game?: MinesweeperGame;
 
-  constructor() {
-    this.game.subscribe(this.notify.bind(this));
+  getFullState(): State {
+    return this._state;
   }
 
-  getFullState() {
-    return {
-      flags: this.game.flags,
-      grid: this.game.grid,
-      state: this.game.state
+  initGame(width: number, height: number, numBombs: number) {
+    this._game = new MinesweeperGame(width, height, numBombs);
+    this._state = {
+      grid: this._game!.grid,
+      name: StateName.WAITING_TO_PLAY
     };
+    // TODO: do we need an unsubscribe?
+    this._game.subscribe(gridChanges => {
+      this.notify({
+        gridChanges,
+        type: UpdateType.GRID_PATCH
+      });
+    });
+    this.notify({
+      newState: this._state,
+      type: UpdateType.FULL_STATE
+    });
   }
 
   subscribe(callback: (state: StateUpdate) => void) {
-    this.eventTarget.addEventListener("state", (event: Event) => {
+    this._eventTarget.addEventListener("state-update", (event: Event) => {
       callback((event as CustomEvent<StateUpdate>).detail);
     });
   }
 
   flag(x: number, y: number) {
-    this.game.tag(x, y, Tag.Flag);
+    this._game!.tag(x, y, Tag.Flag);
   }
 
   unflag(x: number, y: number) {
-    this.game.tag(x, y, Tag.None);
+    this._game!.tag(x, y, Tag.None);
   }
 
   reveal(x: number, y: number) {
-    this.game.reveal(x, y);
+    this._game!.reveal(x, y);
   }
 
   revealSurrounding(x: number, y: number) {
-    this.game.attemptSurroundingReveal(x, y);
+    this._game!.attemptSurroundingReveal(x, y);
   }
 
   async loadDeterministicField() {
-    const field = await fetch(generatedFieldURL).then(r => r.json());
-    this.game.grid = field;
-    // tslint:disable-next-line
-    this.game["_state"] = State.Playing;
-    this.game.startTime = Date.now();
+    throw Error("Currently not implemented");
+    // const field = await fetch(generatedFieldURL).then(r => r.json());
+    // this._game!.grid = field;
+    // // tslint:disable-next-line
+    // this._game!["_state"] = State.Playing;
+    // this._game!.startTime = Date.now();
   }
 
-  private notify(gridChanges: GridChanges) {
-    this.eventTarget.dispatchEvent(
-      new CustomEvent<StateUpdate>("state", {
-        detail: {
-          flags: this.game.flags,
-          gridChanges,
-          state: this.game.state
-        }
+  @bind
+  private notify(stateUpdate: StateUpdate) {
+    this._eventTarget.dispatchEvent(
+      new CustomEvent<StateUpdate>("state-update", {
+        detail: stateUpdate
       })
     );
   }
