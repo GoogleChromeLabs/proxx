@@ -12,12 +12,11 @@
  */
 
 import { Remote } from "comlink/src/comlink.js";
-import { Component, h, render } from "preact";
+import { Component, ComponentFactory, h, render } from "preact";
 import { Cell, GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
-import End from "./components/end/index.js";
-import Game from "./components/game/index.js";
+import ResolveComponent from "./components/resolve/index.js";
 
 interface Props {
   stateService: Remote<StateService>;
@@ -60,18 +59,34 @@ class PreactService extends Component<Props, State> {
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
         return (
-          // TODO: Implement an unsubscribe for when the unmounting happens
-          <Game
-            grid={state.grid}
-            gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
-              this.gridChangeSubscribers.add(f)
-            }
-            stateService={stateService}
+          <ResolveComponent<
+            ComponentFactory<import("./components/game/index.js").Props>
+          >
+            promise={import("./components/game/index.js").then(m => m.default)}
+            // tslint:disable-next-line:variable-name Need uppercase for JSX
+            onResolve={Game => (
+              // TODO: Implement an unsubscribe for when the unmounting happens
+              <Game
+                grid={state.grid}
+                gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
+                  this.gridChangeSubscribers.add(f)
+                }
+                stateService={stateService}
+              />
+            )}
           />
         );
       case StateName.END:
         return (
-          <End type={state.endType} restart={() => stateService.reset()} />
+          <ResolveComponent<
+            ComponentFactory<import("./components/end/index.js").Props>
+          >
+            promise={import("./components/end/index.js").then(m => m.default)}
+            // tslint:disable-next-line:variable-name Need uppercase for JSX
+            onResolve={End => (
+              <End type={state.endType} restart={() => stateService.reset()} />
+            )}
+          />
         );
     }
   }
