@@ -14,7 +14,9 @@ import DtsCreator from "typed-css-modules";
 import find from "find";
 
 function newCreator() {
-  return new DtsCreator({ camelCase: true });
+  return new DtsCreator({
+    camelCase: true
+  });
 }
 
 async function writeTypes(file, creator = newCreator()) {
@@ -40,6 +42,9 @@ export default function cssModuleTypes(root) {
       await Promise.all(promises);
     },
     async watchChange(id) {
+      if (!id.endsWith(".css")) {
+        return null;
+      };
       await writeTypes(id);
     }
   };
