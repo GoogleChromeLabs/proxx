@@ -16,6 +16,7 @@ import { Component, ComponentFactory, h, render } from "preact";
 import { Cell, GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
+import Intro from "./components/intro/index.js";
 import ResolveComponent from "./components/resolve/index.js";
 
 interface Props {
@@ -50,12 +51,7 @@ class PreactService extends Component<Props, State> {
     }
     switch (state.name) {
       case StateName.START:
-        return (
-          <button onClick={() => stateService.initGame(40, 40, 160)}>
-            Let’s play! (There should be a config dialog here, but alas, it is
-            not.)
-          </button>
-        );
+        return <Intro stateService={stateService} />;
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
         return (
