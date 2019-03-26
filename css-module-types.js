@@ -42,9 +42,7 @@ export default function cssModuleTypes(root) {
       await Promise.all(promises);
     },
     async watchChange(id) {
-      if (!id.endsWith(".css")) {
-        return null;
-      }
+      if (!id.endsWith(".css")) return null;
       await writeTypes(id);
     }
   };
