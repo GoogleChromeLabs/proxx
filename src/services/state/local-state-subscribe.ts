@@ -11,37 +11,40 @@
  * limitations under the License.
  */
 import { proxy, Remote } from "comlink/src/comlink.js";
-import StateService, { StateUpdate } from ".";
+import StateService, { State, StateName, StateUpdate, UpdateType } from ".";
 import {
   Cell,
   GridChanges,
   State as GameState
 } from "../../gamelogic/types.js";
 
-interface State {
-  flags: number;
-  state: GameState;
-  grid: Cell[][];
-}
-
 export default async function localStateSubscribe(
   stateService: Remote<StateService>,
   callback: (newState: State, gridChanges: GridChanges) => void
 ) {
-  const initialState = await stateService.getFullState();
-  const { flags, state } = initialState;
-  const { grid } = initialState;
-  callback({ flags, state, grid }, []);
+  let state = await stateService.getFullState();
+  callback(state, []);
 
   stateService.subscribe(
     proxy((update: StateUpdate) => {
-      const { flags, state } = update;
-
-      for (const [x, y, cell] of update.gridChanges) {
-        grid[x][y] = cell;
+      switch (update.type) {
+        case UpdateType.FULL_STATE:
+          state = update.newState;
+          callback(state, []);
+          break;
+        case UpdateType.GRID_PATCH:
+          if (
+            state.name !== StateName.WAITING_TO_PLAY &&
+            state.name !== StateName.PLAYING
+          ) {
+            throw Error("Received patch in invalid state");
+          }
+          for (const [x, y, cell] of update.gridChanges) {
+            state.grid[x][y] = cell;
+          }
+          callback(state, update.gridChanges);
+          break;
       }
-
-      callback({ flags, state, grid }, update.gridChanges);
     })
   );
 }
