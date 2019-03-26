@@ -17,13 +17,15 @@ import { endscreen } from "./style.css";
 
 interface Props {
   type: State.Lost | State.Won;
+  restart: () => void;
 }
 
 export default class End extends Component<Props> {
-  render({ type }: Props) {
+  render({ type, restart }: Props) {
     return (
       <div class={endscreen}>
         <h1>You {type === State.Won ? "Won" : "Lost"}</h1>
+        <button onClick={restart}>New game</button>
       </div>
     );
   }
