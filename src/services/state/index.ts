@@ -11,12 +11,12 @@
  * limitations under the License.
  */
 
-import MinesweeperGame from "../gamelogic/index.js";
+import MinesweeperGame from "../../gamelogic/index.js";
 
-import { Cell, GridChanges, State, Tag } from "../gamelogic/types.js";
+import { Cell, GridChanges, State, Tag } from "../../gamelogic/types.js";
 
 // @ts-ignore
-import generatedFieldURL from "asset-url:../gamelogic/generated-field.json";
+import generatedFieldURL from "asset-url:../../gamelogic/generated-field.json";
 
 export interface StateUpdate {
   state: State;

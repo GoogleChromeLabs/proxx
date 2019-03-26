@@ -11,8 +11,12 @@
  * limitations under the License.
  */
 import { proxy, Remote } from "comlink/src/comlink.js";
-import { Cell, GridChanges, State as GameState } from "../gamelogic/types";
-import StateService, { StateUpdate } from "./state";
+import StateService, { StateUpdate } from ".";
+import {
+  Cell,
+  GridChanges,
+  State as GameState
+} from "../../gamelogic/types.js";
 
 interface State {
   flags: number;
