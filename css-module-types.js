@@ -44,7 +44,7 @@ export default function cssModuleTypes(root) {
     async watchChange(id) {
       if (!id.endsWith(".css")) {
         return null;
-      };
+      }
       await writeTypes(id);
     }
   };
