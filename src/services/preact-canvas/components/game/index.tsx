@@ -30,7 +30,7 @@ import {
   gameTable
 } from "./style.css";
 
-interface Props {
+export interface Props {
   stateService: Remote<StateService>;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;

@@ -15,7 +15,7 @@ import { State } from "../../../../gamelogic/types.js";
 
 import { endscreen } from "./style.css";
 
-interface Props {
+export interface Props {
   type: State.Lost | State.Won;
   restart: () => void;
 }
