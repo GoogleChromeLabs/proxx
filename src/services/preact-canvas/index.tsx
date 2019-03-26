@@ -20,6 +20,7 @@ import {
 } from "../../gamelogic/types.js";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
+import End from "./components/end/index.js";
 import Game from "./components/game/index.js";
 
 interface Props {
@@ -51,19 +52,28 @@ class PreactService extends Component<Props, State> {
     });
   }
 
-  render({ stateService }: Props, { grid }: State) {
-    if (!grid) {
-      return <div />;
-    }
-    return (
-      <Game
-        grid={grid}
-        gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
-          this.gridChangeSubscribers.add(f)
+  render({ stateService }: Props, { state, grid }: State) {
+    switch (state) {
+      case GameState.Pending:
+        return <h1>NOT IMPLEMENTED</h1>;
+      case GameState.Playing: {
+        if (!grid) {
+          return <div />;
         }
-        stateService={stateService}
-      />
-    );
+        return (
+          <Game
+            grid={grid}
+            gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
+              this.gridChangeSubscribers.add(f)
+            }
+            stateService={stateService}
+          />
+        );
+      }
+      case GameState.Won:
+      case GameState.Lost:
+        return <End state={state} time={0} />;
+    }
   }
 }
 
