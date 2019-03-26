@@ -11,8 +11,11 @@
  * limitations under the License.
  */
 
-import isDeviceMotionSupported from "../../feature-detection/device-motion.js";
-import isGenericSensorAccelerometerSupported from "../../feature-detection/generic-sensor-accelerometer.js";
+import {
+  subscribe,
+  UnsubscribeFunction
+} from "../../enhancements/accelerometer.js";
+import { bind } from "../../utils/bind.js";
 import { tiltimage } from "./style.css";
 
 export default class TiltImage {
@@ -22,92 +25,35 @@ export default class TiltImage {
   private _target = [0, 0];
   private _current = [0, 0];
   private _started = false;
-  private _accelerometer?: Accelerometer;
+  private _unsubscribe?: UnsubscribeFunction;
 
   constructor(private path: string, public smoothing = 20) {
     this._el.classList.add(tiltimage);
     this._el.style.backgroundImage = `url(${path})`;
     document.body.appendChild(this._el);
-
-    this._ontilt = this._ontilt.bind(this);
   }
 
   async start() {
-    if (this._started) {
-      return;
-    }
+    this._unsubscribe = await subscribe(this._ontilt);
     this._started = true;
-    if (!(await this._startSensor())) {
-      return;
-    }
-    this.onrender = this.onrender.bind(this);
     this.onrender();
   }
 
   stop() {
-    if (!this._started) {
-      return;
+    if (this._unsubscribe) {
+      this._unsubscribe();
+      this._unsubscribe = undefined;
     }
     this._started = false;
-    this._stopSensor();
   }
 
-  private async _startSensor() {
-    if (await isGenericSensorAccelerometerSupported()) {
-      await this._startGenericSensor();
-      return true;
-    } else if (await isDeviceMotionSupported()) {
-      await this._startDeviceMotion();
-      return true;
-    }
-    return false;
-  }
-
-  private async _stopSensor() {
-    this._stopGenericSensor();
-    this._stopDeviceMotion();
-  }
-
-  private async _startGenericSensor() {
-    this._accelerometer = new Accelerometer({
-      frequency: TiltImage.SENSOR_FREQUENCY
-    });
-    this._accelerometer.start();
-    await new Promise((resolve, reject) => {
-      this._accelerometer!.onactivate = resolve;
-      this._accelerometer!.onerror = reject;
-    });
-    this._accelerometer.onreading = () => {
-      this._ontilt({
-        accelerationIncludingGravity: {
-          x: this._accelerometer!.x,
-          y: this._accelerometer!.y,
-          z: this._accelerometer!.z
-        }
-      } as any);
-    };
-  }
-
-  private async _stopGenericSensor() {
-    if (this._accelerometer) {
-      this._accelerometer.stop();
-    }
-    this._accelerometer = undefined;
-  }
-
-  private async _startDeviceMotion() {
-    window.addEventListener("devicemotion", this._ontilt);
-  }
-
-  private async _stopDeviceMotion() {
-    window.removeEventListener("devicemotion", this._ontilt);
-  }
-
+  @bind
   private _ontilt({ accelerationIncludingGravity }: DeviceMotionEvent) {
     this._target[0] = accelerationIncludingGravity!.x!;
     this._target[1] = accelerationIncludingGravity!.y!;
   }
 
+  @bind
   private onrender() {
     this._el.style.transform = `translate(${-this._current[0]}vmax, ${
       this._current[1]

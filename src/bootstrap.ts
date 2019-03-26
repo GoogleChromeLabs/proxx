@@ -37,6 +37,7 @@ async function bootstrap() {
     import("./utils/square-spinner.js");
   }
 
+  // FIXME: Use a IUU pattern here
   import("./services/tilt-image/index.js");
 }
 
