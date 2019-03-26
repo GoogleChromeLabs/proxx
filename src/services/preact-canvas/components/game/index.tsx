@@ -12,9 +12,9 @@
  */
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h } from "preact";
-import { Cell, Tag } from "../../../../gamelogic/types";
+import { Cell, GridChanges, Tag } from "../../../../gamelogic/types";
 import { bind } from "../../../../utils/bind.js";
-import StateService, { GridChanges } from "../../../state.js";
+import StateService from "../../../state.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
 
 function flatten<T>(v: T[][]): T[] {
@@ -37,8 +37,6 @@ interface Props {
 }
 
 export default class Game extends Component<Props> {
-  static PAINT_THRESHOLD = 10;
-
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
@@ -50,7 +48,6 @@ export default class Game extends Component<Props> {
     HTMLButtonElement,
     [number, number, string]
   >();
-  private renderLoopRunning = false;
 
   componentDidMount() {
     this.props.gridChangeSubscribe(this.doManualDomHandling);
