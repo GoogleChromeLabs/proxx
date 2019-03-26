@@ -53,7 +53,8 @@ class PreactService extends Component<Props, State> {
       case StateName.START:
         return (
           <button onClick={() => stateService.initGame(40, 40, 160)}>
-            Go3
+            Let’s play! (There should be a config dialog here, but alas, it is
+            not.)
           </button>
         );
       case StateName.WAITING_TO_PLAY:
@@ -69,7 +70,9 @@ class PreactService extends Component<Props, State> {
           />
         );
       case StateName.END:
-        return <End type={state.endType} />;
+        return (
+          <End type={state.endType} restart={() => stateService.reset()} />
+        );
     }
   }
 }

@@ -73,12 +73,13 @@ export interface EndState {
 export type State = StartState | WaitingToPlayState | PlayingState | EndState;
 
 export default class StateService {
-  private _state: State = {
-    name: StateName.START
-  };
-
+  private _state: State = {} as any;
   private _eventTarget: EventTarget = new MessageChannel().port1;
   private _game?: MinesweeperGame;
+
+  constructor() {
+    this.reset();
+  }
 
   getFullState(): State {
     return this._state;
@@ -92,12 +93,12 @@ export default class StateService {
     };
     // TODO: do we need an unsubscribe?
     this._game.subscribe(gridChanges => {
-      this.notify({
+      this._notify({
         gridChanges,
         type: UpdateType.GRID_PATCH
       });
     });
-    this.notify({
+    this._notify({
       newState: this._state,
       type: UpdateType.FULL_STATE
     });
@@ -111,18 +112,29 @@ export default class StateService {
 
   flag(x: number, y: number) {
     this._game!.tag(x, y, Tag.Flag);
+    this._checkForGameOver();
   }
 
   unflag(x: number, y: number) {
     this._game!.tag(x, y, Tag.None);
+    this._checkForGameOver();
   }
 
   reveal(x: number, y: number) {
     this._game!.reveal(x, y);
+    this._checkForGameOver();
   }
 
   revealSurrounding(x: number, y: number) {
     this._game!.attemptSurroundingReveal(x, y);
+    this._checkForGameOver();
+  }
+
+  reset() {
+    this._state = {
+      name: StateName.START
+    };
+    this._fullStateUpdate();
   }
 
   async loadDeterministicField() {
@@ -134,8 +146,27 @@ export default class StateService {
     // this._game!.startTime = Date.now();
   }
 
-  @bind
-  private notify(stateUpdate: StateUpdate) {
+  private _checkForGameOver() {
+    if (
+      this._game!.state === LogicGameState.Won ||
+      this._game!.state === LogicGameState.Lost
+    ) {
+      this._state = {
+        endType: this._game!.state,
+        name: StateName.END
+      };
+    }
+    this._fullStateUpdate();
+  }
+
+  private _fullStateUpdate() {
+    this._notify({
+      newState: this._state,
+      type: UpdateType.FULL_STATE
+    });
+  }
+
+  private _notify(stateUpdate: StateUpdate) {
     this._eventTarget.dispatchEvent(
       new CustomEvent<StateUpdate>("state-update", {
         detail: stateUpdate
