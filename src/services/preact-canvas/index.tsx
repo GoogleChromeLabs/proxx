@@ -13,9 +13,13 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render } from "preact";
-import { Cell, GridChanges, State as GameState } from "../../gamelogic/types";
-import localStateSubscribe from "../local-state-subscribe";
-import StateService from "../state.js";
+import {
+  Cell,
+  GridChanges,
+  State as GameState
+} from "../../gamelogic/types.js";
+import StateService from "../state/index.js";
+import localStateSubscribe from "../state/local-state-subscribe.js";
 import Game from "./components/game/index.js";
 
 interface Props {

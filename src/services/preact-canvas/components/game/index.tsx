@@ -12,9 +12,9 @@
  */
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h } from "preact";
-import { Cell, GridChanges, Tag } from "../../../../gamelogic/types";
+import { Cell, GridChanges, Tag } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
-import StateService from "../../../state.js";
+import StateService from "../../../state/index.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
 
 function flatten<T>(v: T[][]): T[] {

@@ -13,7 +13,7 @@
 
 import { expose } from "comlink/src/comlink.js";
 
-import StateService from "./services/state.js";
+import StateService from "./services/state/index.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 
