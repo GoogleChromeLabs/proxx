@@ -73,6 +73,7 @@ export interface EndState {
 export type State = StartState | WaitingToPlayState | PlayingState | EndState;
 
 export default class StateService {
+  readonly ready = true;
   private _state: State = {} as any;
   private _eventTarget: EventTarget = new MessageChannel().port1;
   private _game?: MinesweeperGame;
