@@ -15,23 +15,79 @@ import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 import StateService from "../../../state/index.js";
 
-import { button as buttonStyle } from "./style.css";
+import { button as buttonStyle, intro as introStyle } from "./style.css";
 
 export interface Props {
   stateService: Remote<StateService>;
 }
 
-export default class Intro extends Component<Props> {
-  render() {
+interface State {
+  width: number;
+  height: number;
+  numBombs: number;
+}
+
+function fieldValueAsNumber(ev: Event): number {
+  if (!ev.target || !(ev.target instanceof HTMLInputElement)) {
+    throw Error("Invalid element");
+  }
+  return Number(ev.target.value);
+}
+
+export default class Intro extends Component<Props, State> {
+  constructor() {
+    super();
+    this.setState({ width: 10, height: 10, numBombs: 10 });
+  }
+  render(_props: Props, { width, height, numBombs }: State) {
     return (
-      <button onClick={this.init} class={buttonStyle}>
-        New game
-      </button>
+      <div class={introStyle}>
+        <label>
+          Width:
+          <input
+            type="number"
+            min="10"
+            max="40"
+            step="1"
+            value={width}
+            onChange={ev => this.setState({ width: fieldValueAsNumber(ev) })}
+          />
+        </label>
+        <label>
+          Height:
+          <input
+            type="number"
+            min="10"
+            max="40"
+            step="1"
+            value={height}
+            onChange={ev => this.setState({ height: fieldValueAsNumber(ev) })}
+          />
+        </label>
+        <label>
+          #bombs:
+          <input
+            type="number"
+            min="1"
+            max={width * height}
+            step="1"
+            value={numBombs}
+            onChange={ev => this.setState({ numBombs: fieldValueAsNumber(ev) })}
+          />
+        </label>
+        <button onClick={this.init} class={buttonStyle}>
+          New game
+        </button>
+      </div>
     );
   }
 
   @bind
   private init() {
-    this.props.stateService.initGame(10, 10, 10);
+    this.props.stateService.initGame(
+      this.state.width,
+      this.state.height,
+      this.state.numBombs
+    );
   }
 }

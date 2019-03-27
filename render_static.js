@@ -55,6 +55,12 @@ async function grabMarkup(address) {
   page.viewport(1280, 720);
   await page.goto(address);
   await page.waitFor(1000);
+  // Set all input field values as an attribute
+  await page.evaluate(() => {
+    document.querySelectorAll("input").forEach(el => {
+      el.setAttribute("value", el.value);
+    });
+  });
   const markup = await page.evaluate(() => document.documentElement.outerHTML);
   await browser.close();
   return markup;
