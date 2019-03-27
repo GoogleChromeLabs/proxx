@@ -30,11 +30,11 @@ function extractBootstrap(dependencygraph) {
   return findChunkWithName(dependencygraph, "bootstrap.ts").fileName;
 }
 
-async function generateShell(file, dependencygraph) {
+async function generateShell(file, bootstraps) {
   const pkg = require("./package.json");
   const template = fs.readFileSync("src/index.ejs").toString();
   const output = ejs.render(template, {
-    bootstrapFile: extractBootstrap(dependencygraph),
+    ...bootstraps,
     pkg,
     fs
   });
@@ -82,8 +82,11 @@ async function correctMarkup(markup, { port, dependencygraph }) {
 }
 
 async function run() {
-  const dependencygraph = require("./dependencygraph.json");
-  await generateShell("dist/index.html", dependencygraph);
+  const dependencygraph5 = require("./dependency-graph.es5.json");
+  const dependencygraph = require("./dependency-graph.json");
+  const bootstrap5 = extractBootstrap(dependencygraph5);
+  const bootstrap = extractBootstrap(dependencygraph);
+  await generateShell("dist/index.html", { bootstrap, bootstrap5 });
   const server = await startServer();
   const port = server.address().port;
   let markup = await grabMarkup(`http://localhost:${port}`);

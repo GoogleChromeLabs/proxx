@@ -25,59 +25,66 @@ import { readFileSync } from "fs";
 // Delete 'dist'
 require("rimraf").sync("dist");
 
-export default {
-  input: "src/bootstrap.ts",
-  output: {
-    dir: "dist",
-    format: "amd",
-    sourcemap: true,
-    entryFileNames: "[name]-[hash].js",
-    chunkFileNames: "[name]-[hash].js"
-  },
-  plugins: [
-    cssModuleTypes("src"),
-    postcss({
-      minimize: true,
-      modules: {
-        generateScopedName: "[hash:base64:5]"
-      },
-      //extract: true,
-      namedExports(name) {
-        return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
-      }
-    }),
-    typescript({
-      // Make sure we are using our version of TypeScript.
-      typescript: require("typescript"),
-      tsconfigOverride: {
-        compilerOptions: {
-          sourceMap: true
+function defaultConfig({ es5 }) {
+  return {
+    input: "src/bootstrap.ts",
+    output: {
+      dir: "dist",
+      format: "amd",
+      sourcemap: true,
+      entryFileNames: `[name]-[hash].${es5 ? "es5." : ""}js`,
+      chunkFileNames: `[name]-[hash].${es5 ? "es5." : ""}js`
+    },
+    plugins: [
+      cssModuleTypes("src"),
+      postcss({
+        minimize: true,
+        modules: {
+          generateScopedName: "[hash:base64:5]"
+        },
+        //extract: true,
+        namedExports(name) {
+          return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
         }
-      },
-      // We need to set this so we can use async functions in our
-      // plugin code. :shurg:
-      // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
-      clean: true
-    }),
-    assetPlugin(),
-    chunkNamePlugin(),
-    nodeResolve(),
-    loadz0r({
-      loader: readFileSync("./loadz0r-loader.ejs").toString(),
-      // `prependLoader` will be called for every chunk. If it returns `true`,
-      // the loader code will be prepended.
-      prependLoader: (chunk, inputs) => {
-        // If the filename ends with `worker`, prepend the loader.
-        if (
-          Object.keys(chunk.modules).some(mod => /worker\.[jt]s$/.test(mod))
-        ) {
-          return true;
+      }),
+      typescript({
+        // Make sure we are using our version of TypeScript.
+        typescript: require("typescript"),
+        tsconfigOverride: {
+          compilerOptions: {
+            sourceMap: true,
+            target: es5 ? "es5" : "es2018"
+          }
+        },
+        // We need to set this so we can use async functions in our
+        // plugin code. :shurg:
+        // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
+        clean: true
+      }),
+      assetPlugin(),
+      chunkNamePlugin(),
+      nodeResolve(),
+      loadz0r({
+        loader: readFileSync("./loadz0r-loader.ejs").toString(),
+        // `prependLoader` will be called for every chunk. If it returns `true`,
+        // the loader code will be prepended.
+        prependLoader: (chunk, inputs) => {
+          // If the filename ends with `worker`, prepend the loader.
+          if (
+            Object.keys(chunk.modules).some(mod => /worker\.[jt]s$/.test(mod))
+          ) {
+            return true;
+          }
+          // If not, fall back to the default behavior.
+          return loadz0r.isEntryModule(chunk, inputs);
         }
-        // If not, fall back to the default behavior.
-        return loadz0r.isEntryModule(chunk, inputs);
-      }
-    }),
-    dependencyGraph(),
-    terser()
-  ]
-};
+      }),
+      dependencyGraph({
+        filename: `dependency-graph.${es5 ? "es5." : ""}json`
+      }),
+      terser()
+    ]
+  };
+}
+
+export default [{ es5: true }, { es5: false }].map(defaultConfig);

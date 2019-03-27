@@ -13,7 +13,7 @@
 const fs = require("fs");
 
 const defaults = {
-  manifestName: "dependencygraph.json"
+  filename: "dependencygraph.json"
 };
 
 export default function(opts = {}) {
@@ -21,7 +21,7 @@ export default function(opts = {}) {
   return {
     name: "dependencygraph",
     generateBundle(_outputOptions, bundle) {
-      fs.writeFileSync(opts.manifestName, JSON.stringify(bundle, null, "  "));
+      fs.writeFileSync(opts.filename, JSON.stringify(bundle, null, "  "));
     }
   };
 }
