@@ -4,11 +4,40 @@ const puppeteer = require("puppeteer");
 const ecstatic = require("ecstatic");
 const http = require("http");
 
-async function generateShell(file) {
-  const hashmanifest = require("./entrypoint.hashmanifest.json");
+function unrollDependencies(dependencygraph, desc) {
+  return [
+    desc.fileName,
+    ...desc.imports
+      .map(d => dependencygraph[d])
+      .flatMap(m => unrollDependencies(dependencygraph, m))
+  ];
+}
+
+function findChunkWithName(dependencygraph, name) {
+  return Object.values(dependencygraph).find(desc =>
+    (desc.facadeModuleId || "").endsWith(name)
+  );
+}
+
+function extractPreloads(dependencygraph) {
+  return unrollDependencies(
+    dependencygraph,
+    findChunkWithName(dependencygraph, "bootstrap.ts")
+  );
+}
+
+function extractBootstrap(dependencygraph) {
+  return findChunkWithName(dependencygraph, "bootstrap.ts").fileName;
+}
+
+async function generateShell(file, dependencygraph) {
   const pkg = require("./package.json");
   const template = fs.readFileSync("src/index.ejs").toString();
-  const output = ejs.render(template, { hashmanifest, pkg, fs });
+  const output = ejs.render(template, {
+    bootstrapFile: extractBootstrap(dependencygraph),
+    pkg,
+    fs
+  });
   fs.writeFileSync(file, output);
 }
 
@@ -31,23 +60,34 @@ async function grabMarkup(address) {
   return markup;
 }
 
-async function correctMarkup(markup, { port }) {
+async function correctMarkup(markup, { port, dependencygraph }) {
   // Make absolute references relative
-  markup = markup.replace(new RegExp(`http://localhost:${port}`, "g"), "");
-  // Turn script tags into preloads
+  markup = markup.replace(new RegExp(`http://localhost:${port}/`, "g"), "./");
+  // Remove all dynamically added script tags
   markup = markup.replace(
     /<script src="\.\/chunk-([^"]+)"[^>]+><\/script>/g,
-    `<link rel="preload" href="./chunk-$1" as="script">`
+    ""
   );
+  // Figure out preload
+  const preloads = extractPreloads(dependencygraph).map(
+    name => `<link rel="preload" href="./${name}" as="script" />`
+  );
+
+  const workerChunk = findChunkWithName(dependencygraph, "worker.ts");
+  // Use prefetch as link[rel=preload][as=worker] is not supported yet
+  // crbug.com/946510#
+  preloads.push(`<link rel="prefetch" href="./${workerChunk.fileName}" />`);
+  markup = markup.replace("</head>", `${preloads.join("")}</head>`);
   return markup;
 }
 
 async function run() {
-  await generateShell("dist/index.html");
+  const dependencygraph = require("./dependencygraph.json");
+  await generateShell("dist/index.html", dependencygraph);
   const server = await startServer();
   const port = server.address().port;
   let markup = await grabMarkup(`http://localhost:${port}`);
-  markup = await correctMarkup(markup, { port });
+  markup = await correctMarkup(markup, { port, dependencygraph });
   fs.writeFileSync("dist/index.html", markup);
   server.close();
 }

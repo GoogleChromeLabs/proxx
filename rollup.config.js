@@ -15,7 +15,7 @@ import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
-import entrypointHashmanifest from "rollup-plugin-entrypoint-hashmanifest";
+import dependencyGraph from "./dependency-graph-plugin.js";
 import chunkNamePlugin from "./chunk-name-plugin.js";
 import postcss from "rollup-plugin-postcss";
 import cssModuleTypes from "./css-module-types.js";
@@ -77,7 +77,7 @@ export default {
         return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
-    entrypointHashmanifest()
-    // terser(),
+    dependencyGraph(),
+    terser()
   ]
 };
