@@ -47,7 +47,11 @@ class PreactService extends Component<Props, State> {
 
   render({ stateService }: Props, { state }: State) {
     if (!state || !("name" in state)) {
-      return <div />;
+      // This would delete the entire DOM in <main>,
+      // so we need to avoid it at all costs for a stable
+      // prerender. That’s what the `await stateService.ready` in
+      // `game()` is for.
+      return null;
     }
     switch (state.name) {
       case StateName.START:
@@ -88,7 +92,12 @@ class PreactService extends Component<Props, State> {
   }
 }
 
-export function game(stateService: Remote<StateService>) {
-  render(<PreactService stateService={stateService} />, document.body, document
-    .body.firstChild as any);
+export async function game(stateService: Remote<StateService>) {
+  await stateService.ready;
+  const container = document.body.querySelector("main")!;
+  render(
+    <PreactService stateService={stateService} />,
+    container,
+    container.firstChild as any
+  );
 }
