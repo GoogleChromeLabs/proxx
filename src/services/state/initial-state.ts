@@ -11,16 +11,11 @@
  * limitations under the License.
  */
 
-import { expose } from "comlink/src/comlink.js";
+import { State, StateName } from "./index.js";
 
-import StateService from "./services/state/index.js";
+const initialState: State = {
+  name: StateName.START
+};
+Object.freeze(initialState);
 
-declare var self: DedicatedWorkerGlobalScope;
-
-expose(
-  {
-    stateService: new StateService()
-  },
-  self
-);
-performance.mark("State ready");
+export default initialState;

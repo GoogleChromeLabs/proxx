@@ -21,6 +21,8 @@ import {
 } from "../../gamelogic/types.js";
 import { bind } from "../../utils/bind.js";
 
+import initialState from "./initial-state.js";
+
 // @ts-ignore
 import generatedFieldURL from "asset-url:../../gamelogic/generated-field.json";
 
@@ -74,7 +76,7 @@ export type State = StartState | WaitingToPlayState | PlayingState | EndState;
 
 export default class StateService {
   readonly ready = true;
-  private _state: State = {} as any;
+  private _state: State = { ...initialState };
   private _eventTarget: EventTarget = new MessageChannel().port1;
   private _game?: MinesweeperGame;
 
@@ -132,9 +134,7 @@ export default class StateService {
   }
 
   reset() {
-    this._state = {
-      name: StateName.START
-    };
+    this._state = initialState;
     this._fullStateUpdate();
   }
 

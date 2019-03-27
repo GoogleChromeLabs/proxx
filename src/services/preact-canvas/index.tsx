@@ -15,6 +15,7 @@ import { Remote } from "comlink/src/comlink.js";
 import { Component, ComponentFactory, h, render } from "preact";
 import { Cell, GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
+import initialState from "../state/initial-state.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import Intro from "./components/intro/index.js";
 import ResolveComponent from "./components/resolve/index.js";
@@ -30,7 +31,7 @@ interface State {
 export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
 
 class PreactService extends Component<Props, State> {
-  state: State = {} as any;
+  state: State = { state: { ...initialState } };
 
   private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
 
@@ -93,11 +94,11 @@ class PreactService extends Component<Props, State> {
 }
 
 export async function game(stateService: Remote<StateService>) {
-  await stateService.ready;
   const container = document.body.querySelector("main")!;
   render(
     <PreactService stateService={stateService} />,
     container,
     container.firstChild as any
   );
+  performance.mark("UI ready");
 }
