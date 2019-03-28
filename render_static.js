@@ -6,7 +6,6 @@ const http = require("http");
 
 function unrollDependencies(dependencygraph, desc) {
   return [
-    desc.fileName,
     ...desc.imports
       .map(d => dependencygraph[d])
       .flatMap(m => unrollDependencies(dependencygraph, m))
@@ -75,9 +74,10 @@ async function correctMarkup(markup, { port, dependencygraph }) {
     ""
   );
   // Figure out preload
-  const preloads = extractPreloads(dependencygraph).map(
-    name => `<link rel="preload" href="./${name}" as="script" />`
-  );
+  const preloads = extractPreloads(dependencygraph)
+    // Bootstrap is getting inlined
+    .filter(f => !f.includes("bootstrap"))
+    .map(name => `<link rel="preload" href="./${name}" as="script" />`);
 
   const workerChunk = findChunkWithName(dependencygraph, "worker.ts");
   // Use prefetch as link[rel=preload][as=worker] is not supported yet
