@@ -34,7 +34,7 @@ export default async function localStateSubscribe(
       const { flags, state } = update;
 
       for (const [x, y, cell] of update.gridChanges) {
-        grid[x][y] = cell;
+        grid[y][x] = cell;
       }
 
       callback({ flags, state, grid }, update.gridChanges);

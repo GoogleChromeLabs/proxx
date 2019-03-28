@@ -31,9 +31,12 @@ export default class StateService {
   private eventTarget: EventTarget = new MessageChannel().port1;
 
   private game: MinesweeperGame = new MinesweeperGame(
-    BOARD_SIZE,
-    BOARD_SIZE,
-    Math.floor(BOARD_SIZE * BOARD_SIZE * DENSITY)
+    20,
+    5,
+    5
+    // BOARD_SIZE,
+    // BOARD_SIZE,
+    // Math.floor(BOARD_SIZE * BOARD_SIZE * DENSITY)
   );
 
   constructor() {

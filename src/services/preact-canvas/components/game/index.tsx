@@ -96,13 +96,15 @@ export default class Game extends Component<Props> {
       const tr = document.createElement("tr");
       tr.classList.add(gameRow);
       for (let col = 0; col < grid[0].length; col++) {
+        const y = row;
+        const x = col;
         const td = document.createElement("td");
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.additionalButtonData.set(button, [col, row, "unrevealed"]);
+        this.additionalButtonData.set(button, [x, y, "unrevealed"]);
         button.onclick = this.click;
-        this.updateButton(button, grid[col][row]);
+        this.updateButton(button, grid[y][x]);
         this.buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
