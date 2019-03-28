@@ -75,7 +75,7 @@ export default class Intro extends Component<Props, State> {
             onChange={ev => this.setState({ numBombs: fieldValueAsNumber(ev) })}
           />
         </label>
-        <button onClick={this.init} class={buttonStyle}>
+        <button onClick={this._startGame} class={buttonStyle}>
           New game
         </button>
       </div>
@@ -83,7 +83,7 @@ export default class Intro extends Component<Props, State> {
   }
 
   @bind
-  private init() {
+  private _startGame() {
     this.props.stateService.initGame(
       this.state.width,
       this.state.height,

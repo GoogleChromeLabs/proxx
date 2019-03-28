@@ -24,6 +24,11 @@ async function startWorker(): Promise<Remote<RemoteServices>> {
 
 async function bootstrap() {
   const parsedURL = new URL(location.toString());
+
+  if (parsedURL.searchParams.has("block")) {
+    await import("./utils/load-blocker.js").then(m => m.default());
+  }
+
   let remoteServices: Promise<Remote<RemoteServices>>;
 
   if (parsedURL.searchParams.has("prerender")) {

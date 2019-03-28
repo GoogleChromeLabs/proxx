@@ -92,7 +92,7 @@ async function run() {
   await generateShell("dist/index.html", dependencygraph);
   const server = await startServer();
   const port = server.address().port;
-  let markup = await grabMarkup(`http://localhost:${port}`);
+  let markup = await grabMarkup(`http://localhost:${port}/?prerender`);
   markup = await correctMarkup(markup, { port, dependencygraph });
   fs.writeFileSync("dist/index.html", markup);
   server.close();
