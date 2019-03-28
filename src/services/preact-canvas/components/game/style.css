@@ -30,7 +30,8 @@
 }
 
 .container {
-  width: min-content;
+  width: -moz-max-content;
+  width: max-content;
   position: relative;
 }
 
