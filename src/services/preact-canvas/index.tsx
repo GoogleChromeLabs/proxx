@@ -46,7 +46,14 @@ class PreactService extends Component<Props, State> {
   render(_props: Props, { state, stateService }: State) {
     switch (state.name) {
       case StateName.START:
-        return <Intro stateService={stateService!} spinner={!stateService} />;
+        return (
+          <Intro
+            stateService={stateService!}
+            id="intro"
+            hydrate={Intro.hydrate}
+            spinner={!stateService}
+          />
+        );
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
         return (

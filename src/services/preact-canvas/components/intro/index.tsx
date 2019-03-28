@@ -11,9 +11,12 @@
  * limitations under the License.
  */
 import { Remote } from "comlink/src/comlink.js";
-import { Component, h } from "preact";
+import { h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 import StateService from "../../../state/index.js";
+import HydratableComponent, {
+  HydratableProps
+} from "../hydratable-component/index.js";
 
 import {
   button as buttonStyle,
@@ -32,53 +35,72 @@ interface State {
   numBombs: number;
 }
 
-function fieldValueAsNumber(ev: Event): number {
-  if (!ev.target || !(ev.target instanceof HTMLInputElement)) {
+function fieldValueAsNumber(el: any): number {
+  if (!(el instanceof HTMLInputElement)) {
     throw Error("Invalid element");
   }
-  return Number(ev.target.value);
+  return Number(el.value);
 }
 
-export default class Intro extends Component<Props, State> {
-  constructor() {
-    super();
-    this.setState({ width: 10, height: 10, numBombs: 10 });
+export default class Intro extends HydratableComponent<
+  HydratableProps<Props, State>,
+  State
+> {
+  static hydrate(el: Element | null): State {
+    if (!el) {
+      return {
+        height: 10,
+        numBombs: 10,
+        width: 10
+      };
+    }
+    return {
+      height: fieldValueAsNumber(el.querySelector("[name=height]")),
+      numBombs: fieldValueAsNumber(el.querySelector("[name=numBombs]")),
+      width: fieldValueAsNumber(el.querySelector("[name=width]"))
+    };
   }
 
-  render({ spinner }: Props, { width, height, numBombs }: State) {
+  render(
+    { id, spinner }: HydratableProps<Props, State>,
+    { width, height, numBombs }: State
+  ) {
     return (
-      <div class={introStyle}>
+      <div class={introStyle} id={id}>
         <label>
           Width:
           <input
             type="number"
+            name="width"
             min="10"
             max="40"
             step="1"
             value={width}
-            onChange={ev => this.setState({ width: fieldValueAsNumber(ev) })}
+            onChange={this.onChange}
           />
         </label>
         <label>
           Height:
           <input
             type="number"
+            name="height"
             min="10"
             max="40"
             step="1"
             value={height}
-            onChange={ev => this.setState({ height: fieldValueAsNumber(ev) })}
+            onChange={this.onChange}
           />
         </label>
         <label>
           #bombs:
           <input
             type="number"
+            name="numBombs"
             min="1"
             max={width * height}
             step="1"
             value={numBombs}
-            onChange={ev => this.setState({ numBombs: fieldValueAsNumber(ev) })}
+            onChange={this.onChange}
           />
         </label>
         <button
@@ -90,6 +112,14 @@ export default class Intro extends Component<Props, State> {
         </button>
       </div>
     );
+  }
+
+  @bind
+  private onChange(ev: Event) {
+    if (!(ev.target instanceof HTMLInputElement)) {
+      return;
+    }
+    this.setState({ [ev.target.name]: Number(ev.target.value) } as any);
   }
 
   @bind
