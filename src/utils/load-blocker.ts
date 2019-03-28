@@ -18,7 +18,7 @@ export default function() {
       btn.remove();
       resolve();
     };
-    btn.textContent = "Continue loading";
+    btn.textContent = "Loading has been paused. Click here to resume";
     document.body.appendChild(btn);
   });
 }

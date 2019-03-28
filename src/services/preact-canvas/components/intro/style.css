@@ -1,6 +1,29 @@
 .intro label {
   display: block;
 }
+
 .button {
   border: 1px solid red;
+}
+
+.button:before {
+  content: "";
+  display: inline-block;
+  height: 1em;
+  width: 1em;
+  background-color: black;
+  margin-right: 0.5em;
+}
+
+.spinner:before {
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0turn);
+  }
+  to {
+    transform: rotate(1turn);
+  }
 }

@@ -15,10 +15,15 @@ import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 import StateService from "../../../state/index.js";
 
-import { button as buttonStyle, intro as introStyle } from "./style.css";
+import {
+  button as buttonStyle,
+  intro as introStyle,
+  spinner as spinnerStyle
+} from "./style.css";
 
 export interface Props {
   stateService: Remote<StateService>;
+  spinner: boolean;
 }
 
 interface State {
@@ -39,7 +44,8 @@ export default class Intro extends Component<Props, State> {
     super();
     this.setState({ width: 10, height: 10, numBombs: 10 });
   }
-  render(_props: Props, { width, height, numBombs }: State) {
+
+  render({ spinner }: Props, { width, height, numBombs }: State) {
     return (
       <div class={introStyle}>
         <label>
@@ -75,8 +81,12 @@ export default class Intro extends Component<Props, State> {
             onChange={ev => this.setState({ numBombs: fieldValueAsNumber(ev) })}
           />
         </label>
-        <button onClick={this._startGame} class={buttonStyle}>
-          New game
+        <button
+          onClick={this._startGame}
+          class={[buttonStyle, spinner ? spinnerStyle : ""].join(" ")}
+          disabled={spinner}
+        >
+          {spinner ? "Loading" : "New game"}
         </button>
       </div>
     );

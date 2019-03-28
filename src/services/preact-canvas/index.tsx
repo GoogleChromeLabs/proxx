@@ -32,7 +32,9 @@ interface State {
 export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
 
 class PreactService extends Component<Props, State> {
-  state: State = { state: { ...initialState } };
+  state: State = {
+    state: { ...initialState }
+  };
 
   private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
 
@@ -44,7 +46,7 @@ class PreactService extends Component<Props, State> {
   render(_props: Props, { state, stateService }: State) {
     switch (state.name) {
       case StateName.START:
-        return <Intro stateService={stateService!} />;
+        return <Intro stateService={stateService!} spinner={!stateService} />;
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
         return (
