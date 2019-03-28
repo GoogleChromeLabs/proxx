@@ -11,16 +11,17 @@
  * limitations under the License.
  */
 
-import { expose } from "comlink/src/comlink.js";
+import { expose, proxy } from "comlink/src/comlink.js";
 
 import StateService from "./services/state/index.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 
-expose(
-  {
-    stateService: new StateService()
-  },
-  self
-);
+const services = {
+  stateService: proxy(new StateService())
+};
+
+export type RemoteServices = typeof services;
+
+expose(services, self);
 performance.mark("State ready");

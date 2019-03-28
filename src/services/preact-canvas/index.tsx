@@ -21,11 +21,12 @@ import Intro from "./components/intro/index.js";
 import ResolveComponent from "./components/resolve/index.js";
 
 interface Props {
-  stateService: Remote<StateService>;
+  stateServicePromise: Promise<Remote<StateService>>;
 }
 
 interface State {
   state: GameState;
+  stateService?: Remote<StateService>;
 }
 
 export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
@@ -37,26 +38,13 @@ class PreactService extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-
-    localStateSubscribe(props.stateService, (newState, gridChanges) => {
-      if (gridChanges) {
-        this.gridChangeSubscribers.forEach(f => f(gridChanges));
-      }
-      this.setState({ state: newState });
-    });
+    this._init(props);
   }
 
-  render({ stateService }: Props, { state }: State) {
-    if (!state || !("name" in state)) {
-      // This would delete the entire DOM in <main>,
-      // so we need to avoid it at all costs for a stable
-      // prerender. That’s what the `await stateService.ready` in
-      // `game()` is for.
-      return null;
-    }
+  render(_props: Props, { state, stateService }: State) {
     switch (state.name) {
       case StateName.START:
-        return <Intro stateService={stateService} />;
+        return <Intro stateService={stateService!} />;
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
         return (
@@ -72,7 +60,7 @@ class PreactService extends Component<Props, State> {
                 gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
                   this.gridChangeSubscribers.add(f)
                 }
-                stateService={stateService}
+                stateService={stateService!}
               />
             )}
           />
@@ -85,18 +73,30 @@ class PreactService extends Component<Props, State> {
             promise={import("./components/end/index.js").then(m => m.default)}
             // tslint:disable-next-line:variable-name Need uppercase for JSX
             onResolve={End => (
-              <End type={state.endType} restart={() => stateService.reset()} />
+              <End type={state.endType} restart={() => stateService!.reset()} />
             )}
           />
         );
     }
   }
+  private async _init(props: Props) {
+    const stateService = await props.stateServicePromise;
+    await stateService.ready;
+    this.setState({ stateService });
+
+    localStateSubscribe(stateService, (newState, gridChanges) => {
+      if (gridChanges) {
+        this.gridChangeSubscribers.forEach(f => f(gridChanges));
+      }
+      this.setState({ state: newState });
+    });
+  }
 }
 
-export async function game(stateService: Remote<StateService>) {
+export async function game(stateService: Promise<Remote<StateService>>) {
   const container = document.body.querySelector("main")!;
   render(
-    <PreactService stateService={stateService} />,
+    <PreactService stateServicePromise={stateService} />,
     container,
     container.firstChild as any
   );

@@ -11,31 +11,37 @@
  * limitations under the License.
  */
 
-import { wrap } from "comlink/src/comlink.js";
-
 import workerURL from "chunk-name:./worker.js";
+import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
+import { RemoteServices } from "./worker.js";
 
-const logEl = document.querySelector("#log")!;
-function log(msg: string) {
-  logEl.innerHTML += `${msg}\n`;
+async function startWorker(): Promise<Remote<RemoteServices>> {
+  const worker = new Worker(workerURL);
+  const { wrap } = await import("comlink/src/comlink.js");
+  return wrap(worker);
 }
 
 async function bootstrap() {
-  const worker = new Worker(workerURL);
-
   const parsedURL = new URL(location.toString());
-  const { stateService } = wrap(worker);
+  let remoteServices: Promise<Remote<RemoteServices>>;
 
-  if (parsedURL.searchParams.has("deterministic")) {
-    await stateService.loadDeterministicField();
+  if (parsedURL.searchParams.has("prerender")) {
+    // This will behave the same as if the worker is loading indefinitey. As a
+    // result, our UI will stay in the “not ready to play”state for the
+    // prerender.
+    remoteServices = new Promise(resolve => {
+      /* intentionally blank */
+    });
+  } else {
+    remoteServices = startWorker();
   }
 
-  gameUI(stateService);
+  gameUI(remoteServices.then(remoteServices => remoteServices.stateService));
 
   if (parsedURL.searchParams.has("square")) {
     import("./utils/square-spinner.js");
   }
 }
 
-bootstrap().catch(e => log(e.toString()));
+bootstrap().catch(e => console.error(e));
