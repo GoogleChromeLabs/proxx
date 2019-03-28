@@ -20,6 +20,7 @@ import chunkNamePlugin from "./chunk-name-plugin.js";
 import postcss from "rollup-plugin-postcss";
 import cssModuleTypes from "./css-module-types.js";
 import assetPlugin from "./asset-plugin.js";
+import rename from "./rename-plugin.js";
 import { readFileSync } from "fs";
 
 // Delete 'dist'
@@ -46,6 +47,7 @@ export default {
         return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
       }
     }),
+    rename(),
     typescript({
       // Make sure we are using our version of TypeScript.
       typescript: require("typescript"),

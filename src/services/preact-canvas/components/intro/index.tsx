@@ -11,9 +11,11 @@
  * limitations under the License.
  */
 import { Remote } from "comlink/src/comlink.js";
-import { Component, h } from "preact";
-import { bind } from "../../../../utils/bind.js";
+import { h } from "preact";
 import StateService from "../../../state/index.js";
+
+// @ts-ignore
+import { bind } from "rename:bind-ib:../../../../utils/bind.js";
 
 import {
   button as buttonStyle,
