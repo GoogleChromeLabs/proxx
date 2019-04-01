@@ -18,8 +18,6 @@ import {
   State as GameState
 } from "../../gamelogic/types.js";
 
-type PromiseValue<T> = T extends Promise<infer R> ? R : never;
-
 export default async function localStateSubscribe(
   stateService: Remote<StateService>,
   callback: (newState: State, gridChanges: GridChanges) => void

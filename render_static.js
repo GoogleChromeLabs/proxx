@@ -74,15 +74,12 @@ async function correctMarkup(markup, { port, dependencygraph }) {
     /<script src="\.\/chunk-([^"]+)"[^>]+><\/script>/g,
     ""
   );
-  // Figure out preload
-  const preloads = extractPreloads(dependencygraph)
-    // Bootstrap is getting inlined
-    .filter(f => !f.includes("bootstrap"))
-    .map(name => `<link rel="preload" href="./${name}" as="script" />`);
 
-  const workerChunk = findChunkWithName(dependencygraph, "worker.ts");
-  // Use prefetch as link[rel=preload][as=worker] is not supported yet
+  const preloads = [];
+  // Preload the worker file. But we have to
+  // use prefetch as link[rel=preload][as=worker] is not supported yet
   // crbug.com/946510#
+  const workerChunk = findChunkWithName(dependencygraph, "worker.ts");
   preloads.push(`<link rel="prefetch" href="./${workerChunk.fileName}" />`);
   markup = markup.replace("</head>", `${preloads.join("")}</head>`);
   return markup;
