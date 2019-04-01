@@ -1,0 +1,8 @@
+.alt-label {
+  touch-action: none;
+  display: inline-block;
+  padding: 10px;
+  background: #ddd;
+  -moz-user-select: none;
+  user-select: none;
+}
