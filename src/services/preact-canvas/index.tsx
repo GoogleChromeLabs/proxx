@@ -15,12 +15,10 @@ import { Remote } from "comlink/src/comlink.js";
 import { Component, ComponentFactory, h, render } from "preact";
 import { Cell, GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
+import initialState from "../state/initial-state.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import Intro from "./components/intro/index.js";
 import ResolveComponent from "./components/resolve/index.js";
-
-// @ts-ignore
-import initialState from "rename:initial-state-ib:../state/initial-state.js";
 
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;

@@ -8,5 +8,10 @@ html {
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <main></main>
 <script>
-    <%- fs.readFileSync("./dist/"+bootstrapFile); %>
+  Promise.resolve().then(() => {
+    <% for(const dep of dependencygraph[bootstrapFile].imports) {;%>
+      <%-dependencygraph[dep].code;%>
+    <% } %>
+  });
+  <%- fs.readFileSync("./dist/"+bootstrapFile); %>
 </script>

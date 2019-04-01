@@ -34,6 +34,7 @@ async function generateShell(file, dependencygraph) {
   const template = fs.readFileSync("src/index.ejs").toString();
   const output = ejs.render(template, {
     bootstrapFile: extractBootstrap(dependencygraph),
+    dependencygraph,
     pkg,
     fs
   });
