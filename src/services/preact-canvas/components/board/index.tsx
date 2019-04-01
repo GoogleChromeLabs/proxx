@@ -10,11 +10,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Remote } from "comlink/src/comlink.js";
 import { Component, h } from "preact";
 import { Cell, GridChanges, Tag } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
-import StateService from "../../../state/index.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
 
 function flatten<T>(v: T[][]): T[] {
@@ -31,12 +29,12 @@ import {
 } from "./style.css";
 
 export interface Props {
-  stateService: Remote<StateService>;
+  onCellClick: (cell: [number, number, string], forceAlt: boolean) => void;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
 }
 
-export default class Game extends Component<Props> {
+export default class Board extends Component<Props> {
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
@@ -103,7 +101,6 @@ export default class Game extends Component<Props> {
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
         this.additionalButtonData.set(button, [x, y, "unrevealed"]);
-        button.onclick = this.click;
         this.updateButton(button, grid[y][x]);
         this.buttons.push(button);
         td.appendChild(button);
@@ -115,6 +112,13 @@ export default class Game extends Component<Props> {
     this.canvas.classList.add(canvasStyle);
     this.base!.appendChild(this.canvas);
     this.base!.appendChild(this.table);
+
+    if ("onpointerup" in this.table) {
+      this.table.addEventListener("pointerup", this.click);
+    } else {
+      this.table!.addEventListener("touchend", this.click);
+      this.table!.addEventListener("mouseup", this.click);
+    }
   }
 
   private drawCell(cell: HTMLButtonElement) {
@@ -187,19 +191,16 @@ export default class Game extends Component<Props> {
   }
 
   @bind
-  private async click({ target, shiftKey }: MouseEvent) {
-    const btn = target! as HTMLButtonElement;
-    const [x, y, state] = this.additionalButtonData.get(btn)!;
-
-    if (state === "unrevealed" && !shiftKey) {
-      await this.props.stateService.reveal(x, y);
-    } else if (state === "unrevealed" && shiftKey) {
-      await this.props.stateService.flag(x, y);
-    } else if (state === "flagged" && shiftKey) {
-      await this.props.stateService.unflag(x, y);
-    } else if (Number(state) !== Number.NaN && shiftKey) {
-      await this.props.stateService.revealSurrounding(x, y);
+  private click(event: MouseEvent | TouchEvent) {
+    const target = event.target as HTMLElement;
+    const button = target.closest("button");
+    if (!button) {
+      return;
     }
+    event.preventDefault();
+
+    const cell = this.additionalButtonData.get(button)!;
+    this.props.onCellClick(cell, event.shiftKey);
   }
 
   private updateButton(btn: HTMLButtonElement, cell: Cell) {
