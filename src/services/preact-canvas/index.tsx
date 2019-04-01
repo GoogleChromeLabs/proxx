@@ -31,7 +31,7 @@ interface State {
 
 export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
 
-class PreactService extends PreactComponent<Props, State> {
+class PreactService extends Component<Props, State> {
   state: State = {
     state: { ...initialState }
   };

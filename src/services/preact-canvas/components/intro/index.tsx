@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 import { Remote } from "comlink/src/comlink.js";
-import { h } from "preact";
+import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 import StateService from "../../../state/index.js";
 

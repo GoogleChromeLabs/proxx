@@ -11,9 +11,6 @@
  * limitations under the License.
  */
 
-// This must be first
-import "./utils/preact-globals.js";
-
 import workerURL from "chunk-name:./worker.js";
 import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
