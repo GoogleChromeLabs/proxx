@@ -1,5 +1,5 @@
 #version 100
-precision highp float;
+precision mediump float;
 
 varying vec2 uv;
 uniform float iTime;
@@ -111,7 +111,6 @@ vec4 demultiplyAlpha(vec4 c) {
     r.a = c.a;
     return r;
 }
-
 void main() {
     float speed = 5.0;
     vec4 pink = premultiplyAlpha(vec4(180.0/255.0, 50.0/255.0, 128.0/255.0, 1.0));

@@ -16,9 +16,6 @@ import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
 import { RemoteServices } from "./worker.js";
 
-// @ts-ignore
-import fragmentShader from "./services/nebula/fragment.glsl";
-
 async function startWorker(): Promise<Remote<RemoteServices>> {
   const worker = new Worker(workerURL);
   const { wrap } = await import("comlink/src/comlink.js");
@@ -49,17 +46,7 @@ async function bootstrap() {
   new MutationObserver(c => console.log(c)).observe(document.body, {
     childList: true
   });
-  import("./services/nebula/index.js")
-    .then(m => {
-      const shaderBox = new m.default(fragmentShader, {
-        canvas: document.querySelector("#nebula") as any
-      });
-      document.body.appendChild(shaderBox.canvas);
-      shaderBox.canvas.id = "nebula";
-      // shaderBox.resize();
-      shaderBox.start();
-    })
-    .catch(e => console.error(e));
+  import("./services/nebula/index.js").then(m => m.run());
 }
 
 bootstrap().catch(e => console.error(e));
