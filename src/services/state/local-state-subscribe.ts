@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { proxy, Remote } from "comlink/src/comlink.js";
+import { Remote } from "comlink/src/comlink.js";
 import StateService, { State, StateName, StateUpdate, UpdateType } from ".";
 import {
   Cell,
@@ -23,6 +23,7 @@ export default async function localStateSubscribe(
   callback: (newState: State, gridChanges: GridChanges) => void
 ) {
   let state = await stateService.getFullState();
+  const { proxy } = await import("comlink/src/comlink.js");
   callback(state, []);
 
   stateService.subscribe(

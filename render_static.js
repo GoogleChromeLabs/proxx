@@ -4,37 +4,19 @@ const puppeteer = require("puppeteer");
 const ecstatic = require("ecstatic");
 const http = require("http");
 
-function unrollDependencies(dependencygraph, desc) {
-  return [
-    desc.fileName,
-    ...desc.imports
-      .map(d => dependencygraph[d])
-      .flatMap(m => unrollDependencies(dependencygraph, m))
-  ];
-}
-
 function findChunkWithName(dependencygraph, name) {
   return Object.values(dependencygraph).find(desc =>
     (desc.facadeModuleId || "").endsWith(name)
   );
 }
 
-function extractPreloads(dependencygraph) {
-  return unrollDependencies(
-    dependencygraph,
-    findChunkWithName(dependencygraph, "bootstrap.ts")
-  );
-}
-
-function extractBootstrap(dependencygraph) {
-  return findChunkWithName(dependencygraph, "bootstrap.ts").fileName;
-}
-
 async function generateShell(file, dependencygraph) {
   const pkg = require("./package.json");
   const template = fs.readFileSync("src/index.ejs").toString();
   const output = ejs.render(template, {
-    bootstrapFile: extractBootstrap(dependencygraph),
+    bootstrapFile: findChunkWithName(dependencygraph, "bootstrap.ts").fileName,
+    workerFile: findChunkWithName(dependencygraph, "worker.ts").fileName,
+    dependencygraph,
     pkg,
     fs
   });
@@ -74,16 +56,6 @@ async function correctMarkup(markup, { port, dependencygraph }) {
     /<script src="\.\/chunk-([^"]+)"[^>]+><\/script>/g,
     ""
   );
-  // Figure out preload
-  const preloads = extractPreloads(dependencygraph).map(
-    name => `<link rel="preload" href="./${name}" as="script" />`
-  );
-
-  const workerChunk = findChunkWithName(dependencygraph, "worker.ts");
-  // Use prefetch as link[rel=preload][as=worker] is not supported yet
-  // crbug.com/946510#
-  preloads.push(`<link rel="prefetch" href="./${workerChunk.fileName}" />`);
-  markup = markup.replace("</head>", `${preloads.join("")}</head>`);
   return markup;
 }
 

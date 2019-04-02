@@ -16,6 +16,8 @@ import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
 import { RemoteServices } from "./worker.js";
 
+const parsedURL = new URL(location.toString());
+
 async function startWorker(): Promise<Remote<RemoteServices>> {
   const worker = new Worker(workerURL);
   const { wrap } = await import("comlink/src/comlink.js");
@@ -24,10 +26,6 @@ async function startWorker(): Promise<Remote<RemoteServices>> {
 
 async function bootstrap() {
   const parsedURL = new URL(location.toString());
-
-  if (parsedURL.searchParams.has("block")) {
-    await import("./utils/load-blocker.js").then(m => m.default());
-  }
 
   let remoteServices: Promise<Remote<RemoteServices>>;
 
