@@ -24,6 +24,12 @@ interface State {
 // I really tried.
 // But I failed.
 // Forgive me.
+/**
+ * Create a lazy-loading component. It takes the same props as the target component, along with a
+ * 'loading' prop. This prop should be a function that returns vdom for the loading state.
+ *
+ * @param componentPromise A promise for a component class.
+ */
 export default function deferred<
   C extends ComponentConstructor<any, any>,
   P = C extends ComponentConstructor<infer P1, any> ? P1 : never,
