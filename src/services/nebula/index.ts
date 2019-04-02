@@ -14,7 +14,6 @@
 // @ts-ignore
 import vertexShader from "./vertex.glsl";
 
-console.log("ohai");
 function setShader(
   gl: WebGLRenderingContext,
   program: WebGLProgram,
@@ -38,14 +37,23 @@ function setShader(
   return shader;
 }
 
-export default class ShaderCanvas {
-  readonly canvas = document.createElement("canvas");
+export interface ShaderBoxOpts {
+  canvas?: HTMLCanvasElement;
+}
+export default class ShaderBox {
+  readonly canvas: HTMLCanvasElement;
   private _gl: WebGLRenderingContext;
-  private _startTime = Date.now();
   private _iGlobalTimeUniform: WebGLUniformLocation;
   private _running = false;
 
-  constructor(private _fragmentShader: string) {
+  constructor(
+    private _fragmentShader: string,
+    opts: Partial<ShaderBoxOpts> = {}
+  ) {
+    opts = {
+      canvas: opts.canvas || document.createElement("canvas")
+    };
+    this.canvas = opts.canvas!;
     this._gl = this.canvas.getContext("webgl", { antialias: false })!;
     if (!this._gl) {
       throw Error("No support for WebGL");

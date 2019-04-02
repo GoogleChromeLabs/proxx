@@ -46,10 +46,16 @@ async function bootstrap() {
   if (parsedURL.searchParams.has("square")) {
     import("./utils/square-spinner.js");
   }
+  new MutationObserver(c => console.log(c)).observe(document.body, {
+    childList: true
+  });
   import("./services/nebula/index.js")
     .then(m => {
-      const shaderBox = new m.default(fragmentShader);
+      const shaderBox = new m.default(fragmentShader, {
+        canvas: document.querySelector("#nebula") as any
+      });
       document.body.appendChild(shaderBox.canvas);
+      shaderBox.canvas.id = "nebula";
       // shaderBox.resize();
       shaderBox.start();
     })
