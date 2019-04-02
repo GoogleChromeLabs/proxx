@@ -12,13 +12,13 @@
  */
 
 import { Remote } from "comlink/src/comlink.js";
-import { Component, ComponentFactory, h, render } from "preact";
-import { Cell, GridChanges } from "../../gamelogic/types.js";
+import { Component, h, render } from "preact";
+import { GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
 import initialState from "../state/initial-state.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
+import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
-import ResolveComponent from "./components/resolve/index.js";
 
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;
@@ -30,6 +30,13 @@ interface State {
 }
 
 export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
+
+// tslint:disable-next-line:variable-name
+const Game = deferred(
+  import("./components/game/index.js").then(m => m.default)
+);
+// tslint:disable-next-line:variable-name
+const End = deferred(import("./components/end/index.js").then(m => m.default));
 
 class PreactService extends Component<Props, State> {
   state: State = {
@@ -50,33 +57,21 @@ class PreactService extends Component<Props, State> {
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
         return (
-          <ResolveComponent<
-            ComponentFactory<import("./components/game/index.js").Props>
-          >
-            promise={import("./components/game/index.js").then(m => m.default)}
-            // tslint:disable-next-line:variable-name Need uppercase for JSX
-            onResolve={Game => (
-              // TODO: Implement an unsubscribe for when the unmounting happens
-              <Game
-                grid={state.grid}
-                gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
-                  this.gridChangeSubscribers.add(f)
-                }
-                stateService={stateService!}
-              />
-            )}
+          <Game
+            loading={() => <div />}
+            grid={state.grid}
+            gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
+              this.gridChangeSubscribers.add(f)
+            }
+            stateService={stateService!}
           />
         );
       case StateName.END:
         return (
-          <ResolveComponent<
-            ComponentFactory<import("./components/end/index.js").Props>
-          >
-            promise={import("./components/end/index.js").then(m => m.default)}
-            // tslint:disable-next-line:variable-name Need uppercase for JSX
-            onResolve={End => (
-              <End type={state.endType} restart={() => stateService!.reset()} />
-            )}
+          <End
+            loading={() => <div />}
+            type={state.endType}
+            restart={() => stateService!.reset()}
           />
         );
     }
