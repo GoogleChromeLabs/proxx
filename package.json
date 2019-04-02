@@ -14,9 +14,7 @@
     "lint": "tslint -t verbose -c tslint.json 'src/**/*.{ts,tsx}'",
     "lintfix": "tslint -t verbose -c tslint.json --fix 'src/**/*.{ts,tsx}'",
     "fmt_test": "test $(prettier -l 'src/**/*.{ts,tsx}' *.{js,json,md} | wc -l) -eq 0",
-    "test": "npm run fmt_test && npm run lint && npm run build",
-    "deploy": "netlify deploy --dir=dist",
-    "deploy:prod": "netlify deploy --dir=dist --prod"
+    "test": "npm run fmt_test && npm run lint && npm run build"
   },
   "husky": {
     "hooks": {

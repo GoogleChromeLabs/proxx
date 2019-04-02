@@ -10,17 +10,20 @@ function findChunkWithName(dependencygraph, name) {
   );
 }
 
+async function renderEjsFile(inPath, outPath, data) {
+  const template = fs.readFileSync(inPath).toString();
+  const output = ejs.render(template, data);
+  fs.writeFileSync(outPath, output);
+}
+
 async function generateShell(file, dependencygraph) {
-  const pkg = require("./package.json");
-  const template = fs.readFileSync("src/index.ejs").toString();
-  const output = ejs.render(template, {
+  await renderEjsFile("src/index.ejs", file, {
     bootstrapFile: findChunkWithName(dependencygraph, "bootstrap.ts").fileName,
     workerFile: findChunkWithName(dependencygraph, "worker.ts").fileName,
     dependencygraph,
-    pkg,
+    pkg: require("./package.json"),
     fs
   });
-  fs.writeFileSync(file, output);
 }
 
 async function startServer() {
@@ -68,5 +71,7 @@ async function run() {
   markup = await correctMarkup(markup, { port, dependencygraph });
   fs.writeFileSync("dist/index.html", markup);
   server.close();
+
+  await renderEjsFile("src/_headers.ejs", "dist/_headers", {});
 }
 run();
