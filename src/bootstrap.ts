@@ -16,7 +16,8 @@ import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
 import { RemoteServices } from "./worker.js";
 
-const parsedURL = new URL(location.toString());
+// @ts-ignore
+import fragmentShader from "./services/nebula/fragment.glsl";
 
 async function startWorker(): Promise<Remote<RemoteServices>> {
   const worker = new Worker(workerURL);
@@ -45,6 +46,14 @@ async function bootstrap() {
   if (parsedURL.searchParams.has("square")) {
     import("./utils/square-spinner.js");
   }
+  import("./services/nebula/index.js")
+    .then(m => {
+      const shaderBox = new m.default(fragmentShader);
+      document.body.appendChild(shaderBox.canvas);
+      // shaderBox.resize();
+      shaderBox.start();
+    })
+    .catch(e => console.error(e));
 }
 
 bootstrap().catch(e => console.error(e));

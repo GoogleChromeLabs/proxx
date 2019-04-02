@@ -21,6 +21,7 @@ import postcss from "rollup-plugin-postcss";
 import cssModuleTypes from "./css-module-types.js";
 import assetPlugin from "./asset-plugin.js";
 import { readFileSync } from "fs";
+import { string } from "rollup-plugin-string";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -58,6 +59,9 @@ export default {
       // plugin code. :shurg:
       // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
       clean: true
+    }),
+    string({
+      include: "**/*.glsl"
     }),
     assetPlugin(),
     chunkNamePlugin(),
