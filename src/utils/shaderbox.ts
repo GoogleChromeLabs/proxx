@@ -36,23 +36,32 @@ function setShader(
 
 export interface ShaderBoxOpts {
   canvas?: HTMLCanvasElement;
+  scaling: number;
+  timing: (ts: number) => number;
 }
+const defaultOpts: ShaderBoxOpts = {
+  scaling: devicePixelRatio,
+  timing: ts => ts
+};
 export default class ShaderBox {
   readonly canvas: HTMLCanvasElement;
   private _gl: WebGLRenderingContext;
   private _iGlobalTimeUniform: WebGLUniformLocation;
   private _iResolutionUniform: WebGLUniformLocation;
   private _running = false;
+  private _opts: ShaderBoxOpts;
 
   constructor(
     private _vertexShader: string,
     private _fragmentShader: string,
     opts: Partial<ShaderBoxOpts> = {}
   ) {
-    opts = {
+    this._opts = {
+      ...defaultOpts,
+      ...opts,
       canvas: opts.canvas || document.createElement("canvas")
     };
-    this.canvas = opts.canvas!;
+    this.canvas = this._opts.canvas!;
     this._gl = this.canvas.getContext("webgl", { antialias: false })!;
     if (!this._gl) {
       throw Error("No support for WebGL");
@@ -127,8 +136,8 @@ export default class ShaderBox {
 
   resize() {
     const rect = this.canvas.getBoundingClientRect();
-    this.canvas.width = rect.width; // * devicePixelRatio;
-    this.canvas.height = rect.height; // * devicePixelRatio;
+    this.canvas.width = rect.width * this._opts.scaling;
+    this.canvas.height = rect.height * this._opts.scaling;
     this._gl.uniform2f(
       this._iResolutionUniform,
       this.canvas.width,
@@ -138,13 +147,14 @@ export default class ShaderBox {
     this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  private _loop(ts: number) {
+  draw(ts: number = Date.now()) {
     // tslint:disable-next-line:no-bitwise
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
-    console.log(ts / 1000);
-    ts += 300000;
-    this._gl.uniform1f(this._iGlobalTimeUniform, ts / 1000);
+    this._gl.uniform1f(this._iGlobalTimeUniform, this._opts.timing(ts));
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
+  }
+  private _loop(ts: number) {
+    this.draw(ts);
     if (this._running) {
       requestAnimationFrame(this._loop);
     }

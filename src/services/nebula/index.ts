@@ -22,7 +22,12 @@ import vertexShader from "./vertex.glsl";
 
 export function run() {
   const shaderBox = new ShaderBox(vertexShader, fragmentShader, {
-    canvas: document.querySelector("#nebula") as any
+    canvas: document.querySelector("#nebula") as any,
+    scaling: 1 / 5,
+    // mediump precision will not be able to pass timestamps to the shader
+    // with sufficient precision and will look like jank. So I moved the looping
+    // code to JavaScript.
+    timing: ts => Math.sin(ts / 200000)
   });
   document.body.appendChild(shaderBox.canvas);
   shaderBox.canvas.id = "nebula";
