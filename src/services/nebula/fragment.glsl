@@ -5,79 +5,82 @@ varying vec2 uv;
 uniform float iTime;
 uniform vec2 iResolution;
 
-/**
- * Perlin noise
- */
+#define remap(minIn, maxIn, minOut, maxOut, v) (((v) - (minIn))/((maxIn) - (minIn)) * ((maxOut) - (minOut)) + (minOut))
 
-const vec4 hashf4 = vec4 (0., 1., 57., 58.);
-const vec3 hashf3 = vec3 (1., 57., 113.);
-const float hashC = 43758.54;
-
-vec4 hash(float p) {
-  return fract(sin(p + hashf4) * hashC);
-}
-
-vec2 smoothing(vec2 f) {
-  return f * f * (3. - 2. * f);
-}
-
-float perlin(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = smoothing(fract(p));
-  vec4 t = hash(dot(i, hashf3.xy));
-
-  // Bilinear interpolation
-  return mix (
-      mix (t.x, t.y, f.x),
-      mix (t.z, t.w, f.x),
-      f.y
-  );
-}
-
-#define NUM_OCTAVES 4
-float perlinOctaves(vec2 p)
-{
-  float s = 0.0;
-  float a = 1.0;
-  for (int i = 0; i <= NUM_OCTAVES; i++) {
-    s += a * perlin (p);
-    a *= 0.5;
-    p *= 2.;
-  }
-  return s;
+// sin(v) remapped to [0; 1]
+float sin01(float v) {
+  v = sin(v);
+  return remap(-1., 1., 0., 1., v);
 }
 
 
-/**
- * Vortex flow field
- */
-
-vec2 vortex (vec2 q, vec2 c) {
-  vec2 d = q - c;
-  return 0.25 * vec2 (d.y, - d.x) / (dot (d, d) + 0.05);
+// Random number between -1 and 1 exclusive
+float random (in vec2 st) {
+    // https://thebookofshaders.com/10/
+    // Originally, the last number is 43757.233, but that seems
+    // to be outside of the precision on some mobile devices, making
+    // the PRNG useless.
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 3.233);
 }
 
-vec2 vortexflowfield (vec2 q, float iTime) {
-  float dir = 1.;
-  vec2 vr = vec2(0.0);
-  vec2 c = vec2(mod(iTime, 10.0) - 20.0, 0.6 * dir);
-  for (int k = 0; k < 30; k ++) {
-    vr += dir * vortex(4. * q, c);
-    c = vec2 (c.x + 1., - c.y);
-    dir = - dir;
-  }
-  return vr;
+// Noise field between -1 and 1
+float noise (vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+
+    // Four corners in 2D of a tile
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    vec2 u = f;
+    // These two are equivalent
+	u = smoothstep(0., 1., f);
+    //u = f * f * (3.0 - 2.0 * f);
+
+    return mix(a, b, u.x) +
+            (c - a)* u.y * (1.0 - u.x) +
+            (d - b) * u.x * u.y;
 }
+
+
+float fbm (vec2 st) {
+    float value = 0.0;
+    float amplitude = .5;
+	float lacunarity = 2.0;
+	float gain = 0.5;
+
+        value += amplitude * noise(st);
+        st *= lacunarity;
+        amplitude *= gain;
+
+  return value;
+}
+
+
+vec2 vortex(vec2 center, float strength, vec2 p) {
+  float d = abs(distance(p, center));
+  float v = cos(d*3.);
+  float theta = remap(-1., 1., 0., 2., v) / (1. + length(p)) * strength ;
+  mat2 rot = mat2(cos(theta), -sin(theta), sin(theta), cos(theta));
+  return rot * (p-center) + center;
+}
+
 
 void main() {
-    vec4 darkblue = (vec4(8.0/255.0, 11.0/255.0, 100.0/255.0, 1.0));
-    vec4 blue = (vec4(28.0/255.0, 150.0/255.0, 210.0/255.0, 1.0));
-    vec2 p = uv;
-    p.x *= iResolution.x / iResolution.y;
-    p = (p - vec2(0.5))*0.6;
-    for (int i = 0; i < 10; i++) {
-      p -= vortexflowfield(p, iTime/10.0) * 0.03;
-    }
-    float v = perlinOctaves(p + vec2(iTime/30.0, 0.0));
-    gl_FragColor = mix(darkblue, blue, v/1.0);
+  vec4 darkblue = (vec4(8.0/255.0, 11.0/255.0, 100.0/255.0, 1.0));
+  vec4 blue = (vec4(28.0/255.0, 150.0/255.0, 210.0/255.0, 1.0));
+
+  vec2 p = uv * 4.;
+  p.x *= iResolution.x/iResolution.y;
+
+
+  float time = sin01(iTime/10.0);
+  float fbmScrollFactor = 40.4;
+
+
+  vec2 vortexUV = vortex(vec2(0.5), 4., p);
+  float f = fbm(vortexUV*10. + vec2(time * fbmScrollFactor, 0.0));
+  gl_FragColor = mix(darkblue, vec4(1.0), smoothstep(0., 1., f));
 }

@@ -127,19 +127,22 @@ export default class ShaderBox {
 
   resize() {
     const rect = this.canvas.getBoundingClientRect();
-    this.canvas.width = rect.width * devicePixelRatio;
-    this.canvas.height = rect.height * devicePixelRatio;
+    this.canvas.width = rect.width; // * devicePixelRatio;
+    this.canvas.height = rect.height; // * devicePixelRatio;
     this._gl.uniform2f(
       this._iResolutionUniform,
       this.canvas.width,
       this.canvas.height
     );
+    console.log("Set size uniform to", this.canvas.width, this.canvas.height);
     this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
 
   private _loop(ts: number) {
     // tslint:disable-next-line:no-bitwise
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
+    console.log(ts / 1000);
+    ts += 300000;
     this._gl.uniform1f(this._iGlobalTimeUniform, ts / 1000);
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
     if (this._running) {
