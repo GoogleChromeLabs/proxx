@@ -11,9 +11,6 @@
  * limitations under the License.
  */
 
-// @ts-ignore
-import vertexShader from "./vertex.glsl";
-
 function setShader(
   gl: WebGLRenderingContext,
   program: WebGLProgram,
@@ -44,9 +41,11 @@ export default class ShaderBox {
   readonly canvas: HTMLCanvasElement;
   private _gl: WebGLRenderingContext;
   private _iGlobalTimeUniform: WebGLUniformLocation;
+  private _iResolutionUniform: WebGLUniformLocation;
   private _running = false;
 
   constructor(
+    private _vertexShader: string,
     private _fragmentShader: string,
     opts: Partial<ShaderBoxOpts> = {}
   ) {
@@ -62,7 +61,7 @@ export default class ShaderBox {
     if (!program) {
       throw Error("Could not create program");
     }
-    setShader(this._gl, program, this._gl.VERTEX_SHADER, vertexShader);
+    setShader(this._gl, program, this._gl.VERTEX_SHADER, this._vertexShader);
     setShader(
       this._gl,
       program,
@@ -82,9 +81,18 @@ export default class ShaderBox {
       );
     }
     this._gl.useProgram(program);
+
     this._iGlobalTimeUniform = this._gl.getUniformLocation(program, "iTime")!;
     if (!this._iGlobalTimeUniform) {
       throw Error("Couldn’t find time uniform location in shader");
+    }
+
+    this._iResolutionUniform = this._gl.getUniformLocation(
+      program,
+      "iResolution"
+    )!;
+    if (!this._iGlobalTimeUniform) {
+      throw Error("Couldn’t find resolution uniform location in shader");
     }
 
     const vaoExt = this._gl.getExtension("OES_vertex_array_object");
@@ -121,6 +129,11 @@ export default class ShaderBox {
     const rect = this.canvas.getBoundingClientRect();
     this.canvas.width = rect.width * devicePixelRatio;
     this.canvas.height = rect.height * devicePixelRatio;
+    this._gl.uniform2f(
+      this._iResolutionUniform,
+      this.canvas.width,
+      this.canvas.height
+    );
     this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
 

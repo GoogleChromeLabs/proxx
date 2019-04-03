@@ -11,14 +11,17 @@
  * limitations under the License.
  */
 
-import ShaderBox from "./shaderbox.js";
+import ShaderBox from "../../utils/shaderbox.js";
 import { nebula as nebulaStyle } from "./style.css";
 
 // @ts-ignore
 import fragmentShader from "./fragment.glsl";
 
+// @ts-ignore
+import vertexShader from "./vertex.glsl";
+
 export function run() {
-  const shaderBox = new ShaderBox(fragmentShader, {
+  const shaderBox = new ShaderBox(vertexShader, fragmentShader, {
     canvas: document.querySelector("#nebula") as any
   });
   document.body.appendChild(shaderBox.canvas);

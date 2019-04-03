@@ -43,9 +43,6 @@ async function bootstrap() {
   if (parsedURL.searchParams.has("square")) {
     import("./utils/square-spinner.js");
   }
-  new MutationObserver(c => console.log(c)).observe(document.body, {
-    childList: true
-  });
   import("./services/nebula/index.js").then(m => m.run());
 }
 
