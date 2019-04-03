@@ -38,18 +38,19 @@ export interface ShaderBoxOpts {
   canvas?: HTMLCanvasElement;
   scaling: number;
   timing: (ts: number) => number;
+  uniforms: string[];
 }
 const defaultOpts: ShaderBoxOpts = {
   scaling: devicePixelRatio,
-  timing: ts => ts
+  timing: ts => ts,
+  uniforms: []
 };
 export default class ShaderBox {
   readonly canvas: HTMLCanvasElement;
   private _gl: WebGLRenderingContext;
-  private _iGlobalTimeUniform: WebGLUniformLocation;
-  private _iResolutionUniform: WebGLUniformLocation;
   private _running = false;
   private _opts: ShaderBoxOpts;
+  private _uniforms = new Map<string, WebGLUniformLocation>();
 
   constructor(
     private _vertexShader: string,
@@ -91,17 +92,14 @@ export default class ShaderBox {
     }
     this._gl.useProgram(program);
 
-    this._iGlobalTimeUniform = this._gl.getUniformLocation(program, "iTime")!;
-    if (!this._iGlobalTimeUniform) {
-      throw Error("Couldn’t find time uniform location in shader");
-    }
-
-    this._iResolutionUniform = this._gl.getUniformLocation(
-      program,
-      "iResolution"
-    )!;
-    if (!this._iGlobalTimeUniform) {
-      throw Error("Couldn’t find resolution uniform location in shader");
+    this._opts.uniforms.push("iTime", "iResolution");
+    for (const name of this._opts.uniforms) {
+      const uniformLocation = this._gl.getUniformLocation(program, name)!;
+      if (!uniformLocation) {
+        console.error(`Couldn’t find uniform location of ${name}`);
+        continue;
+      }
+      this._uniforms.set(name, uniformLocation);
     }
 
     const vaoExt = this._gl.getExtension("OES_vertex_array_object");
@@ -138,25 +136,45 @@ export default class ShaderBox {
     const rect = this.canvas.getBoundingClientRect();
     this.canvas.width = rect.width * this._opts.scaling;
     this.canvas.height = rect.height * this._opts.scaling;
-    this._gl.uniform2f(
-      this._iResolutionUniform,
-      this.canvas.width,
-      this.canvas.height
-    );
+    this.setUniform2f("iResolution", [this.canvas.width, this.canvas.height]);
     console.log("Set size uniform to", this.canvas.width, this.canvas.height);
     this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  setUniform1f(name: string, val: number) {
+    this._gl.uniform1f(this._getUniform(name), val);
+  }
+
+  setUniform2f(name: string, val: [number, number]) {
+    this._gl.uniform2fv(this._getUniform(name), val);
+  }
+
+  setUniform3f(name: string, val: [number, number, number]) {
+    this._gl.uniform3fv(this._getUniform(name), val);
+  }
+
+  setUniform4f(name: string, val: [number, number, number, number]) {
+    this._gl.uniform4fv(this._getUniform(name), val);
   }
 
   draw(ts: number = Date.now()) {
     // tslint:disable-next-line:no-bitwise
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
-    this._gl.uniform1f(this._iGlobalTimeUniform, this._opts.timing(ts));
+    this.setUniform1f("iTime", this._opts.timing(ts));
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
   }
+
   private _loop(ts: number) {
     this.draw(ts);
     if (this._running) {
       requestAnimationFrame(this._loop);
     }
+  }
+
+  private _getUniform(name: string): WebGLUniformLocation {
+    if (!this._uniforms.has(name)) {
+      throw Error(`Unknown uniform ${name}`);
+    }
+    return this._uniforms.get(name)!;
   }
 }

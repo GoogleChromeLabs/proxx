@@ -4,6 +4,10 @@ precision mediump float;
 varying vec2 uv;
 uniform float iTime;
 uniform vec2 iResolution;
+uniform float contrast;
+uniform float speed;
+uniform float nebulaScale;
+uniform float vortexInfluence;
 
 #define remap(minIn, maxIn, minOut, maxOut, v) (((v) - (minIn)) / ((maxIn) - (minIn)) * ((maxOut) - (minOut)) + (minOut))
 
@@ -73,9 +77,7 @@ void main() {
   // Config vars
   vec4 darkblue = (vec4(8.0 / 255.0, 11.0 / 255.0, 100.0 / 255.0, 1.0));
   vec4 blue = (vec4(28.0 / 255.0, 150.0 / 255.0, 210.0 / 255.0, 1.0));
-  float fbmScrollFactor = -40.;
-  float nebulaScale = 10.;
-  float contrast = 5.;
+
 
   vec2 p = uv;
   // Maintain aspect ratio
@@ -86,10 +88,10 @@ void main() {
 
   // Displace the point
   for(int i = 0; i < 10; i++) {
-	  p += vortexDisplacement(p, vec2(0.0)) * .03;
+	  p += vortexDisplacement(p, vec2(0.0)) * vortexInfluence;
   }
   // Get intensity of noise at distorted point coordinates
-  float f = fbm(p * nebulaScale + vec2(time * fbmScrollFactor, 0.0));
+  float f = fbm(p * nebulaScale + vec2(time * speed, 0.0));
   // Set color acccording to insensity
   gl_FragColor = mix(darkblue, blue, smoothstep(.1, .7, f) / contrast);
 }

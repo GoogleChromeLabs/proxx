@@ -48,7 +48,7 @@ async function bootstrap() {
   if (parsedURL.searchParams.has("debug")) {
     import("./services/debug/index.js").then(m =>
       m.run({
-        nebula: document.querySelector("#nebula") as any
+        nebula: (document.querySelector("#nebula") as any).shaderBox
       })
     );
   }

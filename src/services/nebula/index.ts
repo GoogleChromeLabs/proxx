@@ -27,10 +27,16 @@ export function run() {
     // mediump precision will not be able to pass timestamps to the shader
     // with sufficient precision and will look like jank. So I moved the looping
     // code to JavaScript.
-    timing: ts => Math.sin(ts / 200000)
+    timing: ts => Math.sin(ts / 200000),
+    uniforms: ["contrast", "speed", "nebulaScale", "vortexInfluence"]
   });
+  shaderBox.setUniform1f("contrast", 5);
+  shaderBox.setUniform1f("speed", -40);
+  shaderBox.setUniform1f("nebulaScale", 10);
+  shaderBox.setUniform1f("vortexInfluence", 0.03);
   document.body.appendChild(shaderBox.canvas);
   shaderBox.canvas.id = "nebula";
+  (shaderBox.canvas as any).shaderBox = shaderBox;
   shaderBox.canvas.classList.add(nebulaStyle);
   shaderBox.resize();
   shaderBox.start();

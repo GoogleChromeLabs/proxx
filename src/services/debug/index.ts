@@ -19,8 +19,25 @@ import ShaderBox from "../../utils/shaderbox.js";
 export interface Params {
   nebula: ShaderBox;
 }
-export function run(params: Params) {
-  (self as any).speed = 4;
+export function run({ nebula }: Params) {
+  const settings = {
+    contrast: 0,
+    nebulaScale: 0,
+    speed: 0,
+    vortexInfluence: 0
+  };
   const gui = new dat.GUI();
-  gui.add(self, "speed", -5, 5);
+  const nebulaF = gui.addFolder("Nebula");
+  nebulaF
+    .add(settings, "contrast", 0, 5)
+    .onChange((v: number) => nebula.setUniform1f("contrast", v));
+  nebulaF
+    .add(settings, "speed", -100, 100)
+    .onChange((v: number) => nebula.setUniform1f("speed", v));
+  nebulaF
+    .add(settings, "nebulaScale", 0, 40)
+    .onChange((v: number) => nebula.setUniform1f("nebulaScale", v));
+  nebulaF
+    .add(settings, "vortexInfluence", -0.1, 0.1)
+    .onChange((v: number) => nebula.setUniform1f("vortexInfluence", v));
 }
