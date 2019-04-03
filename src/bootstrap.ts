@@ -43,7 +43,15 @@ async function bootstrap() {
   if (parsedURL.searchParams.has("square")) {
     import("./utils/square-spinner.js");
   }
+
   import("./services/nebula/index.js").then(m => m.run());
+  if (parsedURL.searchParams.has("debug")) {
+    import("./services/debug/index.js").then(m =>
+      m.run({
+        nebula: document.querySelector("#nebula") as any
+      })
+    );
+  }
 }
 
 bootstrap().catch(e => console.error(e));
