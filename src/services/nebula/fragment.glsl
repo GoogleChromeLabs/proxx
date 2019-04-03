@@ -63,30 +63,31 @@ float fbm(vec2 st)
   return value;
 }
 
-vec2 vortex(vec2 center, float strength, vec2 p)
-{
-  float d = abs(distance(p, center));
-  float theta = sin01(d * 3.) / (1. + length(p)) * strength;
-  mat2 rot = mat2(cos(theta), -sin(theta), sin(theta), cos(theta));
-  return rot * (p - center) + center;
+vec2 vortexDisplacement (vec2 q, vec2 c) {
+  vec2 d = q - c;
+  return vec2(d.y, -d.x) / (length(d) + 0.05);
 }
+
 
 void main() {
   // Config vars
   vec4 darkblue = (vec4(8.0 / 255.0, 11.0 / 255.0, 100.0 / 255.0, 1.0));
   vec4 blue = (vec4(28.0 / 255.0, 150.0 / 255.0, 210.0 / 255.0, 1.0));
-  float fbmScrollFactor = 40.;
+  float fbmScrollFactor = -40.;
   float nebulaScale = 10.;
-  float contrast = 7.;
+  float contrast = 5.;
 
   vec2 p = uv;
   // Maintain aspect ratio
   p.x *= iResolution.x / iResolution.y;
 
   float time = iTime;
+  p += vec2(-0.5);
 
-  // Distort the points coordinates with vortex
-  p = vortex(vec2(0.5), 4., p);
+  // Displace the point
+  for(int i = 0; i < 10; i++) {
+	  p += vortexDisplacement(p, vec2(0.0)) * .03;
+  }
   // Get intensity of noise at distorted point coordinates
   float f = fbm(p * nebulaScale + vec2(time * fbmScrollFactor, 0.0));
   // Set color acccording to insensity
