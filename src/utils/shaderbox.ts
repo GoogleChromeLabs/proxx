@@ -50,7 +50,8 @@ export default class ShaderBox {
   private _gl: WebGLRenderingContext;
   private _running = false;
   private _opts: ShaderBoxOpts;
-  private _uniforms = new Map<string, WebGLUniformLocation>();
+  private _uniformLocations = new Map<string, WebGLUniformLocation>();
+  private _uniformValues = new Map<string, number[]>();
 
   constructor(
     private _vertexShader: string,
@@ -99,7 +100,7 @@ export default class ShaderBox {
         console.error(`Couldn’t find uniform location of ${name}`);
         continue;
       }
-      this._uniforms.set(name, uniformLocation);
+      this._uniformLocations.set(name, uniformLocation);
     }
 
     const vaoExt = this._gl.getExtension("OES_vertex_array_object");
@@ -141,20 +142,33 @@ export default class ShaderBox {
     this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
 
+  get uniforms() {
+    return [...this._uniformLocations.keys()];
+  }
+
+  getUniform(name: string): number[] {
+    this._assertUniformExists(name);
+    return this._uniformValues.get(name)!;
+  }
+
   setUniform1f(name: string, val: number) {
     this._gl.uniform1f(this._getUniform(name), val);
+    this._uniformValues.set(name, [val]);
   }
 
   setUniform2f(name: string, val: [number, number]) {
     this._gl.uniform2fv(this._getUniform(name), val);
+    this._uniformValues.set(name, val);
   }
 
   setUniform3f(name: string, val: [number, number, number]) {
     this._gl.uniform3fv(this._getUniform(name), val);
+    this._uniformValues.set(name, val);
   }
 
   setUniform4f(name: string, val: [number, number, number, number]) {
     this._gl.uniform4fv(this._getUniform(name), val);
+    this._uniformValues.set(name, val);
   }
 
   draw(ts: number = Date.now()) {
@@ -171,10 +185,13 @@ export default class ShaderBox {
     }
   }
 
-  private _getUniform(name: string): WebGLUniformLocation {
-    if (!this._uniforms.has(name)) {
+  private _assertUniformExists(name: string) {
+    if (!this._uniformLocations.has(name)) {
       throw Error(`Unknown uniform ${name}`);
     }
-    return this._uniforms.get(name)!;
+  }
+  private _getUniform(name: string): WebGLUniformLocation {
+    this._assertUniformExists(name);
+    return this._uniformLocations.get(name)!;
   }
 }

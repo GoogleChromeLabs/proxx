@@ -20,24 +20,28 @@ export interface Params {
   nebula: ShaderBox;
 }
 export function run({ nebula }: Params) {
-  const settings = {
-    contrast: 0,
-    nebulaScale: 0,
-    speed: 0,
-    vortexInfluence: 0
-  };
   const gui = new dat.GUI();
+
+  const nebulaSettings: any = {
+    logSettings() {
+      console.log(this);
+    }
+  };
+  for (const name of nebula.uniforms) {
+    nebulaSettings[name] = nebula.getUniform(name)[0];
+  }
   const nebulaF = gui.addFolder("Nebula");
   nebulaF
-    .add(settings, "contrast", 0, 5)
+    .add(nebulaSettings, "contrast", 0, 5)
     .onChange((v: number) => nebula.setUniform1f("contrast", v));
   nebulaF
-    .add(settings, "speed", -100, 100)
+    .add(nebulaSettings, "speed", -100, 100)
     .onChange((v: number) => nebula.setUniform1f("speed", v));
   nebulaF
-    .add(settings, "nebulaScale", 0, 40)
+    .add(nebulaSettings, "nebulaScale", 0, 40)
     .onChange((v: number) => nebula.setUniform1f("nebulaScale", v));
   nebulaF
-    .add(settings, "vortexInfluence", -0.1, 0.1)
+    .add(nebulaSettings, "vortexInfluence", -0.1, 0.1)
     .onChange((v: number) => nebula.setUniform1f("vortexInfluence", v));
+  nebulaF.add(nebulaSettings, "logSettings");
 }

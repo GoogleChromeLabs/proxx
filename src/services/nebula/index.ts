@@ -30,9 +30,9 @@ export function run() {
     timing: ts => Math.sin(ts / 200000),
     uniforms: ["contrast", "speed", "nebulaScale", "vortexInfluence"]
   });
-  shaderBox.setUniform1f("contrast", 5);
-  shaderBox.setUniform1f("speed", -40);
-  shaderBox.setUniform1f("nebulaScale", 10);
+  shaderBox.setUniform1f("contrast", 4.4);
+  shaderBox.setUniform1f("speed", -68);
+  shaderBox.setUniform1f("nebulaScale", 4.6);
   shaderBox.setUniform1f("vortexInfluence", 0.03);
   document.body.appendChild(shaderBox.canvas);
   shaderBox.canvas.id = "nebula";
