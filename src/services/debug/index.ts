@@ -25,6 +25,12 @@ export function run({ nebula }: Params) {
   const nebulaSettings: any = {
     logSettings() {
       console.log(this);
+    },
+    start() {
+      nebula.start();
+    },
+    stop() {
+      nebula.stop();
     }
   };
   for (const name of nebula.uniforms) {
@@ -44,4 +50,6 @@ export function run({ nebula }: Params) {
     .add(nebulaSettings, "vortexInfluence", -0.1, 0.1)
     .onChange((v: number) => nebula.setUniform1f("vortexInfluence", v));
   nebulaF.add(nebulaSettings, "logSettings");
+  nebulaF.add(nebulaSettings, "start");
+  nebulaF.add(nebulaSettings, "stop");
 }

@@ -32,9 +32,9 @@ export function run() {
   });
   shaderBox.setUniform1f("contrast", 4.4);
   shaderBox.setUniform1f("speed", -68);
-  shaderBox.setUniform1f("nebulaScale", 4.6);
+  shaderBox.setUniform1f("nebulaScale", 1.9);
   shaderBox.setUniform1f("vortexInfluence", 0.03);
-  document.body.appendChild(shaderBox.canvas);
+  document.body.insertBefore(shaderBox.canvas, document.body.firstChild);
   shaderBox.canvas.id = "nebula";
   (shaderBox.canvas as any).shaderBox = shaderBox;
   shaderBox.canvas.classList.add(nebulaStyle);

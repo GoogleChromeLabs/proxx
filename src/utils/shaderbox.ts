@@ -125,6 +125,9 @@ export default class ShaderBox {
   }
 
   start() {
+    if (this._running) {
+      return;
+    }
     this._running = true;
     requestAnimationFrame(this._loop);
   }
