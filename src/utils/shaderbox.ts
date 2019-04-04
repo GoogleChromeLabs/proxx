@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+import { bind } from "./bind.js";
+
 function setShader(
   gl: WebGLRenderingContext,
   program: WebGLProgram,
@@ -39,8 +41,10 @@ export interface ShaderBoxOpts {
   scaling: number;
   timing: (ts: number) => number;
   uniforms: string[];
+  antialias: boolean;
 }
 const defaultOpts: ShaderBoxOpts = {
+  antialias: true,
   scaling: devicePixelRatio,
   timing: ts => ts,
   uniforms: []
@@ -64,7 +68,9 @@ export default class ShaderBox {
       canvas: opts.canvas || document.createElement("canvas")
     };
     this.canvas = this._opts.canvas!;
-    this._gl = this.canvas.getContext("webgl", { antialias: false })!;
+    this._gl = this.canvas.getContext("webgl", {
+      antialias: this._opts.antialias
+    })!;
     if (!this._gl) {
       throw Error("No support for WebGL");
     }
@@ -121,7 +127,7 @@ export default class ShaderBox {
 
     this._gl.clearColor(0, 0, 0, 1);
 
-    this._loop = this._loop.bind(this);
+    window.addEventListener("resize", this.resize);
   }
 
   start() {
@@ -136,6 +142,7 @@ export default class ShaderBox {
     this._running = false;
   }
 
+  @bind
   resize() {
     const rect = this.canvas.getBoundingClientRect();
     this.canvas.width = rect.width * this._opts.scaling;
@@ -181,6 +188,7 @@ export default class ShaderBox {
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
   }
 
+  @bind
   private _loop(ts: number) {
     this.draw(ts);
     if (this._running) {
