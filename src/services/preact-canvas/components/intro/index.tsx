@@ -48,6 +48,7 @@ export default class Intro extends Component<Props, State> {
   render({ spinner }: Props, { width, height, numBombs }: State) {
     return (
       <div class={introStyle}>
+        <h1>This is GRAVITON!!!</h1>
         <label>
           Width:
           <input
