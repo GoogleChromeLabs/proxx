@@ -3,7 +3,7 @@ const rescapeRE = require("escape-string-regexp");
 
 module.exports = {
   repo: "GoogleChromeLabs/graviton",
-  path: "build/**/*",
+  path: "dist/**/*",
   branch: "size-report",
   findRenamed(path, newPaths) {
     const parsedPath = parse(path);
