@@ -15,7 +15,7 @@ import { Component, h } from "preact";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
 import { GridChangeSubscriptionCallback } from "../..";
-import { Cell } from "../../../../gamelogic/types";
+import { Cell, Tag } from "../../../../gamelogic/types";
 import Board from "../board";
 import { checkbox, toggle, toggleLabel } from "./style.css";
 
@@ -65,19 +65,23 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onCellClick(cell: [number, number, string], forceAlt: boolean) {
-    const [x, y, state] = cell;
+  private onCellClick(cellData: [number, number, Cell], forceAlt: boolean) {
+    const [x, y, cell] = cellData;
     const { altActionChecked } = this.state;
 
     const altAction = forceAlt || altActionChecked;
 
-    if (state === "unrevealed" && !altAction) {
-      this.props.stateService.reveal(x, y);
-    } else if (state === "unrevealed" && altAction) {
-      this.props.stateService.flag(x, y);
-    } else if (state === "flagged" && altAction) {
-      this.props.stateService.unflag(x, y);
-    } else if (Number(state) !== Number.NaN && altAction) {
+    if (!cell.revealed) {
+      if (altAction) {
+        if (cell.tag === Tag.Flag) {
+          this.props.stateService.unflag(x, y);
+        } else {
+          this.props.stateService.flag(x, y);
+        }
+      } else {
+        this.props.stateService.reveal(x, y);
+      }
+    } else if (cell.touchingFlags >= cell.touchingMines) {
       this.props.stateService.revealSurrounding(x, y);
     }
   }

@@ -29,7 +29,8 @@ export interface Cell {
   id: number;
   tag: Tag;
   revealed: boolean;
-  touching: number;
+  touchingMines: number;
+  touchingFlags: number;
 }
 
 export type GridChanges = Array<[number, number, Cell]>;

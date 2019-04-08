@@ -47,7 +47,7 @@ function roundedRect(
 }
 
 export interface Props {
-  onCellClick: (cell: [number, number, string], forceAlt: boolean) => void;
+  onCellClick: (cell: [number, number, Cell], forceAlt: boolean) => void;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
 }
@@ -62,7 +62,7 @@ export default class Board extends Component<Props> {
   private firstCellRect?: ClientRect | DOMRect;
   private additionalButtonData = new WeakMap<
     HTMLButtonElement,
-    [number, number, string]
+    [number, number, Cell]
   >();
 
   componentDidMount() {
@@ -128,7 +128,7 @@ export default class Board extends Component<Props> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.additionalButtonData.set(button, [x, y, "unrevealed"]);
+        this.additionalButtonData.set(button, [x, y, grid[y][x]]);
         this.updateButton(button, grid[y][x]);
         this.buttons.push(button);
         td.appendChild(button);
@@ -143,9 +143,9 @@ export default class Board extends Component<Props> {
     this.table.addEventListener("click", this.click);
   }
 
-  private drawCell(cell: HTMLButtonElement) {
+  private drawCell(button: HTMLButtonElement) {
     const { width, height, left, top } = this.firstCellRect!;
-    const [bx, by, state] = this.additionalButtonData.get(cell)!;
+    const [bx, by, cell] = this.additionalButtonData.get(button)!;
     const x = bx * width + left;
     const y = by * height + top;
 
@@ -163,14 +163,14 @@ export default class Board extends Component<Props> {
 
     ctx.clearRect(x, y, width, height);
 
-    if (state === "unrevealed" || state === "flagged") {
+    if (!cell.revealed || cell.tag === Tag.Flag) {
       ctx.fillStyle = "#ccc";
       ctx.strokeStyle = "#fff";
 
       roundedRect(ctx, x + 5, y + 5, width - 10, height - 10, 5);
       ctx.stroke();
 
-      if (state === "flagged") {
+      if (cell.tag === Tag.Flag) {
         ctx.fillStyle = "#fff";
         ctx.beginPath();
         ctx.arc(x + width / 2, y + height / 2, height / 8, 0, 2 * Math.PI);
@@ -179,19 +179,20 @@ export default class Board extends Component<Props> {
       return;
     }
 
-    if (state === "mine") {
+    if (cell.hasMine) {
       ctx.fillStyle = "#f00";
       ctx.fillRect(x, y, width, height);
       return;
     }
 
     // state is the number touching
-    if (Number(state) > 0) {
-      ctx.fillStyle = "#fff";
+    if (cell.touchingMines > 0) {
+      ctx.fillStyle =
+        cell.touchingFlags >= cell.touchingMines ? "#5f5" : "#fff";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.font = `${height / 2.5}px sans-serif`;
-      ctx.fillText(state, x + width / 2, y + height / 2);
+      ctx.fillText(cell.touchingMines + "", x + width / 2, y + height / 2);
     }
   }
 
@@ -238,9 +239,9 @@ export default class Board extends Component<Props> {
         : "unrevealed"
       : cell.hasMine
       ? "mine"
-      : `${cell.touching}`;
+      : `${cell.touchingMines}`;
 
     btn.setAttribute("aria-label", cellState);
-    this.additionalButtonData.get(btn)![2] = cellState;
+    this.additionalButtonData.get(btn)![2] = cell;
   }
 }
