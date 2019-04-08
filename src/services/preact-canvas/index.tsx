@@ -12,13 +12,15 @@
  */
 
 import { Remote } from "comlink/src/comlink.js";
-import { Component, h, render } from "preact";
+import { Component, h, render, VNode } from "preact";
 import { GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
 import initialState from "../state/initial-state.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
+import Settings from "./components/settings";
+import { game as gameClassName, mainContainer } from "./style.css";
 
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;
@@ -51,12 +53,17 @@ class PreactService extends Component<Props, State> {
   }
 
   render(_props: Props, { state, stateService }: State) {
+    let mainComponent: VNode;
+
     switch (state.name) {
       case StateName.START:
-        return <Intro stateService={stateService!} spinner={!stateService} />;
+        mainComponent = (
+          <Intro stateService={stateService!} spinner={!stateService} />
+        );
+        break;
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
-        return (
+        mainComponent = (
           <Game
             loading={() => <div />}
             grid={state.grid}
@@ -66,16 +73,30 @@ class PreactService extends Component<Props, State> {
             stateService={stateService!}
           />
         );
+        break;
       case StateName.END:
-        return (
+        mainComponent = (
           <End
             loading={() => <div />}
             type={state.endType}
             restart={() => stateService!.reset()}
           />
         );
+        break;
+      default:
+        throw Error("Unexpected game state");
     }
+
+    return (
+      <div class={gameClassName}>
+        <div class={mainContainer}>{mainComponent}</div>
+        <div>
+          <Settings />
+        </div>
+      </div>
+    );
   }
+
   private async _init(props: Props) {
     const stateService = await props.stateServicePromise;
     await stateService.ready;

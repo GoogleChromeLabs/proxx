@@ -1,5 +1,20 @@
-.intro label {
-  display: block;
+.intro {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-setting {
+  white-space: nowrap;
+}
+
+.manual-settings {
+  display: flex;
+}
+
+.manual-settings > * {
+  flex: 1;
 }
 
 .button {
@@ -23,6 +38,7 @@
   from {
     transform: rotate(0turn);
   }
+
   to {
     transform: rotate(1turn);
   }
