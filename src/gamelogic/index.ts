@@ -19,7 +19,8 @@ function newCell(id: number): Cell {
     id,
     revealed: false,
     tag: Tag.None,
-    touching: -1
+    touchingFlags: 0,
+    touchingMines: -1
   };
 }
 
@@ -105,9 +106,31 @@ export default class MinesweeperGame {
     this._pushGridChange(x, y);
 
     if (tag === Tag.Flag) {
-      this._flags += 1;
+      this._flags++;
+      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+        const nextCell = this.grid[nextY][nextX];
+        nextCell.touchingFlags++;
+        // Emit this if it's just matched the number of mines
+        if (
+          nextCell.revealed &&
+          nextCell.touchingFlags === nextCell.touchingMines
+        ) {
+          this._pushGridChange(nextX, nextY);
+        }
+      }
     } else if (oldTag === Tag.Flag) {
-      this._flags -= 1;
+      this._flags--;
+      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+        const nextCell = this.grid[nextY][nextX];
+        nextCell.touchingFlags--;
+        // Emit this if it's just un-matched the number of mines
+        if (
+          nextCell.revealed &&
+          nextCell.touchingFlags === nextCell.touchingMines - 1
+        ) {
+          this._pushGridChange(nextX, nextY);
+        }
+      }
     }
     this._emit();
   }
@@ -117,39 +140,28 @@ export default class MinesweeperGame {
    */
   attemptSurroundingReveal(x: number, y: number): boolean {
     const cell = this.grid[y][x];
-    const maybeReveal: Array<[number, number]> = [];
 
-    if (!cell.revealed) {
+    if (
+      !cell.revealed ||
+      cell.touchingMines === 0 ||
+      cell.touchingMines > cell.touchingFlags
+    ) {
       return false;
     }
-    if (cell.touching === 0) {
-      return false;
-    }
 
-    let flagged = 0;
+    let revealedSomething = false;
 
     for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
       const nextCell = this.grid[nextY][nextX];
-      if (nextCell.tag === Tag.Flag) {
-        flagged += 1;
+      if (nextCell.tag === Tag.Flag || nextCell.revealed) {
         continue;
       }
-      maybeReveal.push([nextX, nextY]);
-    }
-
-    if (flagged < cell.touching) {
-      return false;
-    }
-    if (maybeReveal.length === 0) {
-      return false;
-    }
-
-    for (const [nextX, nextY] of maybeReveal) {
-      const nextCell = this.grid[nextY][nextX];
-      if (nextCell.revealed) {
-        continue;
-      }
+      revealedSomething = true;
       this._reveal(nextX, nextY);
+    }
+
+    if (!revealedSomething) {
+      return false;
     }
 
     this._emit();
@@ -279,10 +291,11 @@ export default class MinesweeperGame {
         if (nextCell.tag === Tag.Flag || nextCell.revealed) {
           continue;
         }
+
         maybeReveal.push(nextX + nextY * this._width);
       }
 
-      cell.touching = touching;
+      cell.touchingMines = touching;
       this._pushGridChange(x, y);
 
       // Don't reveal the surrounding squares if this is touching a mine.
