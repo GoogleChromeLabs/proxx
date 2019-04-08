@@ -25,6 +25,27 @@ import {
   gameTable
 } from "./style.css";
 
+function roundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
 export interface Props {
   onCellClick: (cell: [number, number, string], forceAlt: boolean) => void;
   grid: Cell[][];
@@ -130,16 +151,19 @@ export default class Board extends Component<Props> {
 
     const ctx = this.ctx!;
 
+    ctx.clearRect(x, y, width, height);
+
     if (state === "unrevealed" || state === "flagged") {
       ctx.fillStyle = "#ccc";
-      ctx.strokeStyle = "#333";
-      ctx.fillRect(x, y, width, height);
-      ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+      ctx.strokeStyle = "#fff";
+
+      roundedRect(ctx, x + 5, y + 5, width - 10, height - 10, 5);
+      ctx.stroke();
 
       if (state === "flagged") {
-        ctx.fillStyle = "#f00";
+        ctx.fillStyle = "#fff";
         ctx.beginPath();
-        ctx.arc(x + width / 2, y + height / 2, height / 4, 0, 2 * Math.PI);
+        ctx.arc(x + width / 2, y + height / 2, height / 8, 0, 2 * Math.PI);
         ctx.fill();
       }
       return;
@@ -152,15 +176,11 @@ export default class Board extends Component<Props> {
     }
 
     // state is the number touching
-    ctx.fillStyle = "#fff";
-    ctx.strokeStyle = "#eee";
-    ctx.fillRect(x, y, width, height);
-    ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
-    ctx.fillStyle = "#000";
     if (Number(state) > 0) {
+      ctx.fillStyle = "#fff";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.font = `${height / 2}px sans-serif`;
+      ctx.font = `${height / 2.5}px sans-serif`;
       ctx.fillText(state, x + width / 2, y + height / 2);
     }
   }
