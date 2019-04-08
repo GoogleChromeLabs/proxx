@@ -1,8 +1,19 @@
+.board {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  --cell-size: 50px;
+}
+
 .game-table {
-  background: #fff;
   position: relative;
-  display: block;
+  display: inline-block;
   opacity: 0;
+  padding: 20px;
+  padding-bottom: 70px;
+  margin: auto;
 }
 
 .game-row {
@@ -11,16 +22,16 @@
 
 .game-cell {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   padding: 0;
   overflow: hidden;
   flex-shrink: 0;
 }
 
 .button {
-  width: 20px;
-  height: 20px;
+  width: var(--cell-size);
+  height: var(--cell-size);
   appearance: none;
   -webkit-appearance: none;
   border: none;
@@ -31,9 +42,13 @@
 }
 
 .container {
-  width: -moz-max-content;
-  width: max-content;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  display: flex;
 }
 
 .canvas {
@@ -42,4 +57,5 @@
   left: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }

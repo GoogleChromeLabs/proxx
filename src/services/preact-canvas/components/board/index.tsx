@@ -15,11 +15,8 @@ import { Cell, GridChanges, Tag } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
 
-function flatten<T>(v: T[][]): T[] {
-  return Array.prototype.concat.apply([], v);
-}
-
 import {
+  board,
   button as buttonStyle,
   canvas as canvasStyle,
   container as containerStyle,
@@ -40,23 +37,26 @@ export default class Board extends Component<Props> {
   private table?: HTMLTableElement;
   private cellsToRedraw: Set<HTMLButtonElement> = new Set();
   private buttons: HTMLButtonElement[] = [];
-  private cellRect?: ClientRect | DOMRect;
-  private tableRect?: ClientRect | DOMRect;
+  private canvasRect?: ClientRect | DOMRect;
+  private firstCellRect?: ClientRect | DOMRect;
   private additionalButtonData = new WeakMap<
     HTMLButtonElement,
     [number, number, string]
   >();
 
   componentDidMount() {
-    this.props.gridChangeSubscribe(this.doManualDomHandling);
     this.createTable(this.props.grid);
+    this.props.gridChangeSubscribe(this.doManualDomHandling);
     this.canvasInit();
-    // Force initial render
-    const gridChanges = this.props.grid.map((row, y) =>
-      row.map((cell, x) => [x, y, cell] as [number, number, Cell])
-    );
-    this.doManualDomHandling(flatten(gridChanges));
-    this.canvasInit();
+
+    const scroller = document.querySelector("." + containerStyle);
+    scroller!.addEventListener("scroll", () => {
+      this.renderCanvas({ forceRedrawAll: true });
+    });
+    window.addEventListener("resize", () => {
+      this.canvasInit();
+      this.renderCanvas({ forceRedrawAll: true });
+    });
   }
 
   shouldComponentUpdate() {
@@ -64,16 +64,15 @@ export default class Board extends Component<Props> {
   }
 
   render() {
-    return <div class={containerStyle} />;
+    return (
+      <div class={board}>
+        <div class={containerStyle} />
+      </div>
+    );
   }
 
   @bind
   private doManualDomHandling(gridChanges: GridChanges) {
-    // Table has not been created
-    if (this.buttons.length === 0) {
-      this.createTable(this.props.grid);
-    }
-
     // Apply patches
     const width = this.props.grid[0].length;
     for (const [x, y, cellProps] of gridChanges) {
@@ -85,9 +84,7 @@ export default class Board extends Component<Props> {
   }
 
   private createTable(grid: Cell[][]) {
-    while (this.base!.firstChild) {
-      this.base!.firstChild.remove();
-    }
+    const tableContainer = document.querySelector("." + containerStyle);
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
     for (let row = 0; row < grid.length; row++) {
@@ -111,24 +108,26 @@ export default class Board extends Component<Props> {
     this.canvas = document.createElement("canvas");
     this.canvas.classList.add(canvasStyle);
     this.base!.appendChild(this.canvas);
-    this.base!.appendChild(this.table);
-
-    if ("onpointerup" in this.table) {
-      this.table.addEventListener("pointerup", this.click);
-    } else {
-      this.table!.addEventListener("touchend", this.click);
-      this.table!.addEventListener("mouseup", this.click);
-    }
+    tableContainer!.appendChild(this.table);
+    this.table.addEventListener("click", this.click);
   }
 
   private drawCell(cell: HTMLButtonElement) {
-    if (!this.cellRect) {
-      this.cellRect = cell.getBoundingClientRect();
-    }
-    const { width, height } = this.cellRect;
+    const { width, height, left, top } = this.firstCellRect!;
     const [bx, by, state] = this.additionalButtonData.get(cell)!;
-    const x = bx * width;
-    const y = by * height;
+    const x = bx * width + left;
+    const y = by * height + top;
+
+    // If cell is out of bounds, skip it
+    if (
+      x + width < 0 ||
+      y + height < 0 ||
+      x > this.canvasRect!.width ||
+      y > this.canvasRect!.height
+    ) {
+      return;
+    }
+
     const ctx = this.ctx!;
 
     if (state === "unrevealed" || state === "flagged") {
@@ -167,24 +166,23 @@ export default class Board extends Component<Props> {
   }
 
   private canvasInit() {
-    const { width, height } = this.canvas!.getBoundingClientRect();
-    this.canvas!.width = width * devicePixelRatio;
-    this.canvas!.height = height * devicePixelRatio;
+    this.canvasRect = this.canvas!.getBoundingClientRect();
+    this.canvas!.width = this.canvasRect.width * devicePixelRatio;
+    this.canvas!.height = this.canvasRect.height * devicePixelRatio;
     this.ctx = this.canvas!.getContext("2d")!;
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
-
-    for (const cell of this.buttons) {
-      this.cellsToRedraw.add(cell);
-    }
-
-    this.renderCanvas();
+    this.renderCanvas({ forceRedrawAll: true });
   }
 
-  private renderCanvas() {
-    if (!this.tableRect) {
-      this.tableRect = this.table!.getBoundingClientRect();
+  private renderCanvas({ forceRedrawAll = false } = {}) {
+    if (forceRedrawAll) {
+      this.ctx!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
+      this.firstCellRect = this.buttons[0].getBoundingClientRect();
     }
-    for (const cell of this.cellsToRedraw) {
+
+    const toRedraw = forceRedrawAll ? this.buttons : this.cellsToRedraw;
+
+    for (const cell of toRedraw) {
       this.drawCell(cell);
     }
     this.cellsToRedraw.clear();
