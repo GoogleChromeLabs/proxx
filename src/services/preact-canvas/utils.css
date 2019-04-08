@@ -1,0 +1,12 @@
+.unbutton {
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  padding: 0;
+  margin: 0;
+}
+
+.unbutton:focus {
+  outline: none;
+}

@@ -1,0 +1,15 @@
+.settings {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fullscreen {
+  composes: unbutton from '../../utils.css';
+  fill: #fff;
+  width: 24px;
+  height: 24px;
+}
+
+html:fullscreen .fullscreen {
+  display: none;
+}

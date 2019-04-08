@@ -13,6 +13,7 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
+import { bind } from "src/utils/bind.js";
 import { GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
 import initialState from "../state/initial-state.js";
@@ -91,10 +92,15 @@ class PreactService extends Component<Props, State> {
       <div class={gameClassName}>
         <div class={mainContainer}>{mainComponent}</div>
         <div>
-          <Settings />
+          <Settings onFullscreenClick={this._onFullscreenClick} />
         </div>
       </div>
     );
+  }
+
+  @bind
+  private _onFullscreenClick() {
+    document.documentElement.requestFullscreen();
   }
 
   private async _init(props: Props) {

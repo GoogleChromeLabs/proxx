@@ -10,23 +10,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, h } from "preact";
-import { Fullscreen } from "../icons";
-import { fullscreen, settings } from "./style.css";
+import { h } from "preact";
 
-export interface Props {
-  onFullscreenClick: () => void;
-}
-export interface State {}
-
-export default class Settings extends Component<Props, State> {
-  render({ onFullscreenClick }: Props) {
-    return (
-      <div class={settings}>
-        <button class={fullscreen} onClick={onFullscreenClick}>
-          <Fullscreen />
-        </button>
-      </div>
-    );
-  }
-}
+// tslint:disable-next-line:variable-name
+export const Fullscreen = (props: JSX.HTMLAttributes) => (
+  <svg viewBox="0 0 24 24" {...props}>
+    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+  </svg>
+);
