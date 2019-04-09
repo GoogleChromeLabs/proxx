@@ -1,5 +1,5 @@
 .toggle-label {
-  position: absolute;
+  position: fixed;
   bottom: 22px;
   left: 50%;
   white-space: nowrap;

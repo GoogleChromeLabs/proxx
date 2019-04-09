@@ -21,7 +21,7 @@ import localStateSubscribe from "../state/local-state-subscribe.js";
 import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
 import Settings from "./components/settings";
-import { game as gameClassName, mainContainer } from "./style.css";
+import { game as gameClassName } from "./style.css";
 
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;
@@ -90,7 +90,7 @@ class PreactService extends Component<Props, State> {
 
     return (
       <div class={gameClassName}>
-        <div class={mainContainer}>{mainComponent}</div>
+        {mainComponent}
         <div>
           <Settings onFullscreenClick={this._onFullscreenClick} />
         </div>

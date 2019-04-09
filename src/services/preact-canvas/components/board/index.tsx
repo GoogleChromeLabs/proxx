@@ -70,14 +70,13 @@ export default class Board extends Component<Props> {
     this.props.gridChangeSubscribe(this.doManualDomHandling);
     this.canvasInit();
 
-    const scroller = document.querySelector("." + containerStyle);
-    scroller!.addEventListener("scroll", () => {
-      this.renderCanvas({ forceRedrawAll: true });
-    });
-    window.addEventListener("resize", () => {
-      this.canvasInit();
-      this.renderCanvas({ forceRedrawAll: true });
-    });
+    window.addEventListener("scroll", this.onWindowScroll);
+    window.addEventListener("resize", this.onWindowResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.onWindowScroll);
+    window.removeEventListener("resize", this.onWindowResize);
   }
 
   shouldComponentUpdate() {
@@ -90,6 +89,17 @@ export default class Board extends Component<Props> {
         <div class={containerStyle} />
       </div>
     );
+  }
+
+  @bind
+  private onWindowResize() {
+    this.canvasInit();
+    this.renderCanvas({ forceRedrawAll: true });
+  }
+
+  @bind
+  private onWindowScroll() {
+    this.renderCanvas({ forceRedrawAll: true });
   }
 
   @bind

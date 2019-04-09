@@ -1,9 +1,4 @@
 .board {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   --cell-size: 50px;
 }
 
@@ -11,9 +6,9 @@
   position: relative;
   display: inline-block;
   opacity: 0;
+  margin: auto;
   padding: 20px;
   padding-bottom: 70px;
-  margin: auto;
 }
 
 .game-row {
@@ -41,17 +36,12 @@
 }
 
 .container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: auto;
   display: flex;
+  min-height: 100%;
 }
 
 .canvas {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
