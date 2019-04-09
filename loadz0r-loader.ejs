@@ -11,68 +11,78 @@
  * limitations under the License.
  */
 
-// If the loader is already loaded, just stop.
-if (!self.define) {
-  const singleRequire = name => {
-    return Promise.resolve()
-      .then(() => {
-        if (registry[name]) {
-          return;
-        }
-        if ("document" in self) {
-          return new Promise(resolve => {
-            const script = document.createElement("script");
-            script.src = name;
-            // Ya never know
-            script.defer = true;
-            document.head.appendChild(script);
-            script.onload = resolve;
-          })
-        } else {
-          importScripts(name);
-        }
-      }).then(() => {
-        if (!registry[name]) {
-          throw new Error(`Module ${name} didn’t register its module`);
-        }
-        return registry[name];
-      });
-  };
+// tslint:disable:no-var-keyword
+// tslint:disable:prefer-const
 
-  const require = (names, resolve) => {
-    Promise.all(names.map(singleRequire))
-      .then(modules => modules.length === 1 ? modules[0] : modules)
-      .then(result => resolve(result));
-  };
-
-  const registry = {
-    require: Promise.resolve(require)
-  };
-
-  self.define = (moduleName, depsNames, factory) => {
-    if (registry[moduleName]) {
-      // Module is already loading or loaded.
-      return;
-    }
-    registry[moduleName] = new Promise(resolve => {
-      let exports = {};
-      const module = {
-        uri: location.origin + moduleName.slice(1)
-      };
-      Promise.all(
-        depsNames.map(depName => {
-          if (depName === "exports") {
-            return exports;
+(function(context) {
+  // If the loader is already loaded, just stop.
+  if (!context.define) {
+    var singleRequire = function(name) {
+      return Promise.resolve()
+        .then(function() {
+          if (registry[name]) {
+            return;
           }
-          if (depName === "module") {
-            return module;
+          if ("document" in context) {
+            return new Promise(function(resolve) {
+              var script = document.createElement("script");
+              script.src = name;
+              // Ya never know
+              script.defer = true;
+              document.head.appendChild(script);
+              script.onload = resolve;
+            });
+          } else {
+            importScripts(name);
           }
-          return singleRequire(depName);
         })
-      ).then(deps => {
-        factory(...deps);
-        resolve(exports);
+        .then(function() {
+          if (!registry[name]) {
+            throw new Error("Module " + name + " didn’t register its module");
+          }
+          return registry[name];
+        });
+    };
+
+    const require = function(names, resolve) {
+      Promise.all(names.map(singleRequire))
+        .then(function(modules) {
+          return modules.length === 1 ? modules[0] : modules;
+        })
+        .then(function(result) {
+          return resolve(result);
+        });
+    };
+
+    const registry = {
+      require: Promise.resolve(require)
+    };
+
+    context.define = function(moduleName, depsNames, factory) {
+      if (registry[moduleName]) {
+        // Module is already loading or loaded.
+        return;
+      }
+      registry[moduleName] = new Promise(function(resolve) {
+        let exports = {};
+        const module = {
+          uri: location.origin + moduleName.slice(1)
+        };
+        Promise.all(
+          depsNames.map(function(depName) {
+            if (depName === "exports") {
+              return exports;
+            }
+            if (depName === "module") {
+              return module;
+            }
+            return singleRequire(depName);
+          })
+        ).then(function(deps) {
+          factory(...deps);
+          resolve(exports);
+        });
       });
-    });
-  };
-}
+    };
+  }
+})(self);
