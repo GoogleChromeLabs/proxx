@@ -124,5 +124,4 @@ export async function game(stateService: Promise<Remote<StateService>>) {
     container,
     container.firstChild as any
   );
-  performance.mark("UI ready");
 }
