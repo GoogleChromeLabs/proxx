@@ -44,7 +44,7 @@
         });
     };
 
-    const require = function(names, resolve) {
+    var require = function(names, resolve) {
       Promise.all(names.map(singleRequire))
         .then(function(modules) {
           return modules.length === 1 ? modules[0] : modules;
@@ -54,7 +54,7 @@
         });
     };
 
-    const registry = {
+    var registry = {
       require: Promise.resolve(require)
     };
 
@@ -64,8 +64,8 @@
         return;
       }
       registry[moduleName] = new Promise(function(resolve) {
-        let exports = {};
-        const module = {
+        var exports = {};
+        var module = {
           uri: location.origin + moduleName.slice(1)
         };
         Promise.all(
