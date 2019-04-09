@@ -77,7 +77,7 @@ export default class Intro extends Component<Props, State> {
               Width:
               <input
                 type="number"
-                min="5"
+                min="1"
                 max="40"
                 step="1"
                 value={width}
@@ -89,7 +89,7 @@ export default class Intro extends Component<Props, State> {
               Height:
               <input
                 type="number"
-                min="5"
+                min="1"
                 max="40"
                 step="1"
                 value={height}

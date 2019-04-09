@@ -12,8 +12,20 @@
  */
 import { Component, h } from "preact";
 import { Cell, GridChanges, Tag } from "../../../../gamelogic/types.js";
+import { TextureGenerator } from "../../../../rendering/texture-generators.js";
 import { bind } from "../../../../utils/bind.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
+
+import {
+  AnimationDesc,
+  AnimationName,
+  flaggedAnimation,
+  flashInAnimation,
+  flashOutAnimation,
+  idleAnimation,
+  initTextureCaches,
+  numberAnimation
+} from "../../../../rendering/animation.js";
 
 import {
   board,
@@ -25,32 +37,19 @@ import {
   gameTable
 } from "./style.css";
 
-function roundedRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-}
-
 export interface Props {
   onCellClick: (cell: [number, number, Cell], forceAlt: boolean) => void;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
   gridChangeUnsubscribe: (f: GridChangeSubscriptionCallback) => void;
+}
+
+function distanceFromCenter(x: number, y: number, size: number): number {
+  // Normalize coordinate system and move origin to center
+  const dx = x / size - 0.5;
+  const dy = y / size - 0.5;
+  // Distance of our point to origin
+  return Math.sqrt(dx * dx + dy * dy) / Math.sqrt(2);
 }
 
 export default class Board extends Component<Props> {
@@ -60,23 +59,25 @@ export default class Board extends Component<Props> {
   private cellsToRedraw: Set<HTMLButtonElement> = new Set();
   private buttons: HTMLButtonElement[] = [];
   private canvasRect?: ClientRect | DOMRect;
+  private flashedCells = new Set<HTMLButtonElement>();
   private firstCellRect?: ClientRect | DOMRect;
   private additionalButtonData = new WeakMap<
     HTMLButtonElement,
     [number, number, Cell]
   >();
+  private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
+  private renderLoopRunning = false;
 
   componentDidMount() {
     this.createTable(this.props.grid);
     this.props.gridChangeSubscribe(this.doManualDomHandling);
     this.canvasInit();
+    this.animationsInit();
 
-    window.addEventListener("scroll", this.onWindowScroll);
     window.addEventListener("resize", this.onWindowResize);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("scroll", this.onWindowScroll);
     window.removeEventListener("resize", this.onWindowResize);
     this.props.gridChangeUnsubscribe(this.doManualDomHandling);
   }
@@ -96,12 +97,6 @@ export default class Board extends Component<Props> {
   @bind
   private onWindowResize() {
     this.canvasInit();
-    this.renderCanvas({ forceRedrawAll: true });
-  }
-
-  @bind
-  private onWindowScroll() {
-    this.renderCanvas({ forceRedrawAll: true });
   }
 
   @bind
@@ -112,8 +107,8 @@ export default class Board extends Component<Props> {
       const btn = this.buttons[y * width + x];
       this.updateButton(btn, cellProps);
       this.cellsToRedraw.add(btn);
+      this.updateAnimation(btn);
     }
-    this.renderCanvas();
   }
 
   private createTable(grid: Cell[][]) {
@@ -145,9 +140,49 @@ export default class Board extends Component<Props> {
     this.table.addEventListener("click", this.click);
   }
 
-  private drawCell(button: HTMLButtonElement) {
+  private updateAnimation(btn: HTMLButtonElement) {
+    const [x, y, cell] = this.additionalButtonData.get(btn)!;
+    const animationList = this.animationLists.get(btn)!;
+
+    if (!cell.revealed && cell.tag !== Tag.Flag) {
+      animationList[0].name = AnimationName.IDLE;
+    } else if (!cell.revealed && cell.tag === Tag.Flag) {
+      animationList[0].name = AnimationName.FLAGGED;
+    } else if (cell.revealed && cell.touchingMines <= 0) {
+      animationList.length = 0;
+    } else if (cell.revealed && cell.touchingMines > 0) {
+      // This button already played the flash animation
+      if (this.flashedCells.has(btn)) {
+        return;
+      }
+      this.flashedCells.add(btn);
+      const ts = performance.now();
+      animationList.push(
+        {
+          name: AnimationName.FLASH_IN,
+          start: ts,
+          done: () => {
+            // Remove idle and flash-in effect
+            animationList.shift();
+            animationList.shift();
+            animationList.unshift({
+              name: AnimationName.NUMBER,
+              start: ts + 100
+            });
+          }
+        },
+        {
+          name: AnimationName.FLASH_OUT,
+          start: ts + 100
+        }
+      );
+    }
+  }
+
+  private drawCell(btn: HTMLButtonElement, ts: number) {
     const { width, height, left, top } = this.firstCellRect!;
-    const [bx, by, cell] = this.additionalButtonData.get(button)!;
+    const [bx, by] = this.additionalButtonData.get(btn)!;
+    const cell = this.props.grid[by][bx];
     const x = bx * width + left;
     const y = by * height + top;
 
@@ -162,63 +197,87 @@ export default class Board extends Component<Props> {
     }
 
     const ctx = this.ctx!;
-
     ctx.clearRect(x, y, width, height);
-
-    if (!cell.revealed || cell.tag === Tag.Flag) {
-      ctx.fillStyle = "#ccc";
-      ctx.strokeStyle = "#fff";
-
-      roundedRect(ctx, x + 5, y + 5, width - 10, height - 10, 5);
-      ctx.stroke();
-
-      if (cell.tag === Tag.Flag) {
-        ctx.fillStyle = "#fff";
-        ctx.beginPath();
-        ctx.arc(x + width / 2, y + height / 2, height / 8, 0, 2 * Math.PI);
-        ctx.fill();
+    const animationList = this.animationLists.get(btn);
+    if (!animationList) {
+      return;
+    }
+    for (const animation of animationList) {
+      const context = { ts, ctx, x, y, width, height, animation };
+      switch (animation.name) {
+        case AnimationName.IDLE:
+          idleAnimation(context);
+          break;
+        case AnimationName.FLAGGED:
+          flaggedAnimation(context);
+          break;
+        case AnimationName.FLASH_IN:
+          flashInAnimation(context);
+          break;
+        case AnimationName.FLASH_OUT:
+          flashOutAnimation(context);
+          break;
+        case AnimationName.NUMBER:
+          numberAnimation(
+            cell.touchingMines,
+            cell.touchingFlags >= cell.touchingMines,
+            context
+          );
+          break;
       }
-      return;
-    }
-
-    if (cell.hasMine) {
-      ctx.fillStyle = "#f00";
-      ctx.fillRect(x, y, width, height);
-      return;
-    }
-
-    // state is the number touching
-    if (cell.touchingMines > 0) {
-      ctx.fillStyle =
-        cell.touchingFlags >= cell.touchingMines ? "#5f5" : "#fff";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = `${height / 2.5}px sans-serif`;
-      ctx.fillText(cell.touchingMines + "", x + width / 2, y + height / 2);
     }
   }
 
   private canvasInit() {
     this.canvasRect = this.canvas!.getBoundingClientRect();
+    this.queryFirstCellRect();
     this.canvas!.width = this.canvasRect.width * devicePixelRatio;
     this.canvas!.height = this.canvasRect.height * devicePixelRatio;
     this.ctx = this.canvas!.getContext("2d")!;
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
-    this.renderCanvas({ forceRedrawAll: true });
+
+    // TODO: Don’t start another rAF loop on resize
+    if (this.renderLoopRunning) {
+      return;
+    }
+
+    const that = this;
+    requestAnimationFrame(function f(ts) {
+      that.renderCanvas(ts);
+      requestAnimationFrame(f);
+    });
+    this.renderLoopRunning = true;
   }
 
-  private renderCanvas({ forceRedrawAll = false } = {}) {
-    if (forceRedrawAll) {
-      this.ctx!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
-      this.firstCellRect = this.buttons[0].getBoundingClientRect();
+  private animationsInit() {
+    // Assuming square field size
+    initTextureCaches(this.firstCellRect!.width);
+    for (const button of this.buttons) {
+      const [x, y] = this.additionalButtonData.get(button)!;
+      this.animationLists.set(button, [
+        {
+          name: AnimationName.IDLE,
+          start:
+            performance.now() -
+            5000 +
+            distanceFromCenter(x, y, this.props.grid[0].length) * 5000
+        }
+      ]);
     }
+  }
 
-    const toRedraw = forceRedrawAll ? this.buttons : this.cellsToRedraw;
+  private renderCanvas(ts: number) {
+    this.ctx!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
+    this.queryFirstCellRect();
 
-    for (const cell of toRedraw) {
-      this.drawCell(cell);
+    for (const cell of this.buttons) {
+      this.drawCell(cell, ts);
     }
     this.cellsToRedraw.clear();
+  }
+
+  private queryFirstCellRect() {
+    this.firstCellRect = this.buttons[0].getBoundingClientRect();
   }
 
   @bind
