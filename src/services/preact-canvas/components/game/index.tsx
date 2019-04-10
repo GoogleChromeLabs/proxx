@@ -23,6 +23,7 @@ export interface Props {
   stateService: Remote<StateService>;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
+  gridChangeUnsubscribe: (f: GridChangeSubscriptionCallback) => void;
 }
 
 interface State {
@@ -34,12 +35,16 @@ export default class Game extends Component<Props, State> {
     altActionChecked: false
   };
 
-  render({ grid, gridChangeSubscribe }: Props, { altActionChecked }: State) {
+  render(
+    { grid, gridChangeSubscribe, gridChangeUnsubscribe }: Props,
+    { altActionChecked }: State
+  ) {
     return (
       <div>
         <Board
           grid={grid}
           gridChangeSubscribe={gridChangeSubscribe}
+          gridChangeUnsubscribe={gridChangeUnsubscribe}
           onCellClick={this.onCellClick}
         />
         <label class={toggleLabel}>
