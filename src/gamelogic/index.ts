@@ -33,13 +33,14 @@ export default class MinesweeperGame {
   get flags() {
     return this._flags;
   }
-  static EMIT_THRESHOLD = 10;
+  static EMIT_THRESHOLD = 60;
   grid: Cell[][];
   startTime = 0;
   endTime = 0;
   private _state = State.Pending;
   private _toReveal = 0;
   private _flags = 0;
+  private _lastEmit = 0;
   private _gridChanges: Array<[number, number]> = [];
   private _changeCallback?: ChangeCallback;
 
@@ -173,8 +174,10 @@ export default class MinesweeperGame {
 
   private _pushGridChange(x: number, y: number) {
     this._gridChanges.push([x, y]);
-    if (this._gridChanges.length >= MinesweeperGame.EMIT_THRESHOLD) {
-      // this._emit();
+    let now = Date.now();
+    if (now - this._lastEmit >= MinesweeperGame.EMIT_THRESHOLD) {
+      this._emit();
+      this._lastEmit = now;
     }
   }
 
@@ -241,6 +244,7 @@ export default class MinesweeperGame {
   private _reveal(x: number, y: number) {
     // The set contains the cell position as if it were a single flat array.
     const revealSet = new Set<number>([x + y * this._width]);
+    this._lastEmit = Date.now();
 
     for (const value of revealSet) {
       const x = value % this._width;
