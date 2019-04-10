@@ -68,9 +68,8 @@ class PreactService extends Component<Props, State> {
           <Game
             loading={() => <div />}
             grid={state.grid}
-            gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
-              this.gridChangeSubscribers.add(f)
-            }
+            gridChangeSubscribe={this._onGridChangeSubscribe}
+            gridChangeUnsubscribe={this._onGridChangeUnsubscribe}
             stateService={stateService!}
           />
         );
@@ -99,6 +98,16 @@ class PreactService extends Component<Props, State> {
   }
 
   @bind
+  private _onGridChangeSubscribe(func: GridChangeSubscriptionCallback) {
+    this.gridChangeSubscribers.add(func);
+  }
+
+  @bind
+  private _onGridChangeUnsubscribe(func: GridChangeSubscriptionCallback) {
+    this.gridChangeSubscribers.delete(func);
+  }
+
+  @bind
   private _onFullscreenClick() {
     document.documentElement.requestFullscreen();
   }
@@ -110,7 +119,9 @@ class PreactService extends Component<Props, State> {
 
     localStateSubscribe(stateService, (newState, gridChanges) => {
       if (gridChanges) {
-        this.gridChangeSubscribers.forEach(f => f(gridChanges));
+        for (const callback of this.gridChangeSubscribers) {
+          callback(gridChanges);
+        }
       }
       this.setState({ state: newState });
     });

@@ -94,7 +94,6 @@ export default class StateService {
       grid: this._game!.grid,
       name: StateName.WAITING_TO_PLAY
     };
-    // TODO: do we need an unsubscribe?
     this._game.subscribe(gridChanges => {
       this._notify({
         gridChanges,

@@ -50,6 +50,7 @@ export interface Props {
   onCellClick: (cell: [number, number, Cell], forceAlt: boolean) => void;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
+  gridChangeUnsubscribe: (f: GridChangeSubscriptionCallback) => void;
 }
 
 export default class Board extends Component<Props> {
@@ -77,6 +78,7 @@ export default class Board extends Component<Props> {
   componentWillUnmount() {
     window.removeEventListener("scroll", this.onWindowScroll);
     window.removeEventListener("resize", this.onWindowResize);
+    this.props.gridChangeUnsubscribe(this.doManualDomHandling);
   }
 
   shouldComponentUpdate() {
