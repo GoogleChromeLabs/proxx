@@ -128,7 +128,9 @@ export default class MinesweeperGame {
 
     let flagged = 0;
 
-    for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+    // Go around the surrounding. This will go over items already seen.
+    const surroundingIndecies = this.getSurrounding(x, y);
+    for (const [nextX, nextY] of surroundingIndecies) {
       const nextCell = this.grid[nextY][nextX];
       if (nextCell.tag === Tag.Flag) {
         flagged += 1;
@@ -204,10 +206,8 @@ export default class MinesweeperGame {
     this._state = State.Playing;
   }
 
-  private *_iterateSurrounding(
-    x: number,
-    y: number
-  ): IterableIterator<[number, number]> {
+  private getSurrounding(x: number, y: number): Array<[number, number]> {
+    const surrounding: Array<[number, number]> = [];
     for (const nextY of [y - 1, y, y + 1]) {
       if (nextY < 0) {
         continue;
@@ -227,9 +227,10 @@ export default class MinesweeperGame {
           continue;
         }
 
-        yield [nextX, nextY];
+        surrounding.push([nextX, nextY]);
       }
     }
+    return surrounding;
   }
 
   /**
@@ -269,8 +270,9 @@ export default class MinesweeperGame {
       let touching = 0;
       const maybeReveal: number[] = [];
 
-      // Go around the surrounding squares
-      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+      // Go around the surrounding. This will go over items already seen.
+      const surroundingIndecies = this.getSurrounding(x, y);
+      for (const [nextX, nextY] of surroundingIndecies) {
         const nextCell = this.grid[nextY][nextX];
 
         if (nextCell.hasMine) {
