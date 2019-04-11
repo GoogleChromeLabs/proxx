@@ -15,11 +15,8 @@ import { Cell, GridChanges, Tag } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
 
-function flatten<T>(v: T[][]): T[] {
-  return Array.prototype.concat.apply([], v);
-}
-
 import {
+  board,
   button as buttonStyle,
   canvas as canvasStyle,
   container as containerStyle,
@@ -28,10 +25,32 @@ import {
   gameTable
 } from "./style.css";
 
+function roundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
 export interface Props {
-  onCellClick: (cell: [number, number, string], forceAlt: boolean) => void;
+  onCellClick: (cell: [number, number, Cell], forceAlt: boolean) => void;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
+  gridChangeUnsubscribe: (f: GridChangeSubscriptionCallback) => void;
 }
 
 export default class Board extends Component<Props> {
@@ -40,23 +59,26 @@ export default class Board extends Component<Props> {
   private table?: HTMLTableElement;
   private cellsToRedraw: Set<HTMLButtonElement> = new Set();
   private buttons: HTMLButtonElement[] = [];
-  private cellRect?: ClientRect | DOMRect;
-  private tableRect?: ClientRect | DOMRect;
+  private canvasRect?: ClientRect | DOMRect;
+  private firstCellRect?: ClientRect | DOMRect;
   private additionalButtonData = new WeakMap<
     HTMLButtonElement,
-    [number, number, string]
+    [number, number, Cell]
   >();
 
   componentDidMount() {
-    this.props.gridChangeSubscribe(this.doManualDomHandling);
     this.createTable(this.props.grid);
+    this.props.gridChangeSubscribe(this.doManualDomHandling);
     this.canvasInit();
-    // Force initial render
-    const gridChanges = this.props.grid.map((row, y) =>
-      row.map((cell, x) => [x, y, cell] as [number, number, Cell])
-    );
-    this.doManualDomHandling(flatten(gridChanges));
-    this.canvasInit();
+
+    window.addEventListener("scroll", this.onWindowScroll);
+    window.addEventListener("resize", this.onWindowResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("scroll", this.onWindowScroll);
+    window.removeEventListener("resize", this.onWindowResize);
+    this.props.gridChangeUnsubscribe(this.doManualDomHandling);
   }
 
   shouldComponentUpdate() {
@@ -64,16 +86,26 @@ export default class Board extends Component<Props> {
   }
 
   render() {
-    return <div class={containerStyle} />;
+    return (
+      <div class={board}>
+        <div class={containerStyle} />
+      </div>
+    );
+  }
+
+  @bind
+  private onWindowResize() {
+    this.canvasInit();
+    this.renderCanvas({ forceRedrawAll: true });
+  }
+
+  @bind
+  private onWindowScroll() {
+    this.renderCanvas({ forceRedrawAll: true });
   }
 
   @bind
   private doManualDomHandling(gridChanges: GridChanges) {
-    // Table has not been created
-    if (this.buttons.length === 0) {
-      this.createTable(this.props.grid);
-    }
-
     // Apply patches
     const width = this.props.grid[0].length;
     for (const [x, y, cellProps] of gridChanges) {
@@ -85,9 +117,7 @@ export default class Board extends Component<Props> {
   }
 
   private createTable(grid: Cell[][]) {
-    while (this.base!.firstChild) {
-      this.base!.firstChild.remove();
-    }
+    const tableContainer = document.querySelector("." + containerStyle);
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
     for (let row = 0; row < grid.length; row++) {
@@ -100,7 +130,7 @@ export default class Board extends Component<Props> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.additionalButtonData.set(button, [x, y, "unrevealed"]);
+        this.additionalButtonData.set(button, [x, y, grid[y][x]]);
         this.updateButton(button, grid[y][x]);
         this.buttons.push(button);
         td.appendChild(button);
@@ -111,80 +141,81 @@ export default class Board extends Component<Props> {
     this.canvas = document.createElement("canvas");
     this.canvas.classList.add(canvasStyle);
     this.base!.appendChild(this.canvas);
-    this.base!.appendChild(this.table);
-
-    if ("onpointerup" in this.table) {
-      this.table.addEventListener("pointerup", this.click);
-    } else {
-      this.table!.addEventListener("touchend", this.click);
-      this.table!.addEventListener("mouseup", this.click);
-    }
+    tableContainer!.appendChild(this.table);
+    this.table.addEventListener("click", this.click);
   }
 
-  private drawCell(cell: HTMLButtonElement) {
-    if (!this.cellRect) {
-      this.cellRect = cell.getBoundingClientRect();
+  private drawCell(button: HTMLButtonElement) {
+    const { width, height, left, top } = this.firstCellRect!;
+    const [bx, by, cell] = this.additionalButtonData.get(button)!;
+    const x = bx * width + left;
+    const y = by * height + top;
+
+    // If cell is out of bounds, skip it
+    if (
+      x + width < 0 ||
+      y + height < 0 ||
+      x > this.canvasRect!.width ||
+      y > this.canvasRect!.height
+    ) {
+      return;
     }
-    const { width, height } = this.cellRect;
-    const [bx, by, state] = this.additionalButtonData.get(cell)!;
-    const x = bx * width;
-    const y = by * height;
+
     const ctx = this.ctx!;
 
-    if (state === "unrevealed" || state === "flagged") {
-      ctx.fillStyle = "#ccc";
-      ctx.strokeStyle = "#333";
-      ctx.fillRect(x, y, width, height);
-      ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+    ctx.clearRect(x, y, width, height);
 
-      if (state === "flagged") {
-        ctx.fillStyle = "#f00";
+    if (!cell.revealed || cell.tag === Tag.Flag) {
+      ctx.fillStyle = "#ccc";
+      ctx.strokeStyle = "#fff";
+
+      roundedRect(ctx, x + 5, y + 5, width - 10, height - 10, 5);
+      ctx.stroke();
+
+      if (cell.tag === Tag.Flag) {
+        ctx.fillStyle = "#fff";
         ctx.beginPath();
-        ctx.arc(x + width / 2, y + height / 2, height / 4, 0, 2 * Math.PI);
+        ctx.arc(x + width / 2, y + height / 2, height / 8, 0, 2 * Math.PI);
         ctx.fill();
       }
       return;
     }
 
-    if (state === "mine") {
+    if (cell.hasMine) {
       ctx.fillStyle = "#f00";
       ctx.fillRect(x, y, width, height);
       return;
     }
 
     // state is the number touching
-    ctx.fillStyle = "#fff";
-    ctx.strokeStyle = "#eee";
-    ctx.fillRect(x, y, width, height);
-    ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
-    ctx.fillStyle = "#000";
-    if (Number(state) > 0) {
+    if (cell.touchingMines > 0) {
+      ctx.fillStyle =
+        cell.touchingFlags >= cell.touchingMines ? "#5f5" : "#fff";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.font = `${height / 2}px sans-serif`;
-      ctx.fillText(state, x + width / 2, y + height / 2);
+      ctx.font = `${height / 2.5}px sans-serif`;
+      ctx.fillText(cell.touchingMines + "", x + width / 2, y + height / 2);
     }
   }
 
   private canvasInit() {
-    const { width, height } = this.canvas!.getBoundingClientRect();
-    this.canvas!.width = width * devicePixelRatio;
-    this.canvas!.height = height * devicePixelRatio;
+    this.canvasRect = this.canvas!.getBoundingClientRect();
+    this.canvas!.width = this.canvasRect.width * devicePixelRatio;
+    this.canvas!.height = this.canvasRect.height * devicePixelRatio;
     this.ctx = this.canvas!.getContext("2d")!;
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
-
-    for (const cell of this.buttons) {
-      this.cellsToRedraw.add(cell);
-    }
-
-    this.renderCanvas();
+    this.renderCanvas({ forceRedrawAll: true });
   }
 
-  private renderCanvas() {
-    if (!this.tableRect) {
-      this.tableRect = this.table!.getBoundingClientRect();
+  private renderCanvas({ forceRedrawAll = false } = {}) {
+    if (forceRedrawAll) {
+      this.ctx!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
+      this.firstCellRect = this.buttons[0].getBoundingClientRect();
     }
-    for (const cell of this.cellsToRedraw) {
+
+    const toRedraw = forceRedrawAll ? this.buttons : this.cellsToRedraw;
+
+    for (const cell of toRedraw) {
       this.drawCell(cell);
     }
     this.cellsToRedraw.clear();
@@ -210,9 +241,9 @@ export default class Board extends Component<Props> {
         : "unrevealed"
       : cell.hasMine
       ? "mine"
-      : `${cell.touching}`;
+      : `${cell.touchingMines}`;
 
     btn.setAttribute("aria-label", cellState);
-    this.additionalButtonData.get(btn)![2] = cellState;
+    this.additionalButtonData.get(btn)![2] = cell;
   }
 }

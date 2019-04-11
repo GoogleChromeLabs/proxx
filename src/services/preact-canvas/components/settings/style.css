@@ -1,0 +1,35 @@
+.settings {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px;
+  margin-top: 0;
+  padding: 10px 0 0;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.settings::before {
+  content: '';
+  height: 1px;
+  transform-origin: 0 0;
+  transform: scaleY(0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+}
+
+.fullscreen {
+  composes: unbutton from '../../utils.css';
+  fill: #fff;
+  width: 24px;
+  height: 24px;
+}
+
+html:fullscreen .fullscreen {
+  display: none;
+}

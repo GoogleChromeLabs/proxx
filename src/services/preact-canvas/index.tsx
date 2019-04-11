@@ -12,13 +12,16 @@
  */
 
 import { Remote } from "comlink/src/comlink.js";
-import { Component, ComponentFactory, h, render } from "preact";
-import { Cell, GridChanges } from "../../gamelogic/types.js";
+import { Component, h, render, VNode } from "preact";
+import { bind } from "src/utils/bind.js";
+import { GridChanges } from "../../gamelogic/types.js";
 import StateService, { State as GameState, StateName } from "../state/index.js";
 import initialState from "../state/initial-state.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
+import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
-import ResolveComponent from "./components/resolve/index.js";
+import Settings from "./components/settings";
+import { game as gameClassName } from "./style.css";
 
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;
@@ -30,6 +33,13 @@ interface State {
 }
 
 export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
+
+// tslint:disable-next-line:variable-name
+const Game = deferred(
+  import("./components/game/index.js").then(m => m.default)
+);
+// tslint:disable-next-line:variable-name
+const End = deferred(import("./components/end/index.js").then(m => m.default));
 
 class PreactService extends Component<Props, State> {
   state: State = {
@@ -44,43 +54,64 @@ class PreactService extends Component<Props, State> {
   }
 
   render(_props: Props, { state, stateService }: State) {
+    let mainComponent: VNode;
+
     switch (state.name) {
       case StateName.START:
-        return <Intro stateService={stateService!} spinner={!stateService} />;
+        mainComponent = (
+          <Intro stateService={stateService!} spinner={!stateService} />
+        );
+        break;
       case StateName.WAITING_TO_PLAY:
       case StateName.PLAYING:
-        return (
-          <ResolveComponent<
-            ComponentFactory<import("./components/game/index.js").Props>
-          >
-            promise={import("./components/game/index.js").then(m => m.default)}
-            // tslint:disable-next-line:variable-name Need uppercase for JSX
-            onResolve={Game => (
-              // TODO: Implement an unsubscribe for when the unmounting happens
-              <Game
-                grid={state.grid}
-                gridChangeSubscribe={(f: GridChangeSubscriptionCallback) =>
-                  this.gridChangeSubscribers.add(f)
-                }
-                stateService={stateService!}
-              />
-            )}
+        mainComponent = (
+          <Game
+            loading={() => <div />}
+            grid={state.grid}
+            gridChangeSubscribe={this._onGridChangeSubscribe}
+            gridChangeUnsubscribe={this._onGridChangeUnsubscribe}
+            stateService={stateService!}
           />
         );
+        break;
       case StateName.END:
-        return (
-          <ResolveComponent<
-            ComponentFactory<import("./components/end/index.js").Props>
-          >
-            promise={import("./components/end/index.js").then(m => m.default)}
-            // tslint:disable-next-line:variable-name Need uppercase for JSX
-            onResolve={End => (
-              <End type={state.endType} restart={() => stateService!.reset()} />
-            )}
+        mainComponent = (
+          <End
+            loading={() => <div />}
+            type={state.endType}
+            restart={() => stateService!.reset()}
           />
         );
+        break;
+      default:
+        throw Error("Unexpected game state");
     }
+
+    return (
+      <div class={gameClassName}>
+        {mainComponent}
+        <div>
+          <Settings onFullscreenClick={this._onFullscreenClick} />
+        </div>
+      </div>
+    );
   }
+
+  @bind
+  private _onGridChangeSubscribe(func: GridChangeSubscriptionCallback) {
+    this.gridChangeSubscribers.add(func);
+  }
+
+  @bind
+  private _onGridChangeUnsubscribe(func: GridChangeSubscriptionCallback) {
+    this.gridChangeSubscribers.delete(func);
+  }
+
+  @bind
+  private _onFullscreenClick() {
+    document.documentElement.requestFullscreen();
+  }
+
   private async _init(props: Props) {
     const stateService = await props.stateServicePromise;
     await stateService.ready;
@@ -88,7 +119,9 @@ class PreactService extends Component<Props, State> {
 
     localStateSubscribe(stateService, (newState, gridChanges) => {
       if (gridChanges) {
-        this.gridChangeSubscribers.forEach(f => f(gridChanges));
+        for (const callback of this.gridChangeSubscribers) {
+          callback(gridChanges);
+        }
       }
       this.setState({ state: newState });
     });

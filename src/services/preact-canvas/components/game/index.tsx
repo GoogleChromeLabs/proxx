@@ -11,65 +11,51 @@
  * limitations under the License.
  */
 import { Remote } from "comlink/src/comlink";
-import PointerTracker from "pointer-tracker";
 import { Component, h } from "preact";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
 import { GridChangeSubscriptionCallback } from "../..";
-import { Cell } from "../../../../gamelogic/types";
+import { Cell, Tag } from "../../../../gamelogic/types";
 import Board from "../board";
-import { altLabel } from "./style.css";
+import { checkbox, toggle, toggleLabel } from "./style.css";
 
 export interface Props {
   stateService: Remote<StateService>;
   grid: Cell[][];
   gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
+  gridChangeUnsubscribe: (f: GridChangeSubscriptionCallback) => void;
 }
 
 interface State {
   altActionChecked: boolean;
-  altActionHeld: boolean;
 }
 
 export default class Game extends Component<Props, State> {
-  altLabel?: HTMLLabelElement;
-
   state: State = {
-    altActionChecked: false,
-    altActionHeld: false
+    altActionChecked: false
   };
 
-  componentDidMount() {
-    const tracker: PointerTracker = new PointerTracker(this.altLabel!, {
-      end: () => {
-        this.setState({ altActionHeld: false });
-      },
-      start: (pointer, event) => {
-        if (tracker.currentPointers.length > 0) {
-          return false;
-        }
-        event.preventDefault();
-        this.setState({ altActionHeld: true });
-        return true;
-      }
-    });
-  }
-
-  render({ grid, gridChangeSubscribe }: Props, { altActionChecked }: State) {
+  render(
+    { grid, gridChangeSubscribe, gridChangeUnsubscribe }: Props,
+    { altActionChecked }: State
+  ) {
     return (
       <div>
         <Board
           grid={grid}
           gridChangeSubscribe={gridChangeSubscribe}
+          gridChangeUnsubscribe={gridChangeUnsubscribe}
           onCellClick={this.onCellClick}
         />
-        <label class={altLabel} ref={el => (this.altLabel = el)}>
+        <label class={toggleLabel}>
+          Reveal
           <input
+            class={checkbox}
             type="checkbox"
             onChange={this.onAltChange}
             checked={altActionChecked}
           />
-          Flag / reveal surrounding
+          <span class={toggle} /> Flag
         </label>
       </div>
     );
@@ -84,19 +70,23 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onCellClick(cell: [number, number, string], forceAlt: boolean) {
-    const [x, y, state] = cell;
-    const { altActionChecked, altActionHeld } = this.state;
+  private onCellClick(cellData: [number, number, Cell], forceAlt: boolean) {
+    const [x, y, cell] = cellData;
+    const { altActionChecked } = this.state;
 
-    const altAction = forceAlt || altActionHeld || altActionChecked;
+    const altAction = forceAlt || altActionChecked;
 
-    if (state === "unrevealed" && !altAction) {
-      this.props.stateService.reveal(x, y);
-    } else if (state === "unrevealed" && altAction) {
-      this.props.stateService.flag(x, y);
-    } else if (state === "flagged" && altAction) {
-      this.props.stateService.unflag(x, y);
-    } else if (Number(state) !== Number.NaN && altAction) {
+    if (!cell.revealed) {
+      if (altAction) {
+        if (cell.tag === Tag.Flag) {
+          this.props.stateService.unflag(x, y);
+        } else {
+          this.props.stateService.flag(x, y);
+        }
+      } else {
+        this.props.stateService.reveal(x, y);
+      }
+    } else if (cell.touchingFlags >= cell.touchingMines) {
       this.props.stateService.revealSurrounding(x, y);
     }
   }

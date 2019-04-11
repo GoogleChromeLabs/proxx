@@ -1,0 +1,18 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+html {
+  background: linear-gradient(to bottom, #00023d, #54216c);
+}
+
+.game {
+  user-select: none;
+  color: #fff;
+  display: flex;
+  flex-flow: column;
+  min-height: 100%;
+}

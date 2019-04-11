@@ -10,27 +10,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Component, h } from "preact";
+import { Fullscreen } from "../icons";
+import { fullscreen, settings } from "./style.css";
 
-export const enum State {
-  Pending,
-  Playing,
-  Lost,
-  Won
+export interface Props {
+  onFullscreenClick: () => void;
 }
+export interface State {}
 
-export const enum Tag {
-  None,
-  Flag,
-  Mark
+export default class Settings extends Component<Props, State> {
+  render({ onFullscreenClick }: Props) {
+    return (
+      <div class={settings}>
+        <button class={fullscreen} onClick={onFullscreenClick}>
+          <Fullscreen />
+        </button>
+      </div>
+    );
+  }
 }
-
-export interface Cell {
-  hasMine: boolean;
-  id: number;
-  tag: Tag;
-  revealed: boolean;
-  touchingMines: number;
-  touchingFlags: number;
-}
-
-export type GridChanges = Array<[number, number, Cell]>;
