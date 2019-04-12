@@ -45,8 +45,8 @@ interface State {
 
 export default class Intro extends Component<Props, State> {
   state: State = {
-    presetName: "beginner",
-    ...presets.beginner
+    presetName: "custom",
+    ...{ width: 24, height: 24, mines: 40 }
   };
 
   private _presetSelect?: HTMLSelectElement;

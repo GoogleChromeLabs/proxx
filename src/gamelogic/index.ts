@@ -183,9 +183,6 @@ export default class MinesweeperGame {
 
   private _pushGridChange(x: number, y: number) {
     this._gridChanges.push([x, y]);
-    if (this._gridChanges.length >= MinesweeperGame.EMIT_THRESHOLD) {
-      this._emit();
-    }
   }
 
   private _endGame(state: State.Won | State.Lost) {
