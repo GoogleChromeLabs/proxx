@@ -11,23 +11,16 @@
  * limitations under the License.
  */
 
-export const enum State {
+export const enum PlayMode {
   Pending,
   Playing,
   Lost,
   Won
 }
 
-export const enum Tag {
-  None,
-  Flag,
-  Mark
-}
-
 export interface Cell {
   hasMine: boolean;
-  id: number;
-  tag: Tag;
+  flagged: boolean;
   revealed: boolean;
   touchingMines: number;
   touchingFlags: number;

@@ -11,38 +11,36 @@
  * limitations under the License.
  */
 
-import { Cell, GridChanges, State, Tag } from "./types.js";
+import { Cell, GridChanges, PlayMode } from "./types.js";
 
 function newCell(id: number): Cell {
   return {
+    flagged: false,
     hasMine: false,
-    id,
     revealed: false,
-    tag: Tag.None,
     touchingFlags: 0,
     touchingMines: 0
   };
 }
 
-export type ChangeCallback = (changes: GridChanges) => void;
+export interface StateChange {
+  flags?: number;
+  toReveal?: number;
+  playMode?: PlayMode;
+  gridChanges?: GridChanges;
+}
+
+export type ChangeCallback = (changes: StateChange) => void;
+
+const FLUSH_GRID_CHANGE_THRESHOLD = 10;
 
 export default class MinesweeperGame {
-  get state() {
-    return this._state;
-  }
-
-  get flags() {
-    return this._flags;
-  }
-  static EMIT_THRESHOLD = 10;
   grid: Cell[][];
-  startTime = 0;
-  endTime = 0;
-  private _state = State.Pending;
+  private _playMode = PlayMode.Pending;
   private _toReveal = 0;
   private _flags = 0;
-  private _gridChanges: Array<[number, number]> = [];
   private _changeCallback?: ChangeCallback;
+  private _stateChange: StateChange = {};
 
   constructor(
     private _width: number,
@@ -74,39 +72,41 @@ export default class MinesweeperGame {
     this._changeCallback = callback;
   }
 
+  unsubscribe() {
+    this._changeCallback = undefined;
+  }
+
   reveal(x: number, y: number) {
-    if (this._state === State.Pending) {
+    if (this._playMode === PlayMode.Pending) {
       this._placeMines(x, y);
-      this.startTime = Date.now();
-    } else if (this._state !== State.Playing) {
+    } else if (this._playMode !== PlayMode.Playing) {
       throw Error("Game is not in a playable state");
     }
 
     const cell = this.grid[y][x];
 
-    if (cell.tag === Tag.Flag) {
+    if (cell.flagged) {
       throw Error("Cell flagged");
     }
 
     this._reveal(x, y);
-    this._emit();
+    this._flushStateChange();
   }
 
-  tag(x: number, y: number, tag: Tag) {
+  tag(x: number, y: number, flagged: boolean) {
     const cell = this.grid[y][x];
     if (cell.revealed) {
       throw Error("Revealed cell cannot be tagged");
     }
-    if (cell.tag === tag) {
+    if (cell.flagged === flagged) {
       return;
     }
 
-    const oldTag = cell.tag;
-    cell.tag = tag;
+    cell.flagged = flagged;
     this._pushGridChange(x, y);
 
-    if (tag === Tag.Flag) {
-      this._flags++;
+    if (flagged) {
+      this._setFlags(this._flags + 1);
       for (const [nextX, nextY] of this._getSurrounding(x, y)) {
         const nextCell = this.grid[nextY][nextX];
         nextCell.touchingFlags++;
@@ -118,12 +118,12 @@ export default class MinesweeperGame {
           this._pushGridChange(nextX, nextY);
         }
       }
-    } else if (oldTag === Tag.Flag) {
-      this._flags--;
+    } else {
+      this._setFlags(this._flags - 1);
       for (const [nextX, nextY] of this._getSurrounding(x, y)) {
         const nextCell = this.grid[nextY][nextX];
         nextCell.touchingFlags--;
-        // Emit this if it's just un-matched the number of mines
+        // Emit this if it's just gone under the number of mines
         if (
           nextCell.revealed &&
           nextCell.touchingFlags === nextCell.touchingMines - 1
@@ -132,7 +132,7 @@ export default class MinesweeperGame {
         }
       }
     }
-    this._emit();
+    this._flushStateChange();
   }
 
   /**
@@ -153,7 +153,7 @@ export default class MinesweeperGame {
 
     for (const [nextX, nextY] of this._getSurrounding(x, y)) {
       const nextCell = this.grid[nextY][nextX];
-      if (nextCell.tag === Tag.Flag || nextCell.revealed) {
+      if (nextCell.flagged || nextCell.revealed) {
         continue;
       }
       revealedSomething = true;
@@ -164,33 +164,59 @@ export default class MinesweeperGame {
       return false;
     }
 
-    this._emit();
+    this._flushStateChange();
     return true;
   }
 
-  private _emit() {
-    if (this._gridChanges.length <= 0) {
+  private _flushStateChange() {
+    if (Object.keys(this._stateChange).length === 0) {
       return;
     }
     if (!this._changeCallback) {
       throw Error("No function present to emit with");
     }
-    this._changeCallback(
-      this._gridChanges.map(([x, y]) => [x, y, this.grid[y][x]] as any)
-    );
-    this._gridChanges = [];
+    this._changeCallback(this._stateChange);
+    this._stateChange = {};
   }
 
   private _pushGridChange(x: number, y: number) {
-    this._gridChanges.push([x, y]);
-    if (this._gridChanges.length >= MinesweeperGame.EMIT_THRESHOLD) {
-      this._emit();
+    if (!this._stateChange.gridChanges) {
+      this._stateChange.gridChanges = [];
+    }
+
+    this._stateChange.gridChanges.push([x, y, this.grid[y][x]]);
+
+    if (this._stateChange.gridChanges.length >= FLUSH_GRID_CHANGE_THRESHOLD) {
+      this._flushStateChange();
     }
   }
 
-  private _endGame(state: State.Won | State.Lost) {
-    this._state = state;
-    this.endTime = Date.now();
+  private _setPlayMode(newMode: PlayMode) {
+    if (this._playMode === newMode) {
+      return;
+    }
+    this._playMode = newMode;
+    this._stateChange.playMode = newMode;
+  }
+
+  private _setToReveal(newToReveal: number) {
+    if (this._toReveal === newToReveal) {
+      return;
+    }
+    this._toReveal = newToReveal;
+    this._stateChange.toReveal = newToReveal;
+  }
+
+  private _setFlags(newFlags: number) {
+    if (this._flags === newFlags) {
+      return;
+    }
+    this._flags = newFlags;
+    this._stateChange.flags = newFlags;
+  }
+
+  private _endGame(mode: PlayMode.Won | PlayMode.Lost) {
+    this._setPlayMode(mode);
   }
 
   private _placeMines(avoidX: number, avoidY: number) {
@@ -221,7 +247,7 @@ export default class MinesweeperGame {
       }
     }
 
-    this._state = State.Playing;
+    this._setPlayMode(PlayMode.Playing);
   }
 
   private _getSurrounding(x: number, y: number): Array<[number, number]> {
@@ -275,14 +301,14 @@ export default class MinesweeperGame {
       this._pushGridChange(x, y);
 
       if (cell.hasMine) {
-        this._endGame(State.Lost);
+        this._endGame(PlayMode.Lost);
         return;
       }
 
-      this._toReveal -= 1;
+      this._setToReveal(this._toReveal - 1);
 
       if (this._toReveal === 0) {
-        this._endGame(State.Won);
+        this._endGame(PlayMode.Won);
         return;
       }
 
@@ -298,11 +324,11 @@ export default class MinesweeperGame {
           // Don't allow corner to expand (but revealing numbers is fine)
           continue;
         }
-        if (!nextCell.revealed && nextCell.tag !== Tag.Flag) {
+        if (!nextCell.revealed && !nextCell.flagged) {
           revealSet.add(nextX + nextY * this._width);
         }
       }
     }
-    this._emit();
+    this._flushStateChange();
   }
 }

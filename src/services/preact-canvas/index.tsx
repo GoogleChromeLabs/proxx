@@ -14,9 +14,9 @@
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
 import { bind } from "src/utils/bind.js";
-import { GridChanges } from "../../gamelogic/types.js";
-import StateService, { State as GameState, StateName } from "../state/index.js";
-import initialState from "../state/initial-state.js";
+import { StateChange as GameStateChange } from "../../gamelogic";
+import { GameType } from "../state";
+import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
@@ -28,63 +28,45 @@ interface Props {
 }
 
 interface State {
-  state: GameState;
+  game?: GameType;
   stateService?: Remote<StateService>;
 }
 
-export type GridChangeSubscriptionCallback = (gridChanges: GridChanges) => void;
+export type GameChangeCallback = (stateChange: GameStateChange) => void;
 
 // tslint:disable-next-line:variable-name
 const Game = deferred(
   import("./components/game/index.js").then(m => m.default)
 );
-// tslint:disable-next-line:variable-name
-const End = deferred(import("./components/end/index.js").then(m => m.default));
 
 class PreactService extends Component<Props, State> {
-  state: State = {
-    state: { ...initialState }
-  };
+  state: State = {};
 
-  private gridChangeSubscribers = new Set<GridChangeSubscriptionCallback>();
+  private _gameChangeSubscribers = new Set<GameChangeCallback>();
 
   constructor(props: Props) {
     super(props);
     this._init(props);
   }
 
-  render(_props: Props, { state, stateService }: State) {
+  render(_props: Props, { game, stateService }: State) {
     let mainComponent: VNode;
 
-    switch (state.name) {
-      case StateName.START:
-        mainComponent = (
-          <Intro stateService={stateService!} spinner={!stateService} />
-        );
-        break;
-      case StateName.WAITING_TO_PLAY:
-      case StateName.PLAYING:
-        mainComponent = (
-          <Game
-            loading={() => <div />}
-            grid={state.grid}
-            gridChangeSubscribe={this._onGridChangeSubscribe}
-            gridChangeUnsubscribe={this._onGridChangeUnsubscribe}
-            stateService={stateService!}
-          />
-        );
-        break;
-      case StateName.END:
-        mainComponent = (
-          <End
-            loading={() => <div />}
-            type={state.endType}
-            restart={() => stateService!.reset()}
-          />
-        );
-        break;
-      default:
-        throw Error("Unexpected game state");
+    if (!game) {
+      mainComponent = (
+        <Intro onStartGame={this._onStartGame} spinner={!stateService} />
+      );
+    } else {
+      mainComponent = (
+        <Game
+          loading={() => <div />}
+          width={game.width}
+          height={game.height}
+          gameChangeSubscribe={this._onGameChangeSubscribe}
+          gameChangeUnsubscribe={this._onGameChangeUnsubscribe}
+          stateService={stateService!}
+        />
+      );
     }
 
     return (
@@ -98,13 +80,13 @@ class PreactService extends Component<Props, State> {
   }
 
   @bind
-  private _onGridChangeSubscribe(func: GridChangeSubscriptionCallback) {
-    this.gridChangeSubscribers.add(func);
+  private _onGameChangeSubscribe(func: GameChangeCallback) {
+    this._gameChangeSubscribers.add(func);
   }
 
   @bind
-  private _onGridChangeUnsubscribe(func: GridChangeSubscriptionCallback) {
-    this.gridChangeSubscribers.delete(func);
+  private _onGameChangeUnsubscribe(func: GameChangeCallback) {
+    this._gameChangeSubscribers.delete(func);
   }
 
   @bind
@@ -112,18 +94,24 @@ class PreactService extends Component<Props, State> {
     document.documentElement.requestFullscreen();
   }
 
+  @bind
+  private _onStartGame(width: number, height: number, mines: number) {
+    this.state.stateService!.initGame(width, height, mines);
+  }
+
   private async _init(props: Props) {
     const stateService = await props.stateServicePromise;
-    await stateService.ready;
     this.setState({ stateService });
 
-    localStateSubscribe(stateService, (newState, gridChanges) => {
-      if (gridChanges) {
-        for (const callback of this.gridChangeSubscribers) {
-          callback(gridChanges);
+    localStateSubscribe(stateService, stateChange => {
+      if ("game" in stateChange) {
+        this.setState({ game: stateChange.game });
+      }
+      if ("gameStateChange" in stateChange) {
+        for (const callback of this._gameChangeSubscribers) {
+          callback(stateChange.gameStateChange!);
         }
       }
-      this.setState({ state: newState });
     });
   }
 }

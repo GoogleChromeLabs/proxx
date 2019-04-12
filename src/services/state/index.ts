@@ -10,131 +10,77 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import MinesweeperGame, {
+  StateChange as GameStateChange
+} from "../../gamelogic/index";
 
-import MinesweeperGame from "../../gamelogic/index.js";
+// import generatedFieldURL from "asset-url:../../gamelogic/generated-field.json";
 
-import {
-  Cell,
-  GridChanges,
-  State as LogicGameState,
-  Tag
-} from "../../gamelogic/types.js";
-import { bind } from "../../utils/bind.js";
-
-import initialState from "./initial-state.js";
-
-// @ts-ignore
-import generatedFieldURL from "asset-url:../../gamelogic/generated-field.json";
-
-export const enum UpdateType {
-  FULL_STATE,
-  GRID_PATCH
+export interface GameType {
+  width: number;
+  height: number;
 }
 
-export interface FullStateUpdate {
-  type: UpdateType.FULL_STATE;
-  newState: State;
+export interface StateChange {
+  game?: GameType;
+  gameStateChange?: GameStateChange;
 }
-
-// TODO We probably want another InitBoardUpdate so we don’t
-// have to send the unrevealed array.
-
-export interface GridPatchUpdate {
-  type: UpdateType.GRID_PATCH;
-  gridChanges: GridChanges;
-}
-
-export type StateUpdate = FullStateUpdate | GridPatchUpdate;
-
-export const enum StateName {
-  START,
-  WAITING_TO_PLAY,
-  PLAYING,
-  END
-}
-
-export interface StartState {
-  name: StateName.START;
-}
-
-export interface WaitingToPlayState {
-  name: StateName.WAITING_TO_PLAY;
-  grid: Cell[][];
-}
-
-export interface PlayingState {
-  name: StateName.PLAYING;
-  grid: Cell[][];
-}
-
-export interface EndState {
-  name: StateName.END;
-  endType: LogicGameState.Won | LogicGameState.Lost;
-}
-
-export type State = StartState | WaitingToPlayState | PlayingState | EndState;
 
 export default class StateService {
-  readonly ready = true;
-  private _state: State = { ...initialState };
   private _eventTarget: EventTarget = new MessageChannel().port1;
   private _game?: MinesweeperGame;
 
-  constructor() {
-    this.reset();
-  }
-
-  getFullState(): State {
-    return this._state;
-  }
-
   initGame(width: number, height: number, numBombs: number) {
+    let gameActiveChange = false;
+
+    if (this._game) {
+      this._game.unsubscribe();
+    } else {
+      gameActiveChange = true;
+    }
+
     this._game = new MinesweeperGame(width, height, numBombs);
-    this._state = {
-      grid: this._game!.grid,
-      name: StateName.WAITING_TO_PLAY
-    };
-    this._game.subscribe(gridChanges => {
+
+    if (gameActiveChange) {
       this._notify({
-        gridChanges,
-        type: UpdateType.GRID_PATCH
+        game: { width, height }
       });
-    });
-    this._notify({
-      newState: this._state,
-      type: UpdateType.FULL_STATE
+    }
+
+    this._game.subscribe(stateChange => {
+      this._notify({ gameStateChange: stateChange });
     });
   }
 
-  subscribe(callback: (state: StateUpdate) => void) {
+  subscribe(callback: (state: StateChange) => void) {
     this._eventTarget.addEventListener("state-update", (event: Event) => {
-      callback((event as CustomEvent<StateUpdate>).detail);
+      callback((event as CustomEvent<StateChange>).detail);
     });
+  }
+
+  reset() {
+    if (!this._game) {
+      return;
+    }
+    this._game.unsubscribe();
+    this._game = undefined;
+    this._notify({ game: undefined });
   }
 
   flag(x: number, y: number) {
-    this._game!.tag(x, y, Tag.Flag);
-    this._checkForGameOver();
+    this._game!.tag(x, y, true);
   }
 
   unflag(x: number, y: number) {
-    this._game!.tag(x, y, Tag.None);
-    this._checkForGameOver();
+    this._game!.tag(x, y, false);
   }
 
   reveal(x: number, y: number) {
     this._game!.reveal(x, y);
-    this._checkForGameOver();
   }
 
   revealSurrounding(x: number, y: number) {
     this._game!.attemptSurroundingReveal(x, y);
-    this._checkForGameOver();
-  }
-
-  reset() {
-    this._state = initialState;
-    this._fullStateUpdate();
   }
 
   async loadDeterministicField() {
@@ -146,30 +92,10 @@ export default class StateService {
     // this._game!.startTime = Date.now();
   }
 
-  private _checkForGameOver() {
-    if (
-      this._game!.state === LogicGameState.Won ||
-      this._game!.state === LogicGameState.Lost
-    ) {
-      this._state = {
-        endType: this._game!.state,
-        name: StateName.END
-      };
-    }
-    this._fullStateUpdate();
-  }
-
-  private _fullStateUpdate() {
-    this._notify({
-      newState: this._state,
-      type: UpdateType.FULL_STATE
-    });
-  }
-
-  private _notify(stateUpdate: StateUpdate) {
+  private _notify(stateChange: StateChange) {
     this._eventTarget.dispatchEvent(
-      new CustomEvent<StateUpdate>("state-update", {
-        detail: stateUpdate
+      new CustomEvent<StateChange>("state-update", {
+        detail: stateChange
       })
     );
   }

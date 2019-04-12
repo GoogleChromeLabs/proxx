@@ -10,10 +10,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Remote } from "comlink/src/comlink.js";
 import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
-import StateService from "../../../state/index.js";
 
 import {
   button as buttonStyle,
@@ -32,7 +30,7 @@ const presets = {
 type PresetName = keyof typeof presets;
 
 export interface Props {
-  stateService: Remote<StateService>;
+  onStartGame: (width: number, height: number, mines: number) => void;
   spinner: boolean;
 }
 
@@ -173,8 +171,7 @@ export default class Intro extends Component<Props, State> {
   @bind
   private _startGame(event: Event) {
     event.preventDefault();
-
-    this.props.stateService.initGame(
+    this.props.onStartGame(
       this.state.width,
       this.state.height,
       this.state.mines

@@ -11,10 +11,8 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Cell, GridChanges, Tag } from "../../../../gamelogic/types.js";
-import { bind } from "../../../../utils/bind.js";
-import { GridChangeSubscriptionCallback } from "../../index.js";
-
+import { StateChange } from "src/gamelogic/index.js";
+import { Cell, GridChanges } from "../../../../gamelogic/types.js";
 import {
   AnimationDesc,
   AnimationName,
@@ -26,6 +24,8 @@ import {
   initTextureCaches,
   numberAnimation
 } from "../../../../rendering/animation.js";
+import { bind } from "../../../../utils/bind.js";
+import { GameChangeCallback } from "../../index.js";
 
 import {
   board,
@@ -37,11 +37,20 @@ import {
   gameTable
 } from "./style.css";
 
+const defaultCell: Cell = {
+  flagged: false,
+  hasMine: false,
+  revealed: false,
+  touchingFlags: 0,
+  touchingMines: 0
+};
+
 export interface Props {
   onCellClick: (cell: [number, number, Cell], forceAlt: boolean) => void;
-  grid: Cell[][];
-  gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
-  gridChangeUnsubscribe: (f: GridChangeSubscriptionCallback) => void;
+  width: number;
+  height: number;
+  gameChangeSubscribe: (f: GameChangeCallback) => void;
+  gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
 
 function distanceFromCenter(x: number, y: number, size: number): number {
@@ -69,8 +78,8 @@ export default class Board extends Component<Props> {
   private renderLoopRunning = false;
 
   componentDidMount() {
-    this.createTable(this.props.grid);
-    this.props.gridChangeSubscribe(this.doManualDomHandling);
+    this.createTable(this.props.width, this.props.height);
+    this.props.gameChangeSubscribe(this.doManualDomHandling);
     this.canvasInit();
     this.animationsInit();
 
@@ -79,7 +88,7 @@ export default class Board extends Component<Props> {
 
   componentWillUnmount() {
     window.removeEventListener("resize", this.onWindowResize);
-    this.props.gridChangeUnsubscribe(this.doManualDomHandling);
+    this.props.gameChangeUnsubscribe(this.doManualDomHandling);
     // Stop rAF
     this.renderLoopRunning = false;
   }
@@ -102,10 +111,14 @@ export default class Board extends Component<Props> {
   }
 
   @bind
-  private doManualDomHandling(gridChanges: GridChanges) {
-    // Apply patches
-    const width = this.props.grid[0].length;
-    for (const [x, y, cellProps] of gridChanges) {
+  private doManualDomHandling(stateChange: StateChange) {
+    if (!stateChange.gridChanges) {
+      return;
+    }
+
+    const width = this.props.width;
+
+    for (const [x, y, cellProps] of stateChange.gridChanges) {
       const btn = this.buttons[y * width + x];
       this.updateButton(btn, cellProps);
       this.cellsToRedraw.add(btn);
@@ -113,22 +126,22 @@ export default class Board extends Component<Props> {
     }
   }
 
-  private createTable(grid: Cell[][]) {
+  private createTable(width: number, height: number) {
     const tableContainer = document.querySelector("." + containerStyle);
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
-    for (let row = 0; row < grid.length; row++) {
+    for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.classList.add(gameRow);
-      for (let col = 0; col < grid[0].length; col++) {
+      for (let col = 0; col < width; col++) {
         const y = row;
         const x = col;
         const td = document.createElement("td");
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.additionalButtonData.set(button, [x, y, grid[y][x]]);
-        this.updateButton(button, grid[y][x]);
+        this.additionalButtonData.set(button, [x, y, defaultCell]);
+        this.updateButton(button, defaultCell);
         this.buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
@@ -146,9 +159,9 @@ export default class Board extends Component<Props> {
     const [x, y, cell] = this.additionalButtonData.get(btn)!;
     const animationList = this.animationLists.get(btn)!;
 
-    if (!cell.revealed && cell.tag !== Tag.Flag) {
+    if (!cell.revealed && !cell.flagged) {
       animationList[0].name = AnimationName.IDLE;
-    } else if (!cell.revealed && cell.tag === Tag.Flag) {
+    } else if (!cell.revealed && cell.flagged) {
       animationList[0].name = AnimationName.FLAGGED;
     } else if (cell.revealed && cell.touchingMines <= 0) {
       animationList.length = 0;
@@ -186,8 +199,7 @@ export default class Board extends Component<Props> {
 
   private drawCell(btn: HTMLButtonElement, ts: number) {
     const { width, height, left, top } = this.firstCellRect!;
-    const [bx, by] = this.additionalButtonData.get(btn)!;
-    const cell = this.props.grid[by][bx];
+    const [bx, by, cell] = this.additionalButtonData.get(btn)!;
     const x = bx * width + left;
     const y = by * height + top;
 
@@ -267,9 +279,7 @@ export default class Board extends Component<Props> {
         {
           name: AnimationName.IDLE,
           start:
-            startTime -
-            5000 +
-            distanceFromCenter(x, y, this.props.grid[0].length) * 5000
+            startTime - 5000 + distanceFromCenter(x, y, this.props.width) * 5000
         }
       ]);
     }
@@ -304,7 +314,7 @@ export default class Board extends Component<Props> {
 
   private updateButton(btn: HTMLButtonElement, cell: Cell) {
     const cellState = !cell.revealed
-      ? cell.tag === Tag.Flag
+      ? cell.flagged
         ? "flagged"
         : "unrevealed"
       : cell.hasMine
