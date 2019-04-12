@@ -26,8 +26,8 @@ export function easeOutQuad(t: number) {
 }
 
 export function easeInOutQuad(t: number) {
-  // tslint:disable-next-line:no-conditional-assignment
-  if ((t *= 2.0) < 1.0) {
+  t *= 2.0;
+  if (t < 1.0) {
     return 0.5 * t * t;
   } else {
     return -0.5 * ((t - 1.0) * (t - 3.0) - 1.0);
@@ -43,11 +43,12 @@ export function easeOutCubic(t: number) {
 }
 
 export function easeInOutCubic(t: number) {
-  // tslint:disable-next-line:no-conditional-assignment
-  if ((t *= 2.0) < 1.0) {
+  t *= 2.0;
+  if (t < 1.0) {
     return 0.5 * t * t * t;
   } else {
-    return 0.5 * ((t -= 2.0) * t * t + 2.0);
+    t -= 2.0;
+    return 0.5 * (t * t * t + 2.0);
   }
 }
 
@@ -63,8 +64,8 @@ export function easeInOutExpo(t: number) {
   if (t === 0.0 || t === 1.0) {
     return t;
   }
-  // tslint:disable-next-line:no-conditional-assignment
-  if ((t *= 2.0) < 1.0) {
+  t *= 2.0;
+  if (t < 1.0) {
     return 0.5 * Math.pow(2.0, 10.0 * (t - 1.0));
   } else {
     return 0.5 * (-Math.pow(2.0, -10.0 * (t - 1.0)) + 2.0);
