@@ -162,22 +162,22 @@ export default class ShaderBox {
   }
 
   setUniform1f(name: string, val: number) {
-    this._gl.uniform1f(this._getUniform(name), val);
+    this._gl.uniform1f(this._getUniformLocation(name), val);
     this._uniformValues.set(name, [val]);
   }
 
   setUniform2f(name: string, val: [number, number]) {
-    this._gl.uniform2fv(this._getUniform(name), val);
+    this._gl.uniform2fv(this._getUniformLocation(name), val);
     this._uniformValues.set(name, val);
   }
 
   setUniform3f(name: string, val: [number, number, number]) {
-    this._gl.uniform3fv(this._getUniform(name), val);
+    this._gl.uniform3fv(this._getUniformLocation(name), val);
     this._uniformValues.set(name, val);
   }
 
   setUniform4f(name: string, val: [number, number, number, number]) {
-    this._gl.uniform4fv(this._getUniform(name), val);
+    this._gl.uniform4fv(this._getUniformLocation(name), val);
     this._uniformValues.set(name, val);
   }
 
@@ -201,8 +201,54 @@ export default class ShaderBox {
       throw Error(`Unknown uniform ${name}`);
     }
   }
-  private _getUniform(name: string): WebGLUniformLocation {
+  private _getUniformLocation(name: string): WebGLUniformLocation {
     this._assertUniformExists(name);
     return this._uniformLocations.get(name)!;
   }
+}
+
+
+hasUniform(name) {
+  return this._uniformLocations.has(name);
+}
+
+get uniforms() {
+  return [...this._uniformLocations.keys()];
+}
+
+getUniform(name) {
+  this._assertUniformExists(name);
+  return this._uniformValues.get(name);
+}
+
+setUniform1f(name, val) {
+  if(!this.hasUniform(name)) {
+    return;
+  }
+  this._gl.uniform1f(this._getUniform(name), val);
+  this._uniformValues.set(name, [val]);
+}
+
+setUniform2f(name, val) {
+  if(!this.hasUniform(name)) {
+    return;
+  }
+  this._gl.uniform2fv(this._getUniform(name), val);
+  this._uniformValues.set(name, val);
+}
+
+setUniform3f(name, val) {
+  if(!this.hasUniform(name)) {
+    return;
+  }
+  this._gl.uniform3fv(this._getUniform(name), val);
+  this._uniformValues.set(name, val);
+}
+
+setUniform4f(name, val) {
+  if(!this.hasUniform(name)) {
+    return;
+  }
+  this._gl.uniform4fv(this._getUniform(name), val);
+  this._uniformValues.set(name, val);
 }
