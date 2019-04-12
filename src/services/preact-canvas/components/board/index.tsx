@@ -80,6 +80,8 @@ export default class Board extends Component<Props> {
   componentWillUnmount() {
     window.removeEventListener("resize", this.onWindowResize);
     this.props.gridChangeUnsubscribe(this.doManualDomHandling);
+    // Stop rAF
+    this.renderLoopRunning = false;
   }
 
   shouldComponentUpdate() {
@@ -244,7 +246,9 @@ export default class Board extends Component<Props> {
     const that = this;
     requestAnimationFrame(function f(ts) {
       that.renderCanvas(ts);
-      requestAnimationFrame(f);
+      if (that.renderLoopRunning) {
+        requestAnimationFrame(f);
+      }
     });
     this.renderLoopRunning = true;
   }
