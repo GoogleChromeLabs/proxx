@@ -48,7 +48,7 @@ async function grabMarkup(address) {
   });
   const markup = await page.evaluate(() => document.documentElement.outerHTML);
   await browser.close();
-  return markup;
+  return "<!doctype html>" + markup;
 }
 
 async function correctMarkup(markup, { port, dependencygraph }) {
