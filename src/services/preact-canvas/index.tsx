@@ -20,6 +20,7 @@ import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
+import Nebula from "./components/nebula/index.js";
 import Settings from "./components/settings";
 import { game as gameClassName, main } from "./style.css";
 
@@ -71,6 +72,7 @@ class PreactService extends Component<Props, State> {
 
     return (
       <div class={gameClassName}>
+        <Nebula dangerMode={false} />
         {mainComponent}
         <Settings onFullscreenClick={this._onFullscreenClick} />
       </div>

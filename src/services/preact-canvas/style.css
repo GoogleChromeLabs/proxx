@@ -5,10 +5,6 @@ body {
   height: 100%;
 }
 
-html {
-  background: linear-gradient(to bottom, #00023d, #54216c);
-}
-
 .main {
   height: 100%;
 }
@@ -19,4 +15,8 @@ html {
   display: flex;
   flex-flow: column;
   height: 100%;
+}
+
+.relative {
+  position: relative;
 }

@@ -1,0 +1,15 @@
+.nebula {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+.not-danger-mode {
+  background: linear-gradient(to bottom, rgb(57, 10, 78), rgb(43, 41, 111));
+}
+
+.danger-mode {
+  background: linear-gradient(to bottom, rgb(53, 0, 0), rgb(117, 31, 61));
+}
