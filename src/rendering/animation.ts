@@ -185,22 +185,20 @@ export function initTextureCaches(textureSize: number) {
     return;
   }
 
+  const tileSize = (textureSize - 10) * devicePixelRatio;
   const uncachedUATG = unrevealedAnimationTextureGeneratorFactory(
-    (textureSize - 10) * devicePixelRatio,
+    tileSize,
     300
   );
   unrevealedAnimationTextureGenerator = cacheTextureGenerator(
     uncachedUATG,
-    (textureSize - 10) * devicePixelRatio,
+    tileSize,
     300
   );
-  const uncachedRATG = revealAnimationTextureGeneratorFactory(
-    (textureSize - 10) * devicePixelRatio,
-    120
-  );
+  const uncachedRATG = revealAnimationTextureGeneratorFactory(tileSize, 120);
   revealAnimationTextureGenerator = cacheTextureGenerator(
     uncachedRATG,
-    (textureSize - 10) * devicePixelRatio,
+    tileSize,
     120
   );
 }

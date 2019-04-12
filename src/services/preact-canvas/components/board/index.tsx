@@ -12,7 +12,6 @@
  */
 import { Component, h } from "preact";
 import { Cell, GridChanges, Tag } from "../../../../gamelogic/types.js";
-import { TextureGenerator } from "../../../../rendering/texture-generators.js";
 import { bind } from "../../../../utils/bind.js";
 import { GridChangeSubscriptionCallback } from "../../index.js";
 
@@ -164,14 +163,17 @@ export default class Board extends Component<Props> {
           name: AnimationName.FLASH_IN,
           start: ts,
           done: () => {
-            // Remove idle and flash-in effect
-            animationList.shift();
-            animationList.shift();
-            animationList.unshift({
-              name: AnimationName.NUMBER,
-              start: ts + 100
-            });
+            while (
+              animationList[0].name === AnimationName.IDLE ||
+              animationList[0].name === AnimationName.FLASH_IN
+            ) {
+              animationList.shift();
+            }
           }
+        },
+        {
+          name: AnimationName.NUMBER,
+          start: ts + 100
         },
         {
           name: AnimationName.FLASH_OUT,
@@ -199,7 +201,6 @@ export default class Board extends Component<Props> {
     }
 
     const ctx = this.ctx!;
-    ctx.clearRect(x, y, width, height);
     const animationList = this.animationLists.get(btn);
     if (!animationList) {
       return;
@@ -238,7 +239,6 @@ export default class Board extends Component<Props> {
     this.ctx = this.canvas!.getContext("2d")!;
     this.ctx.scale(devicePixelRatio, devicePixelRatio);
 
-    // TODO: Don’t start another rAF loop on resize
     if (this.renderLoopRunning) {
       return;
     }
@@ -256,13 +256,14 @@ export default class Board extends Component<Props> {
   private animationsInit() {
     // Assuming square field size
     initTextureCaches(this.firstCellRect!.width);
+    const startTime = performance.now();
     for (const button of this.buttons) {
       const [x, y] = this.additionalButtonData.get(button)!;
       this.animationLists.set(button, [
         {
           name: AnimationName.IDLE,
           start:
-            performance.now() -
+            startTime -
             5000 +
             distanceFromCenter(x, y, this.props.grid[0].length) * 5000
         }

@@ -19,7 +19,6 @@ export function roundedRectangle(
   height: number,
   radius: number
 ) {
-  ctx.save();
   ctx.beginPath();
   ctx.moveTo(x, y + radius);
 
@@ -52,6 +51,4 @@ export function roundedRectangle(
   ctx.arc(x + radius, y + height - radius, radius, Math.PI / 2, Math.PI, false);
 
   ctx.closePath();
-
-  ctx.restore();
 }
