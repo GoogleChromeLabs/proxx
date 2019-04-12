@@ -18,6 +18,7 @@ import { GridChangeSubscriptionCallback } from "../../index.js";
 import {
   AnimationDesc,
   AnimationName,
+  Context,
   flaggedAnimation,
   flashInAnimation,
   flashOutAnimation,
@@ -206,7 +207,9 @@ export default class Board extends Component<Props> {
       return;
     }
     for (const animation of animationList) {
-      const context = { ts, ctx, x, y, width, height, animation };
+      const context: Context = { ts, ctx, width, height, animation };
+      ctx.save();
+      ctx.translate(x, y);
       switch (animation.name) {
         case AnimationName.IDLE:
           idleAnimation(context);
@@ -228,6 +231,7 @@ export default class Board extends Component<Props> {
           );
           break;
       }
+      ctx.restore();
     }
   }
 

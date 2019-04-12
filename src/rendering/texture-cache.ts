@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { Texture, TextureGenerator } from "./texture-generators.js";
+import { TextureGenerator } from "./texture-generators.js";
 
 // Wraps an existing TextureGenerator and caches the generated
 // frames in a sprite.
@@ -20,43 +20,43 @@ export function cacheTextureGenerator(
   textureSize: number,
   numFrames: number
 ): TextureGenerator {
-  const oneOffCanvas = document.createElement("canvas");
   const cacheCanvas = document.createElement("canvas");
-  // TODO: Is a square-ish canvas size better for some reason?
-  cacheCanvas.width = numFrames * textureSize;
-  cacheCanvas.height = textureSize;
+  // Allegedly, Chrome’s maximum canvas size is 32k pixels, which we are *not*
+  // hitting. However, working with a single row causes rendering bugs :shrug:
+  const rows = 2;
+  const framesPerRow = Math.ceil(numFrames / rows);
+  cacheCanvas.width = framesPerRow * textureSize * devicePixelRatio;
+  cacheCanvas.height = rows * textureSize * devicePixelRatio;
   const renderedTiles = new Set<number>();
-  const ctx = cacheCanvas.getContext("2d")!;
-  if (!ctx) {
+  const cacheCtx = cacheCanvas.getContext("2d")!;
+  if (!cacheCtx) {
     throw Error("Could not instantiate 2D rendering context");
   }
-  return (idx: number): Texture => {
+  cacheCtx.scale(devicePixelRatio, devicePixelRatio);
+
+  return (idx: number, ctx: CanvasRenderingContext2D) => {
     idx = Math.floor(idx % numFrames);
-    const x = idx;
-    const y = 0;
+    const x = idx % framesPerRow;
+    const y = Math.floor(idx / framesPerRow);
     const cacheX = x * textureSize;
     const cacheY = y * textureSize;
     if (!renderedTiles.has(idx)) {
-      const { source, sx, sy, sw, sh } = f(idx, { canvas: oneOffCanvas });
-      ctx.drawImage(
-        source,
-        sx,
-        sy,
-        sw,
-        sh,
-        cacheX,
-        cacheY,
-        textureSize,
-        textureSize
-      );
+      cacheCtx.save();
+      cacheCtx.translate(cacheX, cacheY);
+      f(idx, cacheCtx);
+      cacheCtx.restore();
       renderedTiles.add(idx);
     }
-    return {
-      source: cacheCanvas,
-      sx: cacheX,
-      sy: cacheY,
-      sw: textureSize,
-      sh: textureSize
-    };
+    ctx.drawImage(
+      cacheCanvas,
+      cacheX * devicePixelRatio,
+      cacheY * devicePixelRatio,
+      textureSize * devicePixelRatio,
+      textureSize * devicePixelRatio,
+      0,
+      0,
+      textureSize,
+      textureSize
+    );
   };
 }

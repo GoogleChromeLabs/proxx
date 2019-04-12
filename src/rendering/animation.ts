@@ -38,8 +38,6 @@ export interface AnimationDesc {
 export interface Context {
   ts: number;
   ctx: CanvasRenderingContext2D;
-  x: number;
-  y: number;
   width: number;
   height: number;
   animation: AnimationDesc;
@@ -54,27 +52,19 @@ function processDoneCallback(animation: AnimationDesc) {
   delete animation.done;
 }
 
-export function idleAnimation({
-  ts,
-  ctx,
-  x,
-  y,
-  width,
-  height,
-  animation
-}: Context) {
+export function idleAnimation({ ts, ctx, animation }: Context) {
   const animationLength = 5000;
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
-  const { source, sx, sy, sw, sh } = unrevealedAnimationTextureGenerator!(idx);
-  ctx.drawImage(source, sx, sy, sw, sh, x + 5, y + 5, width - 10, height - 10);
+  ctx.save();
+  ctx.translate(5, 5);
+  unrevealedAnimationTextureGenerator!(idx, ctx);
+  ctx.restore();
 }
 
 export function flaggedAnimation({
   ts,
   ctx,
-  x,
-  y,
   width,
   height,
   animation
@@ -82,19 +72,20 @@ export function flaggedAnimation({
   const animationLength = 5000;
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
-  const { source, sx, sy, sw, sh } = unrevealedAnimationTextureGenerator!(idx);
-  ctx.drawImage(source, sx, sy, sw, sh, x + 5, y + 5, width - 10, height - 10);
+
   ctx.save();
+  ctx.translate(5, 5);
+  unrevealedAnimationTextureGenerator!(idx, ctx);
   ctx.globalCompositeOperation = "source-atop";
   ctx.fillStyle = "red";
-  ctx.fillRect(x, y, width, height);
+  ctx.fillRect(0, 0, width, height);
   ctx.restore();
 }
 
 export function numberAnimation(
   touching: number,
   canDoSurroundingReveal: boolean,
-  { ts, ctx, x, y, width, height, animation }: Context
+  { ts, ctx, width, height, animation }: Context
 ) {
   const animationLength = 2000;
   let normalized = (ts - animation.start) / animationLength;
@@ -104,11 +95,12 @@ export function numberAnimation(
   if (normalized > 1) {
     normalized = 1;
   }
-  const idx = Math.floor(normalized * 119);
-  const { source, sx, sy, sw, sh } = revealAnimationTextureGenerator!(idx);
-  ctx.drawImage(source, sx, sy, sw, sh, x + 5, y + 5, width - 10, height - 10);
 
   ctx.save();
+  ctx.translate(5, 5);
+  const idx = Math.floor(normalized * 119);
+  revealAnimationTextureGenerator!(idx, ctx);
+  ctx.translate(-5, -5);
   ctx.fillStyle = "#fff";
   if (canDoSurroundingReveal) {
     ctx.fillStyle = "#5f5";
@@ -116,15 +108,13 @@ export function numberAnimation(
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.font = `${height / 3}px sans-serif`;
-  ctx.fillText(`${touching}`, x + width / 2, y + height / 2);
+  ctx.fillText(`${touching}`, width / 2, height / 2);
   ctx.restore();
 }
 
 export function flashInAnimation({
   ts,
   ctx,
-  x,
-  y,
   width,
   height,
   animation
@@ -141,18 +131,16 @@ export function flashInAnimation({
   ctx.save();
   // A litte buffer on each size for the border
   const size = (width - 10) * 0.97;
-  roundedRectangle(ctx, x + 5, y + 5, size, size, (size * 76) / 650);
+  roundedRectangle(ctx, 5, 5, size, size, (size * 76) / 650);
   ctx.clip();
   ctx.fillStyle = `rgba(255, 255, 255, ${easeOutQuad(normalized)}`;
-  ctx.fillRect(x, y, width, height);
+  ctx.fillRect(0, 0, width, height);
   ctx.restore();
 }
 
 export function flashOutAnimation({
   ts,
   ctx,
-  x,
-  y,
   width,
   height,
   animation
@@ -169,10 +157,10 @@ export function flashOutAnimation({
   ctx.save();
   // A litte buffer on each size for the border
   const size = (width - 10) * 0.97;
-  roundedRectangle(ctx, x + 5, y + 5, size, size, (size * 76) / 650);
+  roundedRectangle(ctx, 5, 5, size, size, (size * 76) / 650);
   ctx.clip();
   ctx.fillStyle = `rgba(255, 255, 255, ${1 - easeInOutCubic(normalized)}`;
-  ctx.fillRect(x, y, width, height);
+  ctx.fillRect(0, 0, width, height);
   ctx.restore();
 }
 
@@ -185,7 +173,7 @@ export function initTextureCaches(textureSize: number) {
     return;
   }
 
-  const tileSize = (textureSize - 10) * devicePixelRatio;
+  const tileSize = textureSize - 10;
   const uncachedUATG = unrevealedAnimationTextureGeneratorFactory(
     tileSize,
     300

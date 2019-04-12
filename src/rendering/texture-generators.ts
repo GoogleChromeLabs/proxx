@@ -21,34 +21,16 @@ import {
   smoothpulse
 } from "./animation-helpers.js";
 
-export interface Texture {
-  source: CanvasImageSource;
-  sx: number;
-  sy: number;
-  sw: number;
-  sh: number;
-}
-
-export interface TextureGeneratorOpts {
-  canvas?: HTMLCanvasElement;
-}
-
 export type TextureGenerator = (
   idx: number,
-  opts?: TextureGeneratorOpts
-) => Texture;
+  ctx: CanvasRenderingContext2D
+) => void;
 
 export function unrevealedAnimationTextureGeneratorFactory(
   textureSize: number,
   numFrames: number
 ): TextureGenerator {
-  return (idx: number, opts: TextureGeneratorOpts = {}): Texture => {
-    const cvs = opts.canvas || document.createElement("canvas");
-    cvs.width = cvs.height = textureSize;
-    const ctx = cvs.getContext("2d");
-    if (!ctx) {
-      throw Error("Could not instantiate 2D rendering context");
-    }
+  return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, textureSize, textureSize);
 
     const ts = Math.floor(idx % numFrames) / numFrames;
@@ -105,13 +87,6 @@ export function unrevealedAnimationTextureGeneratorFactory(
     ctx.stroke();
 
     ctx.restore();
-    return {
-      source: cvs,
-      sx: 0,
-      sy: 0,
-      sw: textureSize,
-      sh: textureSize
-    };
   };
 }
 
@@ -119,13 +94,7 @@ export function revealAnimationTextureGeneratorFactory(
   textureSize: number,
   numFrames: number
 ): TextureGenerator {
-  return (idx: number, opts: TextureGeneratorOpts = {}): Texture => {
-    const cvs = opts.canvas || document.createElement("canvas");
-    cvs.width = cvs.height = textureSize;
-    const ctx = cvs.getContext("2d");
-    if (!ctx) {
-      throw Error("Could not instantiate 2D rendering context");
-    }
+  return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, textureSize, textureSize);
 
     const ts = Math.floor(idx % numFrames) / numFrames;
@@ -176,12 +145,5 @@ export function revealAnimationTextureGeneratorFactory(
     ctx.stroke();
 
     ctx.restore();
-    return {
-      source: cvs,
-      sx: 0,
-      sy: 0,
-      sw: textureSize,
-      sh: textureSize
-    };
   };
 }
