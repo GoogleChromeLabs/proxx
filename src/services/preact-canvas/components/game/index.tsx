@@ -27,11 +27,12 @@ export interface Props {
   height: number;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
+  onDangerModeChange?: (v: boolean) => void;
 }
 
 interface State {
-  altActionChecked: boolean;
   playMode: PlayMode;
+  dangerMode: boolean;
 }
 
 // tslint:disable-next-line:variable-name
@@ -39,13 +40,13 @@ const End = deferred(import("../end/index.js").then(m => m.default));
 
 export default class Game extends Component<Props, State> {
   state: State = {
-    altActionChecked: false,
-    playMode: PlayMode.Playing
+    playMode: PlayMode.Playing,
+    dangerMode: false
   };
 
   render(
     { width, height, gameChangeSubscribe, gameChangeUnsubscribe }: Props,
-    { altActionChecked, playMode }: State
+    { dangerMode, playMode }: State
   ) {
     return (
       <div class={gameClass}>
@@ -69,8 +70,8 @@ export default class Game extends Component<Props, State> {
           <input
             class={checkbox}
             type="checkbox"
-            onChange={this.onAltChange}
-            checked={altActionChecked}
+            onChange={this.onDangerModeChange}
+            checked={!dangerMode}
           />
           <span class={toggle} /> Flag
         </label>
@@ -102,22 +103,27 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onAltChange(event: Event) {
+  private onDangerModeChange(event: Event) {
     const target = event.target as HTMLInputElement;
-    this.setState({
-      altActionChecked: target.checked
-    });
+    const dangerMode = !target.checked;
+    this.setState({ dangerMode });
+    if (this.props.onDangerModeChange) {
+      this.props.onDangerModeChange(dangerMode);
+    }
   }
 
   @bind
-  private onCellClick(cellData: [number, number, Cell], forceAlt: boolean) {
+  private onCellClick(
+    cellData: [number, number, Cell],
+    forceDangerMode: boolean
+  ) {
     const [x, y, cell] = cellData;
-    const { altActionChecked } = this.state;
+    let { dangerMode } = this.state;
 
-    const altAction = forceAlt || altActionChecked;
+    dangerMode = forceDangerMode || dangerMode;
 
     if (!cell.revealed) {
-      if (altAction) {
+      if (!dangerMode) {
         if (cell.flagged) {
           this.props.stateService.unflag(x, y);
         } else {

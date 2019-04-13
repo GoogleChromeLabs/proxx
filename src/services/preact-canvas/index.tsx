@@ -31,6 +31,7 @@ interface Props {
 interface State {
   game?: GameType;
   stateService?: Remote<StateService>;
+  dangerMode: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -41,7 +42,9 @@ const Game = deferred(
 );
 
 class PreactService extends Component<Props, State> {
-  state: State = {};
+  state: State = {
+    dangerMode: false
+  };
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
 
@@ -50,7 +53,7 @@ class PreactService extends Component<Props, State> {
     this._init(props);
   }
 
-  render(_props: Props, { game, stateService }: State) {
+  render(_props: Props, { game, stateService, dangerMode }: State) {
     let mainComponent: VNode;
 
     if (!game) {
@@ -66,6 +69,7 @@ class PreactService extends Component<Props, State> {
           gameChangeSubscribe={this._onGameChangeSubscribe}
           gameChangeUnsubscribe={this._onGameChangeUnsubscribe}
           stateService={stateService!}
+          onDangerModeChange={this._onAltChange}
         />
       );
     }
@@ -77,6 +81,11 @@ class PreactService extends Component<Props, State> {
         <Settings onFullscreenClick={this._onFullscreenClick} />
       </div>
     );
+  }
+
+  @bind
+  private _onAltChange(dangerMode: boolean) {
+    this.setState({ dangerMode });
   }
 
   @bind

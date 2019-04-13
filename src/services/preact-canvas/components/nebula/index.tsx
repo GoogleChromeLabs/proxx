@@ -32,13 +32,13 @@ export interface Props {
   dangerMode: boolean;
 }
 
-interface State {
-  dangerModeBlend: number;
-}
+interface State {}
 
 export default class Nebula extends Component<Props, State> {
   timePeriod = 60000;
+  fadeSpeed = 10;
 
+  private _dangerModeBlend = 0;
   private _shaderBox?: ShaderBox;
   private _loopRunning = false;
 
@@ -118,6 +118,10 @@ export default class Nebula extends Component<Props, State> {
       "time",
       (ts % this.timePeriod) / this.timePeriod
     );
+    this._dangerModeBlend +=
+      ((this.props.dangerMode ? 1 : 0) - this._dangerModeBlend) /
+      this.fadeSpeed;
+    this._shaderBox!.setUniform1f("danger_mode", this._dangerModeBlend);
     this._shaderBox!.draw();
     if (this._loopRunning) {
       requestAnimationFrame(this._loop);
