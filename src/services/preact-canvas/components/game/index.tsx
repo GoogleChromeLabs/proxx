@@ -41,7 +41,7 @@ const End = deferred(import("../end/index.js").then(m => m.default));
 export default class Game extends Component<Props, State> {
   state: State = {
     playMode: PlayMode.Playing,
-    dangerMode: false
+    dangerMode: true
   };
 
   render(
@@ -81,6 +81,7 @@ export default class Game extends Component<Props, State> {
 
   componentDidMount() {
     this.props.gameChangeSubscribe(this.onGameChange);
+    this._notify();
   }
 
   componentWillUnmount() {
@@ -107,8 +108,13 @@ export default class Game extends Component<Props, State> {
     const target = event.target as HTMLInputElement;
     const dangerMode = !target.checked;
     this.setState({ dangerMode });
+    this._notify();
+  }
+
+  @bind
+  private _notify() {
     if (this.props.onDangerModeChange) {
-      this.props.onDangerModeChange(dangerMode);
+      this.props.onDangerModeChange(this.state.dangerMode);
     }
   }
 
