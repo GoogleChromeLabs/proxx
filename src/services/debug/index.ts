@@ -22,11 +22,13 @@ const gui = new dat.GUI();
 export function nebula(nebula: Nebula, shaderBox: ShaderBox) {
   const nebulaUniforms = {
     set dangerMode(v: boolean) {
-      shaderBox.setUniform1f("danger_mode", v ? 1 : 0);
+      // @ts-ignore
+      nebula.props.dangerMode = v;
+      nebula.forceUpdate();
     },
 
     get dangerMode(): boolean {
-      return shaderBox.getUniform("danger_mode")![0] >= 1;
+      return nebula.props.dangerMode;
     }
   };
 

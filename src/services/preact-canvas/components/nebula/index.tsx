@@ -62,11 +62,11 @@ export default class Nebula extends Component<Props, State> {
     }
     this._shaderBox.setUniform1f("danger_mode", 0);
     this._shaderBox.setUniform1f("nebula_movement_range", 2);
-    this._shaderBox.setUniform1f("nebula_zoom", 1);
+    this._shaderBox.setUniform1f("nebula_zoom", 0.5);
     this._shaderBox.setUniform1f("vortex_strength", 0.1);
-    this._shaderBox.setUniform1f("circle1_offset", 0.7);
-    this._shaderBox.setUniform1f("circle2_offset", 2.7);
-    this._shaderBox.setUniform1f("circle3_offset", 1.5);
+    this._shaderBox.setUniform1f("circle1_offset", 0);
+    this._shaderBox.setUniform1f("circle2_offset", 1.4);
+    this._shaderBox.setUniform1f("circle3_offset", 0);
     this._onResize();
 
     window.addEventListener("resize", this._onResize);
