@@ -22,8 +22,10 @@ export function cacheTextureGenerator(
 ): TextureGenerator {
   const cacheCanvas = document.createElement("canvas");
   // Allegedly, Chrome’s maximum canvas size is 32k pixels, which we are *not*
-  // hitting. However, working with a single row causes rendering bugs :shrug:
-  const rows = 2;
+  // hitting. However, the higher the `devicePixelRatio`, the more often I see
+  // the textures not getting painted at the higher values. Breaking it into
+  // a couple of rows fixes it :shrug:
+  const rows = Math.ceil(devicePixelRatio);
   const framesPerRow = Math.ceil(numFrames / rows);
   cacheCanvas.width = framesPerRow * textureSize * devicePixelRatio;
   cacheCanvas.height = rows * textureSize * devicePixelRatio;
