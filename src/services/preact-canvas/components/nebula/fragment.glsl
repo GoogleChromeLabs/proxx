@@ -4,9 +4,17 @@ precision mediump float;
 varying vec2 uv;
 uniform vec2 iResolution;
 
-uniform float nebula_time;
-uniform float circle_time;
+uniform float time;
 uniform float danger_mode;
+uniform float nebula_movement_range;
+uniform float nebula_zoom;
+uniform float vortex_strength;
+
+uniform float circle1_offset;
+uniform float circle2_offset;
+uniform float circle3_offset;
+
+#define PI 3.14159
 
 #define remap(minIn, maxIn, minOut, maxOut, v) (((v) - (minIn)) / ((maxIn) - (minIn)) * ((maxOut) - (minOut)) + (minOut))
 
@@ -95,17 +103,15 @@ void main() {
   // Nebula
   vec4 nebula_color;
   {
-    float speed = 0.1;
-    float nebulaScale = 1.1;
-    float vortexInfluence = .05;
 
     vec2 p = normalized_uv;
     // Displace the point with vortex
     for(int i = 0; i < 5; i++) {
-        p += vortexDisplacement(p, vec2(0.)) * vortexInfluence;
+        p += vortexDisplacement(p, vec2(0.)) * vortex_strength;
     }
+    float nebula_time = sin(time * 2. * PI);
     // Get intensity of noise at distorted point coordinates
-    float f = fbm(p * nebulaScale + vec2(nebula_time * speed, 0.0));
+    float f = fbm(p * nebula_zoom + vec2(nebula_time * nebula_movement_range * nebula_zoom, 0.0));
     // Set color acccording to insensity
     nebula_color = mix(
       mix(darkviolet, darkred, danger_mode),
@@ -120,10 +126,10 @@ void main() {
     float radius = .2;
     vec2 rotation_center = vec2(1, -1.);
     vec2 offset = vec2(.2, -.4);
-    float alpha = circle_time*0.901;
+    float alpha = sin(time * 2. * PI + circle1_offset) * PI/4.;
     mat2 rotation = mat2(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
     vec2 p = normalized_uv - offset;
-    p = rotation *(p - rotation_center) + rotation_center;
+    p = rotation * (p - rotation_center) + rotation_center;
 
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
@@ -131,12 +137,13 @@ void main() {
     circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, red*.1, circle_mask));
   }
 
+
   // Circle 2
   {
     float radius = .3;
     vec2 rotation_center = vec2(0., -3.);
     vec2 offset = vec2(-.2, .3);
-    float alpha = circle_time*.601 ;
+    float alpha = sin(time * 2. * PI + circle2_offset) * PI/4.;
     mat2 rotation = mat2(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
     vec2 p = normalized_uv - offset;
     p = rotation *(p - rotation_center) + rotation_center;
@@ -150,9 +157,9 @@ void main() {
   // Circle 3
   {
     float radius = .1;
-    vec2 rotation_center = vec2(-1., -8.);
-    vec2 offset = vec2(0., .6);
-    float alpha = circle_time*.201;
+    vec2 rotation_center = vec2(-1., 2.);
+    vec2 offset = vec2(-1., .6);
+    float alpha = sin(time * 2. * PI + circle3_offset) * PI/4.;
     mat2 rotation = mat2(cos(alpha), sin(alpha), -sin(alpha), cos(alpha));
     vec2 p = normalized_uv - offset;
     p = rotation *(p - rotation_center) + rotation_center;

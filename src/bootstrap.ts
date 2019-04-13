@@ -27,6 +27,10 @@ async function bootstrap() {
 
   let remoteServices: Promise<Remote<RemoteServices>>;
 
+  if (parsedURL.searchParams.has("debug")) {
+    self.debug = import("./services/debug/index.js");
+  }
+
   if (parsedURL.searchParams.has("prerender")) {
     // This will behave the same as if the worker is loading indefinitey. As a
     // result, our UI will stay in the “not ready to play”state for the

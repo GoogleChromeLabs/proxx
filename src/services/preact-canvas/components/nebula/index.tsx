@@ -37,6 +37,8 @@ interface State {
 }
 
 export default class Nebula extends Component<Props, State> {
+  timePeriod = 60000;
+
   private _shaderBox?: ShaderBox;
   private _loopRunning = false;
 
@@ -44,16 +46,35 @@ export default class Nebula extends Component<Props, State> {
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.base as HTMLCanvasElement,
       scaling: 1 / 5,
-      uniforms: ["danger_mode", "nebula_time", "circle_time"]
+      uniforms: [
+        "danger_mode",
+        "time",
+        "nebula_movement_range",
+        "nebula_zoom",
+        "vortex_strength",
+        "circle1_offset",
+        "circle2_offset",
+        "circle3_offset"
+      ]
     });
-    this._shaderBox.setUniform1f("danger_mode", 0);
     if (!this._shaderBox) {
       return;
     }
+    this._shaderBox.setUniform1f("danger_mode", 0);
+    this._shaderBox.setUniform1f("nebula_movement_range", 2);
+    this._shaderBox.setUniform1f("nebula_zoom", 1);
+    this._shaderBox.setUniform1f("vortex_strength", 0.1);
+    this._shaderBox.setUniform1f("circle1_offset", 0.7);
+    this._shaderBox.setUniform1f("circle2_offset", 2.7);
+    this._shaderBox.setUniform1f("circle3_offset", 1.5);
     this._onResize();
 
     window.addEventListener("resize", this._onResize);
     this.start();
+
+    if (self.debug) {
+      self.debug.then(debug => debug.nebula(this, this._shaderBox!));
+    }
   }
 
   start() {
@@ -93,8 +114,10 @@ export default class Nebula extends Component<Props, State> {
 
   @bind
   private _loop(ts: number) {
-    this._shaderBox!.setUniform1f("circle_time", Math.sin(ts / 20000));
-    this._shaderBox!.setUniform1f("nebula_time", Math.sin(ts / 10000));
+    this._shaderBox!.setUniform1f(
+      "time",
+      (ts % this.timePeriod) / this.timePeriod
+    );
     this._shaderBox!.draw();
     if (this._loopRunning) {
       requestAnimationFrame(this._loop);

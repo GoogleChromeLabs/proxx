@@ -186,6 +186,10 @@ export default class ShaderBox {
     this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
   }
 
+  getUniformNames(): string[] {
+    return [...this._uniformLocations.keys()];
+  }
+
   private _assertUniformExists(name: string) {
     if (!this._uniformLocations.has(name)) {
       throw Error(`Unknown uniform ${name}`);
