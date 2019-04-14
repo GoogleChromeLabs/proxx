@@ -12,7 +12,6 @@
  */
 
 import { easeInOutCubic, easeOutQuad } from "./animation-helpers.js";
-import { roundedRectangle } from "./canvas-helper.js";
 import { turquoise } from "./colors.js";
 import { cacheTextureGenerator } from "./texture-cache.js";
 import {
@@ -59,7 +58,6 @@ export function idleAnimation({ ts, ctx, animation }: Context) {
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
   ctx.save();
-  ctx.translate(5, 5);
   ctx.globalAlpha = 0.5;
   unrevealedAnimationTextureGenerator!(idx, ctx);
   ctx.globalAlpha = 1;
@@ -79,7 +77,6 @@ export function flaggedAnimation({
   const idx = Math.floor(normalized * 300);
 
   ctx.save();
-  ctx.translate(5, 5);
   unrevealedAnimationTextureGenerator!(idx, ctx);
   staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
   ctx.globalCompositeOperation = "source-atop";
@@ -103,9 +100,7 @@ export function numberAnimation(
   }
 
   ctx.save();
-  ctx.translate(5, 5);
   staticTextureGenerator!(touching, ctx);
-  ctx.translate(0, 0);
 
   if (canDoSurroundingReveal) {
     ctx.globalCompositeOperation = "source-atop";
@@ -115,13 +110,7 @@ export function numberAnimation(
   ctx.restore();
 }
 
-export function flashInAnimation({
-  ts,
-  ctx,
-  width,
-  height,
-  animation
-}: Context) {
+export function flashInAnimation({ ts, ctx, animation }: Context) {
   const animationLength = 100;
   let normalized = (ts - animation.start) / animationLength;
   if (normalized < 0) {
@@ -132,22 +121,12 @@ export function flashInAnimation({
     normalized = 1;
   }
   ctx.save();
-  // A litte buffer on each size for the border
-  const size = (width - 10) * 0.97;
-  roundedRectangle(ctx, 5, 5, size, size, (size * 76) / 650);
-  ctx.clip();
-  ctx.fillStyle = `rgba(255, 255, 255, ${easeOutQuad(normalized)}`;
-  ctx.fillRect(0, 0, width, height);
+  ctx.globalAlpha = easeOutQuad(normalized);
+  staticTextureGenerator!(STATIC_TEXTURE.FLASH, ctx);
   ctx.restore();
 }
 
-export function flashOutAnimation({
-  ts,
-  ctx,
-  width,
-  height,
-  animation
-}: Context) {
+export function flashOutAnimation({ ts, ctx, animation }: Context) {
   const animationLength = 700;
   let normalized = (ts - animation.start) / animationLength;
   if (normalized < 0) {
@@ -158,12 +137,8 @@ export function flashOutAnimation({
     normalized = 1;
   }
   ctx.save();
-  // A litte buffer on each size for the border
-  const size = (width - 10) * 0.97;
-  roundedRectangle(ctx, 5, 5, size, size, (size * 76) / 650);
-  ctx.clip();
-  ctx.fillStyle = `rgba(255, 255, 255, ${1 - easeInOutCubic(normalized)}`;
-  ctx.fillRect(0, 0, width, height);
+  ctx.globalAlpha = 1 - easeInOutCubic(normalized);
+  staticTextureGenerator!(STATIC_TEXTURE.FLASH, ctx);
   ctx.restore();
 }
 
@@ -176,20 +151,19 @@ export function initTextureCaches(textureSize: number) {
     return;
   }
 
-  const tileSize = textureSize - 10;
   const uncachedUATG = unrevealedAnimationTextureGeneratorFactory(
-    tileSize,
+    textureSize,
     300
   );
   unrevealedAnimationTextureGenerator = cacheTextureGenerator(
     uncachedUATG,
-    tileSize,
+    textureSize,
     300
   );
-  const uncachedSTG = staticTextureGeneratorFactory(tileSize);
+  const uncachedSTG = staticTextureGeneratorFactory(textureSize);
   staticTextureGenerator = cacheTextureGenerator(
     uncachedSTG,
-    tileSize,
+    textureSize,
     STATIC_TEXTURE.LAST_MARKER
   );
 }

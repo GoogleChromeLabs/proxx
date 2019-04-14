@@ -24,16 +24,16 @@ export function unrevealedAnimationTextureGeneratorFactory(
   textureSize: number,
   numFrames: number
 ): TextureGenerator {
+  const size = (textureSize - 10) * 0.97;
+  const halfSize = size / 2;
+
   return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, textureSize, textureSize);
 
     const ts = Math.floor(idx % numFrames) / numFrames;
-    // A litte buffer on each size for the border
-    const size = textureSize * 0.97;
+
     ctx.save();
     ctx.translate(textureSize / 2, textureSize / 2);
-
-    const halfSize = size / 2;
 
     roundedRectangle(ctx, -halfSize, -halfSize, size, size, (size * 76) / 650);
     ctx.clip();
@@ -79,17 +79,18 @@ export const enum STATIC_TEXTURE {
   NUMBER_6,
   NUMBER_7,
   NUMBER_8, // = 8
-  NUMBER_HIGHLIGHTER,
+  FLASH,
   LAST_MARKER // Not a valid frame, just a marker for the last item in the enum
 }
 export function staticTextureGeneratorFactory(
   textureSize: number
 ): TextureGenerator {
+  const size = (textureSize - 10) * 0.97;
+  const halfSize = size / 2;
+
   return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, textureSize, textureSize);
 
-    const size = textureSize * 0.97;
-    const halfSize = size / 2;
     ctx.save();
     ctx.translate(textureSize / 2, textureSize / 2);
     if (idx === STATIC_TEXTURE.OUTLINE) {
@@ -130,6 +131,18 @@ export function staticTextureGeneratorFactory(
       ctx.font = `${size / 2}px sans-serif`;
       ctx.fillText(`${idx}`, 0, 0);
       ctx.restore();
+    } else if (idx === STATIC_TEXTURE.FLASH) {
+      roundedRectangle(
+        ctx,
+        -halfSize,
+        -halfSize,
+        size,
+        size,
+        (size * 76) / 650
+      );
+      ctx.clip();
+      ctx.fillStyle = `#fff`;
+      ctx.fillRect(-halfSize, -halfSize, size, size);
     }
     ctx.restore();
   };
