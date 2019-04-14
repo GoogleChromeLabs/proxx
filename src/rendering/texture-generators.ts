@@ -88,62 +88,98 @@ export function staticTextureGeneratorFactory(
   const size = (textureSize - 10) * 0.97;
   const halfSize = size / 2;
 
-  return (idx: number, ctx: CanvasRenderingContext2D) => {
-    ctx.clearRect(0, 0, textureSize, textureSize);
+  // If a texture needs a glow effect, the routine can paint
+  // to this canvas instead. This temporary canvas will
+  // be blitted to the output canvas twice — once with a blur,
+  // and once without, yielding a glow.
+  const cvs2 = document.createElement("canvas");
+  cvs2.width = cvs2.height = textureSize * devicePixelRatio;
+  const ctx2 = cvs2.getContext("2d")!;
+  ctx2.scale(devicePixelRatio, devicePixelRatio);
 
-    ctx.save();
-    ctx.translate(textureSize / 2, textureSize / 2);
+  return (idx: number, ctx: CanvasRenderingContext2D) => {
+    ctx2.clearRect(0, 0, textureSize, textureSize);
+
+    ctx2.save();
+    ctx2.translate(textureSize / 2, textureSize / 2);
     if (idx === STATIC_TEXTURE.OUTLINE) {
-      ctx.strokeStyle = "white";
+      ctx2.strokeStyle = "white";
 
       // Inner circle
-      ctx.lineWidth = (size * 20) / 650;
+      ctx2.lineWidth = (size * 20) / 650;
       const radius = (size * 64) / 650;
-      ctx.beginPath();
-      ctx.moveTo(radius, 0);
-      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
-      ctx.closePath();
-      ctx.stroke();
+      ctx2.beginPath();
+      ctx2.moveTo(radius, 0);
+      ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx2.closePath();
+      ctx2.stroke();
 
       // Outline
       // Size: 650, stroke: 20, radius: 76
       roundedRectangle(
-        ctx,
+        ctx2,
         -halfSize,
         -halfSize,
         size,
         size,
         (size * 76) / 650
       );
-      ctx.lineWidth = (size * 20) / 650;
-      ctx.stroke();
+      ctx2.lineWidth = (size * 20) / 650;
+      ctx2.stroke();
     } else if (idx >= 1 && idx <= 8) {
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = (size * 20) / 650;
-      ctx.beginPath();
-      ctx.arc(0, 0, halfSize * 0.9, 0, 2 * Math.PI);
-      ctx.closePath();
-      ctx.stroke();
+      ctx2.strokeStyle = "#fff";
+      ctx2.lineWidth = (size * 20) / 650;
+      ctx2.beginPath();
+      ctx2.arc(0, 0, halfSize * 0.9, 0, 2 * Math.PI);
+      ctx2.closePath();
+      ctx2.stroke();
 
-      ctx.fillStyle = "#fff";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.font = `${size / 2}px sans-serif`;
-      ctx.fillText(`${idx}`, 0, 0);
-      ctx.restore();
+      ctx2.fillStyle = "#fff";
+      ctx2.textAlign = "center";
+      ctx2.textBaseline = "middle";
+      ctx2.font = `${size / 2}px sans-serif`;
+      ctx2.fillText(`${idx}`, 0, 0);
     } else if (idx === STATIC_TEXTURE.FLASH) {
       roundedRectangle(
-        ctx,
+        ctx2,
         -halfSize,
         -halfSize,
         size,
         size,
         (size * 76) / 650
       );
-      ctx.clip();
-      ctx.fillStyle = `#fff`;
-      ctx.fillRect(-halfSize, -halfSize, size, size);
+      ctx2.clip();
+      ctx2.fillStyle = `#fff`;
+      ctx2.fillRect(-halfSize, -halfSize, size, size);
     }
+    ctx2.restore();
+
+    ctx.save();
+    const blur = (textureSize / 10).toFixed(1);
+    ctx.filter = `blur(${blur}px)`;
+    ctx.drawImage(
+      cvs2,
+      0,
+      0,
+      cvs2.width,
+      cvs2.height,
+      0,
+      0,
+      textureSize,
+      textureSize
+    );
+    ctx.filter = "none";
+    ctx.drawImage(
+      cvs2,
+      0,
+      0,
+      cvs2.width,
+      cvs2.height,
+      0,
+      0,
+      textureSize,
+      textureSize
+    );
     ctx.restore();
   };
 }
