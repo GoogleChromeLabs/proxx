@@ -13,9 +13,11 @@
 
 import { easeInOutCubic, easeOutQuad } from "./animation-helpers.js";
 import { roundedRectangle } from "./canvas-helper.js";
+import { turquoise } from "./colors.js";
 import { cacheTextureGenerator } from "./texture-cache.js";
 import {
-  revealAnimationTextureGeneratorFactory,
+  STATIC_TEXTURE,
+  staticTextureGeneratorFactory,
   TextureGenerator,
   unrevealedAnimationTextureGeneratorFactory
 } from "./texture-generators.js";
@@ -58,7 +60,10 @@ export function idleAnimation({ ts, ctx, animation }: Context) {
   const idx = Math.floor(normalized * 300);
   ctx.save();
   ctx.translate(5, 5);
+  ctx.globalAlpha = 0.5;
   unrevealedAnimationTextureGenerator!(idx, ctx);
+  ctx.globalAlpha = 1;
+  staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
   ctx.restore();
 }
 
@@ -76,8 +81,9 @@ export function flaggedAnimation({
   ctx.save();
   ctx.translate(5, 5);
   unrevealedAnimationTextureGenerator!(idx, ctx);
+  staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
   ctx.globalCompositeOperation = "source-atop";
-  ctx.fillStyle = "red";
+  ctx.fillStyle = turquoise;
   ctx.fillRect(0, 0, width, height);
   ctx.restore();
 }
@@ -98,17 +104,14 @@ export function numberAnimation(
 
   ctx.save();
   ctx.translate(5, 5);
-  const idx = Math.floor(normalized * 119);
-  revealAnimationTextureGenerator!(idx, ctx);
-  ctx.translate(-5, -5);
-  ctx.fillStyle = "#fff";
+  staticTextureGenerator!(touching, ctx);
+  ctx.translate(0, 0);
+
   if (canDoSurroundingReveal) {
-    ctx.fillStyle = "#5f5";
+    ctx.globalCompositeOperation = "source-atop";
+    ctx.fillStyle = turquoise;
+    ctx.fillRect(0, 0, width, height);
   }
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.font = `${height / 3}px sans-serif`;
-  ctx.fillText(`${touching}`, width / 2, height / 2);
   ctx.restore();
 }
 
@@ -165,7 +168,7 @@ export function flashOutAnimation({
 }
 
 let unrevealedAnimationTextureGenerator: TextureGenerator | null = null;
-let revealAnimationTextureGenerator: TextureGenerator | null = null;
+let staticTextureGenerator: TextureGenerator | null = null;
 
 export function initTextureCaches(textureSize: number) {
   if (unrevealedAnimationTextureGenerator) {
@@ -183,10 +186,10 @@ export function initTextureCaches(textureSize: number) {
     tileSize,
     300
   );
-  const uncachedRATG = revealAnimationTextureGeneratorFactory(tileSize, 120);
-  revealAnimationTextureGenerator = cacheTextureGenerator(
-    uncachedRATG,
+  const uncachedSTG = staticTextureGeneratorFactory(tileSize);
+  staticTextureGenerator = cacheTextureGenerator(
+    uncachedSTG,
     tileSize,
-    120
+    STATIC_TEXTURE.LAST_MARKER
   );
 }
