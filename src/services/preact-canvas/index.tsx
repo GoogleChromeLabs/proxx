@@ -69,14 +69,15 @@ class PreactService extends Component<Props, State> {
           gameChangeSubscribe={this._onGameChangeSubscribe}
           gameChangeUnsubscribe={this._onGameChangeUnsubscribe}
           stateService={stateService!}
-          onDangerModeChange={this._onAltChange}
+          dangerMode={dangerMode}
+          onDangerModeChange={this._onDangerModeChange}
         />
       );
     }
 
     return (
       <div class={gameClassName}>
-        <Nebula dangerMode={dangerMode} />
+        <Nebula dangerMode={game ? dangerMode : false} />
         {mainComponent}
         <Settings onFullscreenClick={this._onFullscreenClick} />
       </div>
@@ -96,19 +97,19 @@ class PreactService extends Component<Props, State> {
   @bind
   private _onKeyDown(event: KeyboardEvent) {
     if (event.key === "Shift") {
-      this.setState({ dangerMode: !this.state.dangerMode });
+      this._onDangerModeChange(!this.state.dangerMode);
     }
   }
 
   @bind
   private _onKeyUp(event: KeyboardEvent) {
     if (event.key === "Shift") {
-      this.setState({ dangerMode: !this.state.dangerMode });
+      this._onDangerModeChange(!this.state.dangerMode);
     }
   }
 
   @bind
-  private _onAltChange(dangerMode: boolean) {
+  private _onDangerModeChange(dangerMode: boolean) {
     this.setState({ dangerMode });
   }
 

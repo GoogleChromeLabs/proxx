@@ -12,7 +12,7 @@
  */
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
-import { Cell, GridChanges } from "../../../../gamelogic/types.js";
+import { Cell } from "../../../../gamelogic/types.js";
 import {
   AnimationDesc,
   AnimationName,
@@ -46,7 +46,7 @@ const defaultCell: Cell = {
 };
 
 export interface Props {
-  onCellClick: (cell: [number, number, Cell], forceAlt: boolean) => void;
+  onCellClick: (cell: [number, number, Cell], alt: boolean) => void;
   width: number;
   height: number;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
@@ -152,7 +152,9 @@ export default class Board extends Component<Props> {
     this.canvas.classList.add(canvasStyle);
     this.base!.appendChild(this.canvas);
     tableContainer!.appendChild(this.table);
-    this.table.addEventListener("click", this.click);
+    this.table.addEventListener("click", this.onClick);
+    this.table.addEventListener("mouseup", this.onMouseUp);
+    this.table.addEventListener("contextmenu", event => event.preventDefault());
   }
 
   private updateAnimation(btn: HTMLButtonElement) {
@@ -300,7 +302,17 @@ export default class Board extends Component<Props> {
   }
 
   @bind
-  private click(event: MouseEvent | TouchEvent) {
+  private onMouseUp(event: MouseEvent) {
+    if (event.button !== 2) {
+      return;
+    }
+
+    event.preventDefault();
+    this.onClick(event, true);
+  }
+
+  @bind
+  private onClick(event: MouseEvent | TouchEvent, alt = false) {
     const target = event.target as HTMLElement;
     const button = target.closest("button");
     if (!button) {
@@ -309,7 +321,7 @@ export default class Board extends Component<Props> {
     event.preventDefault();
 
     const cell = this.additionalButtonData.get(button)!;
-    this.props.onCellClick(cell, event.shiftKey);
+    this.props.onCellClick(cell, alt);
   }
 
   private updateButton(btn: HTMLButtonElement, cell: Cell) {

@@ -14,7 +14,7 @@ import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
-import { game, GameChangeCallback } from "../..";
+import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
 import Board from "../board";
@@ -27,12 +27,12 @@ export interface Props {
   height: number;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
-  onDangerModeChange?: (v: boolean) => void;
+  onDangerModeChange: (v: boolean) => void;
+  dangerMode: boolean;
 }
 
 interface State {
   playMode: PlayMode;
-  dangerMode: boolean;
 }
 
 // tslint:disable-next-line:variable-name
@@ -40,13 +40,18 @@ const End = deferred(import("../end/index.js").then(m => m.default));
 
 export default class Game extends Component<Props, State> {
   state: State = {
-    playMode: PlayMode.Playing,
-    dangerMode: true
+    playMode: PlayMode.Playing
   };
 
   render(
-    { width, height, gameChangeSubscribe, gameChangeUnsubscribe }: Props,
-    { dangerMode, playMode }: State
+    {
+      dangerMode,
+      width,
+      height,
+      gameChangeSubscribe,
+      gameChangeUnsubscribe
+    }: Props,
+    { playMode }: State
   ) {
     return (
       <div class={gameClass}>
@@ -81,7 +86,9 @@ export default class Game extends Component<Props, State> {
 
   componentDidMount() {
     this.props.gameChangeSubscribe(this.onGameChange);
-    this._notify();
+    if (!this.props.dangerMode) {
+      this.props.onDangerModeChange(true);
+    }
   }
 
   componentWillUnmount() {
@@ -107,26 +114,17 @@ export default class Game extends Component<Props, State> {
   private onDangerModeChange(event: Event) {
     const target = event.target as HTMLInputElement;
     const dangerMode = !target.checked;
-    this.setState({ dangerMode });
-    this._notify();
+    this.props.onDangerModeChange(dangerMode);
   }
 
   @bind
-  private _notify() {
-    if (this.props.onDangerModeChange) {
-      this.props.onDangerModeChange(this.state.dangerMode);
-    }
-  }
-
-  @bind
-  private onCellClick(
-    cellData: [number, number, Cell],
-    forceDangerMode: boolean
-  ) {
+  private onCellClick(cellData: [number, number, Cell], alt: boolean) {
     const [x, y, cell] = cellData;
-    let { dangerMode } = this.state;
+    let { dangerMode } = this.props;
 
-    dangerMode = forceDangerMode || dangerMode;
+    if (alt) {
+      dangerMode = !dangerMode;
+    }
 
     if (!cell.revealed) {
       if (!dangerMode) {
