@@ -12,7 +12,7 @@
  */
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
-import { Cell } from "../../../../gamelogic/types.js";
+import { Cell, GridChanges } from "../../../../gamelogic/types.js";
 import {
   AnimationDesc,
   AnimationName,
@@ -20,6 +20,8 @@ import {
   flaggedAnimation,
   flashInAnimation,
   flashOutAnimation,
+  highlightInAnimation,
+  highlightOutAnimation,
   idleAnimation,
   initTextureCaches,
   numberAnimation
@@ -61,6 +63,13 @@ function distanceFromCenter(x: number, y: number, size: number): number {
   return Math.sqrt(dx * dx + dy * dy) / Math.sqrt(2);
 }
 
+function removeAnimations(
+  al: AnimationDesc[],
+  names: AnimationName[]
+): AnimationDesc[] {
+  return al.filter(a => !names.includes(a.name));
+}
+
 export default class Board extends Component<Props> {
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
@@ -76,6 +85,7 @@ export default class Board extends Component<Props> {
   >();
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
+  private changeBuffer: GridChanges = [];
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
@@ -115,15 +125,7 @@ export default class Board extends Component<Props> {
     if (!stateChange.gridChanges) {
       return;
     }
-
-    const width = this.props.width;
-
-    for (const [x, y, cellProps] of stateChange.gridChanges) {
-      const btn = this.buttons[y * width + x];
-      this.updateButton(btn, cellProps);
-      this.cellsToRedraw.add(btn);
-      this.updateAnimation(btn);
-    }
+    this.changeBuffer.push(...stateChange.gridChanges);
   }
 
   private createTable(width: number, height: number) {
@@ -158,45 +160,84 @@ export default class Board extends Component<Props> {
   }
 
   private updateAnimation(btn: HTMLButtonElement) {
+    const ts = performance.now();
     const [x, y, cell] = this.additionalButtonData.get(btn)!;
-    const animationList = this.animationLists.get(btn)!;
+    let animationList = this.animationLists.get(btn)!;
 
     if (!cell.revealed && !cell.flagged) {
       animationList[0].name = AnimationName.IDLE;
+      animationList[0].fadeStart = ts;
+      animationList = removeAnimations(animationList, [
+        AnimationName.HIGHLIGHT_IN,
+        AnimationName.HIGHLIGHT_OUT
+      ]);
+      animationList.push({
+        name: AnimationName.HIGHLIGHT_OUT,
+        start: ts,
+        done: () => {
+          animationList = removeAnimations(animationList, [
+            AnimationName.HIGHLIGHT_IN,
+            AnimationName.HIGHLIGHT_OUT
+          ]);
+          this.animationLists.set(btn, animationList);
+        }
+      });
     } else if (!cell.revealed && cell.flagged) {
       animationList[0].name = AnimationName.FLAGGED;
-    } else if (cell.revealed && cell.touchingMines <= 0) {
-      animationList.length = 0;
-    } else if (cell.revealed && cell.touchingMines > 0) {
+      animationList[0].fadeStart = ts;
+      animationList.push({
+        name: AnimationName.HIGHLIGHT_IN,
+        start: ts
+      });
+    } else if (cell.revealed) {
+      const isHighlighted = animationList.some(
+        a => a.name === AnimationName.HIGHLIGHT_IN
+      );
+      if (cell.touchingFlags >= cell.touchingMines && !isHighlighted) {
+        animationList.push({
+          name: AnimationName.HIGHLIGHT_IN,
+          start: ts
+        });
+      } else if (cell.touchingFlags < cell.touchingMines && isHighlighted) {
+        animationList = removeAnimations(animationList, [
+          AnimationName.HIGHLIGHT_IN,
+          AnimationName.HIGHLIGHT_OUT
+        ]);
+        animationList.push({
+          name: AnimationName.HIGHLIGHT_OUT,
+          start: ts
+        });
+      }
+      this.animationLists.set(btn, animationList);
       // This button already played the flash animation
       if (this.flashedCells.has(btn)) {
         return;
       }
+      animationList = removeAnimations(animationList, [AnimationName.IDLE]);
       this.flashedCells.add(btn);
-      const ts = performance.now();
-      animationList.push(
-        {
-          name: AnimationName.FLASH_IN,
-          start: ts,
-          done: () => {
-            while (
-              animationList[0].name === AnimationName.IDLE ||
-              animationList[0].name === AnimationName.FLASH_IN
-            ) {
-              animationList.shift();
-            }
-          }
-        },
-        {
+      animationList.push({
+        name: AnimationName.FLASH_IN,
+        start: ts,
+        done: () => {
+          animationList = removeAnimations(animationList, [
+            AnimationName.FLASH_IN
+          ]);
+          this.animationLists.set(btn, animationList);
+        }
+      });
+      if (cell.touchingMines > 0) {
+        animationList.unshift({
           name: AnimationName.NUMBER,
           start: ts + 100
-        },
-        {
-          name: AnimationName.FLASH_OUT,
-          start: ts + 100
-        }
-      );
+        });
+      }
+      animationList.push({
+        name: AnimationName.FLASH_OUT,
+        start: ts + 100
+      });
     }
+
+    this.animationLists.set(btn, animationList);
   }
 
   private drawCell(btn: HTMLButtonElement, ts: number) {
@@ -231,6 +272,12 @@ export default class Board extends Component<Props> {
         case AnimationName.FLAGGED:
           flaggedAnimation(context);
           break;
+        case AnimationName.HIGHLIGHT_IN:
+          highlightInAnimation(context);
+          break;
+        case AnimationName.HIGHLIGHT_OUT:
+          highlightOutAnimation(context);
+          break;
         case AnimationName.FLASH_IN:
           flashInAnimation(context);
           break;
@@ -238,11 +285,7 @@ export default class Board extends Component<Props> {
           flashOutAnimation(context);
           break;
         case AnimationName.NUMBER:
-          numberAnimation(
-            cell.touchingMines,
-            cell.touchingFlags >= cell.touchingMines,
-            context
-          );
+          numberAnimation(cell.touchingMines, context);
           break;
       }
       ctx.restore();
@@ -262,13 +305,30 @@ export default class Board extends Component<Props> {
     }
 
     const that = this;
+    let lastTs = performance.now();
     requestAnimationFrame(function f(ts) {
+      that.consumeChangeBuffer(ts - lastTs);
+      lastTs = ts;
+
       that.renderCanvas(ts);
       if (that.renderLoopRunning) {
         requestAnimationFrame(f);
       }
     });
     this.renderLoopRunning = true;
+  }
+
+  private consumeChangeBuffer(delta: number) {
+    const width = this.props.width;
+    // Reveal ~5 fields per frame
+    const numConsume = Math.floor((delta * 5) / 16);
+    const slice = this.changeBuffer.splice(0, numConsume);
+    for (const [x, y, cellProps] of slice) {
+      const btn = this.buttons[y * width + x];
+      this.updateButton(btn, cellProps);
+      this.cellsToRedraw.add(btn);
+      this.updateAnimation(btn);
+    }
   }
 
   private animationsInit() {

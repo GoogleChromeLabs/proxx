@@ -22,6 +22,13 @@ import {
   notDangerMode as notDangerModeStyle
 } from "./style.css";
 
+import {
+  nebulaDangerDark,
+  nebulaDangerLight,
+  nebulaSafeDark,
+  nebulaSafeLight
+} from "../../../../rendering/constants.js";
+
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
@@ -50,12 +57,21 @@ export default class Nebula extends Component<Props, State> {
         "vortex_strength",
         "circle1_offset",
         "circle2_offset",
-        "circle3_offset"
+        "circle3_offset",
+        "nebula_danger_dark",
+        "nebula_danger_light",
+        "nebula_safe_dark",
+        "nebula_safe_light"
       ]
     });
     if (!this._shaderBox) {
       return;
     }
+
+    this._shaderBox.setUniform4f("nebula_danger_dark", nebulaDangerDark);
+    this._shaderBox.setUniform4f("nebula_danger_light", nebulaDangerLight);
+    this._shaderBox.setUniform4f("nebula_safe_dark", nebulaSafeDark);
+    this._shaderBox.setUniform4f("nebula_safe_light", nebulaSafeLight);
     this._shaderBox.setUniform1f("danger_mode", 0);
     this._shaderBox.setUniform1f("nebula_movement_range", 2);
     this._shaderBox.setUniform1f("nebula_zoom", 0.5);

@@ -4,6 +4,11 @@ precision mediump float;
 varying vec2 uv;
 uniform vec2 iResolution;
 
+uniform vec4 nebula_danger_dark;
+uniform vec4 nebula_danger_light;
+uniform vec4 nebula_safe_dark;
+uniform vec4 nebula_safe_light;
+
 uniform float time;
 uniform float danger_mode;
 uniform float nebula_movement_range;
@@ -85,13 +90,6 @@ vec2 vortexDisplacement (vec2 q, vec2 c) {
 
 
 void main() {
-  // Colors
-  vec4 darkviolet = vec4(58., 10., 78., 255.) / 255.;
-  vec4 blue = vec4(43., 41., 111., 255.) / 255.;
-
-  vec4 darkred = vec4(53., 0., 0., 255.) / 255.;
-  vec4 red = vec4(117., 32., 61., 255.) / 255.;
-
   vec4 black = vec4(vec3(0.), 1.);
   vec4 white = vec4(1.);
 
@@ -114,8 +112,8 @@ void main() {
     float f = fbm(p * nebula_zoom + vec2(nebula_time * nebula_movement_range * nebula_zoom, 0.0));
     // Set color acccording to insensity
     nebula_color = mix(
-      mix(darkviolet, darkred, danger_mode),
-      mix(blue, red, danger_mode),
+      mix(nebula_safe_dark, nebula_danger_dark, danger_mode),
+      mix(nebula_safe_light, nebula_danger_light, danger_mode),
       easeInOutExpo(f)
     );
   }
@@ -134,7 +132,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, red*.1, circle_mask));
+    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, nebula_danger_light*.1, circle_mask));
   }
 
 
@@ -151,7 +149,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, red*.1, circle_mask));
+    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, nebula_danger_light*.1, circle_mask));
   }
 
   // Circle 3
@@ -167,7 +165,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, red*.1, circle_mask));
+    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, nebula_danger_light*.1, circle_mask));
   }
 
   // Soft light blending
