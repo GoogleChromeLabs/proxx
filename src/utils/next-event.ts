@@ -11,18 +11,8 @@
  * limitations under the License.
  */
 
-import { expose, proxy } from "comlink/src/comlink.js";
-
-import StateService from "./services/state/index.js";
-
-declare var self: DedicatedWorkerGlobalScope;
-
-const services = {
-  stateService: proxy(new StateService())
-};
-
-export type RemoteServices = typeof services;
-
-expose(services, self);
-performance.mark("State ready");
-self.postMessage("READY");
+export function nextEvent(ev: EventTarget, evt: string): Promise<Event> {
+  return new Promise(resolve =>
+    ev.addEventListener(evt, resolve, { once: true })
+  );
+}
