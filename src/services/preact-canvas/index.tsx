@@ -76,7 +76,7 @@ class PreactService extends Component<Props, State> {
 
     return (
       <div class={gameClassName}>
-        <Nebula dangerMode={false} />
+        <Nebula dangerMode={dangerMode} />
         {mainComponent}
         <Settings onFullscreenClick={this._onFullscreenClick} />
       </div>
