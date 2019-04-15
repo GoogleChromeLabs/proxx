@@ -12,7 +12,7 @@
  */
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
-import { Cell } from "../../../../gamelogic/types.js";
+import { Cell, GridChanges } from "../../../../gamelogic/types.js";
 import {
   AnimationDesc,
   AnimationName,
@@ -76,6 +76,7 @@ export default class Board extends Component<Props> {
   >();
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
+  private changeBuffer: GridChanges = [];
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
@@ -115,15 +116,7 @@ export default class Board extends Component<Props> {
     if (!stateChange.gridChanges) {
       return;
     }
-
-    const width = this.props.width;
-
-    for (const [x, y, cellProps] of stateChange.gridChanges) {
-      const btn = this.buttons[y * width + x];
-      this.updateButton(btn, cellProps);
-      this.cellsToRedraw.add(btn);
-      this.updateAnimation(btn);
-    }
+    this.changeBuffer.push(...stateChange.gridChanges);
   }
 
   private createTable(width: number, height: number) {
@@ -261,13 +254,30 @@ export default class Board extends Component<Props> {
     }
 
     const that = this;
+    let lastTs = performance.now();
     requestAnimationFrame(function f(ts) {
+      that.consumeChangeBuffer(ts - lastTs);
+      lastTs = ts;
+
       that.renderCanvas(ts);
       if (that.renderLoopRunning) {
         requestAnimationFrame(f);
       }
     });
     this.renderLoopRunning = true;
+  }
+
+  private consumeChangeBuffer(delta: number) {
+    const width = this.props.width;
+    // Reveal ~5 fields per frame
+    const numConsume = Math.floor((delta * 5) / 16);
+    const slice = this.changeBuffer.splice(0, numConsume);
+    for (const [x, y, cellProps] of slice) {
+      const btn = this.buttons[y * width + x];
+      this.updateButton(btn, cellProps);
+      this.cellsToRedraw.add(btn);
+      this.updateAnimation(btn);
+    }
   }
 
   private animationsInit() {
