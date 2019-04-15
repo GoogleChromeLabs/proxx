@@ -24,6 +24,12 @@ async function startWorker(): Promise<Remote<RemoteServices>> {
     import("comlink/src/comlink.js"),
     nextEvent(worker, "message")
   ]);
+  // iOS Safari seems to kill a worker that doesn’t receive
+  // messages after a while. So we prevent that by sending
+  // dummy keep-alive messages.
+  setInterval(() => {
+    worker.postMessage("");
+  }, 3000);
   return wrap(worker);
 }
 
