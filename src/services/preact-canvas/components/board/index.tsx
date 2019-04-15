@@ -213,21 +213,20 @@ export default class Board extends Component<Props> {
       if (this.flashedCells.has(btn)) {
         return;
       }
-      animationList.length = 0;
+      animationList = removeAnimations(animationList, [AnimationName.IDLE]);
       this.flashedCells.add(btn);
       animationList.push({
         name: AnimationName.FLASH_IN,
         start: ts,
         done: () => {
           animationList = removeAnimations(animationList, [
-            AnimationName.IDLE,
             AnimationName.FLASH_IN
           ]);
           this.animationLists.set(btn, animationList);
         }
       });
       if (cell.touchingMines > 0) {
-        animationList.push({
+        animationList.unshift({
           name: AnimationName.NUMBER,
           start: ts + 100
         });
