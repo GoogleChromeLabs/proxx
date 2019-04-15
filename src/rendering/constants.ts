@@ -29,10 +29,13 @@ export const white = "#fff";
 
 // Animation durations
 export const idleAnimationLength = 5000;
+export const fadeInAnimationLength = 300;
+export const fadeOutAnimationLength = 300;
 export const flashInAnimationLength = 100;
 export const flashOutAnimationLength = 700;
 
 // Texture constanst
+export const fadedLinesAlpha = 0.3;
 export const safetyBufferFactor = 0.97;
 export const thickLine = 20 / 650;
 export const thinLine = 12 / 650;

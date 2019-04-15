@@ -11,8 +11,11 @@
  * limitations under the License.
  */
 
-import { easeInOutCubic, easeOutQuad } from "./animation-helpers.js";
+import { easeInOutCubic, easeOutQuad, remap } from "./animation-helpers.js";
 import {
+  fadedLinesAlpha,
+  fadeInAnimationLength,
+  fadeOutAnimationLength,
   flashInAnimationLength,
   flashOutAnimationLength,
   idleAnimationLength,
@@ -31,6 +34,8 @@ export const enum AnimationName {
   IDLE,
   FLASH_IN,
   FLASH_OUT,
+  HIGHLIGHT_IN,
+  HIGHLIGHT_OUT,
   NUMBER,
   FLAGGED
 }
@@ -38,6 +43,7 @@ export const enum AnimationName {
 export interface AnimationDesc {
   name: AnimationName;
   start: number;
+  fadeStart?: number;
   done?: () => void;
 }
 
@@ -62,47 +68,107 @@ export function idleAnimation({ ts, ctx, animation }: Context) {
   const animationLength = 5000;
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
+
+  let fadeInNormalized =
+    (ts - (animation.fadeStart || 0)) / fadeInAnimationLength;
+  if (fadeInNormalized > 1) {
+    fadeInNormalized = 1;
+  }
+
   ctx.save();
-  ctx.globalAlpha = 0.3;
+  ctx.globalAlpha = remap(
+    0,
+    1,
+    1,
+    fadedLinesAlpha,
+    easeOutQuad(fadeInNormalized)
+  );
   idleAnimationTextureGenerator!(idx, ctx);
   ctx.globalAlpha = 1;
   staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
   ctx.restore();
 }
 
-export function flaggedAnimation({
+export function flaggedAnimation({ ts, ctx, animation }: Context) {
+  const animationLength = idleAnimationLength;
+  const normalized = ((ts - animation.start) / animationLength) % 1;
+  const idx = Math.floor(normalized * 300);
+
+  let fadeOutNormalized =
+    (ts - (animation.fadeStart || 0)) / fadeOutAnimationLength;
+  if (fadeOutNormalized > 1) {
+    fadeOutNormalized = 1;
+  }
+
+  ctx.save();
+  ctx.globalAlpha = remap(
+    0,
+    1,
+    fadedLinesAlpha,
+    1,
+    easeOutQuad(fadeOutNormalized)
+  );
+  idleAnimationTextureGenerator!(idx, ctx);
+  ctx.globalAlpha = 1;
+  staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
+  ctx.restore();
+}
+
+export function highlightInAnimation({
   ts,
   ctx,
   width,
   height,
   animation
 }: Context) {
-  const animationLength = idleAnimationLength;
-  const normalized = ((ts - animation.start) / animationLength) % 1;
-  const idx = Math.floor(normalized * 300);
+  const animationLength = fadeInAnimationLength;
+  let normalized = (ts - animation.start) / animationLength;
+
+  if (normalized < 0) {
+    normalized = 0;
+  }
+  if (normalized > 1) {
+    processDoneCallback(animation);
+    normalized = 1;
+  }
 
   ctx.save();
-  idleAnimationTextureGenerator!(idx, ctx);
-  staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
   ctx.globalCompositeOperation = "source-atop";
+  ctx.globalAlpha = easeOutQuad(normalized);
   ctx.fillStyle = turquoise;
   ctx.fillRect(0, 0, width, height);
   ctx.restore();
 }
 
-export function numberAnimation(
-  touching: number,
-  canDoSurroundingReveal: boolean,
-  { ctx, width, height }: Context
-) {
+export function highlightOutAnimation({
+  ts,
+  ctx,
+  width,
+  height,
+  animation
+}: Context) {
+  const animationLength = fadeOutAnimationLength;
+  let normalized = (ts - animation.start) / animationLength;
+
+  if (normalized < 0) {
+    normalized = 0;
+  }
+  if (normalized > 1) {
+    processDoneCallback(animation);
+    normalized = 1;
+  }
+
+  ctx.save();
+  ctx.globalCompositeOperation = "source-atop";
+  ctx.globalAlpha = 1 - easeOutQuad(normalized);
+  ctx.fillStyle = turquoise;
+  ctx.fillRect(0, 0, width, height);
+  ctx.restore();
+}
+
+export function numberAnimation(touching: number, { ctx }: Context) {
   ctx.save();
   staticTextureGenerator!(touching, ctx);
-
-  if (canDoSurroundingReveal) {
-    ctx.globalCompositeOperation = "source-atop";
-    ctx.fillStyle = turquoise;
-    ctx.fillRect(0, 0, width, height);
-  }
   ctx.restore();
 }
 

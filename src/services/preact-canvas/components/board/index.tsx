@@ -20,6 +20,8 @@ import {
   flaggedAnimation,
   flashInAnimation,
   flashOutAnimation,
+  highlightInAnimation,
+  highlightOutAnimation,
   idleAnimation,
   initTextureCaches,
   numberAnimation
@@ -59,6 +61,13 @@ function distanceFromCenter(x: number, y: number, size: number): number {
   const dy = y / size - 0.5;
   // Distance of our point to origin
   return Math.sqrt(dx * dx + dy * dy) / Math.sqrt(2);
+}
+
+function removeAnimations(
+  al: AnimationDesc[],
+  names: AnimationName[]
+): AnimationDesc[] {
+  return al.filter(a => !names.includes(a.name));
 }
 
 export default class Board extends Component<Props> {
@@ -151,31 +160,70 @@ export default class Board extends Component<Props> {
   }
 
   private updateAnimation(btn: HTMLButtonElement) {
+    const ts = performance.now();
     const [x, y, cell] = this.additionalButtonData.get(btn)!;
-    const animationList = this.animationLists.get(btn)!;
+    let animationList = this.animationLists.get(btn)!;
 
     if (!cell.revealed && !cell.flagged) {
       animationList[0].name = AnimationName.IDLE;
+      animationList[0].fadeStart = ts;
+      animationList = removeAnimations(animationList, [
+        AnimationName.HIGHLIGHT_IN,
+        AnimationName.HIGHLIGHT_OUT
+      ]);
+      animationList.push({
+        name: AnimationName.HIGHLIGHT_OUT,
+        start: ts,
+        done: () => {
+          animationList = removeAnimations(animationList, [
+            AnimationName.HIGHLIGHT_IN,
+            AnimationName.HIGHLIGHT_OUT
+          ]);
+          this.animationLists.set(btn, animationList);
+        }
+      });
     } else if (!cell.revealed && cell.flagged) {
       animationList[0].name = AnimationName.FLAGGED;
+      animationList[0].fadeStart = ts;
+      animationList.push({
+        name: AnimationName.HIGHLIGHT_IN,
+        start: ts
+      });
     } else if (cell.revealed) {
+      const isHighlighted = animationList.some(
+        a => a.name === AnimationName.HIGHLIGHT_IN
+      );
+      if (cell.touchingFlags >= cell.touchingMines && !isHighlighted) {
+        animationList.push({
+          name: AnimationName.HIGHLIGHT_IN,
+          start: ts
+        });
+      } else if (cell.touchingFlags < cell.touchingMines && isHighlighted) {
+        animationList = removeAnimations(animationList, [
+          AnimationName.HIGHLIGHT_IN,
+          AnimationName.HIGHLIGHT_OUT
+        ]);
+        animationList.push({
+          name: AnimationName.HIGHLIGHT_OUT,
+          start: ts
+        });
+      }
+      this.animationLists.set(btn, animationList);
       // This button already played the flash animation
       if (this.flashedCells.has(btn)) {
         return;
       }
       animationList.length = 0;
       this.flashedCells.add(btn);
-      const ts = performance.now();
       animationList.push({
         name: AnimationName.FLASH_IN,
         start: ts,
         done: () => {
-          while (
-            animationList[0].name === AnimationName.IDLE ||
-            animationList[0].name === AnimationName.FLASH_IN
-          ) {
-            animationList.shift();
-          }
+          animationList = removeAnimations(animationList, [
+            AnimationName.IDLE,
+            AnimationName.FLASH_IN
+          ]);
+          this.animationLists.set(btn, animationList);
         }
       });
       if (cell.touchingMines > 0) {
@@ -189,6 +237,8 @@ export default class Board extends Component<Props> {
         start: ts + 100
       });
     }
+
+    this.animationLists.set(btn, animationList);
   }
 
   private drawCell(btn: HTMLButtonElement, ts: number) {
@@ -223,6 +273,12 @@ export default class Board extends Component<Props> {
         case AnimationName.FLAGGED:
           flaggedAnimation(context);
           break;
+        case AnimationName.HIGHLIGHT_IN:
+          highlightInAnimation(context);
+          break;
+        case AnimationName.HIGHLIGHT_OUT:
+          highlightOutAnimation(context);
+          break;
         case AnimationName.FLASH_IN:
           flashInAnimation(context);
           break;
@@ -230,11 +286,7 @@ export default class Board extends Component<Props> {
           flashOutAnimation(context);
           break;
         case AnimationName.NUMBER:
-          numberAnimation(
-            cell.touchingMines,
-            cell.touchingFlags >= cell.touchingMines,
-            context
-          );
+          numberAnimation(cell.touchingMines, context);
           break;
       }
       ctx.restore();
