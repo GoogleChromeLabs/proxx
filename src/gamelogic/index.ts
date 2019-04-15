@@ -20,7 +20,7 @@ function newCell(id: number): Cell {
     revealed: false,
     tag: Tag.None,
     touchingFlags: 0,
-    touchingMines: -1
+    touchingMines: 0
   };
 }
 
@@ -107,7 +107,7 @@ export default class MinesweeperGame {
 
     if (tag === Tag.Flag) {
       this._flags++;
-      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+      for (const [nextX, nextY] of this._getSurrounding(x, y)) {
         const nextCell = this.grid[nextY][nextX];
         nextCell.touchingFlags++;
         // Emit this if it's just matched the number of mines
@@ -120,7 +120,7 @@ export default class MinesweeperGame {
       }
     } else if (oldTag === Tag.Flag) {
       this._flags--;
-      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+      for (const [nextX, nextY] of this._getSurrounding(x, y)) {
         const nextCell = this.grid[nextY][nextX];
         nextCell.touchingFlags--;
         // Emit this if it's just un-matched the number of mines
@@ -151,7 +151,7 @@ export default class MinesweeperGame {
 
     let revealedSomething = false;
 
-    for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+    for (const [nextX, nextY] of this._getSurrounding(x, y)) {
       const nextCell = this.grid[nextY][nextX];
       if (nextCell.tag === Tag.Flag || nextCell.revealed) {
         continue;
@@ -194,32 +194,39 @@ export default class MinesweeperGame {
   }
 
   private _placeMines(avoidX: number, avoidY: number) {
-    const cells: Cell[] = this.grid.reduce((cells, row) => {
-      cells.push(...row);
-      return cells;
-    }, []);
+    const flatCellIndexes: number[] = new Array(this._width * this._height)
+      .fill(undefined)
+      .map((_, i) => i);
 
     // Remove the cell played.
-    cells.splice(avoidY * this._width + avoidX, 1);
+    flatCellIndexes.splice(avoidY * this._width + avoidX, 1);
 
     // Place mines in remaining squares
     let minesToPlace = this._mines;
 
     while (minesToPlace) {
-      const index = Math.floor(Math.random() * cells.length);
-      const cell = cells[index];
-      cells.splice(index, 1);
-      cell.hasMine = true;
+      const index = flatCellIndexes.splice(
+        Math.floor(Math.random() * flatCellIndexes.length),
+        1
+      )[0];
+
+      const x = index % this._width;
+      const y = (index - x) / this._width;
+
+      this.grid[y][x].hasMine = true;
       minesToPlace -= 1;
+
+      for (const [nextX, nextY] of this._getSurrounding(x, y)) {
+        this.grid[nextY][nextX].touchingMines++;
+      }
     }
 
     this._state = State.Playing;
   }
 
-  private *_iterateSurrounding(
-    x: number,
-    y: number
-  ): IterableIterator<[number, number]> {
+  private _getSurrounding(x: number, y: number): Array<[number, number]> {
+    const surrounding: Array<[number, number]> = [];
+
     for (const nextY of [y - 1, y, y + 1]) {
       if (nextY < 0) {
         continue;
@@ -239,9 +246,11 @@ export default class MinesweeperGame {
           continue;
         }
 
-        yield [nextX, nextY];
+        surrounding.push([nextX, nextY]);
       }
     }
+
+    return surrounding;
   }
 
   /**
@@ -263,9 +272,9 @@ export default class MinesweeperGame {
         throw Error("Cell already revealed");
       }
       cell.revealed = true;
+      this._pushGridChange(x, y);
 
       if (cell.hasMine) {
-        this._pushGridChange(x, y);
         this._endGame(State.Lost);
         return;
       }
@@ -273,38 +282,25 @@ export default class MinesweeperGame {
       this._toReveal -= 1;
 
       if (this._toReveal === 0) {
-        this._pushGridChange(x, y);
         this._endGame(State.Won);
-        // Although the game is over, we still continue to calculate the touching value.
+        return;
       }
-
-      let touching = 0;
-      const maybeReveal: number[] = [];
-
-      // Go around the surrounding squares
-      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
-        const nextCell = this.grid[nextY][nextX];
-
-        if (nextCell.hasMine) {
-          touching += 1;
-        }
-        if (nextCell.tag === Tag.Flag || nextCell.revealed) {
-          continue;
-        }
-
-        maybeReveal.push(nextX + nextY * this._width);
-      }
-
-      cell.touchingMines = touching;
-      this._pushGridChange(x, y);
 
       // Don't reveal the surrounding squares if this is touching a mine.
-      if (touching !== 0) {
+      if (cell.touchingMines) {
         continue;
       }
 
-      for (const num of maybeReveal) {
-        revealSet.add(num);
+      for (const [nextX, nextY] of this._getSurrounding(x, y)) {
+        const nextCell = this.grid[nextY][nextX];
+        const isCorner = nextX !== x && nextY !== y;
+        if (isCorner && nextCell.touchingMines === 0) {
+          // Don't allow corner to expand (but revealing numbers is fine)
+          continue;
+        }
+        if (!nextCell.revealed && nextCell.tag !== Tag.Flag) {
+          revealSet.add(nextX + nextY * this._width);
+        }
       }
     }
     this._emit();
