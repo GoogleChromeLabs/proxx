@@ -12,6 +12,8 @@
  */
 
 export const numInnerRects = 5;
+// 3s delay per 8 fields
+export const rippleSpeed = 3000 / 8;
 
 function shaderColor(
   x: [number, number, number]
