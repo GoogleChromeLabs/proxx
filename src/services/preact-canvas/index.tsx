@@ -20,6 +20,7 @@ import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
+import Nebula from "./components/nebula/index.js";
 import Settings from "./components/settings";
 import { game as gameClassName, main } from "./style.css";
 
@@ -30,6 +31,7 @@ interface Props {
 interface State {
   game?: GameType;
   stateService?: Remote<StateService>;
+  dangerMode: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -40,7 +42,9 @@ const Game = deferred(
 );
 
 class PreactService extends Component<Props, State> {
-  state: State = {};
+  state: State = {
+    dangerMode: false
+  };
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
 
@@ -49,7 +53,7 @@ class PreactService extends Component<Props, State> {
     this._init(props);
   }
 
-  render(_props: Props, { game, stateService }: State) {
+  render(_props: Props, { game, stateService, dangerMode }: State) {
     let mainComponent: VNode;
 
     if (!game) {
@@ -65,16 +69,48 @@ class PreactService extends Component<Props, State> {
           gameChangeSubscribe={this._onGameChangeSubscribe}
           gameChangeUnsubscribe={this._onGameChangeUnsubscribe}
           stateService={stateService!}
+          dangerMode={dangerMode}
+          onDangerModeChange={this._onDangerModeChange}
         />
       );
     }
 
     return (
       <div class={gameClassName}>
+        <Nebula dangerMode={game ? dangerMode : false} />
         {mainComponent}
         <Settings onFullscreenClick={this._onFullscreenClick} />
       </div>
     );
+  }
+
+  componentDidMount() {
+    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
+  }
+
+  @bind
+  private _onKeyDown(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this._onDangerModeChange(!this.state.dangerMode);
+    }
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this._onDangerModeChange(!this.state.dangerMode);
+    }
+  }
+
+  @bind
+  private _onDangerModeChange(dangerMode: boolean) {
+    this.setState({ dangerMode });
   }
 
   @bind

@@ -14,7 +14,7 @@ import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
-import { game, GameChangeCallback } from "../..";
+import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
 import Board from "../board";
@@ -27,10 +27,11 @@ export interface Props {
   height: number;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
+  onDangerModeChange: (v: boolean) => void;
+  dangerMode: boolean;
 }
 
 interface State {
-  altActionChecked: boolean;
   playMode: PlayMode;
 }
 
@@ -39,13 +40,18 @@ const End = deferred(import("../end/index.js").then(m => m.default));
 
 export default class Game extends Component<Props, State> {
   state: State = {
-    altActionChecked: false,
     playMode: PlayMode.Playing
   };
 
   render(
-    { width, height, gameChangeSubscribe, gameChangeUnsubscribe }: Props,
-    { altActionChecked, playMode }: State
+    {
+      dangerMode,
+      width,
+      height,
+      gameChangeSubscribe,
+      gameChangeUnsubscribe
+    }: Props,
+    { playMode }: State
   ) {
     return (
       <div class={gameClass}>
@@ -69,8 +75,8 @@ export default class Game extends Component<Props, State> {
           <input
             class={checkbox}
             type="checkbox"
-            onChange={this.onAltChange}
-            checked={altActionChecked}
+            onChange={this.onDangerModeChange}
+            checked={!dangerMode}
           />
           <span class={toggle} /> Flag
         </label>
@@ -80,6 +86,9 @@ export default class Game extends Component<Props, State> {
 
   componentDidMount() {
     this.props.gameChangeSubscribe(this.onGameChange);
+    if (!this.props.dangerMode) {
+      this.props.onDangerModeChange(true);
+    }
   }
 
   componentWillUnmount() {
@@ -102,22 +111,23 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onAltChange(event: Event) {
+  private onDangerModeChange(event: Event) {
     const target = event.target as HTMLInputElement;
-    this.setState({
-      altActionChecked: target.checked
-    });
+    const dangerMode = !target.checked;
+    this.props.onDangerModeChange(dangerMode);
   }
 
   @bind
-  private onCellClick(cellData: [number, number, Cell], forceAlt: boolean) {
+  private onCellClick(cellData: [number, number, Cell], alt: boolean) {
     const [x, y, cell] = cellData;
-    const { altActionChecked } = this.state;
+    let { dangerMode } = this.props;
 
-    const altAction = forceAlt || altActionChecked;
+    if (alt) {
+      dangerMode = !dangerMode;
+    }
 
     if (!cell.revealed) {
-      if (altAction) {
+      if (!dangerMode) {
         if (cell.flagged) {
           this.props.stateService.unflag(x, y);
         } else {
