@@ -319,11 +319,6 @@ export default class MinesweeperGame {
 
       for (const [nextX, nextY] of this._getSurrounding(x, y)) {
         const nextCell = this.grid[nextY][nextX];
-        const isCorner = nextX !== x && nextY !== y;
-        if (isCorner && nextCell.touchingMines === 0) {
-          // Don't allow corner to expand (but revealing numbers is fine)
-          continue;
-        }
         if (!nextCell.revealed && !nextCell.flagged) {
           revealSet.add(nextX + nextY * this._width);
         }
