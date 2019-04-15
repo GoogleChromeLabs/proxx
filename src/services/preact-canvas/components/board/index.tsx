@@ -165,37 +165,36 @@ export default class Board extends Component<Props> {
       animationList[0].name = AnimationName.IDLE;
     } else if (!cell.revealed && cell.flagged) {
       animationList[0].name = AnimationName.FLAGGED;
-    } else if (cell.revealed && cell.touchingMines <= 0) {
-      animationList.length = 0;
-    } else if (cell.revealed && cell.touchingMines > 0) {
+    } else if (cell.revealed) {
       // This button already played the flash animation
       if (this.flashedCells.has(btn)) {
         return;
       }
+      animationList.length = 0;
       this.flashedCells.add(btn);
       const ts = performance.now();
-      animationList.push(
-        {
-          name: AnimationName.FLASH_IN,
-          start: ts,
-          done: () => {
-            while (
-              animationList[0].name === AnimationName.IDLE ||
-              animationList[0].name === AnimationName.FLASH_IN
-            ) {
-              animationList.shift();
-            }
+      animationList.push({
+        name: AnimationName.FLASH_IN,
+        start: ts,
+        done: () => {
+          while (
+            animationList[0].name === AnimationName.IDLE ||
+            animationList[0].name === AnimationName.FLASH_IN
+          ) {
+            animationList.shift();
           }
-        },
-        {
+        }
+      });
+      if (cell.touchingMines > 0) {
+        animationList.push({
           name: AnimationName.NUMBER,
           start: ts + 100
-        },
-        {
-          name: AnimationName.FLASH_OUT,
-          start: ts + 100
-        }
-      );
+        });
+      }
+      animationList.push({
+        name: AnimationName.FLASH_OUT,
+        start: ts + 100
+      });
     }
   }
 
