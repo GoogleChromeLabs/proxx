@@ -112,9 +112,9 @@ export function staticTextureGeneratorFactory(
   // be blitted to the output canvas twice — once with a blur,
   // and once without, yielding a glow.
   const cvs2 = document.createElement("canvas");
-  cvs2.width = cvs2.height = textureSize * devicePixelRatio;
+  cvs2.width = cvs2.height = textureSize * self.devicePixelRatioCopy;
   const ctx2 = cvs2.getContext("2d")!;
-  ctx2.scale(devicePixelRatio, devicePixelRatio);
+  ctx2.scale(self.devicePixelRatioCopy, self.devicePixelRatioCopy);
 
   return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx2.clearRect(0, 0, textureSize, textureSize);

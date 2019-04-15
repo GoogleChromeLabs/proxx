@@ -25,16 +25,16 @@ export function cacheTextureGenerator(
   // hitting. However, the higher the `devicePixelRatio`, the more often I see
   // the textures not getting painted at the higher values. Breaking it into
   // a couple of rows fixes it :shrug:
-  const rows = Math.ceil(devicePixelRatio);
+  const rows = Math.ceil(self.devicePixelRatioCopy);
   const framesPerRow = Math.ceil(numFrames / rows);
-  cacheCanvas.width = framesPerRow * textureSize * devicePixelRatio;
-  cacheCanvas.height = rows * textureSize * devicePixelRatio;
+  cacheCanvas.width = framesPerRow * textureSize * self.devicePixelRatioCopy;
+  cacheCanvas.height = rows * textureSize * self.devicePixelRatioCopy;
   const renderedTiles = new Set<number>();
   const cacheCtx = cacheCanvas.getContext("2d")!;
   if (!cacheCtx) {
     throw Error("Could not instantiate 2D rendering context");
   }
-  cacheCtx.scale(devicePixelRatio, devicePixelRatio);
+  cacheCtx.scale(self.devicePixelRatioCopy, self.devicePixelRatioCopy);
 
   return (idx: number, ctx: CanvasRenderingContext2D) => {
     idx = Math.floor(idx % numFrames);
@@ -51,10 +51,10 @@ export function cacheTextureGenerator(
     }
     ctx.drawImage(
       cacheCanvas,
-      cacheX * devicePixelRatio,
-      cacheY * devicePixelRatio,
-      textureSize * devicePixelRatio,
-      textureSize * devicePixelRatio,
+      cacheX * self.devicePixelRatioCopy,
+      cacheY * self.devicePixelRatioCopy,
+      textureSize * self.devicePixelRatioCopy,
+      textureSize * self.devicePixelRatioCopy,
       0,
       0,
       textureSize,
