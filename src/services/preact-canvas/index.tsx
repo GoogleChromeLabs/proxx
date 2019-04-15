@@ -83,6 +83,30 @@ class PreactService extends Component<Props, State> {
     );
   }
 
+  componentDidMount() {
+    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
+  }
+
+  @bind
+  private _onKeyDown(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.setState({ dangerMode: !this.state.dangerMode });
+    }
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.setState({ dangerMode: !this.state.dangerMode });
+    }
+  }
+
   @bind
   private _onAltChange(dangerMode: boolean) {
     this.setState({ dangerMode });
