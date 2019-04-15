@@ -12,13 +12,18 @@
  */
 
 import { easeInOutCubic, easeOutQuad } from "./animation-helpers.js";
-import { turquoise } from "./colors.js";
+import {
+  flashInAnimationLength,
+  flashOutAnimationLength,
+  idleAnimationLength,
+  turquoise
+} from "./constants.js";
 import { cacheTextureGenerator } from "./texture-cache.js";
 import {
+  idleAnimationTextureGeneratorFactory,
   STATIC_TEXTURE,
   staticTextureGeneratorFactory,
-  TextureGenerator,
-  unrevealedAnimationTextureGeneratorFactory
+  TextureGenerator
 } from "./texture-generators.js";
 
 // Enum of all the available animations
@@ -58,8 +63,8 @@ export function idleAnimation({ ts, ctx, animation }: Context) {
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
   ctx.save();
-  ctx.globalAlpha = 0.5;
-  unrevealedAnimationTextureGenerator!(idx, ctx);
+  ctx.globalAlpha = 0.3;
+  idleAnimationTextureGenerator!(idx, ctx);
   ctx.globalAlpha = 1;
   staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
   ctx.restore();
@@ -72,12 +77,12 @@ export function flaggedAnimation({
   height,
   animation
 }: Context) {
-  const animationLength = 5000;
+  const animationLength = idleAnimationLength;
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
 
   ctx.save();
-  unrevealedAnimationTextureGenerator!(idx, ctx);
+  idleAnimationTextureGenerator!(idx, ctx);
   staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
   ctx.globalCompositeOperation = "source-atop";
   ctx.fillStyle = turquoise;
@@ -88,17 +93,8 @@ export function flaggedAnimation({
 export function numberAnimation(
   touching: number,
   canDoSurroundingReveal: boolean,
-  { ts, ctx, width, height, animation }: Context
+  { ctx, width, height }: Context
 ) {
-  const animationLength = 2000;
-  let normalized = (ts - animation.start) / animationLength;
-  if (normalized < 0) {
-    return;
-  }
-  if (normalized > 1) {
-    normalized = 1;
-  }
-
   ctx.save();
   staticTextureGenerator!(touching, ctx);
 
@@ -111,7 +107,7 @@ export function numberAnimation(
 }
 
 export function flashInAnimation({ ts, ctx, animation }: Context) {
-  const animationLength = 100;
+  const animationLength = flashInAnimationLength;
   let normalized = (ts - animation.start) / animationLength;
   if (normalized < 0) {
     return;
@@ -127,7 +123,7 @@ export function flashInAnimation({ ts, ctx, animation }: Context) {
 }
 
 export function flashOutAnimation({ ts, ctx, animation }: Context) {
-  const animationLength = 700;
+  const animationLength = flashOutAnimationLength;
   let normalized = (ts - animation.start) / animationLength;
   if (normalized < 0) {
     return;
@@ -142,23 +138,24 @@ export function flashOutAnimation({ ts, ctx, animation }: Context) {
   ctx.restore();
 }
 
-let unrevealedAnimationTextureGenerator: TextureGenerator | null = null;
+let idleAnimationTextureGenerator: TextureGenerator | null = null;
 let staticTextureGenerator: TextureGenerator | null = null;
 
 export function initTextureCaches(textureSize: number) {
-  if (unrevealedAnimationTextureGenerator) {
+  if (idleAnimationTextureGenerator) {
     // If we have one, we have them all.
     return;
   }
 
-  const uncachedUATG = unrevealedAnimationTextureGeneratorFactory(
+  const idleAnimationNumFrames = (idleAnimationLength * 60) / 1000;
+  const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
-    300
+    idleAnimationNumFrames
   );
-  unrevealedAnimationTextureGenerator = cacheTextureGenerator(
-    uncachedUATG,
+  idleAnimationTextureGenerator = cacheTextureGenerator(
+    uncachedIATG,
     textureSize,
-    300
+    idleAnimationNumFrames
   );
   const uncachedSTG = staticTextureGeneratorFactory(textureSize);
   staticTextureGenerator = cacheTextureGenerator(

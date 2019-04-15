@@ -15,16 +15,29 @@ import { roundedRectangle } from "./canvas-helper.js";
 
 import { deg2rad, remap, smoothpulse } from "./animation-helpers.js";
 
+import {
+  blurFactor,
+  borderRadius,
+  innerCircleRadius,
+  numberCircleRadius,
+  numberFontSizeFactor,
+  numRects,
+  safetyBufferFactor,
+  thickLine,
+  thinLine,
+  white
+} from "./constants.js";
+
 export type TextureGenerator = (
   idx: number,
   ctx: CanvasRenderingContext2D
 ) => void;
 
-export function unrevealedAnimationTextureGeneratorFactory(
+export function idleAnimationTextureGeneratorFactory(
   textureSize: number,
   numFrames: number
 ): TextureGenerator {
-  const size = (textureSize - 10) * 0.97;
+  const size = (textureSize - 10) * safetyBufferFactor;
   const halfSize = size / 2;
 
   return (idx: number, ctx: CanvasRenderingContext2D) => {
@@ -35,13 +48,19 @@ export function unrevealedAnimationTextureGeneratorFactory(
     ctx.save();
     ctx.translate(textureSize / 2, textureSize / 2);
 
-    roundedRectangle(ctx, -halfSize, -halfSize, size, size, (size * 76) / 650);
+    roundedRectangle(
+      ctx,
+      -halfSize,
+      -halfSize,
+      size,
+      size,
+      size * borderRadius
+    );
     ctx.clip();
 
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = white;
 
-    ctx.lineWidth = (size * 6) / 650;
-    const numRects = 5;
+    ctx.lineWidth = size * thinLine;
     const magnification = remap(0, 1, 1, 1.4, smoothpulse(0, 0.5, 0.5, 1, ts));
     for (let i = 0; i < numRects; i++) {
       ctx.save();
@@ -59,7 +78,7 @@ export function unrevealedAnimationTextureGeneratorFactory(
         -subsize / 2,
         subsize,
         subsize,
-        subsize * 0.12
+        subsize * borderRadius
       );
       ctx.stroke();
       ctx.restore();
@@ -85,7 +104,7 @@ export const enum STATIC_TEXTURE {
 export function staticTextureGeneratorFactory(
   textureSize: number
 ): TextureGenerator {
-  const size = (textureSize - 10) * 0.97;
+  const size = (textureSize - 10) * safetyBufferFactor;
   const halfSize = size / 2;
 
   // If a texture needs a glow effect, the routine can paint
@@ -106,8 +125,8 @@ export function staticTextureGeneratorFactory(
       ctx2.strokeStyle = "white";
 
       // Inner circle
-      ctx2.lineWidth = (size * 20) / 650;
-      const radius = (size * 64) / 650;
+      ctx2.lineWidth = size * thickLine;
+      const radius = size * innerCircleRadius;
       ctx2.beginPath();
       ctx2.moveTo(radius, 0);
       ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
@@ -122,22 +141,22 @@ export function staticTextureGeneratorFactory(
         -halfSize,
         size,
         size,
-        (size * 76) / 650
+        size * borderRadius
       );
-      ctx2.lineWidth = (size * 20) / 650;
+      ctx2.lineWidth = size * thickLine;
       ctx2.stroke();
     } else if (idx >= 1 && idx <= 8) {
-      ctx2.strokeStyle = "#fff";
-      ctx2.lineWidth = (size * 20) / 650;
+      ctx2.strokeStyle = white;
+      ctx2.lineWidth = size * thinLine;
       ctx2.beginPath();
-      ctx2.arc(0, 0, halfSize * 0.9, 0, 2 * Math.PI);
+      ctx2.arc(0, 0, halfSize * numberCircleRadius, 0, 2 * Math.PI);
       ctx2.closePath();
       ctx2.stroke();
 
-      ctx2.fillStyle = "#fff";
+      ctx2.fillStyle = white;
       ctx2.textAlign = "center";
       ctx2.textBaseline = "middle";
-      ctx2.font = `${size / 2}px sans-serif`;
+      ctx2.font = `${size * numberFontSizeFactor}px sans-serif`;
       ctx2.fillText(`${idx}`, 0, 0);
     } else if (idx === STATIC_TEXTURE.FLASH) {
       roundedRectangle(
@@ -146,16 +165,16 @@ export function staticTextureGeneratorFactory(
         -halfSize,
         size,
         size,
-        (size * 76) / 650
+        size * borderRadius
       );
       ctx2.clip();
-      ctx2.fillStyle = `#fff`;
+      ctx2.fillStyle = white;
       ctx2.fillRect(-halfSize, -halfSize, size, size);
     }
     ctx2.restore();
 
     ctx.save();
-    const blur = (textureSize / 10).toFixed(1);
+    const blur = (textureSize * blurFactor).toFixed(1);
     ctx.filter = `blur(${blur}px)`;
     ctx.drawImage(
       cvs2,
