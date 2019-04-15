@@ -21,7 +21,7 @@ import {
   innerCircleRadius,
   numberCircleRadius,
   numberFontSizeFactor,
-  numRects,
+  numInnerRects,
   safetyBufferFactor,
   thickLine,
   thinLine,
@@ -62,9 +62,9 @@ export function idleAnimationTextureGeneratorFactory(
 
     ctx.lineWidth = size * thinLine;
     const magnification = remap(0, 1, 1, 1.4, smoothpulse(0, 0.5, 0.5, 1, ts));
-    for (let i = 0; i < numRects; i++) {
+    for (let i = 0; i < numInnerRects; i++) {
       ctx.save();
-      const offset = ((numRects - i) / numRects) * 0.14;
+      const offset = ((numInnerRects - i) / numInnerRects) * 0.14;
       const angle =
         5 +
         i * 9 +

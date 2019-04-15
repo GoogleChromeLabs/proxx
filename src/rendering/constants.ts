@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-export const numRects = 5;
+export const numInnerRects = 5;
 
 function shaderColor(
   x: [number, number, number]
