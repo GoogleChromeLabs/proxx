@@ -31,7 +31,6 @@ function setShader(
     );
   }
   gl.attachShader(program, shader);
-  return shader;
 }
 
 export interface ShaderBoxOpts {
@@ -50,7 +49,6 @@ const defaultOpts: ShaderBoxOpts = {
 export default class ShaderBox {
   readonly canvas: HTMLCanvasElement;
   private _gl: WebGLRenderingContext;
-  private _running = false;
   private _opts: ShaderBoxOpts;
   private _uniformLocations = new Map<string, WebGLUniformLocation>();
   private _uniformValues = new Map<string, number[]>();
@@ -65,6 +63,7 @@ export default class ShaderBox {
       ...opts,
       canvas: opts.canvas || document.createElement("canvas")
     };
+    this._opts.uniforms = this._opts.uniforms.slice();
 
     this.canvas = this._opts.canvas!;
     this._gl = this.canvas.getContext("webgl", {
@@ -73,7 +72,7 @@ export default class ShaderBox {
     if (!this._gl) {
       throw Error("No support for WebGL");
     }
-    const program = this._gl!.createProgram();
+    const program = this._gl.createProgram();
     if (!program) {
       throw Error("Could not create program");
     }

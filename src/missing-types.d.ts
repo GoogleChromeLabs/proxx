@@ -4,5 +4,10 @@ declare module "chunk-name:*" {
 }
 
 interface Window {
-  debug: Promise<typeof import("./services/debug/index.js")> | null;
+  debug?: Promise<typeof import("./services/debug/index.js")>;
+}
+
+declare module "*.glsl" {
+  const content: string;
+  export default content;
 }

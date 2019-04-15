@@ -22,10 +22,7 @@ import {
   notDangerMode as notDangerModeStyle
 } from "./style.css";
 
-// @ts-ignore
 import fragmentShader from "./fragment.glsl";
-
-// @ts-ignore
 import vertexShader from "./vertex.glsl";
 
 export interface Props {
@@ -35,9 +32,8 @@ export interface Props {
 interface State {}
 
 export default class Nebula extends Component<Props, State> {
-  timePeriod = 60000;
-  fadeSpeed = 10;
-
+  private _timePeriod = 60000;
+  private _fadeSpeed = 10;
   private _dangerModeBlend = 0;
   private _shaderBox?: ShaderBox;
   private _loopRunning = false;
@@ -77,15 +73,6 @@ export default class Nebula extends Component<Props, State> {
     }
   }
 
-  start() {
-    this._loopRunning = true;
-    requestAnimationFrame(this._loop);
-  }
-
-  stop() {
-    this._loopRunning = false;
-  }
-
   componentWillUnmount() {
     if (!this._shaderBox) {
       return;
@@ -104,6 +91,18 @@ export default class Nebula extends Component<Props, State> {
     );
   }
 
+  private start() {
+    if (this._loopRunning) {
+      return;
+    }
+    this._loopRunning = true;
+    requestAnimationFrame(this._loop);
+  }
+
+  private stop() {
+    this._loopRunning = false;
+  }
+
   @bind
   private _onResize() {
     if (!this._shaderBox) {
@@ -116,11 +115,11 @@ export default class Nebula extends Component<Props, State> {
   private _loop(ts: number) {
     this._shaderBox!.setUniform1f(
       "time",
-      (ts % this.timePeriod) / this.timePeriod
+      (ts % this._timePeriod) / this._timePeriod
     );
     this._dangerModeBlend +=
       ((this.props.dangerMode ? 1 : 0) - this._dangerModeBlend) /
-      this.fadeSpeed;
+      this._fadeSpeed;
     this._shaderBox!.setUniform1f("danger_mode", this._dangerModeBlend);
     this._shaderBox!.draw();
     if (this._loopRunning) {

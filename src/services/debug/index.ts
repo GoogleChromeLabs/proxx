@@ -51,5 +51,5 @@ export function nebula(nebula: Nebula, shaderBox: ShaderBox) {
     nebulaF.add(nebulaUniforms, uniformName, 0, 10);
   }
 
-  nebulaF.add(nebula, "timePeriod", 1, 100000);
+  nebulaF.add(nebula, "_timePeriod", 1, 100000);
 }
