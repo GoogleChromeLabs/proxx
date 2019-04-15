@@ -93,7 +93,7 @@ export default class MinesweeperGame {
     this._flushStateChange();
   }
 
-  tag(x: number, y: number, flagged: boolean) {
+  setFlag(x: number, y: number, flagged: boolean) {
     const cell = this.grid[y][x];
     if (cell.revealed) {
       throw Error("Revealed cell cannot be tagged");

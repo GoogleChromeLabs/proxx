@@ -14,8 +14,6 @@ import MinesweeperGame, {
   StateChange as GameStateChange
 } from "../../gamelogic/index";
 
-// import generatedFieldURL from "asset-url:../../gamelogic/generated-field.json";
-
 export interface GameType {
   width: number;
   height: number;
@@ -68,11 +66,11 @@ export default class StateService {
   }
 
   flag(x: number, y: number) {
-    this._game!.tag(x, y, true);
+    this._game!.setFlag(x, y, true);
   }
 
   unflag(x: number, y: number) {
-    this._game!.tag(x, y, false);
+    this._game!.setFlag(x, y, false);
   }
 
   reveal(x: number, y: number) {
@@ -81,15 +79,6 @@ export default class StateService {
 
   revealSurrounding(x: number, y: number) {
     this._game!.attemptSurroundingReveal(x, y);
-  }
-
-  async loadDeterministicField() {
-    throw Error("Currently not implemented");
-    // const field = await fetch(generatedFieldURL).then(r => r.json());
-    // this._game!.grid = field;
-    // // tslint:disable-next-line
-    // this._game!["_state"] = State.Playing;
-    // this._game!.startTime = Date.now();
   }
 
   private _notify(stateChange: StateChange) {
