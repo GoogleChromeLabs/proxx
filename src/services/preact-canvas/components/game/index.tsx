@@ -19,7 +19,7 @@ import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
 import Board from "../board";
 import deferred from "../deferred";
-import { checkbox, toggle, toggleLabel } from "./style.css";
+import { checkbox, game as gameClass, toggle, toggleLabel } from "./style.css";
 
 export interface Props {
   stateService: Remote<StateService>;
@@ -48,7 +48,7 @@ export default class Game extends Component<Props, State> {
     { altActionChecked, playMode }: State
   ) {
     return (
-      <div>
+      <div class={gameClass}>
         {playMode === PlayMode.Won || playMode === PlayMode.Lost ? (
           <End
             loading={() => <div />}
