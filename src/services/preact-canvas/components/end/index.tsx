@@ -11,21 +11,21 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { State } from "../../../../gamelogic/types.js";
+import { PlayMode } from "../../../../gamelogic/types.js";
 
 import { endscreen } from "./style.css";
 
 export interface Props {
-  type: State.Lost | State.Won;
-  restart: () => void;
+  type: PlayMode.Lost | PlayMode.Won;
+  onRestart: () => void;
 }
 
 export default class End extends Component<Props> {
-  render({ type, restart }: Props) {
+  render({ type, onRestart }: Props) {
     return (
       <div class={endscreen}>
-        <h1>You {type === State.Won ? "Won" : "Lost"}</h1>
-        <button onClick={restart}>New game</button>
+        <h1>You {type === PlayMode.Won ? "Won" : "Lost"}</h1>
+        <button onClick={onRestart}>New game</button>
       </div>
     );
   }

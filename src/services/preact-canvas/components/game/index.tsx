@@ -14,39 +14,56 @@ import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
-import { GridChangeSubscriptionCallback } from "../..";
-import { Cell, Tag } from "../../../../gamelogic/types";
+import { game, GameChangeCallback } from "../..";
+import { StateChange } from "../../../../gamelogic";
+import { Cell, PlayMode } from "../../../../gamelogic/types";
 import Board from "../board";
+import deferred from "../deferred";
 import { checkbox, toggle, toggleLabel } from "./style.css";
 
 export interface Props {
   stateService: Remote<StateService>;
-  grid: Cell[][];
-  gridChangeSubscribe: (f: GridChangeSubscriptionCallback) => void;
-  gridChangeUnsubscribe: (f: GridChangeSubscriptionCallback) => void;
+  width: number;
+  height: number;
+  gameChangeSubscribe: (f: GameChangeCallback) => void;
+  gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
 
 interface State {
   altActionChecked: boolean;
+  playMode: PlayMode;
 }
+
+// tslint:disable-next-line:variable-name
+const End = deferred(import("../end/index.js").then(m => m.default));
 
 export default class Game extends Component<Props, State> {
   state: State = {
-    altActionChecked: false
+    altActionChecked: false,
+    playMode: PlayMode.Playing
   };
 
   render(
-    { grid, gridChangeSubscribe, gridChangeUnsubscribe }: Props,
-    { altActionChecked }: State
+    { width, height, gameChangeSubscribe, gameChangeUnsubscribe }: Props,
+    { altActionChecked, playMode }: State
   ) {
     return (
       <div>
-        <Board
-          grid={grid}
-          gridChangeSubscribe={gridChangeSubscribe}
-          gridChangeUnsubscribe={gridChangeUnsubscribe}
-          onCellClick={this.onCellClick}
-        />
+        {playMode === PlayMode.Won || playMode === PlayMode.Lost ? (
+          <End
+            loading={() => <div />}
+            type={playMode}
+            onRestart={this.onRestart}
+          />
+        ) : (
+          <Board
+            width={width}
+            height={height}
+            gameChangeSubscribe={gameChangeSubscribe}
+            gameChangeUnsubscribe={gameChangeUnsubscribe}
+            onCellClick={this.onCellClick}
+          />
+        )}
         <label class={toggleLabel}>
           Reveal
           <input
@@ -59,6 +76,29 @@ export default class Game extends Component<Props, State> {
         </label>
       </div>
     );
+  }
+
+  componentDidMount() {
+    this.props.gameChangeSubscribe(this.onGameChange);
+  }
+
+  componentWillUnmount() {
+    this.props.gameChangeUnsubscribe(this.onGameChange);
+  }
+
+  @bind
+  private onRestart() {
+    this.props.stateService.reset();
+  }
+
+  @bind
+  private onGameChange(gameChange: StateChange) {
+    if (
+      "playMode" in gameChange &&
+      this.state.playMode !== gameChange.playMode
+    ) {
+      this.setState({ playMode: gameChange.playMode! });
+    }
   }
 
   @bind
@@ -78,7 +118,7 @@ export default class Game extends Component<Props, State> {
 
     if (!cell.revealed) {
       if (altAction) {
-        if (cell.tag === Tag.Flag) {
+        if (cell.flagged) {
           this.props.stateService.unflag(x, y);
         } else {
           this.props.stateService.flag(x, y);
