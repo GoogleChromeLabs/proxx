@@ -1,5 +1,6 @@
 .board {
   --cell-size: 50px;
+  height: 100%;
 }
 
 .game-table {

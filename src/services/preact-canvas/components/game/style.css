@@ -1,3 +1,7 @@
+.game {
+  height: 100%;
+}
+
 .toggle-label {
   position: fixed;
   bottom: 22px;
