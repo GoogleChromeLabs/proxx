@@ -29,6 +29,7 @@ import {
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
 
+import { rippleSpeed } from "src/rendering/constants.js";
 import {
   board,
   button as buttonStyle,
@@ -55,12 +56,23 @@ export interface Props {
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
 
-function distanceFromCenter(x: number, y: number, size: number): number {
-  // Normalize coordinate system and move origin to center
-  const dx = x / size - 0.5;
-  const dy = y / size - 0.5;
+function distanceFromCenter(
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): number {
+  const centerX = width / 2;
+  const centerY = height / 2;
+  // Measure the distance from the center point of the game board
+  // to the center of the field (hence the +0.5)
+  const dx = x + 0.5 - centerX;
+  const dy = y + 0.5 - centerY;
   // Distance of our point to origin
-  return Math.sqrt(dx * dx + dy * dy) / Math.sqrt(2);
+  return (
+    Math.sqrt(dx * dx + dy * dy) /
+    Math.sqrt(centerX * centerX + centerY * centerY)
+  );
 }
 
 function removeAnimations(
@@ -335,13 +347,18 @@ export default class Board extends Component<Props> {
     // Assuming square field size
     initTextureCaches(this.firstCellRect!.width);
     const startTime = performance.now();
+    const rippleFactor =
+      rippleSpeed * Math.max(this.props.width, this.props.height);
     for (const button of this.buttons) {
       const [x, y] = this.additionalButtonData.get(button)!;
       this.animationLists.set(button, [
         {
           name: AnimationName.IDLE,
           start:
-            startTime - 5000 + distanceFromCenter(x, y, this.props.width) * 5000
+            startTime -
+            rippleFactor +
+            distanceFromCenter(x, y, this.props.width, this.props.height) *
+              rippleFactor
         }
       ]);
     }
