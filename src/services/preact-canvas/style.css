@@ -12,7 +12,7 @@ html {
 @media (min-width: 320px) {
   html {
     --cell-size: 40px;
-    --cell-padding: 9px;
+    --cell-padding: 5px;
     --side-margin: 20px;
     --icon-size: 24px;
     font-size: 1em;
