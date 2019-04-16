@@ -38,8 +38,6 @@ interface State {
   toReveal: number;
 }
 
-type AllOptional<T> = { [K in keyof T]?: T[K] };
-
 // tslint:disable-next-line:variable-name
 const End = deferred(import("../end/index.js").then(m => m.default));
 
@@ -115,7 +113,7 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onGameChange(gameChange: StateChange) {
-    const newState: AllOptional<State> = {};
+    const newState: Partial<State> = {};
 
     if (
       "playMode" in gameChange &&
