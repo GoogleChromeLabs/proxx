@@ -207,7 +207,7 @@ export function flashOutAnimation({ ts, ctx, animation }: Context) {
 let idleAnimationTextureGenerator: TextureGenerator | null = null;
 let staticTextureGenerator: TextureGenerator | null = null;
 
-export function initTextureCaches(textureSize: number) {
+export function initTextureCaches(textureSize: number, cellPadding: number) {
   if (idleAnimationTextureGenerator) {
     // If we have one, we have them all.
     return;
@@ -216,6 +216,7 @@ export function initTextureCaches(textureSize: number) {
   const idleAnimationNumFrames = (idleAnimationLength * 60) / 1000;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
+    cellPadding,
     idleAnimationNumFrames
   );
   idleAnimationTextureGenerator = cacheTextureGenerator(
@@ -223,7 +224,7 @@ export function initTextureCaches(textureSize: number) {
     textureSize,
     idleAnimationNumFrames
   );
-  const uncachedSTG = staticTextureGeneratorFactory(textureSize);
+  const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
   staticTextureGenerator = cacheTextureGenerator(
     uncachedSTG,
     textureSize,

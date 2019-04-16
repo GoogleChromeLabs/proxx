@@ -99,6 +99,11 @@ export default class Board extends Component<Props> {
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
   private changeBuffer: GridChanges = [];
+  private cellPadding = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--cell-padding"
+    )
+  );
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
@@ -346,7 +351,7 @@ export default class Board extends Component<Props> {
 
   private animationsInit() {
     // Assuming square field size
-    initTextureCaches(this.firstCellRect!.width);
+    initTextureCaches(this.firstCellRect!.width, this.cellPadding);
     const startTime = performance.now();
     const rippleFactor =
       rippleSpeed * Math.max(this.props.width, this.props.height);
@@ -376,7 +381,7 @@ export default class Board extends Component<Props> {
   }
 
   private queryFirstCellRect() {
-    this.firstCellRect = this.buttons[0].getBoundingClientRect();
+    this.firstCellRect = this.buttons[0].closest("td")!.getBoundingClientRect();
   }
 
   @bind

@@ -35,9 +35,10 @@ export type TextureGenerator = (
 
 export function idleAnimationTextureGeneratorFactory(
   textureSize: number,
+  cellPadding: number,
   numFrames: number
 ): TextureGenerator {
-  const size = (textureSize - 10) * safetyBufferFactor;
+  const size = (textureSize - cellPadding * 2) * safetyBufferFactor;
   const halfSize = size / 2;
 
   return (idx: number, ctx: CanvasRenderingContext2D) => {
@@ -102,9 +103,10 @@ export const enum STATIC_TEXTURE {
   LAST_MARKER // Not a valid frame, just a marker for the last item in the enum
 }
 export function staticTextureGeneratorFactory(
-  textureSize: number
+  textureSize: number,
+  cellPadding: number
 ): TextureGenerator {
-  const size = (textureSize - 10) * safetyBufferFactor;
+  const size = (textureSize - cellPadding * 2) * safetyBufferFactor;
   const halfSize = size / 2;
 
   // If a texture needs a glow effect, the routine can paint

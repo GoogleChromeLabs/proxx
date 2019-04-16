@@ -22,12 +22,16 @@ export function cacheTextureGenerator(
   numFrames: number
 ): TextureGenerator {
   const cacheCanvas = document.createElement("canvas");
-  // Allegedly, Chrome’s maximum canvas size is 32k pixels, which we are *not*
-  // hitting. However, the higher the `devicePixelRatio`, the more often I see
-  // the textures not getting painted at the higher values. Breaking it into
-  // a couple of rows fixes it :shrug:
-  const rows = Math.ceil(staticDevicePixelRatio);
-  const framesPerRow = Math.ceil(numFrames / rows);
+  // Allegedly, Chrome, Firefox and Safari have a maximum canvas size of 32k
+  // pixels. We are *definitely* below that, but for some reason the draws to
+  // the sprite sheet just seem to stop happening at higher indices when
+  // tileSize is big (due to high dPR for exampe). The maxWidth of 8192 has been
+  // determined by trial and error and seems to be safe.
+  const maxWidth = 8192;
+  const framesPerRow = Math.floor(
+    maxWidth / (textureSize * staticDevicePixelRatio)
+  );
+  const rows = Math.ceil(numFrames / framesPerRow);
   cacheCanvas.width = framesPerRow * textureSize * staticDevicePixelRatio;
   cacheCanvas.height = rows * textureSize * staticDevicePixelRatio;
   const renderedTiles = new Set<number>();
