@@ -1,8 +1,22 @@
 html {
   /* Catch any browsers that still overscroll (eg Safari) */
   background-color: #000;
-  --cell-size: 40px;
-  --cell-padding: 5px;
+  --cell-size: 25px;
+  --cell-padding: 2px;
+  --side-margin: 10px;
+  --icon-size: 15px;
+  font-size: 0.7em;
+}
+
+/* We're assuming (totally safe, right?) that widths below 320 are feature phones */
+@media (min-width: 320px) {
+  html {
+    --cell-size: 40px;
+    --cell-padding: 5px;
+    --side-margin: 20px;
+    --icon-size: 24px;
+    font-size: 1em;
+  }
 }
 
 body {

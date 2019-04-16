@@ -14,13 +14,19 @@
 import { staticDevicePixelRatio } from "../utils/static-dpr.js";
 import { TextureGenerator } from "./texture-generators.js";
 
+export type TextureDrawer = (
+  idx: number,
+  ctx: CanvasRenderingContext2D,
+  cellSize: number
+) => void;
+
 // Wraps an existing TextureGenerator and caches the generated
 // frames in a sprite.
 export function cacheTextureGenerator(
   f: TextureGenerator,
   textureSize: number,
   numFrames: number
-): TextureGenerator {
+): TextureDrawer {
   const cacheCanvas = document.createElement("canvas");
   // Allegedly, Chrome, Firefox and Safari have a maximum canvas size of 32k
   // pixels. We are *definitely* below that, but for some reason the draws to
@@ -41,7 +47,7 @@ export function cacheTextureGenerator(
   }
   cacheCtx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
 
-  return (idx: number, ctx: CanvasRenderingContext2D) => {
+  return (idx: number, ctx: CanvasRenderingContext2D, cellSize: number) => {
     idx = Math.floor(idx % numFrames);
     const x = idx % framesPerRow;
     const y = Math.floor(idx / framesPerRow);
@@ -62,8 +68,8 @@ export function cacheTextureGenerator(
       textureSize * staticDevicePixelRatio,
       0,
       0,
-      textureSize,
-      textureSize
+      cellSize,
+      cellSize
     );
   };
 }

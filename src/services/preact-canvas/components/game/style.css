@@ -4,13 +4,19 @@
 
 .toggle-label {
   position: fixed;
-  bottom: 22px;
+  bottom: 10px;
   left: 50%;
   white-space: nowrap;
   transform: translateX(-50%);
   mix-blend-mode: screen;
   z-index: 1;
   cursor: pointer;
+}
+
+@media (min-width: 320px) {
+  .toggle-label {
+    bottom: 22px;
+  }
 }
 
 .toggle {

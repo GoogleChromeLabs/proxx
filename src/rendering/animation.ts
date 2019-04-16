@@ -21,12 +21,11 @@ import {
   idleAnimationLength,
   turquoise
 } from "./constants.js";
-import { cacheTextureGenerator } from "./texture-cache.js";
+import { cacheTextureGenerator, TextureDrawer } from "./texture-cache.js";
 import {
   idleAnimationTextureGeneratorFactory,
   STATIC_TEXTURE,
-  staticTextureGeneratorFactory,
-  TextureGenerator
+  staticTextureGeneratorFactory
 } from "./texture-generators.js";
 
 // Enum of all the available animations
@@ -64,7 +63,12 @@ function processDoneCallback(animation: AnimationDesc) {
   delete animation.done;
 }
 
-export function idleAnimation({ ts, ctx, animation }: Context) {
+export function idleAnimation({
+  ts,
+  ctx,
+  animation,
+  width: cellSize
+}: Context) {
   const animationLength = 5000;
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
@@ -83,13 +87,18 @@ export function idleAnimation({ ts, ctx, animation }: Context) {
     fadedLinesAlpha,
     easeOutQuad(fadeInNormalized)
   );
-  idleAnimationTextureGenerator!(idx, ctx);
+  idleAnimationTextureDrawer!(idx, ctx, cellSize);
   ctx.globalAlpha = 1;
-  staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
+  staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, ctx, cellSize);
   ctx.restore();
 }
 
-export function flaggedAnimation({ ts, ctx, animation }: Context) {
+export function flaggedAnimation({
+  ts,
+  ctx,
+  animation,
+  width: cellSize
+}: Context) {
   const animationLength = idleAnimationLength;
   const normalized = ((ts - animation.start) / animationLength) % 1;
   const idx = Math.floor(normalized * 300);
@@ -108,9 +117,9 @@ export function flaggedAnimation({ ts, ctx, animation }: Context) {
     1,
     easeOutQuad(fadeOutNormalized)
   );
-  idleAnimationTextureGenerator!(idx, ctx);
+  idleAnimationTextureDrawer!(idx, ctx, cellSize);
   ctx.globalAlpha = 1;
-  staticTextureGenerator!(STATIC_TEXTURE.OUTLINE, ctx);
+  staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, ctx, cellSize);
   ctx.restore();
 }
 
@@ -166,13 +175,21 @@ export function highlightOutAnimation({
   ctx.restore();
 }
 
-export function numberAnimation(touching: number, { ctx }: Context) {
+export function numberAnimation(
+  touching: number,
+  { ctx, width: cellSize }: Context
+) {
   ctx.save();
-  staticTextureGenerator!(touching, ctx);
+  staticTextureDrawer!(touching, ctx, cellSize);
   ctx.restore();
 }
 
-export function flashInAnimation({ ts, ctx, animation }: Context) {
+export function flashInAnimation({
+  ts,
+  ctx,
+  animation,
+  width: cellSize
+}: Context) {
   const animationLength = flashInAnimationLength;
   let normalized = (ts - animation.start) / animationLength;
   if (normalized < 0) {
@@ -184,11 +201,16 @@ export function flashInAnimation({ ts, ctx, animation }: Context) {
   }
   ctx.save();
   ctx.globalAlpha = easeOutQuad(normalized);
-  staticTextureGenerator!(STATIC_TEXTURE.FLASH, ctx);
+  staticTextureDrawer!(STATIC_TEXTURE.FLASH, ctx, cellSize);
   ctx.restore();
 }
 
-export function flashOutAnimation({ ts, ctx, animation }: Context) {
+export function flashOutAnimation({
+  ts,
+  ctx,
+  animation,
+  width: cellSize
+}: Context) {
   const animationLength = flashOutAnimationLength;
   let normalized = (ts - animation.start) / animationLength;
   if (normalized < 0) {
@@ -200,15 +222,15 @@ export function flashOutAnimation({ ts, ctx, animation }: Context) {
   }
   ctx.save();
   ctx.globalAlpha = 1 - easeInOutCubic(normalized);
-  staticTextureGenerator!(STATIC_TEXTURE.FLASH, ctx);
+  staticTextureDrawer!(STATIC_TEXTURE.FLASH, ctx, cellSize);
   ctx.restore();
 }
 
-let idleAnimationTextureGenerator: TextureGenerator | null = null;
-let staticTextureGenerator: TextureGenerator | null = null;
+let idleAnimationTextureDrawer: TextureDrawer | null = null;
+let staticTextureDrawer: TextureDrawer | null = null;
 
 export function initTextureCaches(textureSize: number, cellPadding: number) {
-  if (idleAnimationTextureGenerator) {
+  if (idleAnimationTextureDrawer) {
     // If we have one, we have them all.
     return;
   }
@@ -219,13 +241,13 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
     cellPadding,
     idleAnimationNumFrames
   );
-  idleAnimationTextureGenerator = cacheTextureGenerator(
+  idleAnimationTextureDrawer = cacheTextureGenerator(
     uncachedIATG,
     textureSize,
     idleAnimationNumFrames
   );
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
-  staticTextureGenerator = cacheTextureGenerator(
+  staticTextureDrawer = cacheTextureGenerator(
     uncachedSTG,
     textureSize,
     STATIC_TEXTURE.LAST_MARKER
