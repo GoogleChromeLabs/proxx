@@ -22,8 +22,6 @@ async function startWorker(): Promise<Remote<RemoteServices>> {
   return wrap(worker);
 }
 
-self.devicePixelRatioCopy = devicePixelRatio;
-
 async function bootstrap() {
   const parsedURL = new URL(location.toString());
 

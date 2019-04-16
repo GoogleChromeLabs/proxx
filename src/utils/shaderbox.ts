@@ -42,7 +42,7 @@ export interface ShaderBoxOpts {
 }
 const defaultOpts: ShaderBoxOpts = {
   antialias: true,
-  scaling: self.devicePixelRatioCopy,
+  scaling: devicePixelRatio,
   timing: ts => ts,
   uniforms: []
 };

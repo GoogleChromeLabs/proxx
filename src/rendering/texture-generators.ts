@@ -11,9 +11,9 @@
  * limitations under the License.
  */
 
-import { roundedRectangle } from "./canvas-helper.js";
-
+import { staticDevicePixelRatio } from "../utils/static-dpr.js";
 import { deg2rad, remap, smoothpulse } from "./animation-helpers.js";
+import { roundedRectangle } from "./canvas-helper.js";
 
 import {
   blurFactor,
@@ -112,9 +112,9 @@ export function staticTextureGeneratorFactory(
   // be blitted to the output canvas twice — once with a blur,
   // and once without, yielding a glow.
   const cvs2 = document.createElement("canvas");
-  cvs2.width = cvs2.height = textureSize * self.devicePixelRatioCopy;
+  cvs2.width = cvs2.height = textureSize * staticDevicePixelRatio;
   const ctx2 = cvs2.getContext("2d")!;
-  ctx2.scale(self.devicePixelRatioCopy, self.devicePixelRatioCopy);
+  ctx2.scale(staticDevicePixelRatio, staticDevicePixelRatio);
 
   return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx2.clearRect(0, 0, textureSize, textureSize);
