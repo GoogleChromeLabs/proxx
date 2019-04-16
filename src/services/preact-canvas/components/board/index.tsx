@@ -390,15 +390,19 @@ export default class Board extends Component<Props> {
     x: number,
     y: number
   ) {
-    const cellState = !cell.revealed
-      ? cell.flagged
-        ? `flag at ${x + 1}, ${y + 1}`
-        : `hidden at ${x + 1}, ${y + 1}`
-      : cell.hasMine
-      ? `mine at ${x + 1}, ${y + 1}` // should it say black hole?
-      : cell.touchingMines === 0
-      ? `blank at ${x + 1}, ${y + 1}`
-      : `${cell.touchingMines} at ${x + 1}, ${y + 1}`;
+    let cellState;
+
+    if (!cell.revealed) {
+      cell.flagged
+        ? (cellState = `flag at ${x + 1}, ${y + 1}`)
+        : (cellState = `hidden at ${x + 1}, ${y + 1}`);
+    } else if (cell.hasMine) {
+      cellState = `mine at ${x + 1}, ${y + 1}`; // should it say black hole?
+    } else if (cell.touchingMines === 0) {
+      cellState = `blank at ${x + 1}, ${y + 1}`;
+    } else {
+      cellState = `${cell.touchingMines} at ${x + 1}, ${y + 1}`;
+    }
 
     btn.setAttribute("aria-label", cellState);
     this.additionalButtonData.get(btn)![2] = cell;
