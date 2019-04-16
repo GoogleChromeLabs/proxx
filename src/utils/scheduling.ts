@@ -16,3 +16,19 @@ export function nextEvent(ev: EventTarget, evt: string): Promise<Event> {
     ev.addEventListener(evt, resolve, { once: true })
   );
 }
+
+const { port1, port2 } = new MessageChannel();
+port2.start();
+export function task() {
+  return new Promise(resolve => {
+    const uid = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    port2.addEventListener("message", function f(ev) {
+      if (ev.data !== uid) {
+        return;
+      }
+      port2.removeEventListener("message", f);
+      resolve();
+    });
+    port1.postMessage(uid);
+  });
+}
