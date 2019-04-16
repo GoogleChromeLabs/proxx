@@ -27,6 +27,7 @@ import {
   numberAnimation
 } from "../../../../rendering/animation.js";
 import { bind } from "../../../../utils/bind.js";
+import { staticDevicePixelRatio } from "../../../../utils/static-dpr.js";
 import { GameChangeCallback } from "../../index.js";
 
 import { rippleSpeed } from "src/rendering/constants.js";
@@ -307,10 +308,10 @@ export default class Board extends Component<Props> {
   private canvasInit() {
     this.canvasRect = this.canvas!.getBoundingClientRect();
     this.queryFirstCellRect();
-    this.canvas!.width = this.canvasRect.width * devicePixelRatio;
-    this.canvas!.height = this.canvasRect.height * devicePixelRatio;
+    this.canvas!.width = this.canvasRect.width * staticDevicePixelRatio;
+    this.canvas!.height = this.canvasRect.height * staticDevicePixelRatio;
     this.ctx = this.canvas!.getContext("2d")!;
-    this.ctx.scale(devicePixelRatio, devicePixelRatio);
+    this.ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
 
     if (this.renderLoopRunning) {
       return;
