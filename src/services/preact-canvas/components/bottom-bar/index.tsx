@@ -12,17 +12,17 @@
  */
 import { Component, h } from "preact";
 import { Fullscreen } from "../icons";
-import { fullscreen, settings } from "./style.css";
+import { bottomBar, fullscreen } from "./style.css";
 
 export interface Props {
   onFullscreenClick: () => void;
 }
 export interface State {}
 
-export default class Settings extends Component<Props, State> {
+export default class BottomBar extends Component<Props, State> {
   render({ onFullscreenClick }: Props) {
     return (
-      <div class={settings}>
+      <div class={bottomBar}>
         <button class={fullscreen} onClick={onFullscreenClick}>
           <Fullscreen />
         </button>

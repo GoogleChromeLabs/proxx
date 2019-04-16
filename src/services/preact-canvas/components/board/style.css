@@ -8,8 +8,7 @@
   display: inline-block;
   opacity: 0;
   margin: auto;
-  padding: 20px;
-  padding-bottom: 70px;
+  padding: 70px 20px;
 }
 
 .game-row {

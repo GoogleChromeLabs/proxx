@@ -1,0 +1,62 @@
+.top-bar {
+  display: flex;
+  margin: 20px;
+  margin-bottom: 0;
+  padding: 0 0 10px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
+.top-bar::before {
+  content: '';
+  height: 1px;
+  transform-origin: 0 0;
+  transform: scaleY(0.5);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+}
+
+.squares-left {
+  flex: 1;
+  order: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.title {
+  flex: 2;
+  order: 2;
+  text-align: center;
+  font-size: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.time {
+  flex: 1;
+  order: 3;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.time-icon,
+.square-icon {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+}
+
+.time-icon {
+  margin-left: 0.4em;
+}
+
+.square-icon {
+  margin-right: 0.4em;
+}

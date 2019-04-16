@@ -18,10 +18,10 @@ import { StateChange as GameStateChange } from "../../gamelogic";
 import { GameType } from "../state";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
+import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
 import Nebula from "./components/nebula/index.js";
-import Settings from "./components/settings";
 import { game as gameClassName, main } from "./style.css";
 
 interface Props {
@@ -66,6 +66,7 @@ class PreactService extends Component<Props, State> {
           loading={() => <div />}
           width={game.width}
           height={game.height}
+          toRevealTotal={game.toRevealTotal}
           gameChangeSubscribe={this._onGameChangeSubscribe}
           gameChangeUnsubscribe={this._onGameChangeUnsubscribe}
           stateService={stateService!}
@@ -79,7 +80,7 @@ class PreactService extends Component<Props, State> {
       <div class={gameClassName}>
         <Nebula dangerMode={game ? dangerMode : false} />
         {mainComponent}
-        <Settings onFullscreenClick={this._onFullscreenClick} />
+        <BottomBar onFullscreenClick={this._onFullscreenClick} />
       </div>
     );
   }

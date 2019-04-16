@@ -1,4 +1,4 @@
-.settings {
+.bottom-bar {
   display: flex;
   justify-content: flex-end;
   margin: 20px;
@@ -10,7 +10,7 @@
   bottom: 0;
 }
 
-.settings::before {
+.bottom-bar::before {
   content: '';
   height: 1px;
   transform-origin: 0 0;
@@ -19,7 +19,6 @@
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
   background: white;
 }
 
@@ -31,5 +30,5 @@
 }
 
 html:fullscreen .fullscreen {
-  display: none;
+  visibility: hidden;
 }
