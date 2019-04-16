@@ -25,13 +25,15 @@ import {
 
 // Using a sub class to avoid Preact diffing every second.
 class Time extends Component<{}, {}> {
-  private _start = Date.now();
+  private _start?: number;
   private _intervalId?: number;
 
   componentDidMount() {
+    this._start = Date.now();
+
     this._intervalId = setInterval(() => {
       requestAnimationFrame(() => {
-        const diff = Date.now() - this._start;
+        const diff = Date.now() - this._start!;
         const minutes = Math.floor(diff / (1000 * 60));
         const seconds = Math.floor((diff / 1000) % 60);
         const minStr = minutes < 10 ? "0" + minutes : "" + minutes;
