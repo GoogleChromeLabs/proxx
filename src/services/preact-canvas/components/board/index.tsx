@@ -350,8 +350,6 @@ export default class Board extends Component<Props> {
   }
 
   private animationsInit() {
-    // Assuming square field size
-    initTextureCaches(this.firstCellRect!.width, this.cellPadding);
     const startTime = performance.now();
     const rippleFactor =
       rippleSpeed * Math.max(this.props.width, this.props.height);
