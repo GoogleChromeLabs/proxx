@@ -18,4 +18,11 @@
 // for now that is implemented here is to take a copy of dPR at the start of the
 // game and ignore changes thereafter. In the future we can consider detecting
 // changes to dPR and regenerating the sprite sheets on the fly.
-export const staticDevicePixelRatio = devicePixelRatio;
+const parsedURL = new URL(location.toString());
+let staticDevicePixelRatio = devicePixelRatio;
+
+if (parsedURL.searchParams.has("force-dpr")) {
+  staticDevicePixelRatio = parseFloat(parsedURL.searchParams.get("force-dpr")!);
+}
+
+export { staticDevicePixelRatio };
