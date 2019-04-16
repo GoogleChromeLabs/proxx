@@ -27,15 +27,23 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  white-space: nowrap;
 }
 
 .title {
-  flex: 2;
+  display: none;
+  flex: 1;
   order: 2;
   text-align: center;
   font-size: inherit;
   margin: 0;
   padding: 0;
+}
+
+@media (min-width: 350px) {
+  .title {
+    display: block;
+  }
 }
 
 .time {
@@ -44,6 +52,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  white-space: nowrap;
 }
 
 .time-icon,
