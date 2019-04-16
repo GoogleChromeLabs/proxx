@@ -22,7 +22,7 @@
     "exclude": [
       "./**/node_modules/**",
       "entrypoint.hashmanifest.*",
-      "./**/style.css.d.ts"
+      "./**/*.css.d.ts"
     ]
   }
 }
