@@ -1,7 +1,7 @@
 .bottom-bar {
   display: flex;
   justify-content: flex-end;
-  margin: 20px;
+  margin: var(--side-margin);
   margin-top: 0;
   padding: 10px 0 0;
   position: fixed;
@@ -25,8 +25,8 @@
 .fullscreen {
   composes: unbutton from '../../utils.css';
   fill: #fff;
-  width: 24px;
-  height: 24px;
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 
 html:fullscreen .fullscreen {
