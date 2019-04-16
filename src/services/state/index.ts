@@ -24,6 +24,24 @@ export interface StateChange {
   gameStateChange?: GameStateChange;
 }
 
+interface StateChangeEventInit extends EventInit {
+  stateChange: StateChange;
+}
+
+interface StateChangeEvent extends Event {
+  stateChange: StateChange;
+}
+
+function StateChangeEventFactory(
+  typeArg: string,
+  eventInitDict: StateChangeEventInit
+) {
+  const evt = new Event(typeArg, eventInitDict) as StateChangeEvent;
+  evt.stateChange = eventInitDict.stateChange;
+  Object.setPrototypeOf(evt, Event.prototype);
+  return evt;
+}
+
 export default class StateService {
   private _eventTarget: EventTarget = new MessageChannel().port1;
   private _game?: MinesweeperGame;
@@ -52,7 +70,7 @@ export default class StateService {
 
   subscribe(callback: (state: StateChange) => void) {
     this._eventTarget.addEventListener("state-update", (event: Event) => {
-      callback((event as CustomEvent<StateChange>).detail);
+      callback((event as StateChangeEvent).stateChange);
     });
   }
 
@@ -83,9 +101,8 @@ export default class StateService {
 
   private _notify(stateChange: StateChange) {
     this._eventTarget.dispatchEvent(
-      new CustomEvent<StateChange>("state-update", {
-        detail: stateChange
-      })
+      // @ts-ignore
+      StateChangeEventFactory("state-update", { stateChange })
     );
   }
 }

@@ -14,11 +14,22 @@
 import workerURL from "chunk-name:./worker.js";
 import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
+import { nextEvent } from "./utils/next-event.js";
 import { RemoteServices } from "./worker.js";
 
 async function startWorker(): Promise<Remote<RemoteServices>> {
   const worker = new Worker(workerURL);
-  const { wrap } = await import("comlink/src/comlink.js");
+
+  const [{ wrap }] = await Promise.all([
+    import("comlink/src/comlink.js"),
+    nextEvent(worker, "message")
+  ]);
+  // iOS Safari seems to kill a worker that doesn’t receive
+  // messages after a while. So we prevent that by sending
+  // dummy keep-alive messages.
+  setInterval(() => {
+    worker.postMessage("");
+  }, 3000);
   return wrap(worker);
 }
 
