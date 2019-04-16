@@ -264,7 +264,7 @@ export async function lazyGenerateTextures() {
   cvs.width = cvs.height = 1;
   const ctx = cvs.getContext("2d")!;
   for (let i = 0; i < idleAnimationNumFrames; i++) {
-    idleAnimationTextureGenerator!(i, ctx);
+    idleAnimationTextureDrawer!(i, ctx, cellSize);
     await task();
   }
 }
