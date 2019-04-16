@@ -39,4 +39,14 @@
   flex: 1;
   order: 3;
   text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.time-icon {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+  margin-left: 0.4em;
 }

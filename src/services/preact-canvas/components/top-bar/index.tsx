@@ -11,7 +11,8 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { squaresLeft, time, title, topBar } from "./style.css";
+import { Timer } from "../icons";
+import { squaresLeft, time, timeIcon, title, topBar } from "./style.css";
 
 export interface Props {
   toRevealTotal: number;
@@ -28,7 +29,9 @@ export default class TopBar extends Component<Props, State> {
         <div class={squaresLeft}>
           {toReveal}/{toRevealTotal}
         </div>
-        <div class={time}>00:00</div>
+        <div class={time}>
+          00:00 <Timer class={timeIcon} />
+        </div>
       </div>
     );
   }

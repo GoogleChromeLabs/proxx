@@ -1,0 +1,21 @@
+.time-icon {
+  position: relative;
+}
+
+@keyframes time-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.time-icon::after {
+  content: "";
+  background: #fff;
+  height: 24%;
+  width: 8.6%;
+  position: absolute;
+  top: 28%;
+  left: 45.7%;
+  animation: time-spin 10s linear infinite;
+  transform-origin: 50% 72%;
+}
