@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 
+import { getCellSizes } from "src/utils/cell-sizing.js";
 import { task } from "src/utils/scheduling.js";
 import { easeInOutCubic, easeOutQuad, remap } from "./animation-helpers.js";
 import {
@@ -234,14 +235,7 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
 }
 
 export async function lazyGenerateTextures() {
-  const cellPadding = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue(
-      "--cell-padding"
-    )
-  );
-  const cellSize = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue("--cell-size")
-  );
+  const { cellPadding, cellSize } = getCellSizes();
   initTextureCaches(cellSize + 2 * cellPadding, cellPadding);
   await task();
   const cvs = document.createElement("canvas");

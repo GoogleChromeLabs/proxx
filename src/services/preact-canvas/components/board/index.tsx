@@ -31,6 +31,7 @@ import { staticDevicePixelRatio } from "../../../../utils/static-dpr.js";
 import { GameChangeCallback } from "../../index.js";
 
 import { rippleSpeed } from "src/rendering/constants.js";
+import { getCellSizes } from "src/utils/cell-sizing.js";
 import {
   board,
   button as buttonStyle,
@@ -99,11 +100,7 @@ export default class Board extends Component<Props> {
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
   private changeBuffer: GridChanges = [];
-  private cellPadding = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue(
-      "--cell-padding"
-    )
-  );
+  private cellPadding = getCellSizes().cellPadding;
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
