@@ -1,6 +1,8 @@
 html {
   /* Catch any browsers that still overscroll (eg Safari) */
   background-color: #000;
+  --cell-size: 40px;
+  --cell-padding: 5px;
 }
 
 body {

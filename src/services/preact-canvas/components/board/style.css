@@ -1,5 +1,4 @@
 .board {
-  --cell-size: 50px;
   height: 100%;
 }
 
@@ -19,7 +18,7 @@
   display: block;
   width: var(--cell-size);
   height: var(--cell-size);
-  padding: 0;
+  padding: var(--cell-padding);
   overflow: hidden;
   flex-shrink: 0;
 }
