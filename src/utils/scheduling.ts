@@ -21,7 +21,7 @@ const { port1, port2 } = new MessageChannel();
 port2.start();
 export function task() {
   return new Promise(resolve => {
-    const uid = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    const uid = Math.random();
     port2.addEventListener("message", function f(ev) {
       if (ev.data !== uid) {
         return;
