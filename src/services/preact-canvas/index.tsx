@@ -21,7 +21,6 @@ import localStateSubscribe from "../state/local-state-subscribe.js";
 import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
 import Intro from "./components/intro/index.js";
-import Nebula from "./components/nebula/index.js";
 import { game as gameClassName, main } from "./style.css";
 
 interface Props {
@@ -35,6 +34,11 @@ interface State {
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
+
+// tslint:disable-next-line:variable-name
+const Nebula = deferred(
+  import("./components/nebula/index.js").then(m => m.default)
+);
 
 // tslint:disable-next-line:variable-name
 const Game = deferred(
@@ -78,7 +82,10 @@ class PreactService extends Component<Props, State> {
 
     return (
       <div class={gameClassName}>
-        <Nebula dangerMode={game ? dangerMode : false} />
+        <Nebula
+          loading={() => <div />}
+          dangerMode={game ? dangerMode : false}
+        />
         {mainComponent}
         <BottomBar onFullscreenClick={this._onFullscreenClick} />
       </div>
