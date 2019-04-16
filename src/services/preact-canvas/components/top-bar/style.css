@@ -24,6 +24,9 @@
 .squares-left {
   flex: 1;
   order: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .title {
@@ -38,15 +41,22 @@
 .time {
   flex: 1;
   order: 3;
-  text-align: right;
   display: flex;
   justify-content: flex-end;
   align-items: center;
 }
 
-.time-icon {
+.time-icon,
+.square-icon {
   width: 24px;
   height: 24px;
   fill: #fff;
+}
+
+.time-icon {
   margin-left: 0.4em;
+}
+
+.square-icon {
+  margin-right: 0.4em;
 }

@@ -11,8 +11,15 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Timer } from "../icons";
-import { squaresLeft, time, timeIcon, title, topBar } from "./style.css";
+import { Square, Timer } from "../icons";
+import {
+  squareIcon,
+  squaresLeft,
+  time,
+  timeIcon,
+  title,
+  topBar
+} from "./style.css";
 
 // tslint:disable:max-classes-per-file
 
@@ -61,7 +68,7 @@ export default class TopBar extends Component<Props, State> {
       <div class={topBar}>
         <h1 class={title}>Graviton</h1>
         <div class={squaresLeft}>
-          {toReveal}/{toRevealTotal}
+          <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
         </div>
         <div class={time}>
           <Time /> <Timer class={timeIcon} />
