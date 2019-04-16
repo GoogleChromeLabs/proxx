@@ -14,6 +14,39 @@ import { Component, h } from "preact";
 import { Timer } from "../icons";
 import { squaresLeft, time, timeIcon, title, topBar } from "./style.css";
 
+// tslint:disable:max-classes-per-file
+
+// Using a sub class to avoid Preact diffing every second.
+class Time extends Component<{}, {}> {
+  private _start = Date.now();
+  private _intervalId?: number;
+
+  componentDidMount() {
+    this._intervalId = setInterval(() => {
+      requestAnimationFrame(() => {
+        const diff = Date.now() - this._start;
+        const minutes = Math.floor(diff / (1000 * 60));
+        const seconds = Math.floor((diff / 1000) % 60);
+        const minStr = minutes < 10 ? "0" + minutes : "" + minutes;
+        const secStr = seconds < 10 ? "0" + seconds : "" + seconds;
+        this.base!.textContent = `${minStr}:${secStr}`;
+      });
+    }, 1000);
+  }
+
+  shouldComponentUpdate() {
+    return false;
+  }
+
+  componentWillUnmount() {
+    clearInterval(this._intervalId);
+  }
+
+  render() {
+    return <div>00:00</div>;
+  }
+}
+
 export interface Props {
   toRevealTotal: number;
   toReveal: number;
@@ -21,6 +54,7 @@ export interface Props {
 
 export interface State {}
 
+// tslint:disable-next-line:max-classes-per-file
 export default class TopBar extends Component<Props, State> {
   render({ toReveal, toRevealTotal }: Props) {
     return (
@@ -30,7 +64,7 @@ export default class TopBar extends Component<Props, State> {
           {toReveal}/{toRevealTotal}
         </div>
         <div class={time}>
-          00:00 <Timer class={timeIcon} />
+          <Time /> <Timer class={timeIcon} />
         </div>
       </div>
     );
