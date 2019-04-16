@@ -132,6 +132,8 @@ export default class Board extends Component<Props> {
     const tableContainer = document.querySelector("." + containerStyle);
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
+    this.table.tabIndex = 1;
+    this.table.setAttribute("aria-label", `field of ${width} by ${height}`);
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.classList.add(gameRow);
