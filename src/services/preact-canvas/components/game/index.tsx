@@ -12,7 +12,6 @@
  */
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
-import { lazyGenerateTextures } from "src/rendering/animation";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
 import { GameChangeCallback } from "../..";
@@ -41,9 +40,6 @@ interface State {
 
 // tslint:disable-next-line:variable-name
 const End = deferred(import("../end/index.js").then(m => m.default));
-
-// The second this file is loaded, we start pregenerating our textures.
-lazyGenerateTextures();
 
 export default class Game extends Component<Props, State> {
   state: State;

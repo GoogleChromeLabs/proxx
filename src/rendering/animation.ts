@@ -11,8 +11,6 @@
  * limitations under the License.
  */
 
-import { getCellSizes } from "src/utils/cell-sizing.js";
-import { task } from "src/utils/scheduling.js";
 import { easeInOutCubic, easeOutQuad, remap } from "./animation-helpers.js";
 import {
   fadedLinesAlpha,
@@ -21,7 +19,6 @@ import {
   flashInAnimationLength,
   flashOutAnimationLength,
   idleAnimationLength,
-  idleAnimationNumFrames,
   turquoise
 } from "./constants.js";
 import { cacheTextureGenerator, TextureDrawer } from "./texture-cache.js";
@@ -238,6 +235,7 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
     return;
   }
 
+  const idleAnimationNumFrames = (idleAnimationLength * 60) / 1000;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
@@ -254,17 +252,4 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
     textureSize,
     STATIC_TEXTURE.LAST_MARKER
   );
-}
-
-export async function lazyGenerateTextures() {
-  const { cellPadding, cellSize } = getCellSizes();
-  initTextureCaches(cellSize + 2 * cellPadding, cellPadding);
-  await task();
-  const cvs = document.createElement("canvas");
-  cvs.width = cvs.height = 1;
-  const ctx = cvs.getContext("2d")!;
-  for (let i = 0; i < idleAnimationNumFrames; i++) {
-    idleAnimationTextureGenerator!(i, ctx);
-    await task();
-  }
 }
