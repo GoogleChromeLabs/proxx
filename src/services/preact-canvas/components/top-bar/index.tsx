@@ -11,21 +11,24 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Fullscreen } from "../icons";
-import { fullscreen, settings } from "./style.css";
+import { squaresLeft, time, title, topBar } from "./style.css";
 
 export interface Props {
-  onFullscreenClick: () => void;
+  toRevealTotal: number;
+  toReveal: number;
 }
+
 export interface State {}
 
-export default class Settings extends Component<Props, State> {
-  render({ onFullscreenClick }: Props) {
+export default class TopBar extends Component<Props, State> {
+  render({ toReveal, toRevealTotal }: Props) {
     return (
-      <div class={settings}>
-        <button class={fullscreen} onClick={onFullscreenClick}>
-          <Fullscreen />
-        </button>
+      <div class={topBar}>
+        <h1 class={title}>Graviton</h1>
+        <div class={squaresLeft}>
+          {toReveal}/{toRevealTotal}
+        </div>
+        <div class={time}>00:00</div>
       </div>
     );
   }

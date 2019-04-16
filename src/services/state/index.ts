@@ -17,6 +17,7 @@ import MinesweeperGame, {
 export interface GameType {
   width: number;
   height: number;
+  toRevealTotal: number;
 }
 
 export interface StateChange {
@@ -41,7 +42,7 @@ export default class StateService {
 
     if (gameActiveChange) {
       this._notify({
-        game: { width, height }
+        game: { width, height, toRevealTotal: this._game.toReveal }
       });
     }
 

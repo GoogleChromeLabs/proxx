@@ -19,6 +19,7 @@ import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
 import Board from "../board";
 import deferred from "../deferred";
+import TopBar from "../top-bar";
 import { checkbox, game as gameClass, toggle, toggleLabel } from "./style.css";
 
 export interface Props {
@@ -29,19 +30,29 @@ export interface Props {
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
   onDangerModeChange: (v: boolean) => void;
   dangerMode: boolean;
+  toRevealTotal: number;
 }
 
 interface State {
   playMode: PlayMode;
+  toReveal: number;
 }
+
+type AllOptional<T> = { [K in keyof T]?: T[K] };
 
 // tslint:disable-next-line:variable-name
 const End = deferred(import("../end/index.js").then(m => m.default));
 
 export default class Game extends Component<Props, State> {
-  state: State = {
-    playMode: PlayMode.Playing
-  };
+  state: State;
+
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      playMode: PlayMode.Playing,
+      toReveal: props.toRevealTotal
+    };
+  }
 
   render(
     {
@@ -49,12 +60,14 @@ export default class Game extends Component<Props, State> {
       width,
       height,
       gameChangeSubscribe,
-      gameChangeUnsubscribe
+      gameChangeUnsubscribe,
+      toRevealTotal
     }: Props,
-    { playMode }: State
+    { playMode, toReveal }: State
   ) {
     return (
       <div class={gameClass}>
+        <TopBar toReveal={toReveal} toRevealTotal={toRevealTotal} />
         {playMode === PlayMode.Won || playMode === PlayMode.Lost ? (
           <End
             loading={() => <div />}
@@ -102,11 +115,24 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onGameChange(gameChange: StateChange) {
+    const newState: AllOptional<State> = {};
+
     if (
       "playMode" in gameChange &&
       this.state.playMode !== gameChange.playMode
     ) {
-      this.setState({ playMode: gameChange.playMode! });
+      newState.playMode = gameChange.playMode;
+    }
+
+    if (
+      "toReveal" in gameChange &&
+      this.state.toReveal !== gameChange.toReveal
+    ) {
+      newState.toReveal = gameChange.toReveal;
+    }
+
+    if (Object.keys(newState).length) {
+      this.setState(newState as State);
     }
   }
 

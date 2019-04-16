@@ -35,6 +35,10 @@ export type ChangeCallback = (changes: StateChange) => void;
 const FLUSH_GRID_CHANGE_THRESHOLD = 10;
 
 export default class MinesweeperGame {
+  get toReveal() {
+    return this._toReveal;
+  }
+
   grid: Cell[][];
   private _playMode = PlayMode.Pending;
   private _toReveal = 0;
