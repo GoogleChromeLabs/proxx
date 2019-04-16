@@ -18,7 +18,7 @@ import loadz0r from "rollup-plugin-loadz0r";
 import dependencyGraph from "./dependency-graph-plugin.js";
 import chunkNamePlugin from "./chunk-name-plugin.js";
 import postcss from "rollup-plugin-postcss";
-import { string } from "rollup-plugin-string";
+import glsl from "./glsl-plugin.js";
 import cssModuleTypes from "./css-module-types.js";
 import assetPlugin from "./asset-plugin.js";
 import { readFileSync } from "fs";
@@ -60,9 +60,7 @@ export default {
       // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
       clean: true
     }),
-    string({
-      include: "**/*.glsl"
-    }),
+    glsl(),
     assetPlugin(),
     chunkNamePlugin(),
     nodeResolve(),
