@@ -77,6 +77,7 @@ class PreactService extends Component<Props, State> {
         />
       );
     } else {
+      console.log(game, "game");
       mainComponent = (
         <Game
           loading={() => <div />}
@@ -128,7 +129,32 @@ class PreactService extends Component<Props, State> {
     if (event.key === "Shift" || event.key === "*") {
       this._onDangerModeChange(!this.state.dangerMode);
     }
+
+    if (event.key === "#") {
+      console.log("#");
+    }
+
+    if (event.key === "ArrowRight" || event.key === "9") {
+      console.log("right");
+    }
+
+    if (event.key === "ArrowLeft" || event.key === "7") {
+      console.log("left");
+    }
+
+    if (event.key === "ArrowUp" || event.key === "5") {
+      console.log("up");
+    }
+
+    if (event.key === "ArrowDown" || event.key === "0") {
+      console.log("down");
+    }
   }
+
+  // @bind
+  // private _onFocusChange(id: boolean) {
+  //   this.setState({ dangerMode });
+  // }
 
   @bind
   private _onDangerModeChange(dangerMode: boolean) {
