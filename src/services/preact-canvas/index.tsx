@@ -104,14 +104,14 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift") {
+    if (event.key === "Shift" || event.key === "Control") {
       this._onDangerModeChange(!this.state.dangerMode);
     }
   }
 
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Shift") {
+    if (event.key === "Shift" || event.key === "Control") {
       this._onDangerModeChange(!this.state.dangerMode);
     }
   }
