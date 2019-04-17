@@ -29,8 +29,7 @@ import {
 import { bind } from "../../../../utils/bind";
 import { staticDevicePixelRatio } from "../../../../utils/static-dpr";
 import { GameChangeCallback } from "../../index";
-
-import { rippleSpeed } from "src/rendering/constants";
+import { focusRing, rippleSpeed } from "src/rendering/constants.js";
 import {
   board,
   button as buttonStyle,
@@ -191,7 +190,7 @@ export default class Board extends Component<Props, State> {
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
         this.additionalButtonData.set(button, [x, y, defaultCell, index]);
-        this.updateButton(button, defaultCell);
+        this.updateButton(button, defaultCell, x, y);
         this.buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
@@ -310,11 +309,13 @@ export default class Board extends Component<Props, State> {
       return;
     }
 
+    const isFocused = btn === document.activeElement ? true : false;
     const ctx = this.ctx!;
     const animationList = this.animationLists.get(btn);
     if (!animationList) {
       return;
     }
+
     for (const animation of animationList) {
       const context: Context = { ts, ctx, width, height, animation };
       ctx.save();
@@ -345,6 +346,12 @@ export default class Board extends Component<Props, State> {
           numberAnimation(cell.touchingMines, context);
           break;
       }
+
+      if (isFocused) {
+        ctx.strokeStyle = focusRing;
+        ctx.strokeRect(0, 0, width, height);
+      }
+
       ctx.restore();
     }
   }
