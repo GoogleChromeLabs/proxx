@@ -42,8 +42,12 @@ interface State {
 // tslint:disable-next-line:variable-name
 const End = deferred(import("../end/index.js").then(m => m.default));
 
-// The second this file is loaded, we start pregenerating our textures.
-lazyGenerateTextures();
+const parsedURL = new URL(location.toString());
+
+if (!parsedURL.searchParams.has("no-pregen")) {
+  // The second this file is loaded, we start pregenerating our textures.
+  lazyGenerateTextures();
+}
 
 export default class Game extends Component<Props, State> {
   state: State;

@@ -308,6 +308,8 @@ export default class Board extends Component<Props> {
   }
 
   private canvasInit() {
+    const { cellPadding, cellSize } = getCellSizes();
+    initTextureCaches(cellSize + 2 * cellPadding, cellPadding);
     this.canvasRect = this.canvas!.getBoundingClientRect();
     this.queryFirstCellRect();
     this.canvas!.width = this.canvasRect.width * staticDevicePixelRatio;
