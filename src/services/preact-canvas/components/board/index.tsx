@@ -158,7 +158,7 @@ export default class Board extends Component<Props> {
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
         this.additionalButtonData.set(button, [x, y, defaultCell]);
-        this.updateButton(button, defaultCell);
+        this.updateButton(button, defaultCell, x, y);
         this.buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
@@ -340,7 +340,7 @@ export default class Board extends Component<Props> {
     const slice = this.changeBuffer.splice(0, numConsume);
     for (const [x, y, cellProps] of slice) {
       const btn = this.buttons[y * width + x];
-      this.updateButton(btn, cellProps);
+      this.updateButton(btn, cellProps, x, y);
       this.cellsToRedraw.add(btn);
       this.updateAnimation(btn);
     }
@@ -402,14 +402,25 @@ export default class Board extends Component<Props> {
     this.props.onCellClick(cell, alt);
   }
 
-  private updateButton(btn: HTMLButtonElement, cell: Cell) {
-    const cellState = !cell.revealed
-      ? cell.flagged
-        ? "flagged"
-        : "unrevealed"
-      : cell.hasMine
-      ? "mine"
-      : `${cell.touchingMines}`;
+  private updateButton(
+    btn: HTMLButtonElement,
+    cell: Cell,
+    x: number,
+    y: number
+  ) {
+    let cellState;
+    const position = `${x + 1}, ${y + 1}`;
+    if (!cell.revealed) {
+      cellState = cell.flagged
+        ? `flag at ${position}`
+        : `hidden at ${position}`;
+    } else if (cell.hasMine) {
+      cellState = `mine at ${position}`; // should it say black hole?
+    } else if (cell.touchingMines === 0) {
+      cellState = `blank at ${position}`;
+    } else {
+      cellState = `${cell.touchingMines} at ${position}`;
+    }
 
     btn.setAttribute("aria-label", cellState);
     this.additionalButtonData.get(btn)![2] = cell;
