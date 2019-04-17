@@ -10,8 +10,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { task } from "../utils/scheduling";
 import { staticDevicePixelRatio } from "../utils/static-dpr.js";
 import { TextureGenerator } from "./texture-generators.js";
 
@@ -96,7 +94,7 @@ export async function cacheTextureGenerator(
     image.src = URL.createObjectURL(blob);
     await new Promise(r => (image.onload = r));
     caches[idx] = image;
-    await task();
+    await new Promise(r => setTimeout(r, 500));
   }
 
   return (
