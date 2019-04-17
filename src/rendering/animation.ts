@@ -233,26 +233,30 @@ export function flashOutAnimation({
 let idleAnimationTextureDrawer: TextureDrawer | null = null;
 let staticTextureDrawer: TextureDrawer | null = null;
 
-export function initTextureCaches(textureSize: number, cellPadding: number) {
+export async function initTextureCaches(
+  textureSize: number,
+  cellPadding: number
+) {
   if (idleAnimationTextureDrawer) {
     // If we have one, we have them all.
     return;
   }
 
-  const size = textureSize * staticDevicePixelRatio;
+  // const size = textureSize * staticDevicePixelRatio;
+  const size = 2048;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
     idleAnimationNumFrames
   );
-  idleAnimationTextureDrawer = cacheTextureGenerator(
+  idleAnimationTextureDrawer = await cacheTextureGenerator(
     uncachedIATG,
     textureSize,
     idleAnimationNumFrames,
     { maxWidth: size, maxHeight: size }
   );
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
-  staticTextureDrawer = cacheTextureGenerator(
+  staticTextureDrawer = await cacheTextureGenerator(
     uncachedSTG,
     textureSize,
     STATIC_TEXTURE.LAST_MARKER,
@@ -262,13 +266,5 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
 
 export async function lazyGenerateTextures() {
   const { cellPadding, cellSize } = getCellSizes();
-  initTextureCaches(cellSize + 2 * cellPadding, cellPadding);
-  await task();
-  const cvs = document.createElement("canvas");
-  cvs.width = cvs.height = 1;
-  const ctx = cvs.getContext("2d")!;
-  for (let i = 0; i < idleAnimationNumFrames; i++) {
-    idleAnimationTextureDrawer!(i, ctx, cellSize);
-    await task();
-  }
+  await initTextureCaches(cellSize + 2 * cellPadding, cellPadding);
 }

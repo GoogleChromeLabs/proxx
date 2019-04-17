@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 
+import { task } from "../utils/scheduling";
 import { staticDevicePixelRatio } from "../utils/static-dpr.js";
 import { TextureGenerator } from "./texture-generators.js";
 
@@ -37,12 +38,12 @@ const defaultSizeConstraints = {
 
 // Wraps an existing TextureGenerator and caches the generated
 // frames in a sprite.
-export function cacheTextureGenerator(
+export async function cacheTextureGenerator(
   f: TextureGenerator,
   textureSize: number,
   numFrames: number,
   constraints: Partial<SizeConstraints> = {}
-): TextureDrawer {
+): Promise<TextureDrawer> {
   const { maxWidth, maxHeight } = { ...defaultSizeConstraints, ...constraints };
   const maxFramesPerRow = Math.floor(
     maxWidth / (textureSize * staticDevicePixelRatio)
@@ -53,7 +54,9 @@ export function cacheTextureGenerator(
   const maxFramesPerSprite = maxFramesPerRow * maxRowsPerSprite;
   const numSprites = Math.ceil(numFrames / maxFramesPerSprite);
 
-  const caches = new Array(numSprites).fill(0).map((_, idx) => {
+  const caches: HTMLImageElement[] = [];
+
+  for (let idx = 0; idx < numSprites; idx++) {
     const framesLeftToCache = numFrames - idx * maxFramesPerSprite;
     const width =
       Math.min(maxFramesPerRow, framesLeftToCache) *
@@ -75,10 +78,26 @@ export function cacheTextureGenerator(
       throw Error("Could not instantiate 2D rendering context");
     }
     ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-    return { canvas, ctx };
-  });
 
-  const renderedTiles = new Set<number>();
+    for (let i = 0; i < framesLeftToCache && i < maxFramesPerSprite; i++) {
+      const frame = idx * maxFramesPerSprite + i;
+      const x = i % maxFramesPerRow;
+      const y = Math.floor(i / maxFramesPerRow);
+      const cacheX = x * textureSize;
+      const cacheY = y * textureSize;
+      ctx.save();
+      ctx.translate(cacheX, cacheY);
+      f(frame, ctx);
+      ctx.restore();
+    }
+
+    const blob = await new Promise<Blob | null>(r => canvas.toBlob(r));
+    const image = new Image();
+    image.src = URL.createObjectURL(blob);
+    await new Promise(r => (image.onload = r));
+    caches[idx] = image;
+    await task();
+  }
 
   return (
     idx: number,
@@ -91,18 +110,12 @@ export function cacheTextureGenerator(
     const x = idxInSprite % maxFramesPerRow;
     const y = Math.floor(idxInSprite / maxFramesPerRow);
 
-    const { canvas, ctx } = caches[sprite];
+    const img = caches[sprite];
     const cacheX = x * textureSize;
     const cacheY = y * textureSize;
-    if (!renderedTiles.has(idx)) {
-      ctx.save();
-      ctx.translate(cacheX, cacheY);
-      f(idx, ctx);
-      ctx.restore();
-      renderedTiles.add(idx);
-    }
+
     targetCtx.drawImage(
-      canvas,
+      img,
       cacheX * staticDevicePixelRatio,
       cacheY * staticDevicePixelRatio,
       textureSize * staticDevicePixelRatio,
