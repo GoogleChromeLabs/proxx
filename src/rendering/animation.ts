@@ -243,7 +243,7 @@ export async function initTextureCaches(
   }
 
   // const size = textureSize * staticDevicePixelRatio;
-  const size = 2048;
+  const size = 1024;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
