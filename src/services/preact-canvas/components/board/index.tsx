@@ -59,6 +59,11 @@ export interface Props {
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
 
+interface State {
+  focus: boolean;
+  focusPos: [number, number];
+}
+
 function distanceFromCenter(
   x: number,
   y: number,
@@ -85,7 +90,7 @@ function removeAnimations(
   return al.filter(a => !names.includes(a.name));
 }
 
-export default class Board extends Component<Props> {
+export default class Board extends Component<Props, State> {
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
@@ -96,11 +101,20 @@ export default class Board extends Component<Props> {
   private firstCellRect?: ClientRect | DOMRect;
   private additionalButtonData = new WeakMap<
     HTMLButtonElement,
-    [number, number, Cell]
+    [number, number, Cell, number]
+  >();
+  private buttonMap = new Map<
+    number,
+    HTMLButtonElement
   >();
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
   private changeBuffer: GridChanges = [];
+
+  state: State = {
+    focus: false,
+    focusPos: [0, 0]
+  };
 
   componentDidMount() {
     window.scrollTo(0, 0);
@@ -176,12 +190,14 @@ export default class Board extends Component<Props> {
       for (let col = 0; col < width; col++) {
         const y = row;
         const x = col;
+        const index = x + y * width;
         const td = document.createElement("td");
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.additionalButtonData.set(button, [x, y, defaultCell]);
-        this.updateButton(button, defaultCell, x, y);
+        this.additionalButtonData.set(button, [x, y, defaultCell, index]);
+        this.buttonMap.set(index, button);
+        this.updateButton(button, defaultCell);
         this.buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
@@ -412,24 +428,31 @@ export default class Board extends Component<Props> {
   }
 
   @bind
+  private moveFocus(event: KeyboardEvent, nextIndex: number){
+    const currentBtn = document.activeElement as HTMLButtonElement;
+    if(!currentBtn) return;
+    event.stopPropagation();
+    const [, , , i] = this.additionalButtonData.get(currentBtn)
+    const nextBtn = this.buttonMap.get(i as number + nextIndex)
+    nextBtn!.focus()
+  }
+
+  @bind
   private onKeyUp(event: KeyboardEvent) {
-    // if current focus is on the table, then
-    // event.stopPropagation() to move focus
-    // otherwise bubble up to top so that they can move focus to a cell
     if (event.key === "ArrowRight" || event.key === "9") {
-      console.log("right");
+      this.moveFocus(event, 1)
     }
 
     if (event.key === "ArrowLeft" || event.key === "7") {
-      console.log("left");
+      this.moveFocus(event, -1)
     }
 
     if (event.key === "ArrowUp" || event.key === "5") {
-      console.log("up");
+      this.moveFocus(event, -this.props.width)
     }
 
     if (event.key === "ArrowDown" || event.key === "0") {
-      console.log("down");
+      this.moveFocus(event, this.props.width)
     }
   }
 
@@ -453,7 +476,7 @@ export default class Board extends Component<Props> {
     event.preventDefault();
 
     const cell = this.additionalButtonData.get(button)!;
-    this.props.onCellClick(cell, alt);
+    this.props.onCellClick([cell[0], cell[1], cell[2]] , alt);
   }
 
   private updateButton(
