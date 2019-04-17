@@ -18,6 +18,7 @@ import { bind } from "src/utils/bind";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
+import initFocusHandling from "../../../../utils/focus-visible";
 import Board from "../board";
 import deferred from "../deferred";
 import TopBar from "../top-bar";
@@ -44,6 +45,8 @@ const End = deferred(import("../end/index.js").then(m => m.default));
 
 // The second this file is loaded, we start pregenerating our textures.
 lazyGenerateTextures();
+// …and activate focus handling
+initFocusHandling();
 
 export default class Game extends Component<Props, State> {
   state: State;
