@@ -38,6 +38,8 @@ export interface Props {
 interface State {
   playMode: PlayMode;
   toReveal: number;
+  startTime: number;
+  endTime: number;
 }
 
 // tslint:disable-next-line:variable-name
@@ -54,8 +56,10 @@ export default class Game extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      playMode: PlayMode.Playing,
-      toReveal: props.toRevealTotal
+      playMode: PlayMode.Pending,
+      toReveal: props.toRevealTotal,
+      startTime: 0,
+      endTime: 0
     };
   }
 
@@ -70,9 +74,15 @@ export default class Game extends Component<Props, State> {
     }: Props,
     { playMode, toReveal }: State
   ) {
+    const timerRunning = playMode === PlayMode.Playing;
+
     return (
       <div class={gameClass}>
-        <TopBar toReveal={toReveal} toRevealTotal={toRevealTotal} />
+        <TopBar
+          timerRunning={timerRunning}
+          toReveal={toReveal}
+          toRevealTotal={toRevealTotal}
+        />
         {playMode === PlayMode.Won || playMode === PlayMode.Lost ? (
           <End
             loading={() => <div />}
@@ -127,6 +137,12 @@ export default class Game extends Component<Props, State> {
       this.state.playMode !== gameChange.playMode
     ) {
       newState.playMode = gameChange.playMode;
+
+      if (gameChange.playMode! === PlayMode.Playing) {
+        newState.startTime = Date.now();
+      } else if (gameChange.playMode! === PlayMode.Won) {
+        newState.endTime = Date.now();
+      }
     }
 
     if (
