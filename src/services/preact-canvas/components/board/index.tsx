@@ -91,6 +91,10 @@ function removeAnimations(
 }
 
 export default class Board extends Component<Props, State> {
+  state: State = {
+    focus: false,
+    focusPos: [0, 0]
+  };
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
@@ -103,18 +107,9 @@ export default class Board extends Component<Props, State> {
     HTMLButtonElement,
     [number, number, Cell, number]
   >();
-  private buttonMap = new Map<
-    number,
-    HTMLButtonElement
-  >();
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
   private changeBuffer: GridChanges = [];
-
-  state: State = {
-    focus: false,
-    focusPos: [0, 0]
-  };
 
   componentDidMount() {
     window.scrollTo(0, 0);
@@ -196,7 +191,6 @@ export default class Board extends Component<Props, State> {
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
         this.additionalButtonData.set(button, [x, y, defaultCell, index]);
-        this.buttonMap.set(index, button);
         this.updateButton(button, defaultCell);
         this.buttons.push(button);
         td.appendChild(button);
@@ -428,31 +422,35 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private moveFocus(event: KeyboardEvent, nextIndex: number){
+  private moveFocus(event: KeyboardEvent, tick: number) {
     const currentBtn = document.activeElement as HTMLButtonElement;
-    if(!currentBtn) return;
+    if (!currentBtn) {
+      return;
+    }
     event.stopPropagation();
-    const [, , , i] = this.additionalButtonData.get(currentBtn)
-    const nextBtn = this.buttonMap.get(i as number + nextIndex)
-    nextBtn!.focus()
+    const i = this.additionalButtonData.get(currentBtn)![3] as number;
+    const nextIndex = i + tick;
+    const nextBtn = this.buttons[nextIndex];
+    nextBtn!.focus();
+    // draw something on the nextIndex!
   }
 
   @bind
   private onKeyUp(event: KeyboardEvent) {
     if (event.key === "ArrowRight" || event.key === "9") {
-      this.moveFocus(event, 1)
+      this.moveFocus(event, 1);
     }
 
     if (event.key === "ArrowLeft" || event.key === "7") {
-      this.moveFocus(event, -1)
+      this.moveFocus(event, -1);
     }
 
     if (event.key === "ArrowUp" || event.key === "5") {
-      this.moveFocus(event, -this.props.width)
+      this.moveFocus(event, -this.props.width);
     }
 
     if (event.key === "ArrowDown" || event.key === "0") {
-      this.moveFocus(event, this.props.width)
+      this.moveFocus(event, this.props.width);
     }
   }
 
@@ -475,8 +473,8 @@ export default class Board extends Component<Props, State> {
     }
     event.preventDefault();
 
-    const cell = this.additionalButtonData.get(button)!;
-    this.props.onCellClick([cell[0], cell[1], cell[2]] , alt);
+    const [x, y, cell] = this.additionalButtonData.get(button)!;
+    this.props.onCellClick([x, y, cell], alt);
   }
 
   private updateButton(
