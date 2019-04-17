@@ -1,11 +1,13 @@
 #version 100
-precision mediump float;
+precision highp float;
 
 varying vec2 uv;
 varying vec2 coords;
 varying vec2 iResolution2;
 
-// uniform float iTime;
+uniform vec2 frame;
+uniform float sprite_size;
+uniform float tile_size;
 // uniform vec2 gridSize;
 uniform sampler2D sprite;
 // uniform sampler2D state;
@@ -13,11 +15,15 @@ uniform sampler2D sprite;
 // uniform int frame;
 
 void main() {
-  // vec4 white = vec4(1.);
-  // vec4 black = vec4(vec3(0.), 1.);
-  // gl_FragColor = mix(black, white, step(.5, mod(coords.x + coords.y , 2.)/2.));
+  vec4 white = vec4(1.);
+  vec4 black = vec4(vec3(0.), 1.);
+  vec4 transparent = vec4(0.);
 
-  gl_FragColor = texture2D(sprite, uv);
+  vec2 normalized_uv = vec2(0., 1.) + vec2(1., -1.)*uv;
+  float f = texture2D(sprite, (frame + normalized_uv) * tile_size / sprite_size).r;
+
+  // gl_FragColor = texture2D(sprite, (normalized_uv) * (tile_size + vec2(0.)) / sprite_size);
+  gl_FragColor = mix(transparent, white, f);
 
   // vec4 black = vec4(vec3(.0), 1.);
   // vec4 white = vec4(1.);

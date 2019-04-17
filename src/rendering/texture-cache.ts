@@ -58,17 +58,8 @@ export async function cacheTextureGenerator(
 
   for (let spriteIndex = 0; spriteIndex < numSprites; spriteIndex++) {
     const framesLeftToCache = numFrames - spriteIndex * maxFramesPerSprite;
-    const width =
-      Math.min(maxFramesPerRow, framesLeftToCache) *
-      textureSize *
-      staticDevicePixelRatio;
-    const height =
-      Math.min(
-        maxRowsPerSprite,
-        Math.ceil(framesLeftToCache / maxFramesPerRow)
-      ) *
-      textureSize *
-      staticDevicePixelRatio;
+    const width = maxWidth;
+    const height = maxHeight;
 
     const canvas = document.createElement("canvas");
     canvas.width = width;

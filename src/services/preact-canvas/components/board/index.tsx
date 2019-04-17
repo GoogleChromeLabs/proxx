@@ -23,13 +23,20 @@ import {
   highlightInAnimation,
   highlightOutAnimation,
   idleAnimation,
+  idleSprites,
+  lazyGenerateTextures,
   numberAnimation
 } from "../../../../rendering/animation.js";
 import { bind } from "../../../../utils/bind.js";
 import { staticDevicePixelRatio } from "../../../../utils/static-dpr.js";
 import { GameChangeCallback } from "../../index.js";
 
-import { rippleSpeed } from "src/rendering/constants.js";
+import {
+  idleAnimationLength,
+  idleAnimationNumFrames,
+  rippleSpeed,
+  spriteSize
+} from "src/rendering/constants.js";
 import { getCellSizes } from "src/utils/cell-sizing.js";
 import ShaderBox from "src/utils/shaderbox.js";
 import fragmentShader from "./fragment.glsl";
@@ -311,15 +318,19 @@ export default class Board extends Component<Props> {
   }
 
   private generateGameFieldMesh() {
+    const { cellPadding, cellSize } = getCellSizes();
+    const tileSize = cellSize + 2 * cellPadding;
+
+    const gap = 0;
     const { width, height } = this.props;
     const vertices = new Array(width * height).fill(0).flatMap((_, idx) => {
       const x = idx % this.props.width;
       const y = Math.floor(idx / width);
       return generateCoords(
-        x * this.firstCellRect!.width,
-        y * this.firstCellRect!.height,
-        (x + 1) * this.firstCellRect!.width,
-        (y + 1) * this.firstCellRect!.height
+        x * (tileSize + gap),
+        y * (tileSize + gap),
+        x * (tileSize + gap) + tileSize,
+        y * (tileSize + gap) + tileSize
       );
     });
     return new Float32Array(vertices);
@@ -356,7 +367,7 @@ export default class Board extends Component<Props> {
     const mesh = this.generateGameFieldMesh();
     this.shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.canvas!,
-      uniforms: ["offset", "sprite"],
+      uniforms: ["offset", "sprite", "sprite_size", "tile_size", "frame"],
       scaling: staticDevicePixelRatio,
       mesh: [
         {
@@ -385,36 +396,38 @@ export default class Board extends Component<Props> {
         }
       ],
       indices: this.generateVertexIndices(),
-      clearColor: [0, 0.2, 0, 0.2]
+      clearColor: [0, 0, 0, 0]
     });
     this.shaderBox.setUniform2f("offset", [0, 0]);
     this.shaderBox.resize();
 
-    {
-      const cat = document.createElement("img");
-      cat.crossOrigin = "";
-      cat.src = "https://placekitten.com/g/200/200";
-      await new Promise(resolve => (cat.onload = resolve));
-      this.shaderBox.addTexture("cat1", cat);
-    }
-    {
-      const cat = document.createElement("img");
-      cat.crossOrigin = "";
-      cat.src = "https://placekitten.com/g/500/500";
-      await new Promise(resolve => (cat.onload = resolve));
-      this.shaderBox.addTexture("cat2", cat);
-    }
-    this.shaderBox.activateTexture("cat1", 1);
-    this.shaderBox.activateTexture("cat2", 2);
-    this.shaderBox.setUniform1i("sprite", 1);
+    await lazyGenerateTextures();
+    this.shaderBox.addTexture("idleSprite", idleSprites![0]);
+    this.shaderBox.activateTexture("idleSprite", 0);
+    this.shaderBox.setUniform1i("sprite", 0);
 
-    // this.ctx = this.canvas!.getContext("2d")!;
-    // this.ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
+    this.shaderBox!.setUniform1f("sprite_size", spriteSize);
+    this.shaderBox!.setUniform1f(
+      "frame_size",
+      this.firstCellRect!.width * staticDevicePixelRatio
+    );
+    const { cellPadding, cellSize } = getCellSizes();
+    const tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
+    this.shaderBox!.setUniform1f("tile_size", tileSize);
+
     const that = this;
     let lastTs = performance.now();
+    const framesPerAxis = Math.floor(spriteSize / tileSize);
     requestAnimationFrame(function f(ts) {
       that.consumeChangeBuffer(ts - lastTs);
       lastTs = ts;
+
+      const normalizedTime = (ts % idleAnimationLength) / idleAnimationLength;
+      const frame = Math.floor(normalizedTime * idleAnimationNumFrames);
+      const y = Math.floor(frame / framesPerAxis);
+      const x = frame % framesPerAxis;
+      // console.log(normalizedTime, frame, x, y);
+      that.shaderBox!.setUniform2f("frame", [x, y]);
 
       that.queryFirstCellRect();
       that.shaderBox!.setUniform2f("offset", [
@@ -422,7 +435,6 @@ export default class Board extends Component<Props> {
         that.firstCellRect!.top
       ]);
       that.shaderBox!.draw();
-      // that.renderCanvas(ts);
       if (that.renderLoopRunning) {
         requestAnimationFrame(f);
       }
