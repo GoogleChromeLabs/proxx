@@ -481,6 +481,7 @@ export default class Board extends Component<Props, State> {
       return;
     }
 
+    console.log('click!', cell)
     event.stopPropagation();
     this.buttons[cell[3]].click();
   }
