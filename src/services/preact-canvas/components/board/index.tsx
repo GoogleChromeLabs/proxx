@@ -391,17 +391,17 @@ export default class Board extends Component<Props> {
     y: number
   ) {
     let cellState;
-
+    const position = `${x + 1}, ${y + 1}`;
     if (!cell.revealed) {
       cell.flagged
-        ? (cellState = `flag at ${x + 1}, ${y + 1}`)
-        : (cellState = `hidden at ${x + 1}, ${y + 1}`);
+        ? (cellState = `flag at ${position}`)
+        : (cellState = `hidden at ${position}`);
     } else if (cell.hasMine) {
-      cellState = `mine at ${x + 1}, ${y + 1}`; // should it say black hole?
+      cellState = `mine at ${position}`; // should it say black hole?
     } else if (cell.touchingMines === 0) {
-      cellState = `blank at ${x + 1}, ${y + 1}`;
+      cellState = `blank at ${position}`;
     } else {
-      cellState = `${cell.touchingMines} at ${x + 1}, ${y + 1}`;
+      cellState = `${cell.touchingMines} at ${position}`;
     }
 
     btn.setAttribute("aria-label", cellState);
