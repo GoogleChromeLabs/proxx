@@ -481,7 +481,6 @@ export default class Board extends Component<Props, State> {
       return;
     }
 
-    console.log('click!', cell)
     event.stopPropagation();
     this.buttons[cell[3]].click();
   }
@@ -528,6 +527,7 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
 
     const [x, y, cell] = this.additionalButtonData.get(button)!;
+    console.log("click", [x, y, cell]);
     this.props.onCellClick([x, y, cell], alt);
   }
 
