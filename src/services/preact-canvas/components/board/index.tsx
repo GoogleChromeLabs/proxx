@@ -192,6 +192,7 @@ export default class Board extends Component<Props> {
     this.canvas.classList.add(canvasStyle);
     this.base!.appendChild(this.canvas);
     tableContainer!.appendChild(this.table);
+    this.table.addEventListener("keyup", this.onKeyUp);
     this.table.addEventListener("click", this.onClick);
     this.table.addEventListener("mouseup", this.onMouseUp);
     this.table.addEventListener("contextmenu", event => event.preventDefault());
@@ -408,6 +409,29 @@ export default class Board extends Component<Props> {
 
   private queryFirstCellRect() {
     this.firstCellRect = this.buttons[0].closest("td")!.getBoundingClientRect();
+  }
+
+  @bind
+  private onKeyUp(event: KeyboardEvent) {
+    if (event.key === "#") {
+      console.log("#");
+    }
+
+    if (event.key === "ArrowRight" || event.key === "9") {
+      console.log("right");
+    }
+
+    if (event.key === "ArrowLeft" || event.key === "7") {
+      console.log("left");
+    }
+
+    if (event.key === "ArrowUp" || event.key === "5") {
+      console.log("up");
+    }
+
+    if (event.key === "ArrowDown" || event.key === "0") {
+      console.log("down");
+    }
   }
 
   @bind
