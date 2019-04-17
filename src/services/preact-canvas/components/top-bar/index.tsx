@@ -23,12 +23,46 @@ import {
 
 // tslint:disable:max-classes-per-file
 
+interface TimeProps {
+  running: boolean;
+}
+
 // Using a sub class to avoid Preact diffing every second.
-class Time extends Component<{}, {}> {
+class Time extends Component<TimeProps, {}> {
   private _start?: number;
   private _intervalId?: number;
 
   componentDidMount() {
+    if (this.props.running) {
+      this._startTimer();
+    }
+  }
+
+  componentWillReceiveProps({ running }: TimeProps) {
+    if (running === this.props.running) {
+      return;
+    }
+
+    if (running) {
+      this._startTimer();
+    } else {
+      this._stopTimer();
+    }
+  }
+
+  shouldComponentUpdate() {
+    return false;
+  }
+
+  componentWillUnmount() {
+    this._stopTimer();
+  }
+
+  render() {
+    return <div>00:00</div>;
+  }
+
+  private _startTimer() {
     this._start = Date.now();
 
     this._intervalId = setInterval(() => {
@@ -43,29 +77,22 @@ class Time extends Component<{}, {}> {
     }, 1000);
   }
 
-  shouldComponentUpdate() {
-    return false;
-  }
-
-  componentWillUnmount() {
+  private _stopTimer() {
     clearInterval(this._intervalId);
-  }
-
-  render() {
-    return <div>00:00</div>;
   }
 }
 
 export interface Props {
   toRevealTotal: number;
   toReveal: number;
+  timerRunning: boolean;
 }
 
 export interface State {}
 
 // tslint:disable-next-line:max-classes-per-file
 export default class TopBar extends Component<Props, State> {
-  render({ toReveal, toRevealTotal }: Props) {
+  render({ toReveal, toRevealTotal, timerRunning }: Props) {
     return (
       <div class={topBar}>
         <h1 class={title}>Graviton</h1>
@@ -73,7 +100,7 @@ export default class TopBar extends Component<Props, State> {
           <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
         </div>
         <div class={time}>
-          <Time /> <Timer class={timeIcon} />
+          <Time running={timerRunning} /> <Timer class={timeIcon} />
         </div>
       </div>
     );
