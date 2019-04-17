@@ -154,6 +154,10 @@ class PreactService extends Component<Props, State> {
   }
 
   private async _init(props: Props) {
+    texturePromise.then(() => {
+      this.setState({ texturesReady: true });
+    });
+
     const stateService = await props.stateServicePromise;
     this.setState({ stateService });
 
@@ -167,9 +171,6 @@ class PreactService extends Component<Props, State> {
         }
       }
     });
-
-    await texturePromise;
-    this.setState({ texturesReady: true });
   }
 }
 
