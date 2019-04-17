@@ -393,9 +393,9 @@ export default class Board extends Component<Props> {
     let cellState;
     const position = `${x + 1}, ${y + 1}`;
     if (!cell.revealed) {
-      cell.flagged
-        ? (cellState = `flag at ${position}`)
-        : (cellState = `hidden at ${position}`);
+      cellState = cell.flagged
+        ? `flag at ${position}`
+        : `hidden at ${position}`;
     } else if (cell.hasMine) {
       cellState = `mine at ${position}`; // should it say black hole?
     } else if (cell.touchingMines === 0) {
