@@ -77,7 +77,6 @@ class PreactService extends Component<Props, State> {
         />
       );
     } else {
-      console.log(game, "game");
       mainComponent = (
         <Game
           loading={() => <div />}
