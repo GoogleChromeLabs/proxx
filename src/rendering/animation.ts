@@ -233,17 +233,11 @@ export function flashOutAnimation({
 let idleAnimationTextureDrawer: TextureDrawer | null = null;
 let staticTextureDrawer: TextureDrawer | null = null;
 
-export async function initTextureCaches(
-  textureSize: number,
-  cellPadding: number
-) {
-  if (idleAnimationTextureDrawer) {
-    // If we have one, we have them all.
-    return;
-  }
+export async function lazyGenerateTextures() {
+  const { cellPadding, cellSize } = getCellSizes();
+  const textureSize = cellSize + 2 * cellPadding;
 
-  // const size = textureSize * staticDevicePixelRatio;
-  const size = 1024;
+  const spriteSize = 2048;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
@@ -253,18 +247,13 @@ export async function initTextureCaches(
     uncachedIATG,
     textureSize,
     idleAnimationNumFrames,
-    { maxWidth: size, maxHeight: size }
+    { maxWidth: spriteSize, maxHeight: spriteSize }
   );
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
   staticTextureDrawer = await cacheTextureGenerator(
     uncachedSTG,
     textureSize,
     STATIC_TEXTURE.LAST_MARKER,
-    { maxWidth: size, maxHeight: size }
+    { maxWidth: spriteSize, maxHeight: spriteSize }
   );
-}
-
-export async function lazyGenerateTextures() {
-  const { cellPadding, cellSize } = getCellSizes();
-  await initTextureCaches(cellSize + 2 * cellPadding, cellPadding);
 }
