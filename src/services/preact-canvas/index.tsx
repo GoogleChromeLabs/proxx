@@ -31,6 +31,7 @@ interface State {
   game?: GameType;
   stateService?: Remote<StateService>;
   dangerMode: boolean;
+  texturesReady: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -45,9 +46,14 @@ const Game = deferred(
   import("./components/game/index.js").then(m => m.default)
 );
 
+const texturePromise = import("../../rendering/animation").then(m =>
+  m.lazyGenerateTextures()
+);
+
 class PreactService extends Component<Props, State> {
   state: State = {
-    dangerMode: false
+    dangerMode: false,
+    texturesReady: false
   };
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
@@ -57,12 +63,18 @@ class PreactService extends Component<Props, State> {
     this._init(props);
   }
 
-  render(_props: Props, { game, stateService, dangerMode }: State) {
+  render(
+    _props: Props,
+    { game, stateService, dangerMode, texturesReady }: State
+  ) {
     let mainComponent: VNode;
 
     if (!game) {
       mainComponent = (
-        <Intro onStartGame={this._onStartGame} spinner={!stateService} />
+        <Intro
+          onStartGame={this._onStartGame}
+          spinner={!stateService || !texturesReady}
+        />
       );
     } else {
       mainComponent = (
@@ -142,6 +154,10 @@ class PreactService extends Component<Props, State> {
   }
 
   private async _init(props: Props) {
+    texturePromise.then(() => {
+      this.setState({ texturesReady: true });
+    });
+
     const stateService = await props.stateServicePromise;
     this.setState({ stateService });
 

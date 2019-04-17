@@ -23,7 +23,6 @@ import {
   highlightInAnimation,
   highlightOutAnimation,
   idleAnimation,
-  initTextureCaches,
   numberAnimation
 } from "../../../../rendering/animation.js";
 import { bind } from "../../../../utils/bind.js";

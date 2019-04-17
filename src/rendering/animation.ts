@@ -13,6 +13,7 @@
 
 import { getCellSizes } from "src/utils/cell-sizing.js";
 import { task } from "src/utils/scheduling.js";
+import { staticDevicePixelRatio } from "src/utils/static-dpr.js";
 import { easeInOutCubic, easeOutQuad, remap } from "./animation-helpers.js";
 import {
   fadedLinesAlpha,
@@ -22,6 +23,7 @@ import {
   flashOutAnimationLength,
   idleAnimationLength,
   idleAnimationNumFrames,
+  spriteSize,
   turquoise
 } from "./constants.js";
 import { cacheTextureGenerator, TextureDrawer } from "./texture-cache.js";
@@ -232,39 +234,26 @@ export function flashOutAnimation({
 let idleAnimationTextureDrawer: TextureDrawer | null = null;
 let staticTextureDrawer: TextureDrawer | null = null;
 
-export function initTextureCaches(textureSize: number, cellPadding: number) {
-  if (idleAnimationTextureDrawer) {
-    // If we have one, we have them all.
-    return;
-  }
+export async function lazyGenerateTextures() {
+  const { cellPadding, cellSize } = getCellSizes();
+  const textureSize = cellSize + 2 * cellPadding;
 
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
     idleAnimationNumFrames
   );
-  idleAnimationTextureDrawer = cacheTextureGenerator(
+  idleAnimationTextureDrawer = await cacheTextureGenerator(
     uncachedIATG,
     textureSize,
-    idleAnimationNumFrames
+    idleAnimationNumFrames,
+    { maxWidth: spriteSize, maxHeight: spriteSize }
   );
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
-  staticTextureDrawer = cacheTextureGenerator(
+  staticTextureDrawer = await cacheTextureGenerator(
     uncachedSTG,
     textureSize,
-    STATIC_TEXTURE.LAST_MARKER
+    STATIC_TEXTURE.LAST_MARKER,
+    { maxWidth: spriteSize, maxHeight: spriteSize }
   );
-}
-
-export async function lazyGenerateTextures() {
-  const { cellPadding, cellSize } = getCellSizes();
-  initTextureCaches(cellSize + 2 * cellPadding, cellPadding);
-  await task();
-  const cvs = document.createElement("canvas");
-  cvs.width = cvs.height = 1;
-  const ctx = cvs.getContext("2d")!;
-  for (let i = 0; i < idleAnimationNumFrames; i++) {
-    idleAnimationTextureDrawer!(i, ctx, cellSize);
-    await task();
-  }
 }
