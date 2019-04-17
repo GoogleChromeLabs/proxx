@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-function setShader(
+export function setShader(
   gl: WebGLRenderingContext,
   program: WebGLProgram,
   type: number,
@@ -33,25 +33,55 @@ function setShader(
   gl.attachShader(program, shader);
 }
 
+type Color = [number, number, number, number];
+interface Mesh {
+  data: Float32Array;
+  dimensions: number;
+  name: string;
+}
+
 export interface ShaderBoxOpts {
   canvas?: HTMLCanvasElement;
   scaling: number;
   timing: (ts: number) => number;
   uniforms: string[];
   antialias: boolean;
+  mesh: Mesh[];
+  indices: number[];
+  clearColor: Color;
 }
+
 const defaultOpts: ShaderBoxOpts = {
   antialias: true,
   scaling: devicePixelRatio,
   timing: ts => ts,
-  uniforms: []
+  uniforms: [],
+  mesh: [
+    {
+      data: new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]),
+      dimensions: 2,
+      name: "pos"
+    }
+  ],
+  indices: [0, 1, 2, 2, 1, 3],
+  clearColor: [1, 0, 0, 1]
 };
+
+export interface AddTextureOpts {
+  interpolation: "LINEAR" | "NEAREST";
+}
+
+const defaultAddTextureOpts: AddTextureOpts = {
+  interpolation: "LINEAR"
+};
+
 export default class ShaderBox {
   readonly canvas: HTMLCanvasElement;
   private _gl: WebGLRenderingContext;
   private _opts: ShaderBoxOpts;
   private _uniformLocations = new Map<string, WebGLUniformLocation>();
   private _uniformValues = new Map<string, number[]>();
+  private _textures = new Map<string, WebGLTexture>();
 
   constructor(
     private _vertexShader: string,
@@ -113,24 +143,42 @@ export default class ShaderBox {
     }
     const vao = vaoExt.createVertexArrayOES();
     vaoExt.bindVertexArrayOES(vao);
-    const vbo = this._gl.createBuffer();
-    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, vbo);
+    for (const [idx, data] of this._opts.mesh.entries()) {
+      const vbo = this._gl.createBuffer();
+      this._gl.bindBuffer(this._gl.ARRAY_BUFFER, vbo);
+      this._gl.bufferData(
+        this._gl.ARRAY_BUFFER,
+        data.data,
+        this._gl.STATIC_DRAW
+      );
+      const loc = this._gl.getAttribLocation(program, data.name);
+      this._gl.vertexAttribPointer(
+        loc,
+        data.dimensions,
+        this._gl.FLOAT,
+        false,
+        0,
+        0
+      );
+      this._gl.enableVertexAttribArray(loc);
+    }
+
+    const idxVbo = this._gl.createBuffer();
+    this._gl.bindBuffer(this._gl.ELEMENT_ARRAY_BUFFER, idxVbo);
     this._gl.bufferData(
-      this._gl.ARRAY_BUFFER,
-      new Float32Array([-1, 1, -1, -1, 1, 1, 1, 1, -1, -1, 1, -1]),
+      this._gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(this._opts.indices),
       this._gl.STATIC_DRAW
     );
-    this._gl.vertexAttribPointer(0, 2, this._gl.FLOAT, false, 0, 0);
-    this._gl.enableVertexAttribArray(0);
 
-    this._gl.clearColor(0, 0, 0, 1);
+    this._gl.clearColor(...this._opts.clearColor);
   }
 
   resize() {
     const rect = this.canvas.getBoundingClientRect();
     this.canvas.width = rect.width * this._opts.scaling;
     this.canvas.height = rect.height * this._opts.scaling;
-    this.setUniform2f("iResolution", [this.canvas.width, this.canvas.height]);
+    this.setUniform2f("iResolution", [rect.width, rect.height]);
     this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
 
@@ -182,11 +230,67 @@ export default class ShaderBox {
   draw() {
     // tslint:disable-next-line:no-bitwise
     this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
-    this._gl.drawArrays(this._gl.TRIANGLES, 0, 6);
+    this._gl.drawElements(
+      this._gl.TRIANGLES,
+      this._opts.indices.length,
+      this._gl.UNSIGNED_SHORT,
+      0
+    );
   }
 
   getUniformNames(): string[] {
     return [...this._uniformLocations.keys()];
+  }
+
+  addTexture(
+    name: string,
+    imageData: TexImageSource,
+    userOpts: Partial<AddTextureOpts> = {}
+  ) {
+    const opts = { ...defaultAddTextureOpts, ...userOpts } as AddTextureOpts;
+
+    if (!this._textures.has(name)) {
+      const texture = this._gl.createTexture();
+      if (!texture) {
+        throw Error("Could not create texture");
+      }
+      this._textures.set(name, texture);
+    }
+
+    const texture = this._textures.get(name)!;
+    this._gl.bindTexture(this._gl.TEXTURE_2D, texture);
+
+    // Disable mipmapping
+    this._gl.texParameteri(
+      this._gl.TEXTURE_2D,
+      this._gl.TEXTURE_MAG_FILTER,
+      (this as any)._gl[opts.interpolation]
+    );
+    this._gl.texParameteri(
+      this._gl.TEXTURE_2D,
+      this._gl.TEXTURE_MIN_FILTER,
+      (this as any)._gl[opts.interpolation]
+    );
+    // Repeat
+    this._gl.texParameteri(
+      this._gl.TEXTURE_2D,
+      this._gl.TEXTURE_WRAP_S,
+      this._gl.CLAMP_TO_EDGE
+    );
+    this._gl.texParameteri(
+      this._gl.TEXTURE_2D,
+      this._gl.TEXTURE_WRAP_T,
+      this._gl.CLAMP_TO_EDGE
+    );
+
+    this._gl.texImage2D(
+      this._gl.TEXTURE_2D,
+      0,
+      this._gl.RGBA,
+      this._gl.RGBA,
+      this._gl.UNSIGNED_BYTE,
+      imageData
+    );
   }
 
   private _assertUniformExists(name: string) {

@@ -31,6 +31,8 @@ import { GameChangeCallback } from "../../index.js";
 
 import { rippleSpeed } from "src/rendering/constants.js";
 import { getCellSizes } from "src/utils/cell-sizing.js";
+import ShaderBox from "src/utils/shaderbox.js";
+import fragmentShader from "./fragment.glsl";
 import {
   board,
   button as buttonStyle,
@@ -40,6 +42,7 @@ import {
   gameRow,
   gameTable
 } from "./style.css";
+import vertexShader from "./vertex.glsl";
 
 const defaultCell: Cell = {
   flagged: false,
@@ -100,6 +103,7 @@ export default class Board extends Component<Props> {
   private renderLoopRunning = false;
   private changeBuffer: GridChanges = [];
   private cellPadding = getCellSizes().cellPadding;
+  private shaderBox?: ShaderBox;
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
@@ -306,25 +310,100 @@ export default class Board extends Component<Props> {
     }
   }
 
+  private generateGameFieldMesh() {
+    const { width, height } = this.props;
+    const vertices = new Array(width * height).fill(0).flatMap((_, idx) => {
+      const x = idx % this.props.width;
+      const y = Math.floor(idx / width);
+      return generateCoords(
+        x * this.firstCellRect!.width,
+        y * this.firstCellRect!.height,
+        (x + 1) * this.firstCellRect!.width,
+        (y + 1) * this.firstCellRect!.height
+      );
+    });
+    return new Float32Array(vertices);
+  }
+
+  private generateVertexIndices() {
+    const { width, height } = this.props;
+    const indices = new Array(width * height).fill(0).flatMap((_, idx) => {
+      return [
+        idx * 4,
+        idx * 4 + 1,
+        idx * 4 + 2,
+        idx * 4 + 2,
+        idx * 4 + 1,
+        idx * 4 + 3
+      ];
+    });
+    return indices;
+  }
+
   private canvasInit() {
     this.canvasRect = this.canvas!.getBoundingClientRect();
     this.queryFirstCellRect();
     this.canvas!.width = this.canvasRect.width * staticDevicePixelRatio;
     this.canvas!.height = this.canvasRect.height * staticDevicePixelRatio;
-    this.ctx = this.canvas!.getContext("2d")!;
-    this.ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-
+    if (this.shaderBox) {
+      this.shaderBox.resize();
+    }
     if (this.renderLoopRunning) {
       return;
     }
 
+    const uvs = [0, 1, 0, 0, 1, 1, 1, 0];
+    const mesh = this.generateGameFieldMesh();
+    this.shaderBox = new ShaderBox(vertexShader, fragmentShader, {
+      canvas: this.canvas!,
+      uniforms: ["offset"],
+      scaling: staticDevicePixelRatio,
+      mesh: [
+        {
+          data: mesh,
+          dimensions: 2,
+          name: "pos"
+        },
+        {
+          data: mesh.map((_, idx) => uvs[idx % uvs.length]),
+          dimensions: 2,
+          name: "tile_uv"
+        },
+        {
+          data: mesh.map((_, idx) => {
+            const fieldIdx = idx / 8;
+            const x = fieldIdx % this.props.width;
+            const y = Math.floor(fieldIdx / this.props.width);
+            if (idx % 2 === 0) {
+              return x;
+            } else {
+              return y;
+            }
+          }),
+          dimensions: 2,
+          name: "tile_coords"
+        }
+      ],
+      indices: this.generateVertexIndices(),
+      clearColor: [0, 0.2, 0, 0.2]
+    });
+    this.shaderBox.setUniform2f("offset", [0, 0]);
+    this.shaderBox.resize();
+    // this.ctx = this.canvas!.getContext("2d")!;
+    // this.ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
     const that = this;
     let lastTs = performance.now();
     requestAnimationFrame(function f(ts) {
       that.consumeChangeBuffer(ts - lastTs);
       lastTs = ts;
 
-      that.renderCanvas(ts);
+      that.queryFirstCellRect();
+      that.shaderBox!.setUniform2f("offset", [
+        that.firstCellRect!.left,
+        that.firstCellRect!.top
+      ]);
+      that.shaderBox!.draw();
+      // that.renderCanvas(ts);
       if (that.renderLoopRunning) {
         requestAnimationFrame(f);
       }
@@ -424,4 +503,8 @@ export default class Board extends Component<Props> {
     btn.setAttribute("aria-label", cellState);
     this.additionalButtonData.get(btn)![2] = cell;
   }
+}
+
+function generateCoords(x1: number, y1: number, x2: number, y2: number) {
+  return [x1, y1, x1, y2, x2, y1, x2, y2];
 }

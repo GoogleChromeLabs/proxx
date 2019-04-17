@@ -5,7 +5,7 @@
 .game-table {
   position: relative;
   display: inline-block;
-  opacity: 0;
+  opacity: 0.3;
   margin: auto;
   padding: 43px var(--side-margin);
 }
