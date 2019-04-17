@@ -13,6 +13,7 @@
 
 import { getCellSizes } from "src/utils/cell-sizing.js";
 import { task } from "src/utils/scheduling.js";
+import { staticDevicePixelRatio } from "src/utils/static-dpr.js";
 import { easeInOutCubic, easeOutQuad, remap } from "./animation-helpers.js";
 import {
   fadedLinesAlpha,
@@ -238,7 +239,7 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
     return;
   }
 
-  const size = textureSize;
+  const size = textureSize * staticDevicePixelRatio;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
