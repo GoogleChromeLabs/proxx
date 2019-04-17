@@ -128,6 +128,9 @@ class PreactService extends Component<Props, State> {
     if (event.key === "Shift" || event.key === "*") {
       this._onDangerModeChange(!this.state.dangerMode);
     }
+    if (event.key === "#") {
+      // show setting page (TBD)
+    }
   }
 
   @bind
