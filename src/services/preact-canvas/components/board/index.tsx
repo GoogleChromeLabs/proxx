@@ -413,10 +413,9 @@ export default class Board extends Component<Props> {
 
   @bind
   private onKeyUp(event: KeyboardEvent) {
-    if (event.key === "#") {
-      console.log("#");
-    }
-
+    // if current focus is on the table, then
+    // event.stopPropagation() to move focus
+    // otherwise bubble up to top so that they can move focus to a cell
     if (event.key === "ArrowRight" || event.key === "9") {
       console.log("right");
     }

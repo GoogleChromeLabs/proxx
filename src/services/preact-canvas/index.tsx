@@ -131,6 +131,17 @@ class PreactService extends Component<Props, State> {
     if (event.key === "#") {
       // show setting page (TBD)
     }
+
+    // For T9 navigation
+    if (
+      event.key === "9" ||
+      event.key === "7" ||
+      event.key === "5" ||
+      event.key === "0"
+    ) {
+      // when this is called, it means table don't have focus.
+      // send signal down to Game to focus on a cell
+    }
   }
 
   @bind
