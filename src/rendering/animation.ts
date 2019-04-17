@@ -74,9 +74,9 @@ export function idleAnimation({
   animation,
   width: cellSize
 }: Context) {
-  const animationLength = 5000;
+  const animationLength = idleAnimationLength;
   const normalized = ((ts - animation.start) / animationLength) % 1;
-  const idx = Math.floor(normalized * 300);
+  const idx = Math.floor(normalized * idleAnimationNumFrames);
 
   let fadeInNormalized =
     (ts - (animation.fadeStart || 0)) / fadeInAnimationLength;
@@ -106,7 +106,7 @@ export function flaggedAnimation({
 }: Context) {
   const animationLength = idleAnimationLength;
   const normalized = ((ts - animation.start) / animationLength) % 1;
-  const idx = Math.floor(normalized * 300);
+  const idx = Math.floor(normalized * idleAnimationNumFrames);
 
   let fadeOutNormalized =
     (ts - (animation.fadeStart || 0)) / fadeOutAnimationLength;
