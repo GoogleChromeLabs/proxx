@@ -340,7 +340,7 @@ export default class Board extends Component<Props> {
     return indices;
   }
 
-  private canvasInit() {
+  private async canvasInit() {
     this.canvasRect = this.canvas!.getBoundingClientRect();
     this.queryFirstCellRect();
     this.canvas!.width = this.canvasRect.width * staticDevicePixelRatio;
@@ -356,7 +356,7 @@ export default class Board extends Component<Props> {
     const mesh = this.generateGameFieldMesh();
     this.shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.canvas!,
-      uniforms: ["offset"],
+      uniforms: ["offset", "sprite"],
       scaling: staticDevicePixelRatio,
       mesh: [
         {
@@ -389,6 +389,25 @@ export default class Board extends Component<Props> {
     });
     this.shaderBox.setUniform2f("offset", [0, 0]);
     this.shaderBox.resize();
+
+    {
+      const cat = document.createElement("img");
+      cat.crossOrigin = "";
+      cat.src = "https://placekitten.com/g/200/200";
+      await new Promise(resolve => (cat.onload = resolve));
+      this.shaderBox.addTexture("cat1", cat);
+    }
+    {
+      const cat = document.createElement("img");
+      cat.crossOrigin = "";
+      cat.src = "https://placekitten.com/g/500/500";
+      await new Promise(resolve => (cat.onload = resolve));
+      this.shaderBox.addTexture("cat2", cat);
+    }
+    this.shaderBox.activateTexture("cat1", 1);
+    this.shaderBox.activateTexture("cat2", 2);
+    this.shaderBox.setUniform1i("sprite", 1);
+
     // this.ctx = this.canvas!.getContext("2d")!;
     // this.ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
     const that = this;

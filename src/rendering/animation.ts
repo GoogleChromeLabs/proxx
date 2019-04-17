@@ -231,8 +231,10 @@ export function flashOutAnimation({
   ctx.restore();
 }
 
-let idleAnimationTextureDrawer: TextureDrawer | null = null;
-let staticTextureDrawer: TextureDrawer | null = null;
+export let idleAnimationTextureDrawer: TextureDrawer | null = null;
+export let idleSprites: HTMLImageElement[] | null = null;
+export let staticTextureDrawer: TextureDrawer | null = null;
+export let staticSprites: HTMLImageElement[] | null = null;
 
 export async function lazyGenerateTextures() {
   const { cellPadding, cellSize } = getCellSizes();
@@ -243,17 +245,26 @@ export async function lazyGenerateTextures() {
     cellPadding,
     idleAnimationNumFrames
   );
-  idleAnimationTextureDrawer = await cacheTextureGenerator(
+  ({
+    drawer: idleAnimationTextureDrawer,
+    caches: idleSprites
+  } = await cacheTextureGenerator(
     uncachedIATG,
     textureSize,
     idleAnimationNumFrames,
-    { maxWidth: spriteSize, maxHeight: spriteSize }
-  );
+    {
+      maxWidth: spriteSize,
+      maxHeight: spriteSize
+    }
+  ));
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
-  staticTextureDrawer = await cacheTextureGenerator(
+  ({
+    drawer: staticTextureDrawer,
+    caches: staticSprites
+  } = await cacheTextureGenerator(
     uncachedSTG,
     textureSize,
     STATIC_TEXTURE.LAST_MARKER,
     { maxWidth: spriteSize, maxHeight: spriteSize }
-  );
+  ));
 }

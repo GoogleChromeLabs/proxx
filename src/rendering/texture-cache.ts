@@ -43,7 +43,7 @@ export async function cacheTextureGenerator(
   textureSize: number,
   numFrames: number,
   constraints: Partial<SizeConstraints> = {}
-): Promise<TextureDrawer> {
+) {
   const { maxWidth, maxHeight } = { ...defaultSizeConstraints, ...constraints };
   const maxFramesPerRow = Math.floor(
     maxWidth / (textureSize * staticDevicePixelRatio)
@@ -111,7 +111,7 @@ export async function cacheTextureGenerator(
     await task();
   }
 
-  return (
+  const drawer = (
     idx: number,
     targetCtx: CanvasRenderingContext2D,
     cellSize: number
@@ -137,4 +137,5 @@ export async function cacheTextureGenerator(
       cellSize
     );
   };
+  return { drawer, caches };
 }

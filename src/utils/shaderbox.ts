@@ -195,6 +195,14 @@ export default class ShaderBox {
     return this._uniformValues.get(name);
   }
 
+  setUniform1i(name: string, val: number) {
+    if (!this.hasUniform(name)) {
+      return;
+    }
+    this._gl.uniform1i(this._getUniformLocation(name), val);
+    this._uniformValues.set(name, [val]);
+  }
+
   setUniform1f(name: string, val: number) {
     if (!this.hasUniform(name)) {
       return;
@@ -240,6 +248,15 @@ export default class ShaderBox {
 
   getUniformNames(): string[] {
     return [...this._uniformLocations.keys()];
+  }
+
+  activateTexture(name: string, unit: number) {
+    if (!this._textures.has(name)) {
+      throw Error("Unknown texture name");
+    }
+    const texture = this._textures.get(name)!;
+    this._gl.activeTexture((this as any)._gl[`TEXTURE${unit}`]);
+    this._gl.bindTexture(this._gl.TEXTURE_2D, texture);
   }
 
   addTexture(

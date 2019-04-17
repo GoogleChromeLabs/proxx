@@ -7,15 +7,18 @@ varying vec2 iResolution2;
 
 // uniform float iTime;
 // uniform vec2 gridSize;
-// uniform sampler2D sprite;
+uniform sampler2D sprite;
 // uniform sampler2D state;
 
 // uniform int frame;
 
 void main() {
-  vec4 white = vec4(1.);
-  vec4 black = vec4(vec3(0.), 1.);
-  gl_FragColor = mix(black, white, step(.5, mod(coords.x + coords.y , 2.)/2.));
+  // vec4 white = vec4(1.);
+  // vec4 black = vec4(vec3(0.), 1.);
+  // gl_FragColor = mix(black, white, step(.5, mod(coords.x + coords.y , 2.)/2.));
+
+  gl_FragColor = texture2D(sprite, uv);
+
   // vec4 black = vec4(vec3(.0), 1.);
   // vec4 white = vec4(1.);
   // vec4 transparent = vec4(0.);
