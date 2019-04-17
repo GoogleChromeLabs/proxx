@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+import { getFlag, hasFlag } from "./debugflags";
+
 // `devicePixelRatio` can change throughout the lifetime of a page. For example
 // when a browser window is moved from a low-DPI monitor to a high-DPI monitor.
 // Our rendering relies on dPR to generate the sprite sheets at the right
@@ -18,11 +20,10 @@
 // for now that is implemented here is to take a copy of dPR at the start of the
 // game and ignore changes thereafter. In the future we can consider detecting
 // changes to dPR and regenerating the sprite sheets on the fly.
-const parsedURL = new URL(location.toString());
 let staticDevicePixelRatio = devicePixelRatio;
 
-if (parsedURL.searchParams.has("force-dpr")) {
-  staticDevicePixelRatio = parseFloat(parsedURL.searchParams.get("force-dpr")!);
+if (hasFlag("force-dpr")) {
+  staticDevicePixelRatio = parseFloat(getFlag("force-dpr"));
 }
 
 export { staticDevicePixelRatio };

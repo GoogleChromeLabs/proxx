@@ -15,6 +15,7 @@ import { Component, h } from "preact";
 import { lazyGenerateTextures } from "src/rendering/animation";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
+import { hasFlag } from "src/utils/debugflags";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
@@ -42,9 +43,7 @@ interface State {
 // tslint:disable-next-line:variable-name
 const End = deferred(import("../end/index.js").then(m => m.default));
 
-const parsedURL = new URL(location.toString());
-
-if (!parsedURL.searchParams.has("no-pregen")) {
+if (!hasFlag("no-pregen")) {
   // The second this file is loaded, we start pregenerating our textures.
   lazyGenerateTextures();
 }

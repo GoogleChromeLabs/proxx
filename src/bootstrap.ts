@@ -14,6 +14,7 @@
 import workerURL from "chunk-name:./worker.js";
 import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
+import { hasFlag } from "./utils/debugflags.js";
 import { nextEvent } from "./utils/scheduling.js";
 import { RemoteServices } from "./worker.js";
 
@@ -34,15 +35,13 @@ async function startWorker(): Promise<Remote<RemoteServices>> {
 }
 
 async function bootstrap() {
-  const parsedURL = new URL(location.toString());
-
   let remoteServices: Promise<Remote<RemoteServices>>;
 
-  if (parsedURL.searchParams.has("debug")) {
+  if (hasFlag("debug")) {
     self.debug = import("./services/debug/index.js");
   }
 
-  if (parsedURL.searchParams.has("prerender")) {
+  if (hasFlag("prerender")) {
     // This will behave the same as if the worker is loading indefinitey. As a
     // result, our UI will stay in the “not ready to play”state for the
     // prerender.
@@ -55,7 +54,7 @@ async function bootstrap() {
 
   gameUI(remoteServices.then(remoteServices => remoteServices.stateService));
 
-  if (parsedURL.searchParams.has("square")) {
+  if (hasFlag("square")) {
     import("./utils/square-spinner.js");
   }
 }

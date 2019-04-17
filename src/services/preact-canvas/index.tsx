@@ -14,6 +14,7 @@
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
 import { bind } from "src/utils/bind.js";
+import { hasFlag } from "src/utils/debugflags";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { GameType } from "../state";
 import StateService from "../state/index.js";
@@ -37,7 +38,11 @@ export type GameChangeCallback = (stateChange: GameStateChange) => void;
 
 // tslint:disable-next-line:variable-name
 const Nebula = deferred(
-  import("./components/nebula/index.js").then(m => m.default)
+  hasFlag("no-nebula")
+    ? new Promise<typeof import("./components/nebula/index.js").default>(() => {
+        /* blank */
+      })
+    : import("./components/nebula/index.js").then(m => m.default)
 );
 
 // tslint:disable-next-line:variable-name
