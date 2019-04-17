@@ -348,6 +348,8 @@ export default class Board extends Component<Props, State> {
       }
 
       if (isFocused) {
+        // TODO: Design
+        // currently just a green focus ring
         ctx.strokeStyle = focusRing;
         ctx.strokeRect(0, 0, width, height);
       }
@@ -429,17 +431,32 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private moveFocus(event: KeyboardEvent, tick: number) {
+  private findFocusedBtn(event: KeyboardEvent) {
     const currentBtn = document.activeElement as HTMLButtonElement;
-    if (!currentBtn) {
-      return;
-    }
+    const cell = this.additionalButtonData.get(currentBtn);
+    if (!cell) { return false; }
+    return cell;
+  }
+
+  @bind
+  private moveFocus(event: KeyboardEvent, tick: number) {
+    const cell = this.findFocusedBtn(event);
+    if (!cell) { return; }
+
     event.stopPropagation();
-    const i = this.additionalButtonData.get(currentBtn)![3] as number;
-    const nextIndex = i + tick;
+    const nextIndex = cell[3] + tick;
     const nextBtn = this.buttons[nextIndex];
     nextBtn!.focus();
-    // draw something on the nextIndex!
+  }
+
+  @bind
+  private simulateClick(event: KeyboardEvent) {
+    const cell = this.findFocusedBtn(event);
+    if (!cell) { return; }
+
+    event.stopPropagation();
+    this.buttons[cell[3]].click();
+    console.log("clicked", this.buttons[cell[3]]);
   }
 
   @bind
@@ -458,6 +475,9 @@ export default class Board extends Component<Props, State> {
 
     if (event.key === "ArrowDown" || event.key === "0") {
       this.moveFocus(event, this.props.width);
+    }
+    if (event.key === "8") {
+      this.simulateClick(event);
     }
   }
 
