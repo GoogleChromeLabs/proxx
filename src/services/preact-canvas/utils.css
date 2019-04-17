@@ -6,7 +6,3 @@
   padding: 0;
   margin: 0;
 }
-
-.unbutton:focus {
-  outline: none;
-}

@@ -45,3 +45,7 @@ body {
 .relative {
   position: relative;
 }
+
+:global :focus:not(.focus-visible) {
+  outline: none;
+}
