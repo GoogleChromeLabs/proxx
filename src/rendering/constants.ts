@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+export const spriteSize = 2048;
 
 export const numInnerRects = 5;
 // 3s delay per 8 fields
@@ -36,7 +37,7 @@ export const fadeOutAnimationLength = 300;
 export const flashInAnimationLength = 100;
 export const flashOutAnimationLength = 700;
 
-// Texture constanst
+// Texture constants
 export const fadedLinesAlpha = 0.3;
 export const safetyBufferFactor = 0.97;
 export const thickLine = 20 / 650;

@@ -23,6 +23,7 @@ import {
   flashOutAnimationLength,
   idleAnimationLength,
   idleAnimationNumFrames,
+  spriteSize,
   turquoise
 } from "./constants.js";
 import { cacheTextureGenerator, TextureDrawer } from "./texture-cache.js";
@@ -237,7 +238,6 @@ export async function lazyGenerateTextures() {
   const { cellPadding, cellSize } = getCellSizes();
   const textureSize = cellSize + 2 * cellPadding;
 
-  const spriteSize = 2048;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
