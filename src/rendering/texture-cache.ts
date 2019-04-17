@@ -20,48 +20,89 @@ export type TextureDrawer = (
   cellSize: number
 ) => void;
 
-// Wraps an existing TextureGenerator and caches the generated
-// frames in a sprite.
-export function cacheTextureGenerator(
-  f: TextureGenerator,
-  textureSize: number,
-  numFrames: number
-): TextureDrawer {
-  const cacheCanvas = document.createElement("canvas");
+export interface SizeConstraints {
+  maxWidth: number;
+  maxHeight: number;
+}
+
+const defaultSizeConstraints = {
   // Allegedly, Chrome, Firefox and Safari have a maximum canvas size of 32k
   // pixels. We are *definitely* below that, but for some reason the draws to
   // the sprite sheet just seem to stop happening at higher indices when
   // tileSize is big (due to high dPR for exampe). The maxWidth of 8192 has been
   // determined by trial and error and seems to be safe.
-  const maxWidth = 8192;
-  const framesPerRow = Math.floor(
+  maxWidth: 8192,
+  maxHeight: 32768
+};
+
+// Wraps an existing TextureGenerator and caches the generated
+// frames in a sprite.
+export function cacheTextureGenerator(
+  f: TextureGenerator,
+  textureSize: number,
+  numFrames: number,
+  constraints: Partial<SizeConstraints> = {}
+): TextureDrawer {
+  const { maxWidth, maxHeight } = { ...defaultSizeConstraints, ...constraints };
+  const maxFramesPerRow = Math.floor(
     maxWidth / (textureSize * staticDevicePixelRatio)
   );
-  const rows = Math.ceil(numFrames / framesPerRow);
-  cacheCanvas.width = framesPerRow * textureSize * staticDevicePixelRatio;
-  cacheCanvas.height = rows * textureSize * staticDevicePixelRatio;
-  const renderedTiles = new Set<number>();
-  const cacheCtx = cacheCanvas.getContext("2d")!;
-  if (!cacheCtx) {
-    throw Error("Could not instantiate 2D rendering context");
-  }
-  cacheCtx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
+  const maxRowsPerSprite = Math.floor(
+    maxHeight / (textureSize * staticDevicePixelRatio)
+  );
+  const maxFramesPerSprite = maxFramesPerRow * maxRowsPerSprite;
+  const numSprites = Math.ceil(numFrames / maxFramesPerSprite);
 
-  return (idx: number, ctx: CanvasRenderingContext2D, cellSize: number) => {
+  const caches = new Array(numSprites).fill(0).map((_, idx) => {
+    const framesLeftToCache = numFrames - idx * maxFramesPerSprite;
+    const width =
+      Math.min(maxFramesPerRow, framesLeftToCache) *
+      textureSize *
+      staticDevicePixelRatio;
+    const height =
+      Math.min(
+        maxRowsPerSprite,
+        Math.ceil(framesLeftToCache / maxFramesPerRow)
+      ) *
+      textureSize *
+      staticDevicePixelRatio;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw Error("Could not instantiate 2D rendering context");
+    }
+    ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
+    return { canvas, ctx };
+  });
+
+  const renderedTiles = new Set<number>();
+
+  return (
+    idx: number,
+    targetCtx: CanvasRenderingContext2D,
+    cellSize: number
+  ) => {
     idx = Math.floor(idx % numFrames);
-    const x = idx % framesPerRow;
-    const y = Math.floor(idx / framesPerRow);
+    const sprite = Math.floor(idx / maxFramesPerSprite);
+    const idxInSprite = idx % maxFramesPerSprite;
+    const x = idxInSprite % maxFramesPerRow;
+    const y = Math.floor(idxInSprite / maxFramesPerRow);
+
+    const { canvas, ctx } = caches[sprite];
     const cacheX = x * textureSize;
     const cacheY = y * textureSize;
     if (!renderedTiles.has(idx)) {
-      cacheCtx.save();
-      cacheCtx.translate(cacheX, cacheY);
-      f(idx, cacheCtx);
-      cacheCtx.restore();
+      ctx.save();
+      ctx.translate(cacheX, cacheY);
+      f(idx, ctx);
+      ctx.restore();
       renderedTiles.add(idx);
     }
-    ctx.drawImage(
-      cacheCanvas,
+    targetCtx.drawImage(
+      canvas,
       cacheX * staticDevicePixelRatio,
       cacheY * staticDevicePixelRatio,
       textureSize * staticDevicePixelRatio,

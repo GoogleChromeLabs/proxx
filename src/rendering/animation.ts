@@ -238,6 +238,7 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
     return;
   }
 
+  const size = textureSize;
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,
     cellPadding,
@@ -246,13 +247,15 @@ export function initTextureCaches(textureSize: number, cellPadding: number) {
   idleAnimationTextureDrawer = cacheTextureGenerator(
     uncachedIATG,
     textureSize,
-    idleAnimationNumFrames
+    idleAnimationNumFrames,
+    { maxWidth: size, maxHeight: size }
   );
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
   staticTextureDrawer = cacheTextureGenerator(
     uncachedSTG,
     textureSize,
-    STATIC_TEXTURE.LAST_MARKER
+    STATIC_TEXTURE.LAST_MARKER,
+    { maxWidth: size, maxHeight: size }
   );
 }
 
