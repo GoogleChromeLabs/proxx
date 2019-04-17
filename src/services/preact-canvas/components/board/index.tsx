@@ -186,6 +186,9 @@ export default class Board extends Component<Props, State> {
         const x = col;
         const index = x + y * width;
         const td = document.createElement("td");
+        td.addEventListener("mouseover", event => {
+          this.moveFocusOnHover(event);
+        });
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
@@ -445,6 +448,20 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
+  private moveFocusOnHover(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const button = target.closest("button");
+    if (!button) {
+      return;
+    }
+    const cell = this.additionalButtonData.get(button);
+    if (!cell) {
+      return;
+    }
+    const nextBtn = this.buttons[cell[3]]!.focus();
+  }
+
+  @bind
   private moveFocus(event: KeyboardEvent, tick: number) {
     const cell = this.findFocusedBtn();
     if (!cell) {
@@ -466,7 +483,6 @@ export default class Board extends Component<Props, State> {
 
     event.stopPropagation();
     this.buttons[cell[3]].click();
-    console.log("clicked", this.buttons[cell[3]]);
   }
 
   @bind
