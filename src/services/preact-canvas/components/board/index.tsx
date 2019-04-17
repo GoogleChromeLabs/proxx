@@ -205,6 +205,10 @@ export default class Board extends Component<Props, State> {
     this.table.addEventListener("click", this.onClick);
     this.table.addEventListener("mouseup", this.onMouseUp);
     this.table.addEventListener("contextmenu", event => event.preventDefault());
+    this.table.addEventListener("mousedown", event => {
+      event.preventDefault();
+      this.simulateClick(event);
+    });
   }
 
   private updateAnimation(btn: HTMLButtonElement) {
@@ -431,17 +435,21 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private findFocusedBtn(event: KeyboardEvent) {
+  private findFocusedBtn() {
     const currentBtn = document.activeElement as HTMLButtonElement;
     const cell = this.additionalButtonData.get(currentBtn);
-    if (!cell) { return false; }
+    if (!cell) {
+      return false;
+    }
     return cell;
   }
 
   @bind
   private moveFocus(event: KeyboardEvent, tick: number) {
-    const cell = this.findFocusedBtn(event);
-    if (!cell) { return; }
+    const cell = this.findFocusedBtn();
+    if (!cell) {
+      return;
+    }
 
     event.stopPropagation();
     const nextIndex = cell[3] + tick;
@@ -450,9 +458,11 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private simulateClick(event: KeyboardEvent) {
-    const cell = this.findFocusedBtn(event);
-    if (!cell) { return; }
+  private simulateClick(event: KeyboardEvent | MouseEvent) {
+    const cell = this.findFocusedBtn();
+    if (!cell) {
+      return;
+    }
 
     event.stopPropagation();
     this.buttons[cell[3]].click();
