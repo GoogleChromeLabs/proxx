@@ -520,8 +520,7 @@ export default class Board extends Component<Props, State> {
     event: MouseEvent | TouchEvent | KeyboardEvent,
     alt = false
   ) {
-    const target = event.target as HTMLElement;
-    const button = target.closest("button");
+    const button = document.activeElement as HTMLButtonElement;
     if (!button) {
       return;
     }
