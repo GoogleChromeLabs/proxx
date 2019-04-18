@@ -419,17 +419,17 @@ export default class Board extends Component<Props> {
     await lazyGenerateTextures();
     // Due to the way internal WebGL state handling works, we
     // have to add all the textures first before we bind them.
+    this.shaderBox.addTexture(`staticSprite`, staticSprites![0]);
     for (let i = 0; i < idleSprites!.length; i++) {
       this.shaderBox.addTexture(`idleSprite${i}`, idleSprites![i]);
     }
-    this.shaderBox.addTexture(`staticSprite`, staticSprites![0]);
 
     for (let i = 0; i < idleSprites!.length; i++) {
-      this.shaderBox.activateTexture(`idleSprite${i}`, i);
-      this.shaderBox.setUniform1i(`idle_sprites[${i}]`, i);
+      this.shaderBox.activateTexture(`idleSprite${i}`, i + 1);
+      this.shaderBox.setUniform1i(`idle_sprites[${i}]`, i + 1);
     }
-    this.shaderBox.activateTexture(`staticSprite`, 4);
-    this.shaderBox.setUniform1i(`static_sprite`, 4);
+    this.shaderBox.activateTexture(`staticSprite`, 0);
+    this.shaderBox.setUniform1i(`static_sprite`, 0);
 
     const { cellPadding, cellSize } = getCellSizes();
     const tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
