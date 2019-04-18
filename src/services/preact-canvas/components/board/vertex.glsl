@@ -2,14 +2,14 @@
 precision highp float;
 attribute vec2 pos;
 attribute vec2 tile_uv;
-attribute vec3 static_tile_data;
-attribute vec4 dynamic_tile_data;
+attribute vec3 dynamic_tile_data_a;
+attribute vec4 dynamic_tile_data_b;
 
 varying vec2 uv;
 varying vec2 coords;
 varying vec2 iResolution2;
-varying vec3 static_tile_data2;
-varying vec4 dynamic_tile_data2;
+varying vec3 dynamic_tile_data_a2;
+varying vec4 dynamic_tile_data_b2;
 
 uniform vec2 offset;
 uniform vec2 iResolution;
@@ -23,6 +23,6 @@ void main() {
   gl_Position = vec4(screenPos * 2. - vec2(1.), 0.0, 1.0);
   uv = tile_uv;
   iResolution2 = iResolution;
-  static_tile_data2 = static_tile_data;
-  dynamic_tile_data2 = dynamic_tile_data;
+  dynamic_tile_data_a2 = dynamic_tile_data_a;
+  dynamic_tile_data_b2 = dynamic_tile_data_b;
 }

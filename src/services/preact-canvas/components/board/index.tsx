@@ -20,6 +20,14 @@ import {
   flaggedAnimation,
   flashInAnimation,
   flashOutAnimation,
+  GLContext,
+  glFlaggedAnimation,
+  glFlashInAnimation,
+  glFlashOutAnimation,
+  glHighlightInAnimation,
+  glHighlightOutAnimation,
+  glIdleAnimation,
+  glNumberAnimation,
   highlightInAnimation,
   highlightOutAnimation,
   idleAnimation,
@@ -61,7 +69,13 @@ const defaultCell: Cell = {
   touchingMines: 0
 };
 
-const enum DynamicTileData {
+const enum DynamicTileDataA {
+  TILE_X,
+  TILE_Y,
+  TOUCHING
+}
+
+const enum DynamicTileDataB {
   HIGHLIGHT_OPACITY,
   FLASH_OPACITY,
   BORDER_OPACITY,
@@ -120,8 +134,8 @@ export default class Board extends Component<Props> {
   private changeBuffer: GridChanges = [];
   private cellPadding = getCellSizes().cellPadding;
   private shaderBox?: ShaderBox;
-  private dynamicTileData?: Float32Array;
-  private staticTileData?: Float32Array;
+  private dynamicTileDataB?: Float32Array;
+  private dynamicTileDataA?: Float32Array;
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
@@ -261,12 +275,10 @@ export default class Board extends Component<Props> {
           this.animationLists.set(btn, animationList);
         }
       });
-      if (cell.touchingMines > 0) {
-        animationList.unshift({
-          name: AnimationName.NUMBER,
-          start: ts + 100
-        });
-      }
+      animationList.unshift({
+        name: AnimationName.NUMBER,
+        start: ts + 100
+      });
       animationList.push({
         name: AnimationName.FLASH_OUT,
         start: ts + 100
@@ -276,7 +288,7 @@ export default class Board extends Component<Props> {
     this.animationLists.set(btn, animationList);
   }
 
-  private drawCell(btn: HTMLButtonElement, ts: number) {
+  private updateTileData(btn: HTMLButtonElement, ts: number) {
     const { width, height, left, top } = this.firstCellRect!;
     const [bx, by, cell] = this.additionalButtonData.get(btn)!;
     const x = bx * width + left;
@@ -292,39 +304,68 @@ export default class Board extends Component<Props> {
       return;
     }
 
-    const ctx = this.ctx!;
     const animationList = this.animationLists.get(btn);
     if (!animationList) {
       return;
     }
     for (const animation of animationList) {
-      const context: Context = { ts, ctx, width, height, animation };
-      ctx.save();
-      ctx.translate(x, y);
+      const tileOffset = by * this.props.width + bx;
+      const floatOffset = tileOffset * 4 * 4;
+      const byteOffset = floatOffset * 4;
+      const dynamicTileDataA = new Float32Array(
+        this.dynamicTileDataA!.buffer,
+        byteOffset,
+        4
+      );
+      const dynamicTileDataB = new Float32Array(
+        this.dynamicTileDataB!.buffer,
+        byteOffset,
+        4
+      );
+      const context: GLContext = {
+        ts,
+        dynamicTileDataA,
+        dynamicTileDataB,
+        animation
+      };
       switch (animation.name) {
         case AnimationName.IDLE:
-          idleAnimation(context);
+          glIdleAnimation(context);
           break;
         case AnimationName.FLAGGED:
-          flaggedAnimation(context);
+          glFlaggedAnimation(context);
           break;
         case AnimationName.HIGHLIGHT_IN:
-          highlightInAnimation(context);
+          glHighlightInAnimation(context);
           break;
         case AnimationName.HIGHLIGHT_OUT:
-          highlightOutAnimation(context);
+          glHighlightOutAnimation(context);
           break;
         case AnimationName.FLASH_IN:
-          flashInAnimation(context);
+          glFlashInAnimation(context);
           break;
         case AnimationName.FLASH_OUT:
-          flashOutAnimation(context);
+          glFlashOutAnimation(context);
           break;
         case AnimationName.NUMBER:
-          numberAnimation(cell.touchingMines, context);
+          glNumberAnimation(cell.touchingMines, context);
           break;
       }
-      ctx.restore();
+      // Copy updated vertex data to the other 3 vertices
+      for (let i = 0; i < 4; i++) {
+        const otherDynamicTileDataA = new Float32Array(
+          this.dynamicTileDataA!.buffer,
+          byteOffset + 4 * 4 * i,
+          4
+        );
+        otherDynamicTileDataA.set(dynamicTileDataA);
+        const otherDynamicTileDataB = new Float32Array(
+          this.dynamicTileDataB!.buffer,
+          byteOffset + 4 * 4 * i,
+          4
+        );
+        otherDynamicTileDataB.set(dynamicTileDataB);
+      }
     }
   }
 
@@ -405,11 +446,12 @@ export default class Board extends Component<Props> {
           name: "tile_uv"
         },
         {
-          name: "static_tile_data",
-          dimensions: 3
+          name: "dynamic_tile_data_a",
+          dimensions: 4,
+          usage: "DYNAMIC_DRAW"
         },
         {
-          name: "dynamic_tile_data",
+          name: "dynamic_tile_data_b",
           dimensions: 4,
           usage: "DYNAMIC_DRAW"
         }
@@ -422,41 +464,39 @@ export default class Board extends Component<Props> {
       "tile_uv",
       mesh.map((_, idx) => uvs[idx % uvs.length])
     );
-    this.staticTileData = new Float32Array(
-      new Array(numTiles * 4 * 3).fill(0).map((_, idx) => {
-        const fieldIdx = Math.floor(idx / 12);
+    this.dynamicTileDataA = new Float32Array(
+      new Array(numTiles * 4 * 4).fill(0).map((_, idx) => {
+        const fieldIdx = Math.floor(idx / 16);
         const x = fieldIdx % this.props.width;
         const y = Math.floor(fieldIdx / this.props.width);
-        switch (idx % 3) {
+        switch (idx % 4) {
           case 0:
             return x;
           case 1:
             return y;
-          case 2:
-            return -1;
           default:
-            return -2;
+            return -1;
         }
       })
     );
-    this.shaderBox.updateVBO("static_tile_data", this.staticTileData);
-    this.dynamicTileData = new Float32Array(
+    this.shaderBox.updateVBO("dynamic_tile_data_a", this.dynamicTileDataA);
+    this.dynamicTileDataB = new Float32Array(
       new Array(numTiles * 4 * 4).fill(0).map((_, idx) => {
         switch (idx % 4) {
-          case DynamicTileData.BORDER_OPACITY:
+          case DynamicTileDataB.BORDER_OPACITY:
             return 1;
-          case DynamicTileData.BOXES_OPACITY:
+          case DynamicTileDataB.BOXES_OPACITY:
             return fadedLinesAlpha;
-          case DynamicTileData.FLASH_OPACITY:
+          case DynamicTileDataB.FLASH_OPACITY:
             return 0;
-          case DynamicTileData.HIGHLIGHT_OPACITY:
+          case DynamicTileDataB.HIGHLIGHT_OPACITY:
             return 0;
           default:
             return -1;
         }
       })
     );
-    this.shaderBox.updateVBO("dynamic_tile_data", this.dynamicTileData);
+    this.shaderBox.updateVBO("dynamic_tile_data_b", this.dynamicTileDataB);
     this.shaderBox.setUniform2f("offset", [0, 0]);
     this.shaderBox.resize();
 
@@ -489,14 +529,11 @@ export default class Board extends Component<Props> {
       that.consumeChangeBuffer(ts - lastTs);
       lastTs = ts;
 
-      const normalizedTime = (ts % idleAnimationLength) / idleAnimationLength;
-      let frame = Math.floor(normalizedTime * idleAnimationNumFrames);
-      const sprite = Math.floor(frame / framesPerSprite);
-      frame = frame % framesPerSprite;
-      const y = Math.floor(frame / framesPerAxis);
-      const x = frame % framesPerAxis;
-      that.shaderBox!.setUniform4f("frame", [x, y, 0, sprite]);
-      that.shaderBox!.updateVBO("dynamic_tile_data", that.dynamicTileData!);
+      for (const cell of that.buttons) {
+        that.updateTileData(cell, ts);
+      }
+      that.shaderBox!.updateVBO("dynamic_tile_data_a", that.dynamicTileDataA!);
+      that.shaderBox!.updateVBO("dynamic_tile_data_b", that.dynamicTileDataB!);
       that.queryFirstCellRect();
       that.shaderBox!.setUniform2f("offset", [
         that.firstCellRect!.left,
@@ -540,16 +577,6 @@ export default class Board extends Component<Props> {
         }
       ]);
     }
-  }
-
-  private renderCanvas(ts: number) {
-    this.ctx!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
-    this.queryFirstCellRect();
-
-    for (const cell of this.buttons) {
-      this.drawCell(cell, ts);
-    }
-    this.cellsToRedraw.clear();
   }
 
   private queryFirstCellRect() {

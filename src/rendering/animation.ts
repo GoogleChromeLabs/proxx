@@ -231,6 +231,143 @@ export function flashOutAnimation({
   ctx.restore();
 }
 
+export interface GLContext {
+  ts: number;
+  dynamicTileDataA: Float32Array;
+  dynamicTileDataB: Float32Array;
+  animation: AnimationDesc;
+}
+
+export function glIdleAnimation({
+  ts,
+  dynamicTileDataB,
+  animation
+}: GLContext) {
+  const animationLength = idleAnimationLength;
+  const normalized = ((ts - animation.start) / animationLength) % 1;
+
+  let fadeInNormalized =
+    (ts - (animation.fadeStart || 0)) / fadeInAnimationLength;
+  if (fadeInNormalized > 1) {
+    fadeInNormalized = 1;
+  }
+
+  dynamicTileDataB[3] = remap(
+    0,
+    1,
+    1,
+    fadedLinesAlpha,
+    easeOutQuad(fadeInNormalized)
+  );
+  dynamicTileDataB[2] = 1;
+}
+
+export function glFlaggedAnimation({
+  ts,
+  dynamicTileDataB: dynamicTileData,
+  animation
+}: GLContext) {
+  const animationLength = idleAnimationLength;
+  const normalized = ((ts - animation.start) / animationLength) % 1;
+  const idx = Math.floor(normalized * idleAnimationNumFrames);
+
+  let fadeOutNormalized =
+    (ts - (animation.fadeStart || 0)) / fadeOutAnimationLength;
+  if (fadeOutNormalized > 1) {
+    fadeOutNormalized = 1;
+  }
+
+  dynamicTileData[3] = remap(
+    0,
+    1,
+    fadedLinesAlpha,
+    1,
+    easeOutQuad(fadeOutNormalized)
+  );
+  dynamicTileData[2] = 1;
+}
+
+export function glHighlightInAnimation({
+  ts,
+  dynamicTileDataB: dynamicTileData,
+  animation
+}: GLContext) {
+  const animationLength = fadeInAnimationLength;
+  let normalized = (ts - animation.start) / animationLength;
+
+  if (normalized < 0) {
+    normalized = 0;
+  }
+  if (normalized > 1) {
+    processDoneCallback(animation);
+    normalized = 1;
+  }
+
+  dynamicTileData[0] = easeOutQuad(normalized);
+}
+
+export function glHighlightOutAnimation({
+  ts,
+  dynamicTileDataB: dynamicTileData,
+  animation
+}: GLContext) {
+  const animationLength = fadeOutAnimationLength;
+  let normalized = (ts - animation.start) / animationLength;
+
+  if (normalized < 0) {
+    normalized = 0;
+  }
+  if (normalized > 1) {
+    processDoneCallback(animation);
+    normalized = 1;
+  }
+
+  dynamicTileData[0] = 1 - easeOutQuad(normalized);
+}
+
+export function glNumberAnimation(
+  touching: number,
+  { dynamicTileDataA, dynamicTileDataB }: GLContext
+) {
+  dynamicTileDataA[2] = touching;
+  dynamicTileDataB[2] = 0;
+  dynamicTileDataB[3] = 0;
+}
+
+export function glFlashInAnimation({
+  ts,
+  dynamicTileDataB: dynamicTileData,
+  animation
+}: GLContext) {
+  const animationLength = flashInAnimationLength;
+  let normalized = (ts - animation.start) / animationLength;
+  if (normalized < 0) {
+    return;
+  }
+  if (normalized > 1) {
+    processDoneCallback(animation);
+    normalized = 1;
+  }
+  dynamicTileData[1] = easeOutQuad(normalized);
+}
+
+export function glFlashOutAnimation({
+  ts,
+  dynamicTileDataB: dynamicTileData,
+  animation
+}: GLContext) {
+  const animationLength = flashOutAnimationLength;
+  let normalized = (ts - animation.start) / animationLength;
+  if (normalized < 0) {
+    return;
+  }
+  if (normalized > 1) {
+    processDoneCallback(animation);
+    normalized = 1;
+  }
+  dynamicTileData[1] = 1 - easeInOutCubic(normalized);
+}
+
 export let idleAnimationTextureDrawer: TextureDrawer | null = null;
 export let idleSprites: HTMLImageElement[] | null = null;
 export let staticTextureDrawer: TextureDrawer | null = null;
