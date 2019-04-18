@@ -29,7 +29,8 @@ function collectStream(readableStream) {
 
 const defaultOpts = {
   include: "**/*.glsl",
-  exclude: []
+  exclude: [],
+  minify: true
 };
 
 export default function glslPlugin(opts) {
@@ -53,14 +54,17 @@ export default function glslPlugin(opts) {
           this.push(null);
         }
       });
-      const stream = readable
-        .pipe(parser())
-        .pipe(minify())
-        .pipe(deparser(false));
-      return collectStream(stream).then(chunks => {
-        const minified = chunks.map(c => c.toString()).join("");
-        return `export default ${JSON.stringify(minified)};`;
-      });
+      if (opts.minify) {
+        const stream = readable
+          .pipe(parser())
+          .pipe(minify())
+          .pipe(deparser(!opts.minify));
+        return collectStream(stream).then(chunks => {
+          const minified = chunks.map(c => c.toString()).join("");
+          return `export default ${JSON.stringify(minified)};`;
+        });
+      }
+      return `export default ${JSON.stringify(code.toString())};`;
     }
   };
 }
