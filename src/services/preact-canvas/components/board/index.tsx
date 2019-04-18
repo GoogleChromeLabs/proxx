@@ -206,6 +206,7 @@ export default class Board extends Component<Props, State> {
     tableContainer!.appendChild(this.table);
     this.table.addEventListener("keyup", this.onKeyUp);
     this.table.addEventListener("mouseup", this.onMouseUp);
+    this.table.addEventListener("mousedown", this.onMouseDown);
     this.table.addEventListener("contextmenu", event => event.preventDefault());
   }
 
@@ -496,12 +497,22 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private onMouseUp(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
     if (event.button !== 2) {
       this.simulateClick(event);
       return;
     }
-    event.preventDefault();
     this.simulateClick(event, true);
+  }
+
+  @bind
+  private onMouseDown(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
   }
 
   @bind
