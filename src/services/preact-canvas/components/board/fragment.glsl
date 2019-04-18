@@ -1,5 +1,5 @@
 #version 100
-precision highp float;
+precision mediump float;
 
 varying vec2 uv;
 varying vec4 dynamic_tile_data_a2;
