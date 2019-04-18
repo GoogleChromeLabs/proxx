@@ -139,7 +139,6 @@ export default class Board extends Component<Props, State> {
   }
 
   render() {
-    console.log(this.props.qvga);
     return (
       <div class={board}>
         <div class={containerStyle} />

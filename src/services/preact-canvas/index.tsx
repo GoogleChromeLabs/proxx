@@ -14,6 +14,10 @@
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
 import { bind } from "src/utils/bind.js";
+import {
+  staticScreenHeight,
+  staticScreenWidth
+} from "src/utils/static-screensize";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { GameType } from "../state";
 import StateService from "../state/index.js";
@@ -90,7 +94,11 @@ class PreactService extends Component<Props, State> {
           stateService={stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
-          qvga={Math.min(screen.width, screen.height) <= 240 ? true : false}
+          qvga={
+            Math.min(staticScreenWidth, staticScreenHeight) <= 240
+              ? true
+              : false
+          }
         />
       );
     }
