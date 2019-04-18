@@ -205,13 +205,8 @@ export default class Board extends Component<Props, State> {
     this.base!.appendChild(this.canvas);
     tableContainer!.appendChild(this.table);
     this.table.addEventListener("keyup", this.onKeyUp);
-    this.table.addEventListener("click", this.onClick);
     this.table.addEventListener("mouseup", this.onMouseUp);
     this.table.addEventListener("contextmenu", event => event.preventDefault());
-    this.table.addEventListener("mousedown", event => {
-      event.preventDefault();
-      this.simulateClick(event);
-    });
   }
 
   private updateAnimation(btn: HTMLButtonElement) {
@@ -475,18 +470,10 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private simulateClick(event: KeyboardEvent | MouseEvent) {
-    const cell = this.findFocusedBtn();
-    if (!cell) {
-      return;
-    }
-
-    event.stopPropagation();
-    this.buttons[cell[3]].click();
-  }
-
-  @bind
   private onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Enter") {
+      this.simulateClick(event);
+    }
     if (event.key === "ArrowRight" || event.key === "9") {
       this.moveFocus(event, 1);
     }
@@ -510,15 +497,18 @@ export default class Board extends Component<Props, State> {
   @bind
   private onMouseUp(event: MouseEvent) {
     if (event.button !== 2) {
+      this.simulateClick(event);
       return;
     }
-
     event.preventDefault();
-    this.onClick(event, true);
+    this.simulateClick(event, true);
   }
 
   @bind
-  private onClick(event: MouseEvent | TouchEvent, alt = false) {
+  private simulateClick(
+    event: MouseEvent | TouchEvent | KeyboardEvent,
+    alt = false
+  ) {
     const target = event.target as HTMLElement;
     const button = target.closest("button");
     if (!button) {
@@ -527,7 +517,7 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
 
     const [x, y, cell] = this.additionalButtonData.get(button)!;
-    console.log("click", [x, y, cell]);
+
     this.props.onCellClick([x, y, cell], alt);
   }
 
