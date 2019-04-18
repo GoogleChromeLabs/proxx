@@ -33,6 +33,7 @@ import { staticDevicePixelRatio } from "../../../../utils/static-dpr.js";
 import { GameChangeCallback } from "../../index.js";
 
 import {
+  fadedLinesAlpha,
   idleAnimationLength,
   idleAnimationNumFrames,
   rippleSpeed,
@@ -59,6 +60,13 @@ const defaultCell: Cell = {
   touchingFlags: 0,
   touchingMines: 0
 };
+
+const enum DynamicTileData {
+  HIGHLIGHT_OPACITY,
+  FLASH_OPACITY,
+  BORDER_OPACITY,
+  BOXES_OPACITY
+}
 
 export interface Props {
   onCellClick: (cell: [number, number, Cell], alt: boolean) => void;
@@ -112,6 +120,8 @@ export default class Board extends Component<Props> {
   private changeBuffer: GridChanges = [];
   private cellPadding = getCellSizes().cellPadding;
   private shaderBox?: ShaderBox;
+  private dynamicTileData?: Float32Array;
+  private staticTileData?: Float32Array;
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
@@ -397,6 +407,11 @@ export default class Board extends Component<Props> {
         {
           name: "static_tile_data",
           dimensions: 3
+        },
+        {
+          name: "dynamic_tile_data",
+          dimensions: 4,
+          usage: "DYNAMIC_DRAW"
         }
       ],
       indices: this.generateVertexIndices(),
@@ -407,26 +422,41 @@ export default class Board extends Component<Props> {
       "tile_uv",
       mesh.map((_, idx) => uvs[idx % uvs.length])
     );
-    this.shaderBox.updateVBO(
-      "static_tile_data",
-      new Float32Array(
-        new Array(numTiles * 4 * 3).fill(0).map((_, idx) => {
-          const fieldIdx = Math.floor(idx / 12);
-          const x = fieldIdx % this.props.width;
-          const y = Math.floor(fieldIdx / this.props.width);
-          switch (idx % 3) {
-            case 0:
-              return x;
-            case 1:
-              return y;
-            case 2:
-              return -1;
-            default:
-              return -2;
-          }
-        })
-      )
+    this.staticTileData = new Float32Array(
+      new Array(numTiles * 4 * 3).fill(0).map((_, idx) => {
+        const fieldIdx = Math.floor(idx / 12);
+        const x = fieldIdx % this.props.width;
+        const y = Math.floor(fieldIdx / this.props.width);
+        switch (idx % 3) {
+          case 0:
+            return x;
+          case 1:
+            return y;
+          case 2:
+            return -1;
+          default:
+            return -2;
+        }
+      })
     );
+    this.shaderBox.updateVBO("static_tile_data", this.staticTileData);
+    this.dynamicTileData = new Float32Array(
+      new Array(numTiles * 4 * 4).fill(0).map((_, idx) => {
+        switch (idx % 4) {
+          case DynamicTileData.BORDER_OPACITY:
+            return 1;
+          case DynamicTileData.BOXES_OPACITY:
+            return fadedLinesAlpha;
+          case DynamicTileData.FLASH_OPACITY:
+            return 0;
+          case DynamicTileData.HIGHLIGHT_OPACITY:
+            return 0;
+          default:
+            return -1;
+        }
+      })
+    );
+    this.shaderBox.updateVBO("dynamic_tile_data", this.dynamicTileData);
     this.shaderBox.setUniform2f("offset", [0, 0]);
     this.shaderBox.resize();
 
@@ -466,9 +496,7 @@ export default class Board extends Component<Props> {
       const y = Math.floor(frame / framesPerAxis);
       const x = frame % framesPerAxis;
       that.shaderBox!.setUniform4f("frame", [x, y, 0, sprite]);
-      // mesh[0] -= 1;
-      // mesh[1] -= 1;
-      // that.shaderBox!.updateVBO("pos", mesh);
+      that.shaderBox!.updateVBO("dynamic_tile_data", that.dynamicTileData!);
       that.queryFirstCellRect();
       that.shaderBox!.setUniform2f("offset", [
         that.firstCellRect!.left,

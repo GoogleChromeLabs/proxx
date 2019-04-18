@@ -38,6 +38,7 @@ interface Mesh {
   data?: ArrayBuffer;
   dimensions: number;
   name: string;
+  usage?: "STATIC_DRAW" | "DYNAMIC_DRAW";
 }
 
 export interface ShaderBoxOpts {
@@ -154,7 +155,7 @@ export default class ShaderBox {
       this._gl.bufferData(
         this._gl.ARRAY_BUFFER,
         data.data || new Float32Array([]),
-        this._gl.STATIC_DRAW
+        (this as any)._gl[data.usage || "STATIC_DRAW"]
       );
       const loc = this._gl.getAttribLocation(program, data.name);
       this._gl.vertexAttribPointer(
