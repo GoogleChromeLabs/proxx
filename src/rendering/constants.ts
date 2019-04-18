@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const spriteSize = 2048;
+export const spriteSize = 1024;
 
 export const numInnerRects = 5;
 // 3s delay per 8 fields

@@ -1,15 +1,15 @@
 #version 100
-precision highp float;
+precision mediump float;
 
 varying vec2 uv;
 varying vec2 coords;
 varying vec2 iResolution2;
 
-uniform vec2 frame;
+uniform vec4 frame;
 uniform float sprite_size;
 uniform float tile_size;
 // uniform vec2 gridSize;
-uniform sampler2D sprite;
+uniform sampler2D idle_sprites[4];
 // uniform sampler2D state;
 
 // uniform int frame;
@@ -20,7 +20,21 @@ void main() {
   vec4 transparent = vec4(0.);
 
   vec2 normalized_uv = vec2(0., 1.) + vec2(1., -1.)*uv;
-  float f = texture2D(sprite, (frame + normalized_uv) * tile_size / sprite_size).r;
+
+  float f;
+  vec2 tex_uv = (frame.xy + normalized_uv) * tile_size / sprite_size;
+  int sprite_idx = int(frame.w);
+  // WebGL 1 can access arrays with compile-time indices.
+  // So be it.
+  if(sprite_idx == 0) {
+    f = texture2D(idle_sprites[0], tex_uv).r;
+  } else if (sprite_idx == 1) {
+    f = texture2D(idle_sprites[1], tex_uv).r;
+  } else if (sprite_idx == 2) {
+    f = texture2D(idle_sprites[2], tex_uv).r;
+  } else if (sprite_idx == 3) {
+    f = texture2D(idle_sprites[3], tex_uv).r;
+  }
 
   // gl_FragColor = texture2D(sprite, (normalized_uv) * (tile_size + vec2(0.)) / sprite_size);
   gl_FragColor = mix(transparent, white, f);

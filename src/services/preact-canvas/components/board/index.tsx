@@ -367,7 +367,16 @@ export default class Board extends Component<Props> {
     const mesh = this.generateGameFieldMesh();
     this.shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.canvas!,
-      uniforms: ["offset", "sprite", "sprite_size", "tile_size", "frame"],
+      uniforms: [
+        "offset",
+        "idle_sprites[0]",
+        "idle_sprites[1]",
+        "idle_sprites[2]",
+        "idle_sprites[3]",
+        "sprite_size",
+        "tile_size",
+        "frame"
+      ],
       scaling: staticDevicePixelRatio,
       mesh: [
         {
@@ -402,32 +411,37 @@ export default class Board extends Component<Props> {
     this.shaderBox.resize();
 
     await lazyGenerateTextures();
-    this.shaderBox.addTexture("idleSprite", idleSprites![0]);
-    this.shaderBox.activateTexture("idleSprite", 0);
-    this.shaderBox.setUniform1i("sprite", 0);
+    // Due to the way internal WebGL state handling works, we
+    // have to do this in 2 separate for-loops.
+    for (let i = 0; i < idleSprites!.length; i++) {
+      this.shaderBox.addTexture(`idleSprite${i}`, idleSprites![i]);
+    }
+    for (let i = 0; i < idleSprites!.length; i++) {
+      this.shaderBox.activateTexture(`idleSprite${i}`, i);
+      this.shaderBox.setUniform1i(`idle_sprites[${i}]`, i);
+    }
 
-    this.shaderBox!.setUniform1f("sprite_size", spriteSize);
-    this.shaderBox!.setUniform1f(
-      "frame_size",
-      this.firstCellRect!.width * staticDevicePixelRatio
-    );
     const { cellPadding, cellSize } = getCellSizes();
     const tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
+    const framesPerAxis = Math.floor(spriteSize / tileSize);
+    const framesPerSprite = framesPerAxis * framesPerAxis;
+
+    this.shaderBox!.setUniform1f("sprite_size", spriteSize);
     this.shaderBox!.setUniform1f("tile_size", tileSize);
 
     const that = this;
     let lastTs = performance.now();
-    const framesPerAxis = Math.floor(spriteSize / tileSize);
     requestAnimationFrame(function f(ts) {
       that.consumeChangeBuffer(ts - lastTs);
       lastTs = ts;
 
       const normalizedTime = (ts % idleAnimationLength) / idleAnimationLength;
-      const frame = Math.floor(normalizedTime * idleAnimationNumFrames);
+      let frame = Math.floor(normalizedTime * idleAnimationNumFrames);
+      const sprite = Math.floor(frame / framesPerSprite);
+      frame = frame % framesPerSprite;
       const y = Math.floor(frame / framesPerAxis);
       const x = frame % framesPerAxis;
-      // console.log(normalizedTime, frame, x, y);
-      that.shaderBox!.setUniform2f("frame", [x, y]);
+      that.shaderBox!.setUniform4f("frame", [x, y, 0, sprite]);
 
       that.queryFirstCellRect();
       that.shaderBox!.setUniform2f("offset", [
