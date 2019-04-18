@@ -139,6 +139,7 @@ export default class Board extends Component<Props, State> {
   }
 
   render() {
+    console.log(this.props.qvga);
     return (
       <div class={board}>
         <div class={containerStyle} />
@@ -349,13 +350,14 @@ export default class Board extends Component<Props, State> {
           break;
       }
 
-      if (isFocused) {
-        if (this.props.qvga || this.state.keyNavigation) {
-          // TODO: Design
-          // currently just a green focus ring
-          ctx.strokeStyle = focusRing;
-          ctx.strokeRect(0, 0, width, height);
-        }
+      if (
+        (isFocused && this.props.qvga) ||
+        (isFocused && this.state.keyNavigation)
+      ) {
+        // TODO: Design
+        // currently just a green focus ring
+        ctx.strokeStyle = focusRing;
+        ctx.strokeRect(0, 0, width, height);
       }
 
       ctx.restore();
@@ -527,7 +529,6 @@ export default class Board extends Component<Props, State> {
     alt = false
   ) {
     const button = document.activeElement as HTMLButtonElement;
-    console.log(button);
     if (!button) {
       return;
     }
