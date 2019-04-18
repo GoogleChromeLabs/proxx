@@ -324,31 +324,35 @@ export default class Board extends Component<Props> {
 
     const gap = 0;
     const { width, height } = this.props;
-    const vertices = new Array(width * height).fill(0).flatMap((_, idx) => {
-      const x = idx % this.props.width;
-      const y = Math.floor(idx / width);
-      return generateCoords(
-        x * (tileSize + gap),
-        y * (tileSize + gap),
-        x * (tileSize + gap) + tileSize,
-        y * (tileSize + gap) + tileSize
-      );
-    });
+    const vertices = [];
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        vertices.push(
+          ...generateCoords(
+            x * (tileSize + gap),
+            y * (tileSize + gap),
+            x * (tileSize + gap) + tileSize,
+            y * (tileSize + gap) + tileSize
+          )
+        );
+      }
+    }
     return new Float32Array(vertices);
   }
 
   private generateVertexIndices() {
     const { width, height } = this.props;
-    const indices = new Array(width * height).fill(0).flatMap((_, idx) => {
-      return [
-        idx * 4,
-        idx * 4 + 1,
-        idx * 4 + 2,
-        idx * 4 + 2,
-        idx * 4 + 1,
-        idx * 4 + 3
-      ];
-    });
+    const indices = [];
+    for (let i = 0; i < width * height; i++) {
+      indices.push(
+        i * 4,
+        i * 4 + 1,
+        i * 4 + 2,
+        i * 4 + 2,
+        i * 4 + 1,
+        i * 4 + 3
+      );
+    }
     return indices;
   }
 
