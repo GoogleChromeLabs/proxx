@@ -243,7 +243,11 @@ export default class Board extends Component<Props> {
       const isHighlighted = animationList.some(
         a => a.name === AnimationName.HIGHLIGHT_IN
       );
-      if (cell.touchingFlags >= cell.touchingMines && !isHighlighted) {
+      if (
+        cell.touchingFlags >= cell.touchingMines &&
+        cell.touchingMines > 0 &&
+        !isHighlighted
+      ) {
         animationList.push({
           name: AnimationName.HIGHLIGHT_IN,
           start: ts

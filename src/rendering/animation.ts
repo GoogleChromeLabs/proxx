@@ -264,7 +264,7 @@ export function glIdleAnimation({
 
 export function glFlaggedAnimation({
   ts,
-  dynamicTileDataB: dynamicTileData,
+  dynamicTileDataB,
   animation
 }: GLContext) {
   const animationLength = idleAnimationLength;
@@ -277,19 +277,19 @@ export function glFlaggedAnimation({
     fadeOutNormalized = 1;
   }
 
-  dynamicTileData[3] = remap(
+  dynamicTileDataB[3] = remap(
     0,
     1,
     fadedLinesAlpha,
     1,
     easeOutQuad(fadeOutNormalized)
   );
-  dynamicTileData[2] = 1;
+  dynamicTileDataB[2] = 1;
 }
 
 export function glHighlightInAnimation({
   ts,
-  dynamicTileDataB: dynamicTileData,
+  dynamicTileDataB,
   animation
 }: GLContext) {
   const animationLength = fadeInAnimationLength;
@@ -303,12 +303,12 @@ export function glHighlightInAnimation({
     normalized = 1;
   }
 
-  dynamicTileData[0] = easeOutQuad(normalized);
+  dynamicTileDataB[0] = easeOutQuad(normalized);
 }
 
 export function glHighlightOutAnimation({
   ts,
-  dynamicTileDataB: dynamicTileData,
+  dynamicTileDataB,
   animation
 }: GLContext) {
   const animationLength = fadeOutAnimationLength;
@@ -322,7 +322,7 @@ export function glHighlightOutAnimation({
     normalized = 1;
   }
 
-  dynamicTileData[0] = 1 - easeOutQuad(normalized);
+  dynamicTileDataB[0] = 1 - easeOutQuad(normalized);
 }
 
 export function glNumberAnimation(
@@ -336,7 +336,7 @@ export function glNumberAnimation(
 
 export function glFlashInAnimation({
   ts,
-  dynamicTileDataB: dynamicTileData,
+  dynamicTileDataB,
   animation
 }: GLContext) {
   const animationLength = flashInAnimationLength;
@@ -348,12 +348,12 @@ export function glFlashInAnimation({
     processDoneCallback(animation);
     normalized = 1;
   }
-  dynamicTileData[1] = easeOutQuad(normalized);
+  dynamicTileDataB[1] = easeOutQuad(normalized);
 }
 
 export function glFlashOutAnimation({
   ts,
-  dynamicTileDataB: dynamicTileData,
+  dynamicTileDataB,
   animation
 }: GLContext) {
   const animationLength = flashOutAnimationLength;
@@ -365,7 +365,7 @@ export function glFlashOutAnimation({
     processDoneCallback(animation);
     normalized = 1;
   }
-  dynamicTileData[1] = 1 - easeInOutCubic(normalized);
+  dynamicTileDataB[1] = 1 - easeInOutCubic(normalized);
 }
 
 export let idleAnimationTextureDrawer: TextureDrawer | null = null;
