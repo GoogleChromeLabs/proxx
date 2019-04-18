@@ -2,7 +2,7 @@
 precision mediump float;
 
 varying vec2 uv;
-varying vec2 coords;
+varying vec3 static_tile_data2;
 varying vec2 iResolution2;
 
 uniform vec4 frame;

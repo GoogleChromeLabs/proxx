@@ -35,7 +35,7 @@ export function setShader(
 
 type Color = [number, number, number, number];
 interface Mesh {
-  data: Float32Array;
+  data?: ArrayBuffer;
   dimensions: number;
   name: string;
 }
@@ -82,6 +82,7 @@ export default class ShaderBox {
   private _uniformLocations = new Map<string, WebGLUniformLocation>();
   private _uniformValues = new Map<string, number[]>();
   private _textures = new Map<string, WebGLTexture>();
+  private _vbos = new Map<string, WebGLBuffer>();
 
   constructor(
     private _vertexShader: string,
@@ -145,10 +146,14 @@ export default class ShaderBox {
     vaoExt.bindVertexArrayOES(vao);
     for (const [idx, data] of this._opts.mesh.entries()) {
       const vbo = this._gl.createBuffer();
+      if (!vbo) {
+        throw Error("Could not create VBO");
+      }
+      this._vbos.set(data.name, vbo);
       this._gl.bindBuffer(this._gl.ARRAY_BUFFER, vbo);
       this._gl.bufferData(
         this._gl.ARRAY_BUFFER,
-        data.data,
+        data.data || new Float32Array([]),
         this._gl.STATIC_DRAW
       );
       const loc = this._gl.getAttribLocation(program, data.name);
@@ -172,6 +177,13 @@ export default class ShaderBox {
     );
 
     this._gl.clearColor(...this._opts.clearColor);
+  }
+
+  updateVBO(name: string, data: ArrayBuffer) {
+    this._assertVBOExists(name);
+    const vbo = this._vbos.get(name)!;
+    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, vbo);
+    this._gl.bufferData(this._gl.ARRAY_BUFFER, data, this._gl.STATIC_DRAW);
   }
 
   resize() {
@@ -308,6 +320,12 @@ export default class ShaderBox {
       this._gl.UNSIGNED_BYTE,
       imageData
     );
+  }
+
+  private _assertVBOExists(name: string) {
+    if (!this._vbos.has(name)) {
+      throw Error(`Unknown VBO ${name}`);
+    }
   }
 
   private _assertUniformExists(name: string) {

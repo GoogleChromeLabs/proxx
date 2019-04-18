@@ -368,6 +368,7 @@ export default class Board extends Component<Props> {
       return;
     }
 
+    const numTiles = this.props.width * this.props.height;
     const uvs = [0, 1, 0, 0, 1, 1, 1, 0];
     const mesh = this.generateGameFieldMesh();
     this.shaderBox = new ShaderBox(vertexShader, fragmentShader, {
@@ -386,33 +387,46 @@ export default class Board extends Component<Props> {
       scaling: staticDevicePixelRatio,
       mesh: [
         {
-          data: mesh,
           dimensions: 2,
           name: "pos"
         },
         {
-          data: mesh.map((_, idx) => uvs[idx % uvs.length]),
           dimensions: 2,
           name: "tile_uv"
         },
         {
-          data: mesh.map((_, idx) => {
-            const fieldIdx = idx / 8;
-            const x = fieldIdx % this.props.width;
-            const y = Math.floor(fieldIdx / this.props.width);
-            if (idx % 2 === 0) {
-              return x;
-            } else {
-              return y;
-            }
-          }),
-          dimensions: 2,
-          name: "tile_coords"
+          name: "static_tile_data",
+          dimensions: 3
         }
       ],
       indices: this.generateVertexIndices(),
       clearColor: [0, 0, 0, 0]
     });
+    this.shaderBox.updateVBO("pos", mesh);
+    this.shaderBox.updateVBO(
+      "tile_uv",
+      mesh.map((_, idx) => uvs[idx % uvs.length])
+    );
+    this.shaderBox.updateVBO(
+      "static_tile_data",
+      new Float32Array(
+        new Array(numTiles * 4 * 3).fill(0).map((_, idx) => {
+          const fieldIdx = Math.floor(idx / 12);
+          const x = fieldIdx % this.props.width;
+          const y = Math.floor(fieldIdx / this.props.width);
+          switch (idx % 3) {
+            case 0:
+              return x;
+            case 1:
+              return y;
+            case 2:
+              return -1;
+            default:
+              return -2;
+          }
+        })
+      )
+    );
     this.shaderBox.setUniform2f("offset", [0, 0]);
     this.shaderBox.resize();
 
@@ -452,7 +466,9 @@ export default class Board extends Component<Props> {
       const y = Math.floor(frame / framesPerAxis);
       const x = frame % framesPerAxis;
       that.shaderBox!.setUniform4f("frame", [x, y, 0, sprite]);
-
+      // mesh[0] -= 1;
+      // mesh[1] -= 1;
+      // that.shaderBox!.updateVBO("pos", mesh);
       that.queryFirstCellRect();
       that.shaderBox!.setUniform2f("offset", [
         that.firstCellRect!.left,
