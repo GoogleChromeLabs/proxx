@@ -90,6 +90,7 @@ class PreactService extends Component<Props, State> {
           stateService={stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
+          qvga={Math.min(screen.width, screen.height) <= 240 ? true : false}
         />
       );
     }

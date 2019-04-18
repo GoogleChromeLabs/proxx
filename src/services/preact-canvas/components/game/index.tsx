@@ -43,6 +43,7 @@ export interface Props {
   onDangerModeChange: (v: boolean) => void;
   dangerMode: boolean;
   toRevealTotal: number;
+  qvga: boolean;
 }
 
 interface State {
@@ -80,7 +81,8 @@ export default class Game extends Component<Props, State> {
       height,
       gameChangeSubscribe,
       gameChangeUnsubscribe,
-      toRevealTotal
+      toRevealTotal,
+      qvga
     }: Props,
     { playMode, toReveal, completeTime, bestTime }: State
   ) {

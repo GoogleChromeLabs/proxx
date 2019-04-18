@@ -56,11 +56,11 @@ export interface Props {
   dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
+  qvga: boolean;
 }
 
 interface State {
-  focus: boolean;
-  focusPos: [number, number];
+  keyNavigation: boolean;
 }
 
 function distanceFromCenter(
@@ -91,8 +91,7 @@ function removeAnimations(
 
 export default class Board extends Component<Props, State> {
   state: State = {
-    focus: false,
-    focusPos: [0, 0]
+    keyNavigation: false
   };
   private canvas?: HTMLCanvasElement;
   private ctx?: CanvasRenderingContext2D;
@@ -351,10 +350,12 @@ export default class Board extends Component<Props, State> {
       }
 
       if (isFocused) {
-        // TODO: Design
-        // currently just a green focus ring
-        ctx.strokeStyle = focusRing;
-        ctx.strokeRect(0, 0, width, height);
+        if (this.props.qvga || this.state.keyNavigation) {
+          // TODO: Design
+          // currently just a green focus ring
+          ctx.strokeStyle = focusRing;
+          ctx.strokeRect(0, 0, width, height);
+        }
       }
 
       ctx.restore();
@@ -445,6 +446,7 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private moveFocusOnHover(event: MouseEvent) {
+    this.setState({ keyNavigation: false });
     const target = event.target as HTMLElement;
     const button = target.closest("button");
     if (!button) {
@@ -459,6 +461,7 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private moveFocus(event: KeyboardEvent, tick: number) {
+    this.setState({ keyNavigation: true });
     const cell = this.findFocusedBtn();
     if (!cell) {
       return;
@@ -472,6 +475,9 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Tab") {
+      this.setState({ keyNavigation: true });
+    }
     if (event.key === "Enter") {
       this.simulateClick(event);
     }
@@ -521,6 +527,7 @@ export default class Board extends Component<Props, State> {
     alt = false
   ) {
     const button = document.activeElement as HTMLButtonElement;
+    console.log(button);
     if (!button) {
       return;
     }
