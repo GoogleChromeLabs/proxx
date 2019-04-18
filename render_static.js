@@ -20,7 +20,7 @@ function findAssetWithName(dependencygraph, name) {
     if (parsedGraphName.ext !== parsedName.ext) return false;
     if (!parsedGraphName.name.startsWith(parsedName.name)) return false;
     const expectedHash = parsedGraphName.name.slice(parsedName.name.length);
-    return /-[0-9a-f]+/.test(expectedHash);
+    return /^-[0-9a-f]+$/.test(expectedHash);
   });
 }
 
