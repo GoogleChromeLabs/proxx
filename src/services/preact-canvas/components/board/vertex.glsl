@@ -2,13 +2,13 @@
 precision highp float;
 attribute vec2 pos;
 attribute vec2 tile_uv;
-attribute vec3 dynamic_tile_data_a;
+attribute vec4 dynamic_tile_data_a;
 attribute vec4 dynamic_tile_data_b;
 
 varying vec2 uv;
 varying vec2 coords;
 varying vec2 iResolution2;
-varying vec3 dynamic_tile_data_a2;
+varying vec4 dynamic_tile_data_a2;
 varying vec4 dynamic_tile_data_b2;
 
 uniform vec2 offset;

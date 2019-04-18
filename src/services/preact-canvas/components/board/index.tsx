@@ -437,7 +437,7 @@ export default class Board extends Component<Props> {
         "static_sprite",
         "sprite_size",
         "tile_size",
-        "frame"
+        "idle_frames"
       ],
       scaling: staticDevicePixelRatio,
       mesh: [
@@ -502,6 +502,7 @@ export default class Board extends Component<Props> {
     );
     this.shaderBox.updateVBO("dynamic_tile_data_b", this.dynamicTileDataB);
     this.shaderBox.setUniform2f("offset", [0, 0]);
+    this.shaderBox.setUniform1f("idle_frames", idleAnimationNumFrames);
     this.shaderBox.resize();
 
     await lazyGenerateTextures();

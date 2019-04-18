@@ -2,11 +2,11 @@
 precision mediump float;
 
 varying vec2 uv;
-varying vec3 dynamic_tile_data_a2;
+varying vec4 dynamic_tile_data_a2;
 varying vec4 dynamic_tile_data_b2;
 varying vec2 iResolution2;
 
-uniform vec4 frame;
+uniform float idle_frames;
 uniform float sprite_size;
 uniform float tile_size;
 uniform sampler2D idle_sprites[4];
@@ -21,16 +21,28 @@ void main() {
 
   vec2 normalized_uv = vec2(0., 1.) + vec2(1., -1.)*uv;
 
+  float tile_x = dynamic_tile_data_a2.x;
+  float tile_y = dynamic_tile_data_a2.y;
+  float touching_number = dynamic_tile_data_a2.z;
+  float idle_animation_time = dynamic_tile_data_a2.w;
+
   float highlight_opacity = dynamic_tile_data_b2.x;
   float flash_opacity = dynamic_tile_data_b2.y;
   float border_opacity = dynamic_tile_data_b2.z;
   float boxes_opacity = dynamic_tile_data_b2.w;
 
   float f;
-  float touching_number = dynamic_tile_data_a2.z;
   if(touching_number < 0.) {
-    vec2 idle_tex_uv = (frame.xy + normalized_uv) * tile_size / sprite_size;
-    int sprite_idx = int(frame.w);
+    float idle_frame = floor(idle_animation_time * idle_frames);
+    float frames_per_axis = floor(sprite_size /tile_size);
+    float frames_per_sprite = frames_per_axis * frames_per_axis;
+
+    int sprite_idx = int(floor(idle_frame / frames_per_sprite));
+    float frame_in_sprite = mod(idle_frame, frames_per_sprite);
+    float frame_x = mod(frame_in_sprite, frames_per_axis);
+    float frame_y = floor(frame_in_sprite / frames_per_axis);
+
+    vec2 idle_tex_uv = (vec2(frame_x, frame_y) + normalized_uv) * tile_size / sprite_size;
     // WebGL 1 can only access arrays with compile-time constant indices.
     // So be it.
     if(sprite_idx == 0) {

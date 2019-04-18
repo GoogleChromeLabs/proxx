@@ -240,11 +240,14 @@ export interface GLContext {
 
 export function glIdleAnimation({
   ts,
+  dynamicTileDataA,
   dynamicTileDataB,
   animation
 }: GLContext) {
   const animationLength = idleAnimationLength;
   const normalized = ((ts - animation.start) / animationLength) % 1;
+
+  dynamicTileDataA[3] = normalized;
 
   let fadeInNormalized =
     (ts - (animation.fadeStart || 0)) / fadeInAnimationLength;
@@ -264,12 +267,14 @@ export function glIdleAnimation({
 
 export function glFlaggedAnimation({
   ts,
+  dynamicTileDataA,
   dynamicTileDataB,
   animation
 }: GLContext) {
   const animationLength = idleAnimationLength;
   const normalized = ((ts - animation.start) / animationLength) % 1;
-  const idx = Math.floor(normalized * idleAnimationNumFrames);
+
+  dynamicTileDataA[3] = normalized;
 
   let fadeOutNormalized =
     (ts - (animation.fadeStart || 0)) / fadeOutAnimationLength;
