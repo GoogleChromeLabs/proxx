@@ -7,6 +7,16 @@ html {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <link rel="prefetch" href="<%=workerFile%>">
+<% for (const [i, font] of [normalFontFile, boldFontFile].entries()) { %>
+  <link rel="preload" as="font" href="<%= font %>" crossorigin>
+  <style>
+    @font-face {
+      font-family: 'Space Mono';
+      font-weight: <%= i === 0 ? 400 : 700 %>;
+      src: <% /* local('Space Mono Bold'), local('SpaceMono-Bold'), */ %> url(<%= font %>) format('woff2');
+    }
+  </style>
+<% } %>
 <main></main>
 <script>
   <%- fs.readFileSync("./dist/"+bootstrapFile); %>

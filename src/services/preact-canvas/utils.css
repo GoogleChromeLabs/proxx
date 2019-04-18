@@ -6,3 +6,14 @@
   padding: 0;
   margin: 0;
 }
+
+.button {
+  composes: unbutton;
+  background: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #000;
+  mix-blend-mode: screen;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}

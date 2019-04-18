@@ -13,15 +13,37 @@
 const fs = require("fs");
 
 const defaults = {
-  manifestName: "dependencygraph.json"
+  manifestName: "dependencygraph.json",
+  propList: undefined
 };
 
 export default function(opts = {}) {
-  opts = Object.assign({}, defaults, opts);
+  opts = {
+    ...defaults,
+    ...opts
+  };
+
   return {
     name: "dependencygraph",
     generateBundle(_outputOptions, bundle) {
-      fs.writeFileSync(opts.manifestName, JSON.stringify(bundle, null, "  "));
+      let bundleObj = bundle;
+
+      if (opts.propList) {
+        bundleObj = {};
+        for (const [key, originalEntry] of Object.entries(bundle)) {
+          const entry = {};
+          for (const propKey of opts.propList) {
+            if (propKey in originalEntry) {
+              entry[propKey] = originalEntry[propKey];
+            }
+          }
+          bundleObj[key] = entry;
+        }
+      }
+      fs.writeFileSync(
+        opts.manifestName,
+        JSON.stringify(bundleObj, null, "  ")
+      );
     }
   };
 }

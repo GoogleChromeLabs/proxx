@@ -3,11 +3,25 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 const ecstatic = require("ecstatic");
 const http = require("http");
+const path = require("path");
 
 function findChunkWithName(dependencygraph, name) {
   return Object.values(dependencygraph).find(desc =>
     (desc.facadeModuleId || "").endsWith(name)
   );
+}
+
+function findAssetWithName(dependencygraph, name) {
+  const parsedName = path.parse(name);
+
+  return Object.values(dependencygraph).find(desc => {
+    if (!desc.isAsset) return false;
+    const parsedGraphName = path.parse(desc.fileName);
+    if (parsedGraphName.ext !== parsedName.ext) return false;
+    if (!parsedGraphName.name.startsWith(parsedName.name)) return false;
+    const expectedHash = parsedGraphName.name.slice(parsedName.name.length);
+    return /-[0-9a-f]+/.test(expectedHash);
+  });
 }
 
 async function renderEjsFile(inPath, outPath, data) {
@@ -20,6 +34,12 @@ async function generateShell(file, dependencygraph) {
   await renderEjsFile("src/index.ejs", file, {
     bootstrapFile: findChunkWithName(dependencygraph, "bootstrap.ts").fileName,
     workerFile: findChunkWithName(dependencygraph, "worker.ts").fileName,
+    normalFontFile: findAssetWithName(
+      dependencygraph,
+      "space-mono-normal.woff2"
+    ).fileName,
+    boldFontFile: findAssetWithName(dependencygraph, "space-mono-bold.woff2")
+      .fileName,
     dependencygraph,
     pkg: require("./package.json"),
     fs
@@ -51,7 +71,7 @@ async function grabMarkup(address) {
   return "<!doctype html>" + markup;
 }
 
-async function correctMarkup(markup, { port, dependencygraph }) {
+async function correctMarkup(markup, { port }) {
   // Make absolute references relative
   markup = markup.replace(new RegExp(`http://localhost:${port}/`, "g"), "./");
   // Remove all dynamically added script tags
@@ -68,7 +88,9 @@ async function run() {
   const server = await startServer();
   const port = server.address().port;
   let markup = await grabMarkup(`http://localhost:${port}/?prerender`);
-  markup = await correctMarkup(markup, { port, dependencygraph });
+  markup = await correctMarkup(markup, {
+    port
+  });
   fs.writeFileSync("dist/index.html", markup);
   server.close();
 
