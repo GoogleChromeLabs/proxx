@@ -10,7 +10,7 @@ uniform float sprite_size;
 uniform float tile_size;
 // uniform vec2 gridSize;
 uniform sampler2D idle_sprites[4];
-// uniform sampler2D state;
+uniform sampler2D static_sprite;
 
 // uniform int frame;
 
@@ -22,21 +22,23 @@ void main() {
   vec2 normalized_uv = vec2(0., 1.) + vec2(1., -1.)*uv;
 
   float f;
-  vec2 tex_uv = (frame.xy + normalized_uv) * tile_size / sprite_size;
+  vec2 idle_tex_uv = (frame.xy + normalized_uv) * tile_size / sprite_size;
   int sprite_idx = int(frame.w);
-  // WebGL 1 can access arrays with compile-time indices.
+  // WebGL 1 can only access arrays with compile-time constant indices.
   // So be it.
   if(sprite_idx == 0) {
-    f = texture2D(idle_sprites[0], tex_uv).r;
+    f = texture2D(idle_sprites[0], idle_tex_uv).r;
   } else if (sprite_idx == 1) {
-    f = texture2D(idle_sprites[1], tex_uv).r;
+    f = texture2D(idle_sprites[1], idle_tex_uv).r;
   } else if (sprite_idx == 2) {
-    f = texture2D(idle_sprites[2], tex_uv).r;
+    f = texture2D(idle_sprites[2], idle_tex_uv).r;
   } else if (sprite_idx == 3) {
-    f = texture2D(idle_sprites[3], tex_uv).r;
+    f = texture2D(idle_sprites[3], idle_tex_uv).r;
   }
 
-  // gl_FragColor = texture2D(sprite, (normalized_uv) * (tile_size + vec2(0.)) / sprite_size);
+  // Blend static outline in top
+  vec2 static_tex_uv = (vec2(0.) + normalized_uv) * tile_size / sprite_size;
+  f = mix(f, 1., texture2D(static_sprite, static_tex_uv).r);
   gl_FragColor = mix(transparent, white, f);
 
   // vec4 black = vec4(vec3(.0), 1.);

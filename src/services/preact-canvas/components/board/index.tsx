@@ -25,7 +25,8 @@ import {
   idleAnimation,
   idleSprites,
   lazyGenerateTextures,
-  numberAnimation
+  numberAnimation,
+  staticSprites
 } from "../../../../rendering/animation.js";
 import { bind } from "../../../../utils/bind.js";
 import { staticDevicePixelRatio } from "../../../../utils/static-dpr.js";
@@ -373,6 +374,7 @@ export default class Board extends Component<Props> {
         "idle_sprites[1]",
         "idle_sprites[2]",
         "idle_sprites[3]",
+        "static_sprite",
         "sprite_size",
         "tile_size",
         "frame"
@@ -412,14 +414,18 @@ export default class Board extends Component<Props> {
 
     await lazyGenerateTextures();
     // Due to the way internal WebGL state handling works, we
-    // have to do this in 2 separate for-loops.
+    // have to add all the textures first before we bind them.
     for (let i = 0; i < idleSprites!.length; i++) {
       this.shaderBox.addTexture(`idleSprite${i}`, idleSprites![i]);
     }
+    this.shaderBox.addTexture(`staticSprite`, staticSprites![0]);
+
     for (let i = 0; i < idleSprites!.length; i++) {
       this.shaderBox.activateTexture(`idleSprite${i}`, i);
       this.shaderBox.setUniform1i(`idle_sprites[${i}]`, i);
     }
+    this.shaderBox.activateTexture(`staticSprite`, 4);
+    this.shaderBox.setUniform1i(`static_sprite`, 4);
 
     const { cellPadding, cellSize } = getCellSizes();
     const tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;

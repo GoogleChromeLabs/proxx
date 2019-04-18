@@ -124,6 +124,9 @@ export function staticTextureGeneratorFactory(
     ctx2.clearRect(0, 0, textureSize, textureSize);
 
     ctx2.save();
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, textureSize, textureSize);
+
     ctx2.translate(textureSize / 2, textureSize / 2);
     if (idx === STATIC_TEXTURE.OUTLINE) {
       ctx2.strokeStyle = "white";
