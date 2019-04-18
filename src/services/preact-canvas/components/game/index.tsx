@@ -15,6 +15,10 @@ import { Component, h } from "preact";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
+import {
+  staticScreenHeight,
+  staticScreenWidth
+} from "src/utils/static-screensize";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";

@@ -436,16 +436,6 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private findFocusedBtn() {
-    const currentBtn = document.activeElement as HTMLButtonElement;
-    const cell = this.additionalButtonData.get(currentBtn);
-    if (!cell) {
-      return false;
-    }
-    return cell;
-  }
-
-  @bind
   private moveFocusOnHover(event: MouseEvent) {
     this.setState({ keyNavigation: false });
     const target = event.target as HTMLElement;
@@ -461,13 +451,13 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private moveFocus(event: KeyboardEvent, tick: number) {
+  private moveFocusByKey(event: KeyboardEvent, tick: number) {
     this.setState({ keyNavigation: true });
-    const cell = this.findFocusedBtn();
+    const currentBtn = document.activeElement as HTMLButtonElement;
+    const cell = this.additionalButtonData.get(currentBtn);
     if (!cell) {
       return;
     }
-
     event.stopPropagation();
     const nextIndex = cell[3] + tick;
     const nextBtn = this.buttons[nextIndex];
@@ -479,29 +469,34 @@ export default class Board extends Component<Props, State> {
     if (event.key === "Tab") {
       this.setState({ keyNavigation: true });
     }
-    if (event.key === "Enter") {
+
+    // Since click action is tied to mouseup event,
+    // listen to Enter in case of key navigation click.
+    // Key 8 support is for T9 navigation
+    if (event.key === "Enter" || event.key === "8") {
       this.simulateClick(event);
     }
+
     if (event.key === "ArrowRight" || event.key === "9") {
-      this.moveFocus(event, 1);
+      this.moveFocusByKey(event, 1);
     }
 
     if (event.key === "ArrowLeft" || event.key === "7") {
-      this.moveFocus(event, -1);
+      this.moveFocusByKey(event, -1);
     }
 
     if (event.key === "ArrowUp" || event.key === "5") {
-      this.moveFocus(event, -this.props.width);
+      this.moveFocusByKey(event, -this.props.width);
     }
 
     if (event.key === "ArrowDown" || event.key === "0") {
-      this.moveFocus(event, this.props.width);
-    }
-    if (event.key === "8") {
-      this.simulateClick(event);
+      this.moveFocusByKey(event, this.props.width);
     }
   }
 
+  // Stopping event is necessary for preventing click event on KaiOS
+  // which moves focus to the mouse and end up clicking two cells,
+  // one under the mouse and one that is currently focused
   @bind
   private onMouseUp(event: MouseEvent) {
     event.preventDefault();
@@ -509,12 +504,15 @@ export default class Board extends Component<Props, State> {
     event.stopImmediatePropagation();
 
     if (event.button !== 2) {
+      // normal click
       this.simulateClick(event);
       return;
     }
+    // right (two finger) click
     this.simulateClick(event, true);
   }
 
+  // Same as mouseup, necessary for preventing click event on KaiOS
   @bind
   private onMouseDown(event: MouseEvent) {
     event.preventDefault();
@@ -527,6 +525,7 @@ export default class Board extends Component<Props, State> {
     event: MouseEvent | TouchEvent | KeyboardEvent,
     alt = false
   ) {
+    // find which button = cell has current focus
     const button = document.activeElement as HTMLButtonElement;
     if (!button) {
       return;
@@ -534,7 +533,6 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
 
     const [x, y, cell] = this.additionalButtonData.get(button)!;
-
     this.props.onCellClick([x, y, cell], alt);
   }
 

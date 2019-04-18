@@ -148,8 +148,9 @@ class PreactService extends Component<Props, State> {
       event.key === "5" ||
       event.key === "0"
     ) {
-      // when this is called, it means table don't have focus.
-      // send signal down to Game to focus on a cell
+      // TODO
+      // When this is called, it means game table does not have focus.
+      // So, set state and let the board focus on a cell
     }
   }
 
