@@ -9,7 +9,7 @@
 .start-form {
   display: flex;
   flex-flow: column;
-  padding: var(--bar-avoid) var(--side-margin);
+  padding: var(--bar-avoid) var(--side-margin) 0;
   box-sizing: border-box;
   width: 100%;
   max-width: 33rem;
