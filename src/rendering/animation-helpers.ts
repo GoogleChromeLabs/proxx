@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+import { AnimationDesc, AnimationName } from "./animation";
+
 export function deg2rad(deg: number) {
   return (deg / 180) * Math.PI;
 }
@@ -121,4 +123,11 @@ export function smoothpulse(
     clampedRemap(inStart, inEnd, 0, 1, v) *
       (1 - clampedRemap(outStart, outEnd, 0, 1, v))
   );
+}
+
+export function removeAnimations(
+  al: AnimationDesc[],
+  names: AnimationName[]
+): AnimationDesc[] {
+  return al.filter(a => !names.includes(a.name));
 }
