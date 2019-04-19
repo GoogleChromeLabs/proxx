@@ -139,13 +139,7 @@ export default class ShaderBox {
       this._uniformLocations.set(name, uniformLocation);
     }
 
-    const vaoExt = this._gl.getExtension("OES_vertex_array_object");
-    if (!vaoExt) {
-      throw Error("No VAO extension");
-    }
-    const vao = vaoExt.createVertexArrayOES();
-    vaoExt.bindVertexArrayOES(vao);
-    for (const [idx, data] of this._opts.mesh.entries()) {
+    for (const data of this._opts.mesh) {
       const vbo = this._gl.createBuffer();
       if (!vbo) {
         throw Error("Could not create VBO");

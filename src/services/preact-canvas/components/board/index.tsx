@@ -16,10 +16,6 @@ import { Cell, GridChanges } from "../../../../gamelogic/types.js";
 import {
   AnimationDesc,
   AnimationName,
-  Context,
-  flaggedAnimation,
-  flashInAnimation,
-  flashOutAnimation,
   GLContext,
   glFlaggedAnimation,
   glFlashInAnimation,
@@ -28,12 +24,8 @@ import {
   glHighlightOutAnimation,
   glIdleAnimation,
   glNumberAnimation,
-  highlightInAnimation,
-  highlightOutAnimation,
-  idleAnimation,
   idleSprites,
   lazyGenerateTextures,
-  numberAnimation,
   staticSprites
 } from "../../../../rendering/animation.js";
 import { bind } from "../../../../utils/bind.js";
@@ -118,7 +110,6 @@ function removeAnimations(
 
 export default class Board extends Component<Props> {
   private canvas?: HTMLCanvasElement;
-  private ctx?: CanvasRenderingContext2D;
   private table?: HTMLTableElement;
   private cellsToRedraw: Set<HTMLButtonElement> = new Set();
   private buttons: HTMLButtonElement[] = [];
@@ -132,10 +123,10 @@ export default class Board extends Component<Props> {
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
   private changeBuffer: GridChanges = [];
-  private cellPadding = getCellSizes().cellPadding;
   private shaderBox?: ShaderBox;
   private dynamicTileDataB?: Float32Array;
   private dynamicTileDataA?: Float32Array;
+  private lastTs: number = performance.now();
 
   componentDidMount() {
     this.createTable(this.props.width, this.props.height);
@@ -292,7 +283,7 @@ export default class Board extends Component<Props> {
     this.animationLists.set(btn, animationList);
   }
 
-  private updateTileData(btn: HTMLButtonElement, ts: number) {
+  private updateDynamicTileDataForTile(btn: HTMLButtonElement, ts: number) {
     const { width, height, left, top } = this.firstCellRect!;
     const [bx, by, cell] = this.additionalButtonData.get(btn)!;
     const x = bx * width + left;
@@ -412,20 +403,39 @@ export default class Board extends Component<Props> {
   }
 
   private async canvasInit() {
-    this.canvasRect = this.canvas!.getBoundingClientRect();
-    this.queryFirstCellRect();
-    this.canvas!.width = this.canvasRect.width * staticDevicePixelRatio;
-    this.canvas!.height = this.canvasRect.height * staticDevicePixelRatio;
+    // If shaderBox is already initialized, this got called due to a window resize
+    // and we only need to call resize() and bial.
     if (this.shaderBox) {
       this.shaderBox.resize();
-    }
-    if (this.renderLoopRunning) {
       return;
     }
 
-    const numTiles = this.props.width * this.props.height;
-    const uvs = [0, 1, 0, 0, 1, 1, 1, 0];
-    const mesh = this.generateGameFieldMesh();
+    /**
+     * We are setting up a WebGL context here.
+     *
+     * Per-vertex attributes:
+     * - `pos`: Position of the vertex on screen in pixels. Starting at (0, 0)
+     *   in the top left corner.
+     * - `tile_uv`: UV coordinates within each tile. Top-left corner is (0, 0),
+     *   bottom right corner is (1, 1).
+     * - `dynamic_tile_data_a`: A `vec4` containing data according to the
+     *   `DynamicTileDataA` enum
+     * - `dynamic_tile_data_b`: A `vec4` containing data according to the
+     *   `DynamicTileDataB` enum
+     *
+     * Uniforms:
+     * - `offset`: Offset of the first tile’s top left corner from the top-left
+     *   corner of the screen. This effectively makes sure our WebGL tiles are
+     *   perfectly aligned with the inivisible table, including scroll position.
+     * - `idle_sprites[n]`: Up to 4 texture samplers for the sprite of the idle
+     *   animation.
+     * - `static_sprite`: Sampler for the static sprite.
+     * - `sprite_size`: A single float for the size of the sprites in pixels
+     *   (they are assumed to be square).
+     * - `tile_size`: A single float for the size of each tile in pixels.
+     * - `idle_frames`: Number of frames the idle animation has.
+     */
+
     this.shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.canvas!,
       uniforms: [
@@ -463,27 +473,38 @@ export default class Board extends Component<Props> {
       indices: this.generateVertexIndices(),
       clearColor: [0, 0, 0, 0]
     });
+    this.shaderBox.resize();
+
+    const mesh = this.generateGameFieldMesh();
     this.shaderBox.updateVBO("pos", mesh);
+
+    // Repeat these UVs for all tiles.
+    const uvs = [0, 1, 0, 0, 1, 1, 1, 0];
     this.shaderBox.updateVBO(
       "tile_uv",
       mesh.map((_, idx) => uvs[idx % uvs.length])
     );
+
+    const numTiles = this.props.width * this.props.height;
     this.dynamicTileDataA = new Float32Array(
       new Array(numTiles * 4 * 4).fill(0).map((_, idx) => {
         const fieldIdx = Math.floor(idx / 16);
         const x = fieldIdx % this.props.width;
         const y = Math.floor(fieldIdx / this.props.width);
         switch (idx % 4) {
-          case 0:
+          case DynamicTileDataA.TILE_X:
             return x;
-          case 1:
+          case DynamicTileDataA.TILE_Y:
             return y;
+          case DynamicTileDataA.TOUCHING:
+            return -1; // Equivalent to “unrevealed”
           default:
-            return -1;
+            return -1; // Currently unused
         }
       })
     );
     this.shaderBox.updateVBO("dynamic_tile_data_a", this.dynamicTileDataA);
+
     this.dynamicTileDataB = new Float32Array(
       new Array(numTiles * 4 * 4).fill(0).map((_, idx) => {
         switch (idx % 4) {
@@ -496,16 +517,14 @@ export default class Board extends Component<Props> {
           case DynamicTileDataB.HIGHLIGHT_OPACITY:
             return 0;
           default:
-            return -1;
+            return -1; // Never reached. Just to make TypeScript happy.
         }
       })
     );
     this.shaderBox.updateVBO("dynamic_tile_data_b", this.dynamicTileDataB);
-    this.shaderBox.setUniform2f("offset", [0, 0]);
-    this.shaderBox.setUniform1f("idle_frames", idleAnimationNumFrames);
-    this.shaderBox.resize();
 
     await lazyGenerateTextures();
+
     // Due to the way internal WebGL state handling works, we
     // have to add all the textures first before we bind them.
     this.shaderBox.addTexture(`staticSprite`, staticSprites![0]);
@@ -522,38 +541,45 @@ export default class Board extends Component<Props> {
 
     const { cellPadding, cellSize } = getCellSizes();
     const tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
-    const framesPerAxis = Math.floor(spriteSize / tileSize);
-    const framesPerSprite = framesPerAxis * framesPerAxis;
-
     this.shaderBox!.setUniform1f("sprite_size", spriteSize);
     this.shaderBox!.setUniform1f("tile_size", tileSize);
+    this.shaderBox.setUniform1f("idle_frames", idleAnimationNumFrames);
 
-    const that = this;
-    let lastTs = performance.now();
-    requestAnimationFrame(function f(ts) {
-      that.consumeChangeBuffer(ts - lastTs);
-      lastTs = ts;
-
-      for (const cell of that.buttons) {
-        that.updateTileData(cell, ts);
-      }
-      that.shaderBox!.updateVBO("dynamic_tile_data_a", that.dynamicTileDataA!);
-      that.shaderBox!.updateVBO("dynamic_tile_data_b", that.dynamicTileDataB!);
-      that.queryFirstCellRect();
-      that.shaderBox!.setUniform2f("offset", [
-        that.firstCellRect!.left,
-        that.firstCellRect!.top
-      ]);
-      that.shaderBox!.draw();
-      if (that.renderLoopRunning) {
-        requestAnimationFrame(f);
-      }
-    });
     this.renderLoopRunning = true;
+    requestAnimationFrame(this.renderLoop);
+  }
+
+  @bind
+  private renderLoop(ts: number) {
+    const delta = ts - this.lastTs;
+    this.lastTs = ts;
+
+    // Update DOM and animations according to incoming grid changes
+    this.consumeChangeBuffer(delta);
+
+    // Iterate over all the buttons and update the data in the `dynamicTileData`
+    // buffer.
+    this.queryDimensions();
+    for (const cell of this.buttons) {
+      this.updateDynamicTileDataForTile(cell, ts);
+    }
+    // Upload updated buffers to the GPU
+    this.shaderBox!.updateVBO("dynamic_tile_data_a", this.dynamicTileDataA!);
+    this.shaderBox!.updateVBO("dynamic_tile_data_b", this.dynamicTileDataB!);
+
+    // Grab scrolling position
+    this.shaderBox!.setUniform2f("offset", [
+      this.firstCellRect!.left,
+      this.firstCellRect!.top
+    ]);
+    this.shaderBox!.draw();
+    if (this.renderLoopRunning) {
+      requestAnimationFrame(this.renderLoop);
+    }
   }
 
   private consumeChangeBuffer(delta: number) {
-    const width = this.props.width;
+    const { width } = this.props;
     // Reveal ~5 fields per frame
     const numConsume = Math.floor((delta * 5) / 16);
     const slice = this.changeBuffer.splice(0, numConsume);
@@ -584,8 +610,9 @@ export default class Board extends Component<Props> {
     }
   }
 
-  private queryFirstCellRect() {
+  private queryDimensions() {
     this.firstCellRect = this.buttons[0].closest("td")!.getBoundingClientRect();
+    this.canvasRect = this.canvas!.getBoundingClientRect();
   }
 
   @bind
