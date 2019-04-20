@@ -72,4 +72,10 @@ void main() {
   vec4 target_color = mix(white, turquoise, highlight_opacity);
 
   gl_FragColor = mix(transparent, target_color, f);
+  gl_FragColor = vec4(
+    mod(tile_x, 8.) / 8.,
+    mod(tile_y, 8.) / 8.,
+    0.,
+    1.
+  );
 }

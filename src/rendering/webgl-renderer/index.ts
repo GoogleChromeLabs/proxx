@@ -19,7 +19,6 @@ import { staticDevicePixelRatio } from "src/utils/static-dpr";
 import {
   AnimationDesc,
   AnimationName,
-  idleAnimation,
   idleSprites,
   processDoneCallback,
   staticSprites
@@ -58,14 +57,14 @@ function generateCoords(x1: number, y1: number, x2: number, y2: number) {
 }
 
 function generateGameFieldMesh(
-  tileSize: number,
-  width: number,
-  height: number
+  numTilesX: number,
+  numTilesY: number,
+  tileSize: number
 ): Float32Array {
-  // TODO optimize me
+  // TODO optimize me (avoid allocations)
   const vertices = [];
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
+  for (let y = 0; y < numTilesY; y++) {
+    for (let x = 0; x < numTilesX; x++) {
       vertices.push(
         ...generateCoords(
           x * tileSize,
@@ -79,9 +78,10 @@ function generateGameFieldMesh(
   return new Float32Array(vertices);
 }
 
-function generateVertexIndices(width: number, height: number) {
+function generateVertexIndices(numTilesX: number, numTilesY: number) {
+  // TODO optimize me (avoid allocations)
   const indices = [];
-  for (let i = 0; i < width * height; i++) {
+  for (let i = 0; i < numTilesX * numTilesY; i++) {
     indices.push(i * 4, i * 4 + 1, i * 4 + 2, i * 4 + 2, i * 4 + 1, i * 4 + 3);
   }
   return indices;
@@ -92,8 +92,8 @@ export default class WebGlRenderer implements Renderer {
   private _dynamicTileDataB?: Float32Array;
   private _dynamicTileDataA?: Float32Array;
   private _shaderBox?: ShaderBox;
-  private _width?: number;
-  private _height?: number;
+  private _numTilesX?: number;
+  private _numTilesY?: number;
 
   private _renderLoopRunning = false;
 
@@ -102,15 +102,15 @@ export default class WebGlRenderer implements Renderer {
     return this._canvas;
   }
 
-  init(width: number, height: number) {
-    this._width = width;
-    this._height = height;
+  init(numTilesX: number, numTilesY: number) {
+    this._numTilesX = numTilesX;
+    this._numTilesY = numTilesY;
 
     const { cellPadding, cellSize } = getCellSizes();
     const tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
 
-    this._initShaderBox(width, height);
-    this._setupMesh(width, height, tileSize);
+    this._initShaderBox(numTilesX, numTilesY);
+    this._setupMesh(numTilesX, numTilesY, tileSize);
     this._setupTextures();
 
     this._shaderBox!.setUniform1f("sprite_size", spriteSize);
@@ -320,20 +320,20 @@ export default class WebGlRenderer implements Renderer {
   }
 
   private _getDynamicTileDataAForTile(x: number, y: number): Float32Array {
-    const tileOffset = y * this._width! + x;
+    const tileOffset = y * this._numTilesX! + x;
     const floatOffset = tileOffset * 4 * 4;
     const byteOffset = floatOffset * 4;
     return new Float32Array(this._dynamicTileDataA!.buffer, byteOffset);
   }
 
   private _getDynamicTileDataBForTile(x: number, y: number): Float32Array {
-    const tileOffset = y * this._width! + x;
+    const tileOffset = y * this._numTilesX! + x;
     const floatOffset = tileOffset * 4 * 4;
     const byteOffset = floatOffset * 4;
     return new Float32Array(this._dynamicTileDataB!.buffer, byteOffset);
   }
 
-  private _initShaderBox(width: number, height: number) {
+  private _initShaderBox(numTilesX: number, numTilesY: number) {
     /**
      * We are setting up a WebGL context here.
      *
@@ -393,14 +393,14 @@ export default class WebGlRenderer implements Renderer {
           usage: "DYNAMIC_DRAW"
         }
       ],
-      indices: generateVertexIndices(width, height),
+      indices: generateVertexIndices(numTilesX, numTilesY),
       clearColor: [0, 0, 0, 0]
     });
     this._shaderBox!.resize();
   }
 
-  private _setupMesh(width: number, height: number, tileSize: number) {
-    const mesh = generateGameFieldMesh(width, height, tileSize);
+  private _setupMesh(numTilesX: number, numTilesY: number, tileSize: number) {
+    const mesh = generateGameFieldMesh(numTilesX, numTilesY, tileSize);
     this._shaderBox!.updateVBO("pos", mesh);
 
     // Repeat these UVs for all tiles.
@@ -410,12 +410,12 @@ export default class WebGlRenderer implements Renderer {
       mesh.map((_, idx) => uvs[idx % uvs.length])
     );
 
-    const numTiles = width * height;
+    const numTiles = numTilesX * numTilesY;
     this._dynamicTileDataA = new Float32Array(
       new Array(numTiles * 4 * 4).fill(0).map((_, idx) => {
         const fieldIdx = Math.floor(idx / 16);
-        const x = fieldIdx % width;
-        const y = Math.floor(fieldIdx / width);
+        const x = fieldIdx % numTilesX;
+        const y = Math.floor(fieldIdx / numTilesX);
         switch (idx % 4) {
           case DynamicTileDataA.TILE_X:
             return x;

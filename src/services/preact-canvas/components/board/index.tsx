@@ -54,7 +54,6 @@ export default class Board extends Component<Props> {
   private _canvas?: HTMLCanvasElement;
   private _table?: HTMLTableElement;
   private _buttons: HTMLButtonElement[] = [];
-  private _canvasRect?: ClientRect | DOMRect;
   private _flashedCells = new Set<HTMLButtonElement>();
   private _firstCellRect?: ClientRect | DOMRect;
   private _additionalButtonData = new WeakMap<
@@ -71,6 +70,8 @@ export default class Board extends Component<Props> {
     this.props.gameChangeSubscribe(this._doManualDomHandling);
     this._animationsInit();
     this._rendererInit();
+    this.queryFirstCellRect();
+    this.props.renderer.updateFirstRect(this._firstCellRect!);
     this._updateLoopRunning = true;
     requestAnimationFrame(this._updateLoop);
 
@@ -249,8 +250,8 @@ export default class Board extends Component<Props> {
     if (
       x + width < 0 ||
       y + height < 0 ||
-      x > this._canvasRect!.width ||
-      y > this._canvasRect!.height
+      x > window.innerWidth ||
+      y > window.innerHeight
     ) {
       return;
     }
