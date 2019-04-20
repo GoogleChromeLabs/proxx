@@ -185,7 +185,7 @@ export default class ShaderBox {
     const rect = this.canvas.getBoundingClientRect();
     this.canvas.width = rect.width * this._opts.scaling;
     this.canvas.height = rect.height * this._opts.scaling;
-    this.setUniform2f("iResolution", [rect.width, rect.height]);
+    this.setUniform2f("iResolution", [this.canvas.width, this.canvas.height]);
     this._gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
 

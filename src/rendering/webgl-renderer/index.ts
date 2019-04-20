@@ -122,7 +122,10 @@ export default class WebGlRenderer implements Renderer {
 
   updateFirstRect(rect: ClientRect | DOMRect) {
     this._assertShaderBox();
-    this._shaderBox!.setUniform2f("offset", [rect.left, rect.top]);
+    this._shaderBox!.setUniform2f("offset", [
+      rect.left * staticDevicePixelRatio,
+      rect.top * staticDevicePixelRatio
+    ]);
   }
 
   stop() {
