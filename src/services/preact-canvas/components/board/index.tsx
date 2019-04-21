@@ -70,7 +70,7 @@ export default class Board extends Component<Props> {
     this.props.gameChangeSubscribe(this._doManualDomHandling);
     this._animationsInit();
     this._rendererInit();
-    this.queryFirstCellRect();
+    this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
     this._updateLoopRunning = true;
     requestAnimationFrame(this._animationLoop);
@@ -105,7 +105,7 @@ export default class Board extends Component<Props> {
 
   @bind
   private _onWindowScroll() {
-    this.queryFirstCellRect();
+    this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
   }
 
@@ -120,7 +120,7 @@ export default class Board extends Component<Props> {
     // Update DOM straight away
     for (const [x, y, cell] of stateChange.gridChanges) {
       const btn = this._buttons[y * this.props.width + x];
-      this.updateButton(btn, cell, x, y);
+      this._updateButton(btn, cell, x, y);
     }
   }
 
@@ -139,7 +139,7 @@ export default class Board extends Component<Props> {
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
         this._additionalButtonData.set(button, [x, y, defaultCell]);
-        this.updateButton(button, defaultCell, x, y);
+        this._updateButton(button, defaultCell, x, y);
         this._buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
@@ -150,8 +150,8 @@ export default class Board extends Component<Props> {
     this._canvas.classList.add(canvasStyle);
     this.base!.appendChild(this._canvas);
     tableContainer!.appendChild(this._table);
-    this._table.addEventListener("click", this.onClick);
-    this._table.addEventListener("mouseup", this.onMouseUp);
+    this._table.addEventListener("click", this._onClick);
+    this._table.addEventListener("mouseup", this._onMouseUp);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
@@ -317,24 +317,24 @@ export default class Board extends Component<Props> {
     }
   }
 
-  private queryFirstCellRect() {
+  private _queryFirstCellRect() {
     this._firstCellRect = this._buttons[0]
       .closest("td")!
       .getBoundingClientRect();
   }
 
   @bind
-  private onMouseUp(event: MouseEvent) {
+  private _onMouseUp(event: MouseEvent) {
     if (event.button !== 2) {
       return;
     }
 
     event.preventDefault();
-    this.onClick(event, true);
+    this._onClick(event, true);
   }
 
   @bind
-  private onClick(event: MouseEvent | TouchEvent, alt = false) {
+  private _onClick(event: MouseEvent | TouchEvent, alt = false) {
     const target = event.target as HTMLElement;
     const button = target.closest("button");
     if (!button) {
@@ -346,7 +346,7 @@ export default class Board extends Component<Props> {
     this.props.onCellClick(cell, alt);
   }
 
-  private updateButton(
+  private _updateButton(
     btn: HTMLButtonElement,
     cell: Cell,
     x: number,
@@ -370,6 +370,7 @@ export default class Board extends Component<Props> {
     this._additionalButtonData.get(btn)![2] = cell;
   }
 }
+
 function distanceFromCenter(
   x: number,
   y: number,
