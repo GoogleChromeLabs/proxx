@@ -19,6 +19,7 @@ export interface Renderer {
   createCanvas(): HTMLCanvasElement;
   onResize(): void;
   updateFirstRect(rect: ClientRect | DOMRect): void;
+  beforeRenderFrame(): void;
   render(
     x: number,
     y: number,
@@ -31,7 +32,10 @@ export interface Renderer {
 
 // TODO: Do feature detection for WebGL and required extensions and fall back to
 // 2D if necessary.
-const renderer = import("./webgl-renderer/index.js").then(m => new m.default());
+// const renderer = import("./webgl-renderer/index.js").then(m => new m.default());
+const renderer = import("./canvas-2d-renderer/index.js").then(
+  m => new m.default()
+);
 
 export function getRendererInstance(): Promise<Renderer> {
   return renderer;
