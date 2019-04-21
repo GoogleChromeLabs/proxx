@@ -187,6 +187,12 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onCellClick(cellData: [number, number, Cell], alt: boolean) {
+    if (
+      this.state.playMode !== PlayMode.Pending &&
+      this.state.playMode !== PlayMode.Playing
+    ) {
+      return;
+    }
     const [x, y, cell] = cellData;
     let { dangerMode } = this.props;
 

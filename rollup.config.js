@@ -40,7 +40,7 @@ export default {
     postcss({
       minimize: true,
       modules: {
-        generateScopedName: "[hash:base64:5]"
+        //generateScopedName: "[hash:base64:5]"
       },
       //extract: true,
       namedExports(name) {
