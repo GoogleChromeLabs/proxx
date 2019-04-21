@@ -128,10 +128,6 @@ class PreactService extends Component<Props, State> {
           onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
         />
-        <Settings
-          onCloseClicked={this._onSettingsCloseClicked}
-          open={settingsOpen}
-        />
       </div>
     );
   }
@@ -163,12 +159,16 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private _onSettingsClick() {
-    if (this.state.settingsOpen) {
-      this.previousFocus!.focus();
-    } else {
+    if (!this.state.settingsOpen) {
       this.previousFocus = document.activeElement as HTMLElement;
     }
     this.setState({ settingsOpen: !this.state.settingsOpen });
+
+    if (!this.state.settingsOpen) {
+      setTimeout(() => {
+        this.previousFocus!.focus();
+      }, 0);
+    }
   }
 
   @bind
