@@ -111,6 +111,7 @@ class PreactService extends Component<Props, State> {
           stateService={this._stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
+          inert={settingsOpen ? true : false}
         />
       );
     }
@@ -127,6 +128,7 @@ class PreactService extends Component<Props, State> {
         <BottomBar
           onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
+          inert={settingsOpen ? true : false}
         />
       </div>
     );

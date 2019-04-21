@@ -17,13 +17,15 @@ import { bottomBar, icons } from "./style.css";
 export interface Props {
   onFullscreenClick: () => void;
   onSettingsClick: () => void;
+  inert?: boolean;
 }
+
 export interface State {}
 
 export default class BottomBar extends Component<Props, State> {
-  render({ onFullscreenClick, onSettingsClick }: Props) {
+  render({ onFullscreenClick, onSettingsClick, inert }: Props) {
     return (
-      <div class={bottomBar}>
+      <div class={bottomBar} inert={inert}>
         <button class={icons} onClick={onSettingsClick}>
           <Settings />
         </button>

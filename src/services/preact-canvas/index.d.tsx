@@ -1,5 +1,5 @@
-// declare namespace JSX {
-//   interface HTMLAttributes {
-//     inert?: boolean;
-//   }
-// }
+declare namespace JSX {
+  interface HTMLAttributes {
+    inert?: boolean;
+  }
+}
