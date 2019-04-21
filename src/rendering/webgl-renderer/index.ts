@@ -148,7 +148,18 @@ export default class WebGlRenderer implements Renderer {
   ) {
     this._assertShaderBox();
     // @ts-ignore
-    this[animation.name](x, y, animation, ts);
+    this[animation.name](x, y, cell, animation, ts);
+
+    // Go through the _other_ 3 vertices and copy the (potentially modified)
+    // dynamic tile data from vertex 0 to their respective buffers.
+    // TODO: We can prevent running these loops by switching to ANGLE instanced
+    // rendering.
+    const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
+    const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
+    for (let i = 1; i < 4; i++) {
+      this._getDynamicTileDataAForTile(x, y, i).set(dynamicTileDataA);
+      this._getDynamicTileDataBForTile(x, y, i).set(dynamicTileDataB);
+    }
   }
 
   private [AnimationName.IDLE](
@@ -322,18 +333,28 @@ export default class WebGlRenderer implements Renderer {
       1 - easeInOutCubic(normalized);
   }
 
-  private _getDynamicTileDataAForTile(x: number, y: number): Float32Array {
+  private _getDynamicTileDataAForTile(
+    x: number,
+    y: number,
+    vertex: number = 0
+  ): Float32Array {
     const tileOffset = y * this._numTilesX! + x;
-    const floatOffset = tileOffset * 4 * 4;
+    const vertexOffset = tileOffset * 4 + vertex;
+    const floatOffset = vertexOffset * 4;
     const byteOffset = floatOffset * 4;
-    return new Float32Array(this._dynamicTileDataA!.buffer, byteOffset);
+    return new Float32Array(this._dynamicTileDataA!.buffer, byteOffset, 4);
   }
 
-  private _getDynamicTileDataBForTile(x: number, y: number): Float32Array {
+  private _getDynamicTileDataBForTile(
+    x: number,
+    y: number,
+    vertex: number = 0
+  ): Float32Array {
     const tileOffset = y * this._numTilesX! + x;
-    const floatOffset = tileOffset * 4 * 4;
+    const vertexOffset = tileOffset * 4 + vertex;
+    const floatOffset = vertexOffset * 4;
     const byteOffset = floatOffset * 4;
-    return new Float32Array(this._dynamicTileDataB!.buffer, byteOffset);
+    return new Float32Array(this._dynamicTileDataB!.buffer, byteOffset, 4);
   }
 
   private _initShaderBox(numTilesX: number, numTilesY: number) {
@@ -426,8 +447,10 @@ export default class WebGlRenderer implements Renderer {
             return y;
           case DynamicTileDataA.TOUCHING:
             return -1; // Equivalent to “unrevealed”
+          case DynamicTileDataA.IDLE_ANIMATION_TIME:
+            return 0;
           default:
-            return -1; // Currently unused
+            return -1; // Never reached. Just to make TypeScript happy.
         }
       })
     );

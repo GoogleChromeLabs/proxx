@@ -73,7 +73,7 @@ export default class Board extends Component<Props> {
     this.queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
     this._updateLoopRunning = true;
-    requestAnimationFrame(this._updateLoop);
+    requestAnimationFrame(this._animationLoop);
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
@@ -240,7 +240,7 @@ export default class Board extends Component<Props> {
     this._animationLists.set(btn, animationList);
   }
 
-  private _maybeRenderTile(btn: HTMLButtonElement, ts: number) {
+  private _maybeAnimateTile(btn: HTMLButtonElement, ts: number) {
     const { width, height, left, top } = this._firstCellRect!;
     const [bx, by, cell] = this._additionalButtonData.get(btn)!;
     const x = bx * width + left;
@@ -270,7 +270,7 @@ export default class Board extends Component<Props> {
   }
 
   @bind
-  private _updateLoop(ts: number) {
+  private _animationLoop(ts: number) {
     const delta = ts - this._lastTs;
     this._lastTs = ts;
 
@@ -280,10 +280,10 @@ export default class Board extends Component<Props> {
     // Iterate over all the buttons and update the data in the `dynamicTileData`
     // buffer.
     for (const cell of this._buttons) {
-      this._maybeRenderTile(cell, ts);
+      this._maybeAnimateTile(cell, ts);
     }
     if (this._updateLoopRunning) {
-      requestAnimationFrame(this._updateLoop);
+      requestAnimationFrame(this._animationLoop);
     }
   }
 
