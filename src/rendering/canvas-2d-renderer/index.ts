@@ -12,7 +12,6 @@
  */
 
 import { Cell } from "src/gamelogic/types";
-import { bind } from "src/utils/bind";
 import { getCellSizes } from "src/utils/cell-sizing";
 import { staticDevicePixelRatio } from "src/utils/static-dpr";
 import {
@@ -36,8 +35,6 @@ import {
 } from "../constants";
 import { Renderer } from "../renderer";
 import { STATIC_TEXTURE } from "../texture-generators";
-import fragmentShader from "./fragment.glsl";
-import vertexShader from "./vertex.glsl";
 
 export default class Canvas2DRenderer implements Renderer {
   private _canvas?: HTMLCanvasElement;
