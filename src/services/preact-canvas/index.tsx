@@ -73,6 +73,7 @@ class PreactService extends Component<Props, State> {
     awaitingGame: false,
     settingsOpen: false
   };
+  private previousFocus: HTMLElement | null = null;
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
   private _awaitingGameTimeout: number = -1;
@@ -83,7 +84,7 @@ class PreactService extends Component<Props, State> {
     this._init(props);
   }
 
-  render(_props: Props, { game, dangerMode, awaitingGame }: State) {
+  render(_props: Props, { game, dangerMode, awaitingGame, settingsOpen }: State) {
     let mainComponent: VNode;
 
     if (!game) {
@@ -123,7 +124,10 @@ class PreactService extends Component<Props, State> {
           onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
         />
-        <Settings open={this.state.settingsOpen} />
+        <Settings
+          onCloseClicked={this._onSettingsCloseClicked}
+          open={settingsOpen}
+        />
       </div>
     );
   }
@@ -149,7 +153,17 @@ class PreactService extends Component<Props, State> {
   }
 
   @bind
+  private _onSettingsCloseClicked() {
+    this._onSettingsClick();
+  }
+
+  @bind
   private _onSettingsClick() {
+    if (this.state.settingsOpen) {
+      this.previousFocus!.focus();
+    } else {
+      this.previousFocus = document.activeElement as HTMLElement;
+    }
     this.setState({ settingsOpen: !this.state.settingsOpen });
   }
 

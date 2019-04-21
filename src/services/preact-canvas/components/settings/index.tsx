@@ -17,22 +17,34 @@ import {
   settingsWindow
 } from "./style.css";
 
-export interface State {
+export interface Props {
+  onCloseClicked: () => void;
   open: boolean;
 }
 
-export default class Settings extends Component<State> {
-  state: State = {
-    open: false
-  };
-  render({ open }: State) {
+export default class Settings extends Component<Props> {
+  private focusItem?: HTMLElement;
+
+  render({ onCloseClicked, open }: Props) {
     return (
       <div class={`${open ? dialogOpen : dialogClosed}`}>
         <div class={settingsWindow}>
           <h1>Settings</h1>
+          <button
+            ref={focusItem => (this.focusItem = focusItem)}
+            onClick={onCloseClicked}
+          >
+            close
+          </button>
           <button>some button</button>
         </div>
       </div>
     );
+  }
+
+  componentDidUpdate() {
+    if (this.props.open) {
+      this.focusItem!.focus();
+    }
   }
 }
