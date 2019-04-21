@@ -16,6 +16,7 @@ import { Component, h, render, VNode } from "preact";
 import { getBestRenderer } from "src/rendering/renderer";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
+import initInert from "../../utils/inert";
 import { GameType } from "../state";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
@@ -45,6 +46,7 @@ interface State {
   settingsOpen: boolean;
 }
 
+initInert();
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
 
 // tslint:disable-next-line:variable-name
