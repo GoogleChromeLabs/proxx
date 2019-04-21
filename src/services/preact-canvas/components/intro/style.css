@@ -65,6 +65,7 @@
   right: 0.6rem;
   width: 15px;
   height: 7px;
+  -webkit-tap-highlight-color: transparent;
   /* For a larger touch target */
   padding: 7px;
 }
