@@ -24,13 +24,15 @@ import {
 
 export interface Props {
   onCloseClicked: () => void;
+  onMotionPrefChange: () => void;
   open: boolean;
+  motion: boolean;
 }
 
 export default class Settings extends Component<Props> {
   private focusItem?: HTMLElement;
 
-  render({ onCloseClicked, open }: Props) {
+  render({ onCloseClicked, onMotionPrefChange, open, motion }: Props) {
     return (
       <div
         role="dialog"
@@ -46,7 +48,12 @@ export default class Settings extends Component<Props> {
           >
             <Close />
           </button>
-          <button class={true ? btnOnStyle : btnOffStyle}>Animations</button>
+          <button
+            class={motion ? btnOnStyle : btnOffStyle}
+            onClick={onMotionPrefChange}
+          >
+            Animations {motion ? "on" : "off"}
+          </button>
           <button class={btnStyle}>About</button>
         </div>
       </div>
