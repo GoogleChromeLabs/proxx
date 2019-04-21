@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Square, Timer } from "../icons";
+import { Square, Timer } from "../icons/additional";
 import {
   squareIcon,
   squaresLeft,
@@ -104,7 +104,8 @@ export default class TopBar extends Component<Props, State> {
         )}
         {!titleOnly && (
           <div class={time}>
-            <Time running={timerRunning!} /> <Timer class={timeIcon} />
+            <Time running={timerRunning!} />
+            <Timer class={timeIcon} animate={timerRunning} />
           </div>
         )}
       </div>

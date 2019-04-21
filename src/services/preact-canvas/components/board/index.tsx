@@ -99,9 +99,9 @@ export default class Board extends Component<Props> {
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
   private changeBuffer: GridChanges = [];
-  private cellPadding = getCellSizes().cellPadding;
 
   componentDidMount() {
+    document.documentElement.classList.add("in-game");
     this.createTable(this.props.width, this.props.height);
     this.props.gameChangeSubscribe(this.doManualDomHandling);
     this.canvasInit();
@@ -111,6 +111,7 @@ export default class Board extends Component<Props> {
   }
 
   componentWillUnmount() {
+    document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this.onWindowResize);
     this.props.gameChangeUnsubscribe(this.doManualDomHandling);
     // Stop rAF

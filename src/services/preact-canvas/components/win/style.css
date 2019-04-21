@@ -1,0 +1,80 @@
+.win-screen {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+}
+
+.win-inner {
+  display: flex;
+  flex-flow: column;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 500px;
+  padding: var(--bar-avoid) var(--side-margin) 0;
+}
+
+.win-square {
+  width: var(--size);
+  height: var(--size);
+  --size: 40%;
+  display: block;
+  margin: 0 auto;
+  fill: #fff;
+  stroke: #fff;
+}
+
+.win-state {
+  margin: 1.4rem 0;
+  text-align: center;
+  font-size: inherit;
+  font-weight: normal;
+}
+
+.score-row {
+  position: relative;
+  display: flex;
+  fill: #fff;
+  padding: 2rem 0;
+}
+
+.score-row::before,
+.score-row::after {
+  content: '';
+  height: 1px;
+  transform-origin: 0 0;
+  transform: scaleY(0.5);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  background: white;
+}
+
+.score-row::after {
+  top: auto;
+  bottom: 0;
+}
+
+.score {
+  flex: 1;
+}
+
+.timer-icon {
+  width: 57px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.time {
+  font-size: 1.2rem;
+}
+
+.time-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}

@@ -42,7 +42,7 @@ interface State {
 }
 
 // tslint:disable-next-line:variable-name
-const End = deferred(import("../end/index.js").then(m => m.default));
+const Win = deferred(import("../win/index.js").then(m => m.default));
 
 // The second this file is loaded, activate focus handling
 initFocusHandling();
@@ -80,12 +80,10 @@ export default class Game extends Component<Props, State> {
           toReveal={toReveal}
           toRevealTotal={toRevealTotal}
         />
-        {playMode === PlayMode.Won || playMode === PlayMode.Lost ? (
-          <End
-            loading={() => <div />}
-            type={playMode}
-            onRestart={this.onRestart}
-          />
+        {/*playMode === PlayMode.Won*/ true ? (
+          <Win loading={() => <div />} onRestart={this.onRestart} />
+        ) : playMode === PlayMode.Lost ? (
+          "Loser"
         ) : (
           <Board
             width={width}
@@ -110,7 +108,6 @@ export default class Game extends Component<Props, State> {
   }
 
   componentDidMount() {
-    document.documentElement.classList.add("in-game");
     this.props.gameChangeSubscribe(this.onGameChange);
     if (!this.props.dangerMode) {
       this.props.onDangerModeChange(true);
@@ -118,7 +115,6 @@ export default class Game extends Component<Props, State> {
   }
 
   componentWillUnmount() {
-    document.documentElement.classList.remove("in-game");
     this.props.gameChangeUnsubscribe(this.onGameChange);
   }
 

@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 
-import { Arrow } from "../icons/index.js";
+import { Arrow } from "../icons/initial.js";
 import TopBar from "../top-bar/index.js";
 import {
   field as fieldStyle,
