@@ -11,25 +11,27 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Fullscreen, Settings } from "../icons";
-import { bottomBar, icons } from "./style.css";
+import {
+  closed as dialogClosed,
+  open as dialogOpen,
+  settingsWindow
+} from "./style.css";
 
-export interface Props {
-  onFullscreenClick: () => void;
-  onSettingsClick: () => void;
+export interface State {
+  open: boolean;
 }
-export interface State {}
 
-export default class BottomBar extends Component<Props, State> {
-  render({ onFullscreenClick, onSettingsClick }: Props) {
+export default class Settings extends Component<State> {
+  state: State = {
+    open: false
+  };
+  render({ open }: State) {
     return (
-      <div class={bottomBar}>
-        <button class={icons} onClick={onSettingsClick}>
-          <Settings />
-        </button>
-        <button class={icons} onClick={onFullscreenClick}>
-          <Fullscreen />
-        </button>
+      <div class={`${open ? dialogOpen : dialogClosed}`}>
+        <div class={settingsWindow}>
+          <h1>Settings</h1>
+          <button>some button</button>
+        </div>
       </div>
     );
   }

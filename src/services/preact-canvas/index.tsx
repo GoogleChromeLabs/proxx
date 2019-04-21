@@ -27,6 +27,7 @@ import {
   nebula as nebulaStyle,
   notDangerMode as notDangerModeStyle
 } from "./components/nebula/style.css";
+import Settings from "./components/settings";
 import { game as gameClassName, main } from "./style.css";
 
 // If the user tries to start a game when we aren't ready, how long do we wait before showing the
@@ -41,6 +42,7 @@ interface State {
   game?: GameType;
   dangerMode: boolean;
   awaitingGame: boolean;
+  settingsOpen: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -68,7 +70,8 @@ const immedateGameSessionKey = "instantGame";
 class PreactService extends Component<Props, State> {
   state: State = {
     dangerMode: false,
-    awaitingGame: false
+    awaitingGame: false,
+    settingsOpen: false
   };
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
@@ -116,7 +119,11 @@ class PreactService extends Component<Props, State> {
           dangerMode={game ? dangerMode : false}
         />
         {mainComponent}
-        <BottomBar onFullscreenClick={this._onFullscreenClick} />
+        <BottomBar
+          onFullscreenClick={this._onFullscreenClick}
+          onSettingsClick={this._onSettingsClick}
+        />
+        <Settings open={this.state.settingsOpen} />
       </div>
     );
   }
@@ -139,6 +146,11 @@ class PreactService extends Component<Props, State> {
   @bind
   private _onFullscreenClick() {
     document.documentElement.requestFullscreen();
+  }
+
+  @bind
+  private _onSettingsClick() {
+    this.setState({ settingsOpen: !this.state.settingsOpen });
   }
 
   @bind
