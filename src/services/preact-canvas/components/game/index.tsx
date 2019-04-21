@@ -110,6 +110,7 @@ export default class Game extends Component<Props, State> {
   }
 
   componentDidMount() {
+    document.documentElement.classList.add("in-game");
     this.props.gameChangeSubscribe(this.onGameChange);
     if (!this.props.dangerMode) {
       this.props.onDangerModeChange(true);
@@ -117,6 +118,7 @@ export default class Game extends Component<Props, State> {
   }
 
   componentWillUnmount() {
+    document.documentElement.classList.remove("in-game");
     this.props.gameChangeUnsubscribe(this.onGameChange);
   }
 

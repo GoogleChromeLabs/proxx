@@ -73,7 +73,7 @@ class PreactService extends Component<Props, State> {
       mainComponent = (
         <Intro
           onStartGame={this._onStartGame}
-          spinner={!stateService || !texturesReady}
+          loading={!stateService || !texturesReady}
         />
       );
     } else {

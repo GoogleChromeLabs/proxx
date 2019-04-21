@@ -4,7 +4,7 @@
 
 .toggle-label {
   position: fixed;
-  bottom: 10px;
+  bottom: 9px;
   left: 50%;
   white-space: nowrap;
   transform: translateX(-50%);
@@ -15,7 +15,7 @@
 
 @media (min-width: 320px) {
   .toggle-label {
-    bottom: 22px;
+    bottom: 17px;
   }
 }
 
