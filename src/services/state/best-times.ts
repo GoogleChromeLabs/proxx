@@ -3,7 +3,7 @@ import { get, set } from "idb-keyval";
 function getKey(width: number, height: number, mines: number) {
   // Order width and height, because a 90 degree rotated board is the same thing in terms of
   // difficulty.
-  const [size1, size2] = [width, height].sort((a, b) => (a > b ? 1 : -1));
+  const [size1, size2] = [width, height].sort((a, b) => a - b);
   return `hs:${size1}:${size2}:${mines}`;
 }
 
