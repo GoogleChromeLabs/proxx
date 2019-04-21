@@ -10,17 +10,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export async function forEach<T>(
-  stream: ReadableStream<T>,
-  f: (t: T) => Promise<any>
-) {
-  const reader = stream.getReader();
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) {
-      return;
-    }
-    await f(value);
-  }
+export function minSec(ms: number): string {
+  const minutes = Math.floor(ms / (1000 * 60));
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minStr = minutes < 10 ? "0" + minutes : "" + minutes;
+  const secStr = seconds < 10 ? "0" + seconds : "" + seconds;
+  return `${minStr}:${secStr}`;
 }

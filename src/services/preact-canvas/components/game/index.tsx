@@ -13,6 +13,7 @@
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import StateService from "src/services/state";
+import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
@@ -27,6 +28,7 @@ export interface Props {
   stateService: Remote<StateService>;
   width: number;
   height: number;
+  mines: number;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
   onDangerModeChange: (v: boolean) => void;
@@ -38,11 +40,12 @@ interface State {
   playMode: PlayMode;
   toReveal: number;
   startTime: number;
-  endTime: number;
+  completeTime: number;
+  bestTime: number;
 }
 
 // tslint:disable-next-line:variable-name
-const End = deferred(import("../end/index.js").then(m => m.default));
+const Win = deferred(import("../win/index.js").then(m => m.default));
 
 // The second this file is loaded, activate focus handling
 initFocusHandling();
@@ -56,7 +59,8 @@ export default class Game extends Component<Props, State> {
       playMode: PlayMode.Pending,
       toReveal: props.toRevealTotal,
       startTime: 0,
-      endTime: 0
+      completeTime: 0,
+      bestTime: 0
     };
   }
 
@@ -69,7 +73,7 @@ export default class Game extends Component<Props, State> {
       gameChangeUnsubscribe,
       toRevealTotal
     }: Props,
-    { playMode, toReveal }: State
+    { playMode, toReveal, completeTime, bestTime }: State
   ) {
     const timerRunning = playMode === PlayMode.Playing;
 
@@ -80,37 +84,44 @@ export default class Game extends Component<Props, State> {
           toReveal={toReveal}
           toRevealTotal={toRevealTotal}
         />
-        {playMode === PlayMode.Won || playMode === PlayMode.Lost ? (
-          <End
+        {playMode === PlayMode.Won ? (
+          <Win
             loading={() => <div />}
-            type={playMode}
+            onMainMenu={this.onReset}
             onRestart={this.onRestart}
+            time={completeTime}
+            bestTime={bestTime}
           />
+        ) : playMode === PlayMode.Lost ? (
+          "Loser"
         ) : (
-          <Board
-            width={width}
-            height={height}
-            gameChangeSubscribe={gameChangeSubscribe}
-            gameChangeUnsubscribe={gameChangeUnsubscribe}
-            onCellClick={this.onCellClick}
-          />
+          [
+            <Board
+              width={width}
+              height={height}
+              dangerMode={dangerMode}
+              gameChangeSubscribe={gameChangeSubscribe}
+              gameChangeUnsubscribe={gameChangeUnsubscribe}
+              onCellClick={this.onCellClick}
+              onDangerModeChange={this.props.onDangerModeChange}
+            />,
+            <label class={toggleLabel}>
+              Reveal
+              <input
+                class={checkbox}
+                type="checkbox"
+                onChange={this.onDangerModeChange}
+                checked={!dangerMode}
+              />
+              <span class={toggle} /> Flag
+            </label>
+          ]
         )}
-        <label class={toggleLabel}>
-          Reveal
-          <input
-            class={checkbox}
-            type="checkbox"
-            onChange={this.onDangerModeChange}
-            checked={!dangerMode}
-          />
-          <span class={toggle} /> Flag
-        </label>
       </div>
     );
   }
 
   componentDidMount() {
-    document.documentElement.classList.add("in-game");
     this.props.gameChangeSubscribe(this.onGameChange);
     if (!this.props.dangerMode) {
       this.props.onDangerModeChange(true);
@@ -118,17 +129,21 @@ export default class Game extends Component<Props, State> {
   }
 
   componentWillUnmount() {
-    document.documentElement.classList.remove("in-game");
     this.props.gameChangeUnsubscribe(this.onGameChange);
   }
 
   @bind
-  private onRestart() {
+  private onReset() {
     this.props.stateService.reset();
   }
 
   @bind
-  private onGameChange(gameChange: StateChange) {
+  private onRestart() {
+    this.props.stateService.restart();
+  }
+
+  @bind
+  private async onGameChange(gameChange: StateChange) {
     const newState: Partial<State> = {};
 
     if (
@@ -140,7 +155,14 @@ export default class Game extends Component<Props, State> {
       if (gameChange.playMode! === PlayMode.Playing) {
         newState.startTime = Date.now();
       } else if (gameChange.playMode! === PlayMode.Won) {
-        newState.endTime = Date.now();
+        newState.completeTime = Date.now() - this.state.startTime;
+        newState.bestTime = await submitTime(
+          this.props.width,
+          this.props.height,
+          this.props.mines,
+          newState.completeTime
+        );
+        this.props.onDangerModeChange(false);
       }
     }
 

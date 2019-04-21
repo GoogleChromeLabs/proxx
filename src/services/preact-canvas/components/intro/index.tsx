@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 
-import { Arrow } from "../icons/index.js";
+import { Arrow } from "../icons/initial.js";
 import TopBar from "../top-bar/index.js";
 import {
   field as fieldStyle,
@@ -118,6 +118,8 @@ export default class Intro extends Component<Props, State> {
   private _minesInput?: HTMLInputElement;
 
   componentDidMount() {
+    window.scrollTo(0, 0);
+
     setTimeout(() => {
       this.setState({ longLoad: true });
     }, 1000);

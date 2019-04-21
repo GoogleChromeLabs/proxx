@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Fullscreen } from "../icons";
+import { Fullscreen } from "../icons/initial";
 import { bottomBar, fullscreen } from "./style.css";
 
 export interface Props {
