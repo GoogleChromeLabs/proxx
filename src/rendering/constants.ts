@@ -38,6 +38,7 @@ export const flashInAnimationLength = 100;
 export const flashOutAnimationLength = 700;
 
 // Texture constants
+export const revealedAlpha = 0.3;
 export const fadedLinesAlpha = 0.3;
 export const safetyBufferFactor = 0.97;
 export const thickLine = 20 / 650;

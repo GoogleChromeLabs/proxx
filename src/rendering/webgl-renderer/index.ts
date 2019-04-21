@@ -32,6 +32,7 @@ import {
   flashOutAnimationLength,
   idleAnimationLength,
   idleAnimationNumFrames,
+  revealedAlpha,
   spriteSize
 } from "../constants";
 import { Renderer } from "../renderer";
@@ -233,7 +234,9 @@ export default class WebGlRenderer implements Renderer {
     const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
     const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
     dynamicTileDataA[DynamicTileDataA.TOUCHING] = cell.touchingMines;
-    dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 0;
+
+    dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] =
+      cell.touchingMines <= 0 ? revealedAlpha : 0;
     dynamicTileDataB[DynamicTileDataB.BOXES_OPACITY] = 0;
   }
 
