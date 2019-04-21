@@ -97,6 +97,8 @@
 
 .start-button {
   composes: button from "../../utils.css";
+  /** PostCSS seems to be ordering class names incorrectly, meaning I can't override this without
+   * !important */
   margin: 0 var(--item-margin) !important;
   text-transform: uppercase;
   letter-spacing: 0.15rem;
