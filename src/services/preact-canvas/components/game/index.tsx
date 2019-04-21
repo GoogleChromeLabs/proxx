@@ -13,7 +13,7 @@
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import { lazyGenerateTextures } from "src/rendering/animation";
-import { Renderer } from "src/rendering/renderer";
+import { getRendererInstance, Renderer } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { bind } from "src/utils/bind";
 import { getCellSizes } from "src/utils/cell-sizing";
@@ -42,18 +42,15 @@ interface State {
   toReveal: number;
   startTime: number;
   endTime: number;
-  // TODO: Temporary hack. This can be done better, I hope.
+  // This should never not be set as we prevent the game from starting until the
+  // renderer is loaded.
   renderer?: Renderer;
 }
 
 // tslint:disable-next-line:variable-name
 const End = deferred(import("../end/index.js").then(m => m.default));
 
-// TODO: Fall back to 2D canvas
-const rendererPromise = import("../../../../rendering/webgl-renderer/index.js");
-
 // The second this file is loaded, activate focus handling
-lazyGenerateTextures();
 initFocusHandling();
 
 export default class Game extends Component<Props, State> {
@@ -68,7 +65,7 @@ export default class Game extends Component<Props, State> {
       endTime: 0
     };
 
-    rendererPromise.then(m => this.setState({ renderer: new m.default() }));
+    getRendererInstance().then(renderer => this.setState({ renderer }));
   }
 
   render(

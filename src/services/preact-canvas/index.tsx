@@ -13,6 +13,7 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
+import { getRendererInstance } from "src/rendering/renderer";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { GameType } from "../state";
@@ -32,6 +33,7 @@ interface State {
   stateService?: Remote<StateService>;
   dangerMode: boolean;
   texturesReady: boolean;
+  rendererReady: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -50,10 +52,13 @@ const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
 
+const rendererPromise = getRendererInstance();
+
 class PreactService extends Component<Props, State> {
   state: State = {
     dangerMode: false,
-    texturesReady: false
+    texturesReady: false,
+    rendererReady: false
   };
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
@@ -65,7 +70,7 @@ class PreactService extends Component<Props, State> {
 
   render(
     _props: Props,
-    { game, stateService, dangerMode, texturesReady }: State
+    { game, stateService, dangerMode, texturesReady, rendererReady }: State
   ) {
     let mainComponent: VNode;
 
@@ -73,7 +78,7 @@ class PreactService extends Component<Props, State> {
       mainComponent = (
         <Intro
           onStartGame={this._onStartGame}
-          spinner={!stateService || !texturesReady}
+          spinner={!stateService || !texturesReady || !rendererReady}
         />
       );
     } else {
@@ -156,6 +161,9 @@ class PreactService extends Component<Props, State> {
   private async _init(props: Props) {
     texturePromise.then(() => {
       this.setState({ texturesReady: true });
+    });
+    rendererPromise.then(() => {
+      this.setState({ rendererReady: true });
     });
 
     const stateService = await props.stateServicePromise;

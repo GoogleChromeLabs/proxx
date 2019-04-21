@@ -28,3 +28,11 @@ export interface Renderer {
   ): void;
   stop(): void;
 }
+
+// TODO: Do feature detection for WebGL and required extensions and fall back to
+// 2D if necessary.
+const renderer = import("./webgl-renderer/index.js").then(m => new m.default());
+
+export function getRendererInstance(): Promise<Renderer> {
+  return renderer;
+}
