@@ -7,8 +7,19 @@
   margin: 0;
 }
 
+.circle-button{
+  composes: unbutton;
+  background: #fff;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 0.1rem;
+  border: 3px solid #fff;
+}
+
 .button,
-.button-alt {
+.button-alt,
+.button-on,
+.button-off {
   composes: unbutton;
   background: #fff;
   font-weight: bold;
@@ -26,4 +37,15 @@
 .button-alt {
   background: none;
   color: #fff;
+}
+
+.button-on {
+  background: #3ee5ea;
+  border-color: #3ee5ea;
+}
+
+.button-off {
+  color: #fff;
+  background: #ff274b;
+  border-color: #ff274b;
 }

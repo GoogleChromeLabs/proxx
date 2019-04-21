@@ -1,17 +1,54 @@
-.open{
-  display: block;
+.settings {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
 }
 
-.closed {
-  display:none;
+.settings.closed {
+  display: none;
 }
 
 .settings-window {
-  display: inline-block;
+  background-color:rgba(0,0,0,0);
+  display: flex;
+  flex-flow: column;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 33rem;
+  /* --item-margin: 0.4rem; */
+}
+
+.close-button {
+  composes: circle-button from "../../utils.css";
+  fill: #000;
   position: fixed;
-  top: 50%;
-  left:50%;
-  transform: translate(-50%, -50%);
-  width:50%;
-  background-color: black;
+  right: 20px;
+  top: 20px;
+  width: var(--circlebtn-size);
+  height: var(--circlebtn-size);
+}
+
+.button, .button-on, .button-off {
+  text-transform: uppercase;
+  display: block;
+  width: 100%;
+  margin: 1.2rem 0 0 !important;
+  font-size: 1.1rem;
+  letter-spacing: 0.2rem;
+}
+
+.button {
+  composes: button from "../../utils.css";
+}
+
+.button-on{
+  composes: button-on from "../../utils.css";
+}
+.button-off{
+  composes: button-off from "../../utils.css";
 }

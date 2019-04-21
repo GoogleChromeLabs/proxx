@@ -11,10 +11,15 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
+import { Close } from "../icons/initial";
 import {
-  closed as dialogClosed,
-  open as dialogOpen,
-  settingsWindow
+  button as btnStyle,
+  buttonOff as btnOffStyle,
+  buttonOn as btnOnStyle,
+  closeButton as closebtnStyle,
+  closed as closedStyle,
+  settings as settingsStyle,
+  settingsWindow as settingsWindowStyle
 } from "./style.css";
 
 export interface Props {
@@ -27,16 +32,22 @@ export default class Settings extends Component<Props> {
 
   render({ onCloseClicked, open }: Props) {
     return (
-      <div class={`${open ? dialogOpen : dialogClosed}`}>
-        <div class={settingsWindow}>
-          <h1>Settings</h1>
+      <div
+        role="dialog"
+        aria-label="settings dialog"
+        class={[settingsStyle, `${open ? "" : closedStyle}`].join(" ")}
+      >
+        <div class={settingsWindowStyle}>
           <button
+            aria-label="close settings dialog"
+            class={closebtnStyle}
             ref={focusItem => (this.focusItem = focusItem)}
             onClick={onCloseClicked}
           >
-            close
+            <Close />
           </button>
-          <button>some button</button>
+          <button class={true ? btnOnStyle : btnOffStyle}>Animations</button>
+          <button class={btnStyle}>About</button>
         </div>
       </div>
     );
