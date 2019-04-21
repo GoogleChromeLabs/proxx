@@ -172,7 +172,12 @@ export default class Canvas2DRenderer implements Renderer {
     ts: number
   ) {
     this._ctx!.save();
-    staticTextureDrawer!(cell.touchingMines, this._ctx!, this._tileSize!);
+    if (cell.touchingMines > 0) {
+      staticTextureDrawer!(cell.touchingMines, this._ctx!, this._tileSize!);
+    } else {
+      this._ctx!.globalAlpha = revealedAlpha;
+      staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, this._ctx!, this._tileSize!);
+    }
     this._ctx!.restore();
   }
 
