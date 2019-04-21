@@ -46,7 +46,9 @@ interface State {
   settingsOpen: boolean;
 }
 
+// install inert polyfill for A11y
 initInert();
+
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
 
 // tslint:disable-next-line:variable-name
