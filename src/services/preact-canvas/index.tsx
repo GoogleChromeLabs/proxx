@@ -132,6 +132,17 @@ class PreactService extends Component<Props, State> {
     );
   }
 
+  componentDidMount() {
+    window.addEventListener("keyup", this._onKeyUp);
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Escape" && this.state.settingsOpen) {
+      this._onSettingsClick();
+    }
+  }
+
   @bind
   private _onDangerModeChange(dangerMode: boolean) {
     this.setState({ dangerMode });
