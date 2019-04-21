@@ -80,6 +80,7 @@ class PreactService extends Component<Props, State> {
       mainComponent = (
         <Game
           loading={() => <div />}
+          key={game.id}
           width={game.width}
           height={game.height}
           toRevealTotal={game.toRevealTotal}

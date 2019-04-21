@@ -80,8 +80,12 @@ export default class Game extends Component<Props, State> {
           toReveal={toReveal}
           toRevealTotal={toRevealTotal}
         />
-        {/*playMode === PlayMode.Won*/ true ? (
-          <Win loading={() => <div />} onRestart={this.onRestart} />
+        {playMode === PlayMode.Won ? (
+          <Win
+            loading={() => <div />}
+            onMainMenu={this.onReset}
+            onRestart={this.onRestart}
+          />
         ) : playMode === PlayMode.Lost ? (
           "Loser"
         ) : (
@@ -119,8 +123,13 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onRestart() {
+  private onReset() {
     this.props.stateService.reset();
+  }
+
+  @bind
+  private onRestart() {
+    this.props.stateService.restart();
   }
 
   @bind

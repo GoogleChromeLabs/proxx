@@ -17,10 +17,12 @@
   top: 30%;
   left: 45.7%;
   transform-origin: 50% 86%;
+  animation: time-spin 10s linear infinite;
+  animation-play-state: paused;
 }
 
 .time-icon-animate::after {
-  animation: time-spin 10s linear infinite;
+  animation-play-state: running;
 }
 
 .time-icon-svg {

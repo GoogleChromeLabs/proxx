@@ -15,6 +15,7 @@ import MinesweeperGame, {
 } from "../../gamelogic/index";
 
 export interface GameType {
+  id: number;
   width: number;
   height: number;
   toRevealTotal: number;
@@ -60,7 +61,12 @@ export default class StateService {
 
     if (gameActiveChange) {
       this._notify({
-        game: { width, height, toRevealTotal: this._game.toReveal }
+        game: {
+          width,
+          height,
+          toRevealTotal: this._game.toReveal,
+          id: Math.random()
+        }
       });
     }
 
@@ -82,6 +88,17 @@ export default class StateService {
     this._game.unsubscribe();
     this._game = undefined;
     this._notify({ game: undefined });
+  }
+
+  restart() {
+    if (!this._game) {
+      return;
+    }
+
+    this._game.unsubscribe();
+    const oldGame = this._game;
+    this._game = undefined;
+    this.initGame(oldGame.width, oldGame.height, oldGame.mines);
   }
 
   flag(x: number, y: number) {

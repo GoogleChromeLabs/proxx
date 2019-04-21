@@ -14,6 +14,8 @@ import { Component, h } from "preact";
 
 import { EndSquare, Timer } from "../icons/additional";
 import {
+  againButton,
+  mainButton,
   score,
   scoreRow,
   time,
@@ -27,10 +29,11 @@ import {
 
 export interface Props {
   onRestart: () => void;
+  onMainMenu: () => void;
 }
 
 export default class End extends Component<Props> {
-  render({ onRestart }: Props) {
+  render({ onRestart, onMainMenu }: Props) {
     return (
       <div class={winScreen}>
         <div class={winInner}>
@@ -47,12 +50,12 @@ export default class End extends Component<Props> {
               <div class={time}>01:44</div>
             </div>
           </div>
-          <div>
-            <button>Play again</button>
-          </div>
-          <div>
-            <button>Quit</button>
-          </div>
+          <button class={againButton} onClick={onRestart}>
+            Play again
+          </button>
+          <button class={mainButton} onClick={onMainMenu}>
+            Main menu
+          </button>
         </div>
       </div>
     );

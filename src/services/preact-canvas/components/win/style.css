@@ -38,6 +38,7 @@
   display: flex;
   fill: #fff;
   padding: 2rem 0;
+  margin-bottom: 0.6rem;
 }
 
 .score-row::before,
@@ -77,4 +78,22 @@
 .time-label {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
+}
+
+.again-button,
+.main-button {
+  text-transform: uppercase;
+  display: block;
+  width: 100%;
+  margin: 1.2rem 0 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.2rem;
+}
+
+.again-button {
+  composes: button from "../../utils.css";
+}
+
+.main-button {
+  composes: button-alt from "../../utils.css";
 }

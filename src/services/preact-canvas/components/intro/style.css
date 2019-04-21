@@ -97,7 +97,7 @@
 
 .start-button {
   composes: button from "../../utils.css";
-  margin: 0 var(--item-margin);
+  margin: 0 var(--item-margin) !important;
   text-transform: uppercase;
   letter-spacing: 0.15rem;
   will-change: opacity;

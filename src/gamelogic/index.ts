@@ -39,6 +39,18 @@ export default class MinesweeperGame {
     return this._toReveal;
   }
 
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
+  }
+
+  get mines() {
+    return this._mines;
+  }
+
   grid: Cell[][];
   private _playMode = PlayMode.Pending;
   private _toReveal = 0;
