@@ -22,7 +22,16 @@ import initFocusHandling from "../../../../utils/focus-visible";
 import Board from "../board";
 import deferred from "../deferred";
 import TopBar from "../top-bar";
-import { checkbox, game as gameClass, toggle, toggleLabel } from "./style.css";
+import {
+  againButton,
+  checkbox,
+  exitRow,
+  exitRowInner,
+  game as gameClass,
+  mainButton,
+  toggle,
+  toggleLabel
+} from "./style.css";
 
 export interface Props {
   stateService: Remote<StateService>;
@@ -92,8 +101,6 @@ export default class Game extends Component<Props, State> {
             time={completeTime}
             bestTime={bestTime}
           />
-        ) : playMode === PlayMode.Lost ? (
-          "Loser"
         ) : (
           [
             <Board
@@ -105,16 +112,31 @@ export default class Game extends Component<Props, State> {
               onCellClick={this.onCellClick}
               onDangerModeChange={this.props.onDangerModeChange}
             />,
-            <label class={toggleLabel}>
-              Reveal
-              <input
-                class={checkbox}
-                type="checkbox"
-                onChange={this.onDangerModeChange}
-                checked={!dangerMode}
-              />
-              <span class={toggle} /> Flag
-            </label>
+            playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
+              <label class={toggleLabel}>
+                Reveal
+                <input
+                  class={checkbox}
+                  type="checkbox"
+                  onChange={this.onDangerModeChange}
+                  checked={!dangerMode}
+                />
+                <span class={toggle} /> Flag
+              </label>
+            ) : playMode === PlayMode.Lost ? (
+              <div class={exitRow}>
+                <div class={exitRowInner}>
+                  <button class={againButton} onClick={this.onRestart}>
+                    Try again
+                  </button>
+                  <button class={mainButton} onClick={this.onReset}>
+                    Main menu
+                  </button>
+                </div>
+              </div>
+            ) : (
+              undefined
+            )
           ]
         )}
       </div>
@@ -187,6 +209,12 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onCellClick(cellData: [number, number, Cell], alt: boolean) {
+    if (
+      this.state.playMode !== PlayMode.Pending &&
+      this.state.playMode !== PlayMode.Playing
+    ) {
+      return;
+    }
     const [x, y, cell] = cellData;
     let { dangerMode } = this.props;
 

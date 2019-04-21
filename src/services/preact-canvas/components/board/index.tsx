@@ -11,8 +11,8 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { StateChange } from "src/gamelogic/index.js";
-import { Cell, GridChanges } from "../../../../gamelogic/types.js";
+import { StateChange } from "src/gamelogic/index";
+import { Cell, GridChanges } from "../../../../gamelogic/types";
 import {
   AnimationDesc,
   AnimationName,
@@ -23,13 +23,14 @@ import {
   highlightInAnimation,
   highlightOutAnimation,
   idleAnimation,
+  minedAnimation,
   numberAnimation
-} from "../../../../rendering/animation.js";
-import { bind } from "../../../../utils/bind.js";
-import { staticDevicePixelRatio } from "../../../../utils/static-dpr.js";
-import { GameChangeCallback } from "../../index.js";
+} from "../../../../rendering/animation";
+import { bind } from "../../../../utils/bind";
+import { staticDevicePixelRatio } from "../../../../utils/static-dpr";
+import { GameChangeCallback } from "../../index";
 
-import { rippleSpeed } from "src/rendering/constants.js";
+import { rippleSpeed } from "src/rendering/constants";
 import {
   board,
   button as buttonStyle,
@@ -262,7 +263,12 @@ export default class Board extends Component<Props> {
           this.animationLists.set(btn, animationList);
         }
       });
-      if (cell.touchingMines > 0) {
+      if (cell.hasMine) {
+        animationList.push({
+          name: AnimationName.MINED,
+          start: ts + 100
+        });
+      } else if (cell.touchingMines > 0) {
         animationList.unshift({
           name: AnimationName.NUMBER,
           start: ts + 100
@@ -308,6 +314,9 @@ export default class Board extends Component<Props> {
           break;
         case AnimationName.FLAGGED:
           flaggedAnimation(context);
+          break;
+        case AnimationName.MINED:
+          minedAnimation(context);
           break;
         case AnimationName.HIGHLIGHT_IN:
           highlightInAnimation(context);

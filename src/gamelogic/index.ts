@@ -57,6 +57,7 @@ export default class MinesweeperGame {
   private _flags = 0;
   private _changeCallback?: ChangeCallback;
   private _stateChange: StateChange = {};
+  private _minedCells: Array<[number, number]> = [];
 
   constructor(
     private _width: number,
@@ -256,6 +257,7 @@ export default class MinesweeperGame {
       const y = (index - x) / this._width;
 
       this.grid[y][x].hasMine = true;
+      this._minedCells.push([x, y]);
       minesToPlace -= 1;
 
       for (const [nextX, nextY] of this._getSurrounding(x, y)) {
@@ -296,11 +298,22 @@ export default class MinesweeperGame {
   }
 
   /**
+   * When the user loses, reveal all the mines.
+   */
+  private _revealAllMines(): void {
+    for (const [x, y] of this._minedCells) {
+      const cell = this.grid[y][x];
+      cell.revealed = true;
+      this._pushGridChange(x, y);
+    }
+  }
+
+  /**
    * @param x
    * @param y
    * @param objsCloned A weakmap to track which objects have already been cloned.
    */
-  private _reveal(x: number, y: number) {
+  private _reveal(x: number, y: number): void {
     // The set contains the cell position as if it were a single flat array.
     const revealSet = new Set<number>([x + y * this._width]);
 
@@ -313,19 +326,20 @@ export default class MinesweeperGame {
       if (cell.revealed) {
         throw Error("Cell already revealed");
       }
+      if (cell.hasMine) {
+        this._revealAllMines();
+        this._endGame(PlayMode.Lost);
+        break;
+      }
+
       cell.revealed = true;
       this._pushGridChange(x, y);
-
-      if (cell.hasMine) {
-        this._endGame(PlayMode.Lost);
-        return;
-      }
 
       this._setToReveal(this._toReveal - 1);
 
       if (this._toReveal === 0) {
         this._endGame(PlayMode.Won);
-        return;
+        break;
       }
 
       // Don't reveal the surrounding squares if this is touching a mine.

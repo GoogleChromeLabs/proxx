@@ -41,7 +41,8 @@ export const enum AnimationName {
   HIGHLIGHT_IN,
   HIGHLIGHT_OUT,
   NUMBER,
-  FLAGGED
+  FLAGGED,
+  MINED
 }
 
 export interface AnimationDesc {
@@ -125,6 +126,23 @@ export function flaggedAnimation({
   idleAnimationTextureDrawer!(idx, ctx, cellSize);
   ctx.globalAlpha = 1;
   staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, ctx, cellSize);
+  ctx.restore();
+}
+
+export function minedAnimation({
+  width: cellSize,
+  ctx,
+  animation,
+  ts
+}: Context) {
+  if (animation.start > ts) {
+    return;
+  }
+  ctx.save();
+  ctx.fillStyle = "#f00";
+  ctx.beginPath();
+  ctx.arc(cellSize / 2, cellSize / 2, cellSize * 0.3, 0, 2 * Math.PI);
+  ctx.fill();
   ctx.restore();
 }
 
