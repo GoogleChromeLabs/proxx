@@ -118,6 +118,8 @@ export default class Intro extends Component<Props, State> {
   private _minesInput?: HTMLInputElement;
 
   componentDidMount() {
+    window.scrollTo(0, 0);
+
     setTimeout(() => {
       this.setState({ longLoad: true });
     }, 1000);

@@ -36,6 +36,10 @@ export interface Props {
 }
 
 export default class End extends Component<Props> {
+  componentDidMount() {
+    window.scrollTo(0, 0);
+  }
+
   render({ onRestart, onMainMenu, time, bestTime }: Props) {
     const timeStr = minSec(time);
     const bestTimeStr = minSec(bestTime);

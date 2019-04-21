@@ -102,6 +102,7 @@ export default class Board extends Component<Props> {
   private changeBuffer: GridChanges = [];
 
   componentDidMount() {
+    window.scrollTo(0, 0);
     document.documentElement.classList.add("in-game");
     this.createTable(this.props.width, this.props.height);
     this.props.gameChangeSubscribe(this.doManualDomHandling);
