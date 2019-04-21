@@ -101,7 +101,7 @@
   text-transform: uppercase;
   letter-spacing: 0.15rem;
   will-change: opacity;
-  transition: opacity 0.8s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
 }
 
 .start-button:disabled {
@@ -111,7 +111,7 @@
 .start-button-text-hide {
   will-change: opacity;
   opacity: 0;
-  transition: opacity 0.4s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 }
 
 .start-button-text-show {

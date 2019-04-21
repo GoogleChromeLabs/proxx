@@ -1,10 +1,9 @@
 .win-screen {
   display: flex;
   flex: 1;
-  align-items: center;
-  justify-content: center;
   position: relative;
   text-align: center;
+  flex-flow: column;
 }
 
 .win-inner {
@@ -13,7 +12,8 @@
   width: 100%;
   box-sizing: border-box;
   max-width: 500px;
-  padding: var(--bar-avoid) var(--side-margin) 0;
+  padding: var(--bar-avoid) var(--side-margin) 1.3rem;
+  margin: 0 auto;
 }
 
 .win-square {

@@ -95,24 +95,28 @@ export default class Game extends Component<Props, State> {
         ) : playMode === PlayMode.Lost ? (
           "Loser"
         ) : (
-          <Board
-            width={width}
-            height={height}
-            gameChangeSubscribe={gameChangeSubscribe}
-            gameChangeUnsubscribe={gameChangeUnsubscribe}
-            onCellClick={this.onCellClick}
-          />
+          [
+            <Board
+              width={width}
+              height={height}
+              dangerMode={dangerMode}
+              gameChangeSubscribe={gameChangeSubscribe}
+              gameChangeUnsubscribe={gameChangeUnsubscribe}
+              onCellClick={this.onCellClick}
+              onDangerModeChange={this.props.onDangerModeChange}
+            />,
+            <label class={toggleLabel}>
+              Reveal
+              <input
+                class={checkbox}
+                type="checkbox"
+                onChange={this.onDangerModeChange}
+                checked={!dangerMode}
+              />
+              <span class={toggle} /> Flag
+            </label>
+          ]
         )}
-        <label class={toggleLabel}>
-          Reveal
-          <input
-            class={checkbox}
-            type="checkbox"
-            onChange={this.onDangerModeChange}
-            checked={!dangerMode}
-          />
-          <span class={toggle} /> Flag
-        </label>
       </div>
     );
   }
@@ -158,6 +162,7 @@ export default class Game extends Component<Props, State> {
           this.props.mines,
           newState.completeTime
         );
+        this.props.onDangerModeChange(false);
       }
     }
 

@@ -30,7 +30,6 @@ import { staticDevicePixelRatio } from "../../../../utils/static-dpr.js";
 import { GameChangeCallback } from "../../index.js";
 
 import { rippleSpeed } from "src/rendering/constants.js";
-import { getCellSizes } from "src/utils/cell-sizing.js";
 import {
   board,
   button as buttonStyle,
@@ -51,8 +50,10 @@ const defaultCell: Cell = {
 
 export interface Props {
   onCellClick: (cell: [number, number, Cell], alt: boolean) => void;
+  onDangerModeChange: (v: boolean) => void;
   width: number;
   height: number;
+  dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
@@ -108,12 +109,18 @@ export default class Board extends Component<Props> {
     this.animationsInit();
 
     window.addEventListener("resize", this.onWindowResize);
+    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
-    window.removeEventListener("resize", this.onWindowResize);
     this.props.gameChangeUnsubscribe(this.doManualDomHandling);
+
+    window.removeEventListener("resize", this.onWindowResize);
+    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
+
     // Stop rAF
     this.renderLoopRunning = false;
   }
@@ -128,6 +135,20 @@ export default class Board extends Component<Props> {
         <div class={containerStyle} />
       </div>
     );
+  }
+
+  @bind
+  private _onKeyDown(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
   }
 
   @bind
