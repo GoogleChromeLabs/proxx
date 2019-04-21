@@ -54,10 +54,6 @@ async function bootstrap() {
   }
 
   gameUI(remoteServices.then(remoteServices => remoteServices.stateService));
-
-  if (parsedURL.searchParams.has("square")) {
-    import("./utils/square-spinner.js");
-  }
 }
 
 bootstrap().catch(e => console.error(e));

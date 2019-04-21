@@ -12,13 +12,14 @@
  */
 import { Component, h } from "preact";
 
+import { minSec } from "../../../../utils/format";
 import { EndSquare, Timer } from "../icons/additional";
 import {
   againButton,
   mainButton,
   score,
   scoreRow,
-  time,
+  time as timeStyle,
   timeLabel,
   timerIcon,
   winInner,
@@ -30,24 +31,31 @@ import {
 export interface Props {
   onRestart: () => void;
   onMainMenu: () => void;
+  time: number;
+  bestTime: number;
 }
 
 export default class End extends Component<Props> {
-  render({ onRestart, onMainMenu }: Props) {
+  render({ onRestart, onMainMenu, time, bestTime }: Props) {
+    const timeStr = minSec(time);
+    const bestTimeStr = minSec(bestTime);
+
     return (
       <div class={winScreen}>
         <div class={winInner}>
           <EndSquare class={winSquare} />
-          <h2 class={winState}>New high score!</h2>
+          <h2 class={winState}>
+            {time === bestTime ? "New high score!" : "You win!"}
+          </h2>
           <div class={scoreRow}>
             <div class={score}>
               <div class={timeLabel}>Score</div>
-              <div class={time}>01:44</div>
+              <div class={timeStyle}>{timeStr}</div>
             </div>
             <Timer class={timerIcon} />
             <div class={score}>
               <div class={timeLabel}>Best</div>
-              <div class={time}>01:44</div>
+              <div class={timeStyle}>{bestTimeStr}</div>
             </div>
           </div>
           <button class={againButton} onClick={onRestart}>

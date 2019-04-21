@@ -13,6 +13,7 @@
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import StateService from "src/services/state";
+import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
@@ -27,6 +28,7 @@ export interface Props {
   stateService: Remote<StateService>;
   width: number;
   height: number;
+  mines: number;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
   onDangerModeChange: (v: boolean) => void;
@@ -38,7 +40,8 @@ interface State {
   playMode: PlayMode;
   toReveal: number;
   startTime: number;
-  endTime: number;
+  completeTime: number;
+  bestTime: number;
 }
 
 // tslint:disable-next-line:variable-name
@@ -56,7 +59,8 @@ export default class Game extends Component<Props, State> {
       playMode: PlayMode.Pending,
       toReveal: props.toRevealTotal,
       startTime: 0,
-      endTime: 0
+      completeTime: 0,
+      bestTime: 0
     };
   }
 
@@ -69,7 +73,7 @@ export default class Game extends Component<Props, State> {
       gameChangeUnsubscribe,
       toRevealTotal
     }: Props,
-    { playMode, toReveal }: State
+    { playMode, toReveal, completeTime, bestTime }: State
   ) {
     const timerRunning = playMode === PlayMode.Playing;
 
@@ -85,6 +89,8 @@ export default class Game extends Component<Props, State> {
             loading={() => <div />}
             onMainMenu={this.onReset}
             onRestart={this.onRestart}
+            time={completeTime}
+            bestTime={bestTime}
           />
         ) : playMode === PlayMode.Lost ? (
           "Loser"
@@ -133,7 +139,7 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onGameChange(gameChange: StateChange) {
+  private async onGameChange(gameChange: StateChange) {
     const newState: Partial<State> = {};
 
     if (
@@ -145,7 +151,13 @@ export default class Game extends Component<Props, State> {
       if (gameChange.playMode! === PlayMode.Playing) {
         newState.startTime = Date.now();
       } else if (gameChange.playMode! === PlayMode.Won) {
-        newState.endTime = Date.now();
+        newState.completeTime = Date.now() - this.state.startTime;
+        newState.bestTime = await submitTime(
+          this.props.width,
+          this.props.height,
+          this.props.mines,
+          newState.completeTime
+        );
       }
     }
 

@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
+import { minSec } from "../../../../utils/format";
 import { Square, Timer } from "../icons/additional";
 import {
   squareIcon,
@@ -67,12 +68,7 @@ class Time extends Component<TimeProps, {}> {
 
     this._intervalId = setInterval(() => {
       requestAnimationFrame(() => {
-        const diff = Date.now() - this._start!;
-        const minutes = Math.floor(diff / (1000 * 60));
-        const seconds = Math.floor((diff / 1000) % 60);
-        const minStr = minutes < 10 ? "0" + minutes : "" + minutes;
-        const secStr = seconds < 10 ? "0" + seconds : "" + seconds;
-        this.base!.textContent = `${minStr}:${secStr}`;
+        this.base!.textContent = minSec(Date.now() - this._start!);
       });
     }, 1000);
   }

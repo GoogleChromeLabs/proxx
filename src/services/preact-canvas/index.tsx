@@ -83,6 +83,7 @@ class PreactService extends Component<Props, State> {
           key={game.id}
           width={game.width}
           height={game.height}
+          mines={game.mines}
           toRevealTotal={game.toRevealTotal}
           gameChangeSubscribe={this._onGameChangeSubscribe}
           gameChangeUnsubscribe={this._onGameChangeUnsubscribe}

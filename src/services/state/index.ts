@@ -18,6 +18,7 @@ export interface GameType {
   id: number;
   width: number;
   height: number;
+  mines: number;
   toRevealTotal: number;
 }
 
@@ -64,6 +65,7 @@ export default class StateService {
         game: {
           width,
           height,
+          mines: numBombs,
           toRevealTotal: this._game.toReveal,
           id: Math.random()
         }
