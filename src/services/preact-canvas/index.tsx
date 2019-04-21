@@ -13,7 +13,7 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
-import { getRendererInstance } from "src/rendering/renderer";
+import { getBestRenderer } from "src/rendering/renderer";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { GameType } from "../state";
@@ -52,7 +52,7 @@ const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
 
-const rendererPromise = getRendererInstance();
+const rendererPromise = getBestRenderer();
 
 class PreactService extends Component<Props, State> {
   state: State = {
