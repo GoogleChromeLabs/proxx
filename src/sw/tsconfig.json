@@ -4,13 +4,9 @@
     "target": "es5",
     "downlevelIteration": true,
     "module": "esnext",
-    "jsx": "react",
-    "jsxFactory": "h",
     "strict": true,
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "lib": ["esnext", "webworker"],
     "moduleResolution": "node",
     "baseUrl": "./",
-    "types": []
-  },
-  "exclude": ["src/sw/**/*"]
+  }
 }
