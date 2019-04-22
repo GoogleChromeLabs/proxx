@@ -40,6 +40,7 @@ export default class Canvas2DRenderer implements Renderer {
   private _canvas?: HTMLCanvasElement;
   private _ctx?: CanvasRenderingContext2D;
   private _firstCellRect?: DOMRect | ClientRect;
+  private _canvasRect?: DOMRect | ClientRect;
   private _tileSize?: number;
 
   createCanvas(): HTMLCanvasElement {
@@ -72,9 +73,9 @@ export default class Canvas2DRenderer implements Renderer {
     if (!this._canvas) {
       return;
     }
-    const rect = this._canvas!.getBoundingClientRect();
-    this._canvas.width = rect.width * staticDevicePixelRatio;
-    this._canvas.height = rect.height * staticDevicePixelRatio;
+    this._canvasRect = this._canvas!.getBoundingClientRect();
+    this._canvas.width = this._canvasRect.width * staticDevicePixelRatio;
+    this._canvas.height = this._canvasRect.height * staticDevicePixelRatio;
   }
 
   beforeRenderFrame() {
@@ -88,6 +89,9 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    if (!this._isTileInView(x, y)) {
+      return;
+    }
     this._ctx!.save();
     this._ctx!.scale(staticDevicePixelRatio, staticDevicePixelRatio);
     // Adjust for scroll position
@@ -97,6 +101,21 @@ export default class Canvas2DRenderer implements Renderer {
     // @ts-ignore
     this[animation.name](x, y, cell, animation, ts);
     this._ctx!.restore();
+  }
+
+  private _isTileInView(bx: number, by: number) {
+    const { left, top, width, height } = this._firstCellRect!;
+    const x = bx * width + left;
+    const y = by * height + top;
+    if (
+      x + width < 0 ||
+      y + height < 0 ||
+      x > this._canvasRect!.width ||
+      y > this._canvasRect!.height
+    ) {
+      return false;
+    }
+    return true;
   }
 
   private [AnimationName.IDLE](
