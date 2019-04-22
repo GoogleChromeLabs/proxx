@@ -29,9 +29,7 @@ export default class NoMotionAnimator implements Animator {
 
   updateCells(changes: GridChanges) {
     for (const [x, y, cell] of changes) {
-      this._renderer.beforeCell(x, y, cell);
       this._renderCell(x, y, cell);
-      this._renderer.afterCell(x, y, cell);
     }
   }
 
@@ -40,54 +38,37 @@ export default class NoMotionAnimator implements Animator {
   }
 
   private _renderCell(x: number, y: number, cell: Cell) {
+    const animationList: AnimationDesc[] = [];
     if (!cell.revealed) {
-      this._renderer.render(
-        x,
-        y,
-        cell,
-        {
-          name: AnimationName.IDLE,
-          start: 0
-        },
-        1000
-      );
+      animationList.push({
+        name: AnimationName.IDLE,
+        start: 0
+      });
     } else {
-      this._renderer.render(
-        x,
-        y,
-        cell,
-        {
-          name: AnimationName.NUMBER,
-          start: 0
-        },
-        1000
-      );
+      animationList.push({
+        name: AnimationName.NUMBER,
+        start: 0
+      });
     }
     if (
       (cell.touchingFlags > 0 && cell.touchingFlags >= cell.touchingMines) ||
       (!cell.revealed && cell.flagged)
     ) {
-      this._renderer.render(
-        x,
-        y,
-        cell,
-        {
-          name: AnimationName.HIGHLIGHT_IN,
-          start: 0
-        },
-        1000
-      );
+      animationList.push({
+        name: AnimationName.HIGHLIGHT_IN,
+        start: 0
+      });
     } else {
-      this._renderer.render(
-        x,
-        y,
-        cell,
-        {
-          name: AnimationName.HIGHLIGHT_OUT,
-          start: 0
-        },
-        1000
-      );
+      animationList.push({
+        name: AnimationName.HIGHLIGHT_OUT,
+        start: 0
+      });
     }
+
+    this._renderer.beforeCell(x, y, cell, animationList, 1000);
+    for (const animation of animationList) {
+      this._renderer.render(x, y, cell, animation, 1000);
+    }
+    this._renderer.afterCell(x, y, cell, animationList, 1000);
   }
 }

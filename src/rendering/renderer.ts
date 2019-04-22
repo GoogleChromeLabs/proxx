@@ -23,8 +23,20 @@ export interface Renderer {
   onResize(): void;
   updateFirstRect(rect: ClientRect | DOMRect): void;
   beforeRenderFrame(): void;
-  beforeCell(x: number, y: number, cell: Cell): void;
-  afterCell(x: number, y: number, cell: Cell): void;
+  beforeCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ): void;
+  afterCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ): void;
   render(
     x: number,
     y: number,

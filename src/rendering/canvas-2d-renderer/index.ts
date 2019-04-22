@@ -36,12 +36,26 @@ import {
 import { Renderer } from "../renderer";
 import { STATIC_TEXTURE } from "../texture-generators";
 
+interface GridEntry {
+  x: number;
+  y: number;
+  cell?: Cell;
+  animationList: AnimationDesc[];
+}
+
 export default class Canvas2DRenderer implements Renderer {
   private _canvas?: HTMLCanvasElement;
   private _ctx?: CanvasRenderingContext2D;
   private _firstCellRect?: DOMRect | ClientRect;
   private _canvasRect?: DOMRect | ClientRect;
   private _tileSize?: number;
+  private _grid: GridEntry[] = [];
+  private _numTilesX?: number;
+  private _numTilesY?: number;
+
+  get numTiles() {
+    return this._numTilesX! * this._numTilesY!;
+  }
 
   createCanvas(): HTMLCanvasElement {
     this._canvas = document.createElement("canvas");
@@ -49,11 +63,14 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   init(numTilesX: number, numTilesY: number) {
+    this._numTilesX = numTilesX;
+    this._numTilesY = numTilesY;
     const { cellPadding, cellSize } = getCellSizes();
     // This does _not_ need to get multiplied by `devicePixelRatio` as we will
     // be scaling the canvas instead.
     this._tileSize = cellSize + 2 * cellPadding;
 
+    this._initGrid();
     this.onResize();
     this._ctx = this._canvas!.getContext("2d")!;
     if (!this._ctx) {
@@ -63,6 +80,8 @@ export default class Canvas2DRenderer implements Renderer {
 
   updateFirstRect(rect: ClientRect | DOMRect) {
     this._firstCellRect = rect;
+
+    this._rerender();
   }
 
   stop() {
@@ -82,14 +101,28 @@ export default class Canvas2DRenderer implements Renderer {
     // Nothing to do here
   }
 
-  beforeCell(x: number, y: number, cell: Cell) {
+  beforeCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
     this._ctx!.save();
     this._setupContextForTile(x, y);
     this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
     this._ctx!.restore();
+
+    this._grid[y * this._numTilesX! + x].animationList = animationList.slice();
   }
 
-  afterCell(x: number, y: number, cell: Cell) {
+  afterCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
     // Nothing to do here
   }
 
@@ -108,6 +141,26 @@ export default class Canvas2DRenderer implements Renderer {
     // @ts-ignore
     this[animation.name](x, y, cell, animation, ts);
     this._ctx!.restore();
+  }
+
+  private _initGrid() {
+    const start = performance.now();
+    this._grid = new Array(this.numTiles);
+
+    for (let y = 0; y < this._numTilesY!; y++) {
+      for (let x = 0; x < this._numTilesX!; x++) {
+        this._grid[y * this._numTilesX! + x] = {
+          animationList: [
+            {
+              name: AnimationName.IDLE,
+              start
+            }
+          ],
+          x,
+          y
+        };
+      }
+    }
   }
 
   private _setupContextForTile(x: number, y: number) {
@@ -316,5 +369,19 @@ export default class Canvas2DRenderer implements Renderer {
     this._ctx!.globalAlpha = 1 - easeInOutCubic(normalized);
     staticTextureDrawer!(STATIC_TEXTURE.FLASH, this._ctx!, this._tileSize!);
     this._ctx!.restore();
+  }
+
+  private _rerender() {
+    this._ctx!.clearRect(0, 0, this._canvas!.width, this._canvas!.height);
+
+    for (let y = 0; y < this._numTilesY!; y++) {
+      for (let x = 0; x < this._numTilesX!; x++) {
+        const { cell, animationList } = this._grid[y * this._numTilesX! + y];
+        const ts = performance.now();
+        for (const animation of animationList) {
+          this.render(x, y, cell!, animation, ts);
+        }
+      }
+    }
   }
 }
