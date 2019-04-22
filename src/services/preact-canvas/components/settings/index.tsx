@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
+import { bind } from "src/utils/bind.js";
+import About from "../about";
 import { Close } from "../icons/initial";
 import {
   button as btnStyle,
@@ -22,40 +24,59 @@ import {
   settingsWindow as settingsWindowStyle
 } from "./style.css";
 
-export interface Props {
+interface Props {
   onCloseClicked: () => void;
   onMotionPrefChange: () => void;
   open: boolean;
   motion: boolean;
 }
 
-export default class Settings extends Component<Props> {
+interface State {
+  aboutVisible: boolean;
+}
+
+export default class Settings extends Component<Props, State> {
+  state: State = {
+    aboutVisible: false
+  };
+
   private focusItem?: HTMLElement;
 
-  render({ onCloseClicked, onMotionPrefChange, open, motion }: Props) {
+  render(
+    { onCloseClicked, onMotionPrefChange, open, motion }: Props,
+    { aboutVisible }: State
+  ) {
     return (
       <div
         role="dialog"
         aria-label="settings dialog"
         class={[settingsStyle, `${open ? "" : closedStyle}`].join(" ")}
       >
-        <div class={settingsWindowStyle}>
-          <button
-            aria-label="close settings dialog"
-            class={closebtnStyle}
-            ref={focusItem => (this.focusItem = focusItem)}
-            onClick={onCloseClicked}
-          >
-            <Close />
-          </button>
-          <button
-            class={motion ? btnOnStyle : btnOffStyle}
-            onClick={onMotionPrefChange}
-          >
-            Animations {motion ? "on" : "off"}
-          </button>
-          <button class={btnStyle}>About</button>
-        </div>
+        <button
+          aria-label={`close button`}
+          class={closebtnStyle}
+          ref={focusItem => (this.focusItem = focusItem)}
+          onClick={aboutVisible ? this._onAboutCloseClicked : onCloseClicked}
+        >
+          <Close />
+        </button>
+        {aboutVisible ? (
+          <div class={settingsWindowStyle}>
+            <About />
+          </div>
+        ) : (
+          <div class={settingsWindowStyle}>
+            <button
+              class={motion ? btnOnStyle : btnOffStyle}
+              onClick={onMotionPrefChange}
+            >
+              Animations {motion ? "on" : "off"}
+            </button>
+            <button class={btnStyle} onClick={this._onAboutClicked}>
+              About
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -63,6 +84,17 @@ export default class Settings extends Component<Props> {
   componentDidUpdate() {
     if (this.props.open) {
       this.focusItem!.focus();
+      return;
     }
+  }
+
+  @bind
+  private _onAboutClicked() {
+    this.setState({ aboutVisible: true });
+  }
+
+  @bind
+  private _onAboutCloseClicked() {
+    this.setState({ aboutVisible: false });
   }
 }

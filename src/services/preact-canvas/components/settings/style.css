@@ -6,6 +6,7 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,1);
+  overflow: scroll;
 }
 
 .settings.closed {
@@ -19,7 +20,6 @@
   box-sizing: border-box;
   width: 100%;
   max-width: 33rem;
-  /* --item-margin: 0.4rem; */
 }
 
 .close-button {
