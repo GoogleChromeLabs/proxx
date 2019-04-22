@@ -79,7 +79,18 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   beforeRenderFrame() {
-    this._ctx!.clearRect(0, 0, this._canvas!.width, this._canvas!.height);
+    // Nothing to do here
+  }
+
+  beforeCell(x: number, y: number, cell: Cell) {
+    this._ctx!.save();
+    this._setupContextForTile(x, y);
+    this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
+    this._ctx!.restore();
+  }
+
+  afterCell(x: number, y: number, cell: Cell) {
+    // Nothing to do here
   }
 
   render(
@@ -93,14 +104,18 @@ export default class Canvas2DRenderer implements Renderer {
       return;
     }
     this._ctx!.save();
+    this._setupContextForTile(x, y);
+    // @ts-ignore
+    this[animation.name](x, y, cell, animation, ts);
+    this._ctx!.restore();
+  }
+
+  private _setupContextForTile(x: number, y: number) {
     this._ctx!.scale(staticDevicePixelRatio, staticDevicePixelRatio);
     // Adjust for scroll position
     this._ctx!.translate(this._firstCellRect!.left, this._firstCellRect!.top);
     // Put tile that is supposed to be rendered at (0, 0)
     this._ctx!.translate(x * this._tileSize!, y * this._tileSize!);
-    // @ts-ignore
-    this[animation.name](x, y, cell, animation, ts);
-    this._ctx!.restore();
   }
 
   private _isTileInView(bx: number, by: number) {

@@ -23,6 +23,8 @@ export interface Renderer {
   onResize(): void;
   updateFirstRect(rect: ClientRect | DOMRect): void;
   beforeRenderFrame(): void;
+  beforeCell(x: number, y: number, cell: Cell): void;
+  afterCell(x: number, y: number, cell: Cell): void;
   render(
     x: number,
     y: number,
