@@ -29,6 +29,9 @@
   font-size: 0.8rem;
   opacity: 0.7;
   top: 0.9rem;
+  /** In the select box, clicking the label text focuses the input, but doesn't show the options.
+   * This fixes that, by making the click goes through to the select itself. */
+  pointer-events: none;
 }
 
 .field {
@@ -73,6 +76,9 @@
 .select-arrow {
   top: 50%;
   transform: translateY(-50%);
+  /** Clicking the arrow focuses the input, but doesn't show the options. This fixes that, by making
+  * the click goes through to the select itself. */
+  pointer-events: none;
 }
 
 .number-up-arrow,
