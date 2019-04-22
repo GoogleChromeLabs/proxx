@@ -18,6 +18,7 @@ import { GameChangeCallback } from "../../index.js";
 
 import { Animator } from "src/rendering/animator.js";
 import MotionAnimator from "src/rendering/motion-animator/index.js";
+import NoMotionAnimator from "src/rendering/no-motion-animator/index.js";
 import { Renderer } from "src/rendering/renderer.js";
 import {
   board,
@@ -155,7 +156,8 @@ export default class Board extends Component<Props> {
   }
 
   private _animatorInit() {
-    this._animator = new MotionAnimator(
+    this._animator = new NoMotionAnimator(
+      // this._animator = new MotionAnimator(
       this.props.width,
       this.props.height,
       this.props.renderer
