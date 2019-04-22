@@ -113,7 +113,9 @@ export default class Canvas2DRenderer implements Renderer {
     this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
     this._ctx!.restore();
 
-    this._grid[y * this._numTilesX! + x].animationList = animationList.slice();
+    const gridCell = this._grid[y * this._numTilesX! + x];
+    gridCell.animationList = animationList.slice();
+    gridCell.cell = cell;
   }
 
   afterCell(
@@ -376,7 +378,7 @@ export default class Canvas2DRenderer implements Renderer {
 
     for (let y = 0; y < this._numTilesY!; y++) {
       for (let x = 0; x < this._numTilesX!; x++) {
-        const { cell, animationList } = this._grid[y * this._numTilesX! + y];
+        const { cell, animationList } = this._grid[y * this._numTilesX! + x];
         const ts = performance.now();
         for (const animation of animationList) {
           this.render(x, y, cell!, animation, ts);
