@@ -40,7 +40,7 @@
   font: inherit;
   padding: 2em var(--padding-sides) 0.8em;
   -webkit-appearance: none;
-  -moz-appearance: none;
+  -moz-appearance: textfield;
   border: none;
   border-bottom: 1px solid #fff;
   width: 100%;
