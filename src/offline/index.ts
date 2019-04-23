@@ -1,4 +1,4 @@
-/** Tell the service worker to skip waiting */
+/** Tell the service worker to skip waiting. Resolves once the controller has changed. */
 export async function skipWaiting() {
   const reg = await navigator.serviceWorker.getRegistration();
   if (!reg || !reg.waiting) {
@@ -15,6 +15,7 @@ export async function skipWaiting() {
   });
 }
 
+/** Is there currently a waiting worker? */
 export let updateReady = false;
 
 /** Wait for an installing worker */
@@ -76,6 +77,5 @@ export async function init() {
   }
 
   await navigator.serviceWorker.register("/sw.js");
-
   watchForUpdate();
 }

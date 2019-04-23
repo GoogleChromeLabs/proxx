@@ -14,7 +14,6 @@ import { Component, h } from "preact";
 import TopBar from "../top-bar/index.js";
 import { loading, loadingInner } from "./style.css";
 
-// tslint:disable-next-line:max-classes-per-file
 export default class GameLoading extends Component<{}, {}> {
   render() {
     return (

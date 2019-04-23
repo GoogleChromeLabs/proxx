@@ -31,7 +31,6 @@ interface Props {
 interface State {
   game?: GameType;
   dangerMode: boolean;
-  texturesReady: boolean;
   awaitingGame: boolean;
 }
 
@@ -58,7 +57,6 @@ const immedateGameSessionKey = "instantGame";
 class PreactService extends Component<Props, State> {
   state: State = {
     dangerMode: false,
-    texturesReady: false,
     awaitingGame: false
   };
 
@@ -167,10 +165,6 @@ class PreactService extends Component<Props, State> {
     }
 
     offlineModulePromise.then(({ init }) => init());
-
-    texturePromise.then(() => {
-      this.setState({ texturesReady: true });
-    });
 
     this._stateService = await stateServicePromise;
 
