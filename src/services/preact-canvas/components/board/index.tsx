@@ -148,7 +148,7 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift") {
+    if (event.key === "Shift" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
@@ -189,6 +189,8 @@ export default class Board extends Component<Props, State> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
+
+        // set only 1st cell tab focusable
         if (row === 0 && col === 0) {
           button.setAttribute("tabindex", "0");
         } else {
@@ -439,6 +441,7 @@ export default class Board extends Component<Props, State> {
     this.firstCellRect = this.buttons[0].closest("td")!.getBoundingClientRect();
   }
 
+  // Mouse move will change focused button. This is needed for simulateClick.
   @bind
   private moveFocusOnHover(event: MouseEvent) {
     this.setState({ keyNavigation: false });
@@ -458,16 +461,25 @@ export default class Board extends Component<Props, State> {
     const y = btnInfo[1] as number;
     const width = this.props.width;
     const height = this.props.height;
-    const xindex = x + h;
-    const yindex = y + v;
-    if (xindex < 0 || xindex >= width || (yindex < 0 || yindex >= height)) {
+
+    // move x, y position by passed steps h:horizontal, v:vertical
+    const newX = x + h;
+    const newY = y + v;
+
+    // Check if [newX, newY] position is out of the game field.
+    if (newX < 0 || newX >= width || (newY < 0 || newY >= height)) {
       return;
     }
+
     event.stopPropagation();
-    const nextIndex = xindex + yindex * width;
+    const nextIndex = newX + newY * width;
     const nextBtn = this.buttons[nextIndex];
+
+    // Change `tabindex="0"` to the next button so that when user tab out of the game
+    // (to select setting menu, for example) they comeback to where they left off.
     currentBtn.setAttribute("tabindex", "-1");
     nextBtn.setAttribute("tabindex", "0");
+
     nextBtn.focus();
   }
 
@@ -503,8 +515,6 @@ export default class Board extends Component<Props, State> {
   @bind
   private onMouseUp(event: MouseEvent) {
     event.preventDefault();
-    // event.stopPropagation();
-    // event.stopImmediatePropagation();
 
     if (event.button !== 2) {
       // normal click
@@ -519,8 +529,6 @@ export default class Board extends Component<Props, State> {
   @bind
   private onMouseDown(event: MouseEvent) {
     event.preventDefault();
-    // event.stopPropagation();
-    // event.stopImmediatePropagation();
   }
 
   @bind
