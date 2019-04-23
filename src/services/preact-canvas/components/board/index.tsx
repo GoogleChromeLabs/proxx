@@ -12,6 +12,7 @@
  */
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
+import { focusRing, rippleSpeed } from "src/rendering/constants.js";
 import { isFeaturePhone } from "src/utils/static-screensize";
 import { Cell, GridChanges } from "../../../../gamelogic/types.js";
 import {
@@ -30,7 +31,6 @@ import {
 import { bind } from "../../../../utils/bind";
 import { staticDevicePixelRatio } from "../../../../utils/static-dpr";
 import { GameChangeCallback } from "../../index";
-import { focusRing, rippleSpeed } from "src/rendering/constants.js";
 import {
   board,
   button as buttonStyle,

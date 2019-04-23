@@ -106,45 +106,6 @@ class PreactService extends Component<Props, State> {
     );
   }
 
-  componentDidMount() {
-    window.addEventListener("keydown", this._onKeyDown);
-    window.addEventListener("keyup", this._onKeyUp);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("keydown", this._onKeyDown);
-    window.removeEventListener("keyup", this._onKeyUp);
-  }
-
-  @bind
-  private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift") {
-      this._onDangerModeChange(!this.state.dangerMode);
-    }
-  }
-
-  @bind
-  private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Shift" || event.key === "*") {
-      this._onDangerModeChange(!this.state.dangerMode);
-    }
-    if (event.key === "#") {
-      // show setting page (TBD)
-    }
-
-    // For T9 navigation
-    if (
-      event.key === "9" ||
-      event.key === "7" ||
-      event.key === "5" ||
-      event.key === "0"
-    ) {
-      // TODO
-      // When this is called, it means game table does not have focus.
-      // So, set state and let the board focus on a cell
-    }
-  }
-
   @bind
   private _onDangerModeChange(dangerMode: boolean) {
     this.setState({ dangerMode });
