@@ -19,5 +19,9 @@
 // implementation below stores initial screen width and height.
 const staticScreenWidth = screen.width;
 const staticScreenHeight = screen.height;
+
+// Our assumption here is that every feature phone has qvga or less screen size,
+// so this says nothing about the input interface and may be busted in the future.
+// in Q1 2019, all KaiOS devices ship with QVGA and Xiaomi's Qin1 is also QVGA.
 export const isFeaturePhone =
   Math.min(staticScreenWidth, staticScreenHeight) <= 240;

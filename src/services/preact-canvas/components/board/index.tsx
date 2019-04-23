@@ -184,12 +184,14 @@ export default class Board extends Component<Props, State> {
         const y = row;
         const x = col;
         const td = document.createElement("td");
-        td.addEventListener("mouseover", event => {
-          this.moveFocusOnHover(event);
-        });
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
+        if (isFeaturePhone) {
+          button.addEventListener("mouseenter", event => {
+            this.moveFocusOnHover(event);
+          });
+        }
         this.additionalButtonData.set(button, [x, y, defaultCell]);
         this.updateButton(button, defaultCell, x, y);
         this.buttons.push(button);
@@ -202,7 +204,7 @@ export default class Board extends Component<Props, State> {
     this.canvas.classList.add(canvasStyle);
     this.base!.appendChild(this.canvas);
     tableContainer!.appendChild(this.table);
-    this.table.addEventListener("keyup", this.onKeyUp);
+    this.table.addEventListener("keydown", this.onKeyDownOnTable);
     this.table.addEventListener("mouseup", this.onMouseUp);
     this.table.addEventListener("mousedown", this.onMouseDown);
     this.table.addEventListener("contextmenu", event => event.preventDefault());
@@ -310,7 +312,7 @@ export default class Board extends Component<Props, State> {
       return;
     }
 
-    const isFocused = btn === document.activeElement ? true : false;
+    const isFocused = btn === document.activeElement;
     const ctx = this.ctx!;
     const animationList = this.animationLists.get(btn);
     if (!animationList) {
@@ -348,10 +350,7 @@ export default class Board extends Component<Props, State> {
           break;
       }
 
-      if (
-        (isFocused && isFeaturePhone) ||
-        (isFocused && this.state.keyNavigation)
-      ) {
+      if (isFocused && (isFeaturePhone || this.state.keyNavigation)) {
         // TODO: Design
         // currently just a green focus ring
         ctx.strokeStyle = focusRing;
@@ -461,7 +460,7 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private onKeyUp(event: KeyboardEvent) {
+  private onKeyDownOnTable(event: KeyboardEvent) {
     if (event.key === "Tab") {
       this.setState({ keyNavigation: true });
     }
@@ -471,21 +470,13 @@ export default class Board extends Component<Props, State> {
     // Key 8 support is for T9 navigation
     if (event.key === "Enter" || event.key === "8") {
       this.simulateClick(event);
-    }
-
-    if (event.key === "ArrowRight" || event.key === "9") {
+    } else if (event.key === "ArrowRight" || event.key === "9") {
       this.moveFocusByKey(event, 1);
-    }
-
-    if (event.key === "ArrowLeft" || event.key === "7") {
+    } else if (event.key === "ArrowLeft" || event.key === "7") {
       this.moveFocusByKey(event, -1);
-    }
-
-    if (event.key === "ArrowUp" || event.key === "5") {
+    } else if (event.key === "ArrowUp" || event.key === "5") {
       this.moveFocusByKey(event, -this.props.width);
-    }
-
-    if (event.key === "ArrowDown" || event.key === "0") {
+    } else if (event.key === "ArrowDown" || event.key === "0") {
       this.moveFocusByKey(event, this.props.width);
     }
   }
