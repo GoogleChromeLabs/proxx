@@ -238,7 +238,13 @@ class PreactService extends Component<Props, State> {
     this._stateService = await stateServicePromise;
 
     const motionPreference = await getMotionPreference();
-    this.setState({ motionPreference });
+    const prmMediaQuery = window.matchMedia("(prefers-reduced-motion)").matches;
+    if (motionPreference !== prmMediaQuery) {
+      await setMotionPreference(prmMediaQuery);
+      this.setState({ motionPreference: prmMediaQuery });
+    } else {
+      this.setState({ motionPreference });
+    }
 
     localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {
