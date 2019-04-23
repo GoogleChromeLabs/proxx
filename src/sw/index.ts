@@ -6,7 +6,9 @@ declare var self: ServiceWorkerGlobalScope;
 const staticCache = `static-${version}`;
 
 self.addEventListener("install", event => {
-  const toCache = resourceList.filter(item => item !== "sw.js");
+  const toCache = resourceList.filter(
+    item => item !== "sw.js" && item !== "bootstrap.js"
+  );
 
   event.waitUntil(
     (async function() {
