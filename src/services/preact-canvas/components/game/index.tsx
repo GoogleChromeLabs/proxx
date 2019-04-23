@@ -15,10 +15,6 @@ import { Component, h } from "preact";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
-import {
-  staticScreenHeight,
-  staticScreenWidth
-} from "src/utils/static-screensize";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
@@ -47,7 +43,6 @@ export interface Props {
   onDangerModeChange: (v: boolean) => void;
   dangerMode: boolean;
   toRevealTotal: number;
-  qvga: boolean;
 }
 
 interface State {
@@ -85,8 +80,7 @@ export default class Game extends Component<Props, State> {
       height,
       gameChangeSubscribe,
       gameChangeUnsubscribe,
-      toRevealTotal,
-      qvga
+      toRevealTotal
     }: Props,
     { playMode, toReveal, completeTime, bestTime }: State
   ) {

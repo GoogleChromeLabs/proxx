@@ -17,5 +17,7 @@
 //
 // Since zoom level is set to default every time a page gets loaded,
 // implementation below stores initial screen width and height.
-export const staticScreenWidth = screen.width;
-export const staticScreenHeight = screen.height;
+const staticScreenWidth = screen.width;
+const staticScreenHeight = screen.height;
+export const isFeaturePhone =
+  Math.min(staticScreenWidth, staticScreenHeight) <= 240;

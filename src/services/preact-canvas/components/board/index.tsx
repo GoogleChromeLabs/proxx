@@ -11,8 +11,9 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { StateChange } from "src/gamelogic/index";
-import { Cell, GridChanges } from "../../../../gamelogic/types";
+import { StateChange } from "src/gamelogic/index.js";
+import { isFeaturePhone } from "src/utils/static-screensize";
+import { Cell, GridChanges } from "../../../../gamelogic/types.js";
 import {
   AnimationDesc,
   AnimationName,
@@ -56,7 +57,6 @@ export interface Props {
   dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
-  qvga: boolean;
 }
 
 interface State {
@@ -350,7 +350,7 @@ export default class Board extends Component<Props, State> {
       }
 
       if (
-        (isFocused && this.props.qvga) ||
+        (isFocused && isFeaturePhone) ||
         (isFocused && this.state.keyNavigation)
       ) {
         // TODO: Design
