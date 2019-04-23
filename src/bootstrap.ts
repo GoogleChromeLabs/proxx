@@ -14,6 +14,7 @@
 import workerURL from "chunk-name:./worker.js";
 import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
+import { setMotionPreference } from "./services/state/motion-preference";
 import { nextEvent } from "./utils/scheduling.js";
 import { RemoteServices } from "./worker.js";
 
@@ -51,6 +52,10 @@ async function bootstrap() {
     });
   } else {
     remoteServices = startWorker();
+  }
+
+  if (window.matchMedia("(prefers-reduced-motion)").matches) {
+    await setMotionPreference(true);
   }
 
   gameUI(remoteServices.then(remoteServices => remoteServices.stateService));
