@@ -103,7 +103,7 @@ export default class Board extends Component<Props, State> {
   private firstCellRect?: ClientRect | DOMRect;
   private additionalButtonData = new WeakMap<
     HTMLButtonElement,
-    [number, number, Cell, number]
+    [number, number, Cell]
   >();
   private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private renderLoopRunning = false;
@@ -183,7 +183,6 @@ export default class Board extends Component<Props, State> {
       for (let col = 0; col < width; col++) {
         const y = row;
         const x = col;
-        const index = x + y * width;
         const td = document.createElement("td");
         td.addEventListener("mouseover", event => {
           this.moveFocusOnHover(event);
@@ -191,7 +190,7 @@ export default class Board extends Component<Props, State> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.additionalButtonData.set(button, [x, y, defaultCell, index]);
+        this.additionalButtonData.set(button, [x, y, defaultCell]);
         this.updateButton(button, defaultCell, x, y);
         this.buttons.push(button);
         td.appendChild(button);
@@ -443,23 +442,20 @@ export default class Board extends Component<Props, State> {
     if (!button) {
       return;
     }
-    const cell = this.additionalButtonData.get(button);
-    if (!cell) {
-      return;
-    }
-    const nextBtn = this.buttons[cell[3]]!.focus();
+    button.focus();
   }
 
   @bind
   private moveFocusByKey(event: KeyboardEvent, tick: number) {
     this.setState({ keyNavigation: true });
     const currentBtn = document.activeElement as HTMLButtonElement;
-    const cell = this.additionalButtonData.get(currentBtn);
-    if (!cell) {
+    const btnInfo = this.additionalButtonData.get(currentBtn);
+    if (!btnInfo) {
       return;
     }
+    const index = btnInfo[0] + btnInfo[1] * this.props.width;
     event.stopPropagation();
-    const nextIndex = cell[3] + tick;
+    const nextIndex = index + tick;
     const nextBtn = this.buttons[nextIndex];
     nextBtn!.focus();
   }
@@ -532,8 +528,8 @@ export default class Board extends Component<Props, State> {
     }
     event.preventDefault();
 
-    const [x, y, cell] = this.additionalButtonData.get(button)!;
-    this.props.onCellClick([x, y, cell], alt);
+    const buttonData = this.additionalButtonData.get(button)!;
+    this.props.onCellClick(buttonData, alt);
   }
 
   private updateButton(
