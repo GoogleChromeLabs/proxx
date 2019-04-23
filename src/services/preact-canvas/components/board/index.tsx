@@ -178,6 +178,7 @@ export default class Board extends Component<Props, State> {
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
     this.table.setAttribute("role", "grid");
+    this.table.setAttribute("aria-label", "game grid");
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.classList.add(gameRow);
@@ -196,12 +197,6 @@ export default class Board extends Component<Props, State> {
         button.addEventListener("mouseenter", event => {
           this.moveFocusOnHover(event);
         });
-        // button.addEventListener("focus", event => {
-        //   button.setAttribute('tabindex', '0')
-        // })
-        // button.addEventListener("blur", event => {
-        //   button.setAttribute('tabindex', '-1')
-        // })
         this.additionalButtonData.set(button, [x, y, defaultCell]);
         this.updateButton(button, defaultCell, x, y);
         this.buttons.push(button);
@@ -361,8 +356,7 @@ export default class Board extends Component<Props, State> {
           break;
       }
 
-      // if (isFocused && (isFeaturePhone || this.state.keyNavigation)) {
-      if (isFocused) {
+      if (isFocused && (isFeaturePhone || this.state.keyNavigation)) {
         // TODO: Design
         // currently just a green focus ring
         ctx.strokeStyle = focusRing;
@@ -449,10 +443,6 @@ export default class Board extends Component<Props, State> {
   private moveFocusOnHover(event: MouseEvent) {
     this.setState({ keyNavigation: false });
     const target = event.target as HTMLElement;
-    // const button = target.closest("button");
-    // if (!button) {
-    //   return;
-    // }
     target.focus();
   }
 
@@ -483,7 +473,6 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private onKeyUpOnTable(event: KeyboardEvent) {
-    console.log("keyup!");
     if (event.key === "Tab") {
       this.setState({ keyNavigation: true });
       this.moveFocusByKey(event, 0, 0);
@@ -514,8 +503,8 @@ export default class Board extends Component<Props, State> {
   @bind
   private onMouseUp(event: MouseEvent) {
     event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
+    // event.stopPropagation();
+    // event.stopImmediatePropagation();
 
     if (event.button !== 2) {
       // normal click
@@ -530,8 +519,8 @@ export default class Board extends Component<Props, State> {
   @bind
   private onMouseDown(event: MouseEvent) {
     event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
+    // event.stopPropagation();
+    // event.stopImmediatePropagation();
   }
 
   @bind
@@ -547,7 +536,6 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
 
     const buttonData = this.additionalButtonData.get(button)!;
-    console.log(buttonData);
     this.props.onCellClick(buttonData, alt);
   }
 
