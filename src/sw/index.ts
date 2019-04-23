@@ -4,11 +4,13 @@ import resourceList from "resource-list:";
 declare var self: ServiceWorkerGlobalScope;
 
 const staticCache = `static-${version}`;
+const expectedCaches = [staticCache];
 
 self.addEventListener("install", event => {
-  const toCache = resourceList.filter(
+  const resourcesToCache = resourceList.filter(
     item => item !== "sw.js" && item !== "bootstrap.js"
   );
+  const toCache = ["/", ...resourcesToCache];
 
   event.waitUntil(
     (async function() {
@@ -19,15 +21,18 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
+  self.clients.claim();
+
   event.waitUntil(
     (async function() {
-      const cacheNames = await caches.keys();
-      for (const cacheName of cacheNames) {
-        if (cacheName === staticCache) {
-          continue;
+      // Remove old caches.
+      const promises = (await caches.keys()).map(cacheName => {
+        if (!expectedCaches.includes(cacheName)) {
+          return caches.delete(cacheName);
         }
-        await caches.delete(cacheName);
-      }
+      });
+
+      await Promise.all<any>(promises);
     })()
   );
 });
@@ -38,8 +43,18 @@ self.addEventListener("fetch", event => {
   }
   event.respondWith(
     (async function() {
-      const cachedResponse = await caches.match(event.request);
+      const cachedResponse = await caches.match(event.request, {
+        ignoreSearch: true
+      });
       return cachedResponse || fetch(event.request);
     })()
   );
+});
+
+self.addEventListener("message", event => {
+  switch (event.data) {
+    case "skip-waiting":
+      self.skipWaiting();
+      break;
+  }
 });

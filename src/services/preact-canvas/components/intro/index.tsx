@@ -25,8 +25,6 @@ import {
   selectArrow as selectArrowStyle,
   settingsRow as settingsRowStyle,
   startButton as startButtonStyle,
-  startButtonTextHide,
-  startButtonTextShow,
   startForm as startFormStyle
 } from "./style.css";
 
@@ -93,7 +91,6 @@ type PresetName = keyof typeof presets;
 
 export interface Props {
   onStartGame: (width: number, height: number, mines: number) => void;
-  loading: boolean;
 }
 
 interface State {
@@ -101,14 +98,12 @@ interface State {
   width: number;
   height: number;
   mines: number;
-  longLoad: boolean;
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export default class Intro extends Component<Props, State> {
   state: State = {
     presetName: "beginner",
-    longLoad: false,
     ...presets.beginner
   };
 
@@ -119,16 +114,9 @@ export default class Intro extends Component<Props, State> {
 
   componentDidMount() {
     window.scrollTo(0, 0);
-
-    setTimeout(() => {
-      this.setState({ longLoad: true });
-    }, 1000);
   }
 
-  render(
-    { loading }: Props,
-    { width, height, mines, presetName, longLoad }: State
-  ) {
+  render(_props: Props, { width, height, mines, presetName }: State) {
     return (
       <div class={introStyle}>
         <TopBar titleOnly />
@@ -185,21 +173,7 @@ export default class Intro extends Component<Props, State> {
             </NumberField>
           </div>
           <div class={settingsRowStyle}>
-            <button class={startButtonStyle} disabled={loading}>
-              <span
-                class={
-                  longLoad || !loading
-                    ? startButtonTextShow
-                    : startButtonTextHide
-                }
-              >
-                {loading
-                  ? longLoad
-                    ? "…Loading…"
-                    : "\u00A0" // non-breaking space, to retain height
-                  : "Start"}
-              </span>
-            </button>
+            <button class={startButtonStyle}>Start</button>
           </div>
         </form>
       </div>

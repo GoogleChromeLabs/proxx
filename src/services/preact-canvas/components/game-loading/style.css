@@ -1,0 +1,25 @@
+.loading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+@keyframes fade-in-out {
+  50% {
+    opacity: 1;
+  }
+}
+
+.loadingInner {
+  display: flex;
+  flex-flow: column;
+  padding: var(--bar-avoid) var(--side-margin) 0;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: center;
+  font-size: 2.3rem;
+  opacity: 0;
+  animation: fade-in-out 3s ease-in-out infinite 0.5s;
+}
