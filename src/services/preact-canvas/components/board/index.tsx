@@ -177,6 +177,7 @@ export default class Board extends Component<Props, State> {
     const tableContainer = document.querySelector("." + containerStyle);
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
+    this.table.setAttribute("role", "grid");
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.classList.add(gameRow);
@@ -187,11 +188,20 @@ export default class Board extends Component<Props, State> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        if (isFeaturePhone) {
-          button.addEventListener("mouseenter", event => {
-            this.moveFocusOnHover(event);
-          });
+        if (row === 0 && col === 0) {
+          button.setAttribute("tabindex", "0");
+        } else {
+          button.setAttribute("tabindex", "-1");
         }
+        button.addEventListener("mouseenter", event => {
+          this.moveFocusOnHover(event);
+        });
+        // button.addEventListener("focus", event => {
+        //   button.setAttribute('tabindex', '0')
+        // })
+        // button.addEventListener("blur", event => {
+        //   button.setAttribute('tabindex', '-1')
+        // })
         this.additionalButtonData.set(button, [x, y, defaultCell]);
         this.updateButton(button, defaultCell, x, y);
         this.buttons.push(button);
@@ -205,6 +215,7 @@ export default class Board extends Component<Props, State> {
     this.base!.appendChild(this.canvas);
     tableContainer!.appendChild(this.table);
     this.table.addEventListener("keydown", this.onKeyDownOnTable);
+    this.table.addEventListener("keyup", this.onKeyUpOnTable);
     this.table.addEventListener("mouseup", this.onMouseUp);
     this.table.addEventListener("mousedown", this.onMouseDown);
     this.table.addEventListener("contextmenu", event => event.preventDefault());
@@ -350,7 +361,8 @@ export default class Board extends Component<Props, State> {
           break;
       }
 
-      if (isFocused && (isFeaturePhone || this.state.keyNavigation)) {
+      // if (isFocused && (isFeaturePhone || this.state.keyNavigation)) {
+      if (isFocused) {
         // TODO: Design
         // currently just a green focus ring
         ctx.strokeStyle = focusRing;
@@ -437,47 +449,62 @@ export default class Board extends Component<Props, State> {
   private moveFocusOnHover(event: MouseEvent) {
     this.setState({ keyNavigation: false });
     const target = event.target as HTMLElement;
-    const button = target.closest("button");
-    if (!button) {
-      return;
-    }
-    button.focus();
+    // const button = target.closest("button");
+    // if (!button) {
+    //   return;
+    // }
+    target.focus();
   }
 
   @bind
-  private moveFocusByKey(event: KeyboardEvent, tick: number) {
+  private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
     this.setState({ keyNavigation: true });
     const currentBtn = document.activeElement as HTMLButtonElement;
     const btnInfo = this.additionalButtonData.get(currentBtn);
     if (!btnInfo) {
       return;
     }
-    const index = btnInfo[0] + btnInfo[1] * this.props.width;
+    const x = btnInfo[0] as number;
+    const y = btnInfo[1] as number;
+    const width = this.props.width;
+    const height = this.props.height;
+    const xindex = x + h;
+    const yindex = y + v;
+    if (xindex < 0 || xindex >= width || (yindex < 0 || yindex >= height)) {
+      return;
+    }
     event.stopPropagation();
-    const nextIndex = index + tick;
+    const nextIndex = xindex + yindex * width;
     const nextBtn = this.buttons[nextIndex];
-    nextBtn!.focus();
+    currentBtn.setAttribute("tabindex", "-1");
+    nextBtn.setAttribute("tabindex", "0");
+    nextBtn.focus();
+  }
+
+  @bind
+  private onKeyUpOnTable(event: KeyboardEvent) {
+    console.log("keyup!");
+    if (event.key === "Tab") {
+      this.setState({ keyNavigation: true });
+      this.moveFocusByKey(event, 0, 0);
+    }
   }
 
   @bind
   private onKeyDownOnTable(event: KeyboardEvent) {
-    if (event.key === "Tab") {
-      this.setState({ keyNavigation: true });
-    }
-
     // Since click action is tied to mouseup event,
     // listen to Enter in case of key navigation click.
     // Key 8 support is for T9 navigation
     if (event.key === "Enter" || event.key === "8") {
       this.simulateClick(event);
     } else if (event.key === "ArrowRight" || event.key === "9") {
-      this.moveFocusByKey(event, 1);
+      this.moveFocusByKey(event, 1, 0);
     } else if (event.key === "ArrowLeft" || event.key === "7") {
-      this.moveFocusByKey(event, -1);
+      this.moveFocusByKey(event, -1, 0);
     } else if (event.key === "ArrowUp" || event.key === "5") {
-      this.moveFocusByKey(event, -this.props.width);
+      this.moveFocusByKey(event, 0, -1);
     } else if (event.key === "ArrowDown" || event.key === "0") {
-      this.moveFocusByKey(event, this.props.width);
+      this.moveFocusByKey(event, 0, 1);
     }
   }
 
@@ -520,6 +547,7 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
 
     const buttonData = this.additionalButtonData.get(button)!;
+    console.log(buttonData);
     this.props.onCellClick(buttonData, alt);
   }
 
@@ -532,15 +560,13 @@ export default class Board extends Component<Props, State> {
     let cellState;
     const position = `${x + 1}, ${y + 1}`;
     if (!cell.revealed) {
-      cellState = cell.flagged
-        ? `flag at ${position}`
-        : `hidden at ${position}`;
+      cellState = cell.flagged ? `flag` : `hidden`;
     } else if (cell.hasMine) {
-      cellState = `mine at ${position}`; // should it say black hole?
+      cellState = `mine`; // should it say black hole?
     } else if (cell.touchingMines === 0) {
-      cellState = `blank at ${position}`;
+      cellState = `blank`;
     } else {
-      cellState = `${cell.touchingMines} at ${position}`;
+      cellState = `${cell.touchingMines}`;
     }
 
     btn.setAttribute("aria-label", cellState);
