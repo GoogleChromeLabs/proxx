@@ -21,6 +21,7 @@ import {
   closeButton as closebtnStyle,
   closed as closedStyle,
   settings as settingsStyle,
+  settingsContent as settingsContentStyle,
   settingsWindow as settingsWindowStyle
 } from "./style.css";
 
@@ -62,19 +63,23 @@ export default class Settings extends Component<Props, State> {
         </button>
         {aboutVisible ? (
           <div class={settingsWindowStyle}>
-            <About />
+            <div class={settingsContentStyle}>
+              <About />
+            </div>
           </div>
         ) : (
           <div class={settingsWindowStyle}>
-            <button
-              class={motion ? btnOnStyle : btnOffStyle}
-              onClick={onMotionPrefChange}
-            >
-              Animations {motion ? "on" : "off"}
-            </button>
-            <button class={btnStyle} onClick={this._onAboutClicked}>
-              About
-            </button>
+            <div class={settingsContentStyle}>
+              <button
+                class={motion ? btnOnStyle : btnOffStyle}
+                onClick={onMotionPrefChange}
+              >
+                Animations {motion ? "on" : "off"}
+              </button>
+              <button class={btnStyle} onClick={this._onAboutClicked}>
+                About
+              </button>
+            </div>
           </div>
         )}
       </div>
