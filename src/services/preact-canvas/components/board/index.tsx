@@ -121,14 +121,14 @@ export default class Board extends Component<Props> {
 
   @bind
   private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift") {
+    if (event.key === "Control") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
 
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Shift") {
+    if (event.key === "Control") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
@@ -357,12 +357,15 @@ export default class Board extends Component<Props> {
 
   @bind
   private _onMouseUp(event: MouseEvent) {
-    if (event.button !== 2) {
+    if (event.button === 0 && !this.props.dangerMode) {
+      event.preventDefault();
+      this._onClick(event, false);
+    } else if (event.button === 2) {
+      event.preventDefault();
+      this._onClick(event, true);
+    } else {
       return;
     }
-
-    event.preventDefault();
-    this._onClick(event, true);
   }
 
   @bind
