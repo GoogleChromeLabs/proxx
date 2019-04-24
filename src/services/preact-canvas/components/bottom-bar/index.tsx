@@ -11,7 +11,6 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { GameType } from "src/services/state";
 import { Back } from "../icons/additional";
 import { Fullscreen, Settings } from "../icons/initial";
 import { bottomBar, hidden, icons } from "./style.css";
@@ -20,7 +19,7 @@ export interface Props {
   onFullscreenClick: () => void;
   onSettingsClick: () => void;
   onBackClick: () => void;
-  game?: GameType;
+  buttonType: "back" | "settings";
   display: boolean;
 }
 
@@ -31,12 +30,12 @@ export default class BottomBar extends Component<Props, State> {
     onFullscreenClick,
     onSettingsClick,
     onBackClick,
-    game,
+    buttonType,
     display
   }: Props) {
     return (
-      <div class={[bottomBar, `${display ? hidden : ""}`].join("")}>
-        {game ? (
+      <div class={[bottomBar, display ? "" : hidden].join(" ")}>
+        {buttonType === "back" ? (
           <button
             class={icons}
             onClick={onBackClick}

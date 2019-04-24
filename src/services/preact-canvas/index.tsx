@@ -147,8 +147,8 @@ class PreactService extends Component<Props, State> {
           onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
           onBackClick={this._onBackClick}
-          game={game}
-          display={settingsOpen}
+          buttonType={game ? "back" : "settings"}
+          display={!settingsOpen} // Settings is open = Bottom bar display should be hidden
         />
       </div>
     );
