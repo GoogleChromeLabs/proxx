@@ -156,10 +156,17 @@ export default class MotionAnimator implements Animator {
           details.animationList = animationList;
         }
       });
-      animationList.unshift({
-        name: AnimationName.NUMBER,
-        start: ts + 100
-      });
+      if (cell.hasMine) {
+        animationList.push({
+          name: AnimationName.MINED,
+          start: ts + 100
+        });
+      } else {
+        animationList.unshift({
+          name: AnimationName.NUMBER,
+          start: ts + 100
+        });
+      }
       animationList.push({
         name: AnimationName.FLASH_OUT,
         start: ts + 100

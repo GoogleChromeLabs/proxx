@@ -44,8 +44,13 @@ export default class NoMotionAnimator implements Animator {
         name: AnimationName.IDLE,
         start: 0
       });
-    } else {
+    } else if (cell.hasMine) {
       animationList.push({
+        name: AnimationName.MINED,
+        start: 0
+      });
+    } else {
+      animationList.unshift({
         name: AnimationName.NUMBER,
         start: 0
       });
