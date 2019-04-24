@@ -100,11 +100,7 @@ export default class TopBar extends Component<Props, State> {
           Graviton
         </h1>
         {!titleOnly && (
-          <div
-            class={squaresLeft}
-            role="status"
-            aria-label={`game ${timerRunning ? "running" : "not running"}`}
-          >
+          <div class={squaresLeft} role="status" aria-label="remaining">
             <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
           </div>
         )}

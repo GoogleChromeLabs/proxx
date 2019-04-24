@@ -126,8 +126,6 @@ export default class Game extends Component<Props, State> {
             playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
               <label
                 class={toggleLabel}
-                tabIndex={0}
-                onKeyUp={this.onKeyUp}
                 role="button"
                 aria-pressed={!dangerMode}
                 aria-label="game mode"
@@ -179,13 +177,6 @@ export default class Game extends Component<Props, State> {
 
   componentWillUnmount() {
     this.props.gameChangeUnsubscribe(this.onGameChange);
-  }
-
-  @bind
-  private onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Enter" || event.code === "Space") {
-      this.props.onDangerModeChange(!this.props.dangerMode);
-    }
   }
 
   @bind

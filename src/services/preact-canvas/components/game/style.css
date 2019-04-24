@@ -22,11 +22,18 @@
 }
 
 .toggle {
+  overflow: hidden;
   display: inline-block;
   background: white;
   height: 15px;
   width: 40px;
   border-radius: 15px;
+}
+
+.checkbox {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 .toggle::before {
@@ -44,8 +51,13 @@
   transform: translate(25px);
 }
 
-.checkbox {
-  display: none;
+.checkbox:focus + .toggle {
+  outline: 5px blue;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+.checkboxx:checked + .toggle::before {
+  margin-left: auto;
 }
 
 .again-button,
