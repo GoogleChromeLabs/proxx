@@ -60,7 +60,11 @@ class Time extends Component<TimeProps, {}> {
   }
 
   render() {
-    return <div>00:00</div>;
+    return (
+      <div role="timer" aria-label="game timer">
+        00:00
+      </div>
+    );
   }
 
   private _startTimer() {
@@ -101,7 +105,7 @@ export default class TopBar extends Component<Props, State> {
           </div>
         )}
         {!titleOnly && (
-          <div class={time} role="timer">
+          <div class={time}>
             <Time running={timerRunning!} />
             <Timer class={timeIcon} animate={timerRunning} />
           </div>
