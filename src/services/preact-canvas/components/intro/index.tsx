@@ -91,14 +91,6 @@ type PresetName = keyof typeof presets;
 
 export interface Props {
   onStartGame: (width: number, height: number, mines: number) => void;
-<<<<<<< HEAD
-=======
-  loading: boolean;
-<<<<<<< HEAD
-  inert: boolean;
->>>>>>> make inert work
-=======
->>>>>>> move settings meny out of game, only avilable to start screen
 }
 
 interface State {
@@ -124,14 +116,7 @@ export default class Intro extends Component<Props, State> {
     window.scrollTo(0, 0);
   }
 
-<<<<<<< HEAD
   render(_props: Props, { width, height, mines, presetName }: State) {
-=======
-  render(
-    { loading }: Props,
-    { width, height, mines, presetName, longLoad }: State
-  ) {
->>>>>>> make inert work
     return (
       <div class={introStyle}>
         <TopBar titleOnly />

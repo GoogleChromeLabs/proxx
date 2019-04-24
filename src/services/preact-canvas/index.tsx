@@ -95,7 +95,10 @@ class PreactService extends Component<Props, State> {
     this._init(props);
   }
 
-  render(_props: Props, { game, dangerMode, awaitingGame, settingsOpen, motionPreference }: State) {
+  render(
+    _props: Props,
+    { game, dangerMode, awaitingGame, settingsOpen, motionPreference }: State
+  ) {
     let mainComponent: VNode;
 
     if (!game) {
@@ -221,11 +224,10 @@ class PreactService extends Component<Props, State> {
     const stateService = await this.props.stateServicePromise;
     stateService.initGame(width, height, mines);
   }
-  
 
   @bind
   private _onBackClick() {
-    this.state.stateService!.reset();
+    this._stateService!.reset();
   }
 
   private async _init({ stateServicePromise }: Props) {
