@@ -103,7 +103,7 @@ export default class Nebula extends Component<Props, State> {
         class={`${nebulaStyle} ${
           dangerMode ? dangerModeStyle : notDangerModeStyle
         }`}
-        role="presentation"
+        aria-hidden="true"
       />
     );
   }

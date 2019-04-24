@@ -77,7 +77,8 @@ export default class Board extends Component<Props> {
     this.props.renderer.updateFirstRect(this._firstCellRect!);
     this._updateLoopRunning = true;
     requestAnimationFrame(this._animationLoop);
-
+    this._table!.focus();
+    
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keydown", this._onKeyDown);
@@ -150,15 +151,10 @@ export default class Board extends Component<Props> {
 
   private _createTable(width: number, height: number) {
     const tableContainer = document.querySelector("." + containerStyle);
-<<<<<<< HEAD
     this._table = document.createElement("table");
     this._table.classList.add(gameTable);
-=======
-    this.table = document.createElement("table");
-    this.table.classList.add(gameTable);
-    this.table.setAttribute("role", "grid");
-    this.table.setAttribute("aria-label", "The game grid");
->>>>>>> focus on table after start
+    this._table.setAttribute("role", "grid");
+    this._table.setAttribute("aria-label", "The game grid");
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.setAttribute("role", "row");
