@@ -6,3 +6,24 @@
   padding: 0;
   margin: 0;
 }
+
+.button,
+.button-alt {
+  composes: unbutton;
+  background: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #000;
+  border-radius: var(--border-radius);
+  padding: 0.9rem;
+  border: 3px solid #fff;
+}
+
+.button {
+  mix-blend-mode: screen;
+}
+
+.button-alt {
+  background: none;
+  color: #fff;
+}

@@ -41,7 +41,8 @@ export const enum AnimationName {
   HIGHLIGHT_IN,
   HIGHLIGHT_OUT,
   NUMBER,
-  FLAGGED
+  FLAGGED,
+  MINED
 }
 
 export interface AnimationDesc {

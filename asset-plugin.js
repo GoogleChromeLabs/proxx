@@ -15,7 +15,8 @@ import { readFileSync } from "fs";
 import { basename } from "path";
 
 const defaultOpts = {
-  prefix: "asset-url"
+  prefix: "asset-url",
+  initialAssets: []
 };
 
 export default function assetPlugin(opts) {
@@ -23,6 +24,11 @@ export default function assetPlugin(opts) {
   const prefix = opts.prefix + ":";
   return {
     name: "asset-plugin",
+    buildStart() {
+      for (const asset of opts.initialAssets) {
+        this.emitAsset(basename(asset), readFileSync(asset));
+      }
+    },
     async resolveId(id, importer) {
       if (!id.startsWith(prefix)) {
         return;

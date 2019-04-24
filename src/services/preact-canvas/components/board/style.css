@@ -1,5 +1,6 @@
 .board {
   height: 100%;
+  width: 100%;
 }
 
 .game-table {
@@ -7,13 +8,7 @@
   display: inline-block;
   opacity: 0;
   margin: auto;
-  padding: 43px var(--side-margin);
-}
-
-@media (min-width: 320px) {
-  .game-table {
-    padding: 70px var(--side-margin);
-  }
+  padding: var(--bar-avoid) var(--side-margin);
 }
 
 .game-row {

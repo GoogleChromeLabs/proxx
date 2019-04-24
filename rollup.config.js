@@ -61,7 +61,12 @@ export default {
       clean: true
     }),
     glsl(),
-    assetPlugin(),
+    assetPlugin({
+      initialAssets: [
+        "./src/assets/space-mono-normal.woff2",
+        "./src/assets/space-mono-bold.woff2"
+      ]
+    }),
     chunkNamePlugin(),
     nodeResolve(),
     loadz0r({
@@ -79,7 +84,9 @@ export default {
         return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
-    dependencyGraph(),
+    dependencyGraph({
+      propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
+    }),
     terser()
   ]
 };

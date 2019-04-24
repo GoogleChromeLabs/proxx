@@ -78,15 +78,17 @@ class PreactService extends Component<Props, State> {
       mainComponent = (
         <Intro
           onStartGame={this._onStartGame}
-          spinner={!stateService || !texturesReady || !rendererReady}
+          loading={!stateService || !texturesReady || !rendererReady}
         />
       );
     } else {
       mainComponent = (
         <Game
           loading={() => <div />}
+          key={game.id}
           width={game.width}
           height={game.height}
+          mines={game.mines}
           toRevealTotal={game.toRevealTotal}
           gameChangeSubscribe={this._onGameChangeSubscribe}
           gameChangeUnsubscribe={this._onGameChangeUnsubscribe}
@@ -107,30 +109,6 @@ class PreactService extends Component<Props, State> {
         <BottomBar onFullscreenClick={this._onFullscreenClick} />
       </div>
     );
-  }
-
-  componentDidMount() {
-    window.addEventListener("keydown", this._onKeyDown);
-    window.addEventListener("keyup", this._onKeyUp);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("keydown", this._onKeyDown);
-    window.removeEventListener("keyup", this._onKeyUp);
-  }
-
-  @bind
-  private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift") {
-      this._onDangerModeChange(!this.state.dangerMode);
-    }
-  }
-
-  @bind
-  private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Shift") {
-      this._onDangerModeChange(!this.state.dangerMode);
-    }
   }
 
   @bind

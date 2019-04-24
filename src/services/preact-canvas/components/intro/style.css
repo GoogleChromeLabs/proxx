@@ -6,41 +6,123 @@
   position: relative;
 }
 
-.game-setting {
-  white-space: nowrap;
-}
-
-.manual-settings {
+.start-form {
   display: flex;
+  flex-flow: column;
+  padding: var(--bar-avoid) var(--side-margin) 0;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 33rem;
+  --item-margin: 0.4rem;
 }
 
-.manual-settings > * {
+.label {
+  position: relative;
+  display: block;
+  --padding-sides: 0.9rem;
+  margin: 0 var(--item-margin);
+}
+
+.label-text {
+  position: absolute;
+  padding: 0 var(--padding-sides);
+  font-size: 0.8rem;
+  opacity: 0.7;
+  top: 0.9rem;
+  /** In the select box, clicking the label text focuses the input, but doesn't show the options.
+   * This fixes that, by making the click goes through to the select itself. */
+  pointer-events: none;
+}
+
+.field {
+  background: rgba(0, 0, 0, .39);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  font: inherit;
+  padding: 2em var(--padding-sides) 0.8em;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  border: none;
+  border-bottom: 1px solid #fff;
+  width: 100%;
+  color: #fff;
+  box-sizing: border-box;
+}
+
+.field:focus {
+  outline: none;
+  border-bottom-color: #4b93ff;
+}
+
+/* Hide the number spinner */
+.field::-webkit-inner-spin-button,
+.field::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.select-arrow,
+.number-up-arrow,
+.number-down-arrow {
+  position: absolute;
+  fill: #fff;
+  right: 0.6rem;
+  width: 15px;
+  height: 7px;
+  -webkit-tap-highlight-color: transparent;
+  /* For a larger touch target */
+  padding: 7px;
+}
+
+.select-arrow {
+  top: 50%;
+  transform: translateY(-50%);
+  /** Clicking the arrow focuses the input, but doesn't show the options. This fixes that, by making
+  * the click goes through to the select itself. */
+  pointer-events: none;
+}
+
+.number-up-arrow,
+.number-down-arrow {
+  top: 50%;
+  transform: translateY(-10px) translateY(-50%) scaleY(-1);
+  cursor: pointer;
+}
+
+.number-down-arrow {
+  transform: translateY(10px) translateY(-50%);
+}
+
+.settings-row {
+  display: flex;
+  margin: 1.2rem calc(-1 * var(--item-margin));
+}
+
+.settings-row>* {
   flex: 1;
 }
 
-.button {
-  border: 1px solid red;
+.start-button {
+  composes: button from "../../utils.css";
+  /** PostCSS seems to be ordering class names incorrectly, meaning I can't override this without
+   * !important */
+  margin: 0 var(--item-margin) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.15rem;
+  will-change: opacity;
+  transition: opacity 0.4s ease-in-out;
 }
 
-.button:before {
-  content: "";
-  display: inline-block;
-  height: 1em;
-  width: 1em;
-  background-color: black;
-  margin-right: 0.5em;
+.start-button:disabled {
+  opacity: 0.7;
 }
 
-.spinner:before {
-  animation: spin 1s infinite linear;
+.start-button-text-hide {
+  will-change: opacity;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0turn);
-  }
-
-  to {
-    transform: rotate(1turn);
-  }
+.start-button-text-show {
+  composes: start-button-text-hide;
+  opacity: 1;
 }

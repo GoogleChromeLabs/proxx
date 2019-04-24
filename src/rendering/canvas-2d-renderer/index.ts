@@ -181,6 +181,19 @@ export default class Canvas2DRenderer implements Renderer {
     this._ctx!.restore();
   }
 
+  private [AnimationName.MINED](
+    x: number,
+    y: number,
+    cell: Cell,
+    animation: AnimationDesc,
+    ts: number
+  ) {
+    if (animation.start > ts) {
+      return;
+    }
+    staticTextureDrawer!(STATIC_TEXTURE.MINE, this._ctx!, this._tileSize!);
+  }
+
   private [AnimationName.HIGHLIGHT_IN](
     x: number,
     y: number,

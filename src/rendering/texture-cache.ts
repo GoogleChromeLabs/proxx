@@ -36,6 +36,11 @@ const defaultSizeConstraints = {
   maxHeight: 32768
 };
 
+export interface TextureCache {
+  drawer: TextureDrawer;
+  caches: HTMLImageElement[];
+}
+
 // Wraps an existing TextureGenerator and caches the generated
 // frames in an img.
 export async function cacheTextureGenerator(
@@ -43,7 +48,7 @@ export async function cacheTextureGenerator(
   textureSize: number,
   numFrames: number,
   constraints: Partial<SizeConstraints> = {}
-) {
+): Promise<TextureCache> {
   const { maxWidth, maxHeight } = { ...defaultSizeConstraints, ...constraints };
   const maxFramesPerRow = Math.floor(
     maxWidth / (textureSize * staticDevicePixelRatio)
