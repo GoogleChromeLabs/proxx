@@ -19,3 +19,18 @@
 // game and ignore changes thereafter. In the future we can consider detecting
 // changes to dPR and regenerating the sprite sheets on the fly.
 export const staticDevicePixelRatio = devicePixelRatio;
+
+// On KaiOS browser, zoom in/out changes both screen.width and window.innerWidth.
+// This makes it hard to detect an actual screen size in order to provide
+// better visual guide (such as focus on mouse hover) for the smaller screen.
+//
+// Since zoom level is set to default every time a page gets loaded,
+// implementation below stores initial screen width and height.
+const staticScreenWidth = screen.width;
+const staticScreenHeight = screen.height;
+
+// Our assumption here is that every feature phone has qvga or less screen size,
+// so this says nothing about the input interface and may be busted in the future.
+// in Q1 2019, all KaiOS devices ship with QVGA and Xiaomi's Qin1 is also QVGA.
+export const isFeaturePhone =
+  Math.min(staticScreenWidth, staticScreenHeight) <= 240;

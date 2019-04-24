@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
 import { focusRing, rippleSpeed } from "src/rendering/constants.js";
-import { isFeaturePhone } from "src/utils/static-screensize";
+import { isFeaturePhone } from "src/utils/static-dpr";
 import { Cell, GridChanges } from "../../../../gamelogic/types.js";
 import {
   AnimationDesc,
@@ -451,12 +451,9 @@ export default class Board extends Component<Props, State> {
   private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
     this.setState({ keyNavigation: true });
     const currentBtn = document.activeElement as HTMLButtonElement;
-    const btnInfo = this.additionalButtonData.get(currentBtn);
-    if (!btnInfo) {
-      return;
-    }
-    const x = btnInfo[0] as number;
-    const y = btnInfo[1] as number;
+    const btnInfo = this.additionalButtonData.get(currentBtn)!;
+    const x = btnInfo[0];
+    const y = btnInfo[1];
     const width = this.props.width;
     const height = this.props.height;
 
@@ -469,7 +466,6 @@ export default class Board extends Component<Props, State> {
       return;
     }
 
-    event.stopPropagation();
     const nextIndex = newX + newY * width;
     const nextBtn = this.buttons[nextIndex];
 
