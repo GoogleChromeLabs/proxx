@@ -140,27 +140,15 @@ class PreactService extends Component<Props, State> {
           dangerMode={game ? dangerMode : false}
         />
         {mainComponent}
-        {!settingsOpen ? (
-          <BottomBar
-            onFullscreenClick={this._onFullscreenClick}
-            onSettingsClick={this._onSettingsClick}
-            onBackClick={this._onBackClick}
-            game={game}
-          />
-        ) : null}
+        <BottomBar
+          onFullscreenClick={this._onFullscreenClick}
+          onSettingsClick={this._onSettingsClick}
+          onBackClick={this._onBackClick}
+          game={game}
+          display={settingsOpen}
+        />
       </div>
     );
-  }
-
-  componentDidMount() {
-    window.addEventListener("keyup", this._onKeyUp);
-  }
-
-  @bind
-  private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Escape" && this.state.settingsOpen) {
-      this._onSettingsClick();
-    }
   }
 
   @bind
@@ -202,10 +190,8 @@ class PreactService extends Component<Props, State> {
     }
     this.setState({ settingsOpen: !this.state.settingsOpen });
 
-    if (!this.state.settingsOpen) {
-      setTimeout(() => {
-        this.previousFocus!.focus();
-      }, 0);
+    if (!this.state.settingsOpen && this.previousFocus) {
+      this.previousFocus.focus();
     }
   }
 

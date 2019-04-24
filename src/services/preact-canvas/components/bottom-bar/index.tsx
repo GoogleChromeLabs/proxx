@@ -14,21 +14,28 @@ import { Component, h } from "preact";
 import { GameType } from "src/services/state";
 import { Back } from "../icons/additional";
 import { Fullscreen, Settings } from "../icons/initial";
-import { bottomBar, icons } from "./style.css";
+import { bottomBar, hidden, icons } from "./style.css";
 
 export interface Props {
   onFullscreenClick: () => void;
   onSettingsClick: () => void;
   onBackClick: () => void;
   game?: GameType;
+  display: boolean;
 }
 
 export interface State {}
 
 export default class BottomBar extends Component<Props, State> {
-  render({ onFullscreenClick, onSettingsClick, onBackClick, game }: Props) {
+  render({
+    onFullscreenClick,
+    onSettingsClick,
+    onBackClick,
+    game,
+    display
+  }: Props) {
     return (
-      <div class={bottomBar}>
+      <div class={[bottomBar, `${display ? hidden : ""}`].join("")}>
         {game ? (
           <button
             class={icons}

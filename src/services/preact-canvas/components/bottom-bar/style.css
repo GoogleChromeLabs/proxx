@@ -34,6 +34,10 @@
   height: var(--icon-size);
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 html:fullscreen .fullscreen {
   visibility: hidden;
 }

@@ -82,11 +82,20 @@ export default class Settings extends Component<Props, State> {
 
   componentDidMount() {
     this.focusItem!.focus();
+    window.addEventListener("keyup", this._onKeyUp);
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+      this.props.onCloseClicked();
+    }
   }
 
   @bind
   private _onAboutClicked() {
     this.setState({ aboutVisible: true });
+    this.focusItem!.focus();
   }
 
   @bind
