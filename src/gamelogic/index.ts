@@ -13,7 +13,7 @@
 
 import { Cell, GridChanges, PlayMode } from "./types.js";
 
-function newCell(id: number): Cell {
+function newCell(): Cell {
   return {
     flagged: false,
     hasMine: false,
@@ -78,10 +78,10 @@ export default class MinesweeperGame {
 
     this.grid = Array(_height)
       .fill(undefined)
-      .map((_, rowIdx) =>
+      .map(() =>
         Array(_width)
           .fill(undefined)
-          .map((_, cellIdx) => newCell(rowIdx * _width + cellIdx))
+          .map(() => newCell())
       );
   }
 

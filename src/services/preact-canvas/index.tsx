@@ -16,7 +16,9 @@ import { Component, h, render, VNode } from "preact";
 import { getRendererInstance } from "src/rendering/renderer";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
+import { prerender } from "../../utils/constants";
 import { GameType } from "../state";
+import { getGridDefault, setGridDefault } from "../state/grid-default";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import BottomBar from "./components/bottom-bar";
@@ -33,12 +35,19 @@ import { game as gameClassName, main } from "./style.css";
 // loading screen?
 const loadingScreenTimeout = 1000;
 
+export interface GridType {
+  width: number;
+  height: number;
+  mines: number;
+}
+
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;
 }
 
 interface State {
   game?: GameType;
+  gridDefaults?: GridType;
   dangerMode: boolean;
   awaitingGame: boolean;
 }
@@ -62,6 +71,8 @@ const texturePromise = import("../../rendering/animation").then(m =>
 const rendererPromise = getRendererInstance();
 const gamePerquisites = Promise.all([texturePromise, rendererPromise]);
 
+const gridDefaultPromise = getGridDefault();
+
 const immedateGameSessionKey = "instantGame";
 
 class PreactService extends Component<Props, State> {
@@ -79,14 +90,22 @@ class PreactService extends Component<Props, State> {
     this._init(props);
   }
 
-  render(_props: Props, { game, dangerMode, awaitingGame }: State) {
+  render(
+    _props: Props,
+    { game, dangerMode, awaitingGame, gridDefaults }: State
+  ) {
     let mainComponent: VNode;
 
     if (!game) {
       if (awaitingGame) {
         mainComponent = <GameLoading />;
       } else {
-        mainComponent = <Intro onStartGame={this._onStartGame} />;
+        mainComponent = (
+          <Intro
+            onStartGame={this._onStartGame}
+            defaults={prerender ? undefined : gridDefaults}
+          />
+        );
       }
     } else {
       mainComponent = (
@@ -142,6 +161,8 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private async _onStartGame(width: number, height: number, mines: number) {
+    setGridDefault(width, height, mines);
+
     const { updateReady, skipWaiting } = await offlineModulePromise;
 
     if (updateReady) {
@@ -168,6 +189,10 @@ class PreactService extends Component<Props, State> {
   }
 
   private async _init({ stateServicePromise }: Props) {
+    gridDefaultPromise.then(gridDefaults => {
+      this.setState({ gridDefaults });
+    });
+
     // Is this the reload after an update?
     const instantGameDataStr = sessionStorage.getItem(immedateGameSessionKey);
 

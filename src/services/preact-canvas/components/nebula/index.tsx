@@ -29,6 +29,7 @@ import {
   nebulaSafeLight
 } from "../../../../rendering/constants.js";
 
+import { debug } from "../../../../utils/constants";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
@@ -84,8 +85,10 @@ export default class Nebula extends Component<Props, State> {
     window.addEventListener("resize", this._onResize);
     this.start();
 
-    if (self.debug) {
-      self.debug.then(debug => debug.nebula(this, this._shaderBox!));
+    if (debug) {
+      import("../../../../services/debug/index.js").then(m =>
+        m.nebula(this, this._shaderBox!)
+      );
     }
   }
 
