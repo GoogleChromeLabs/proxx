@@ -11,7 +11,6 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-// import {} from "./style.css";
 
 export default class About extends Component {
   render() {
