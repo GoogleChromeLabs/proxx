@@ -58,7 +58,7 @@ export default function glslPlugin(opts) {
         const stream = readable
           .pipe(parser())
           .pipe(minify())
-          .pipe(deparser(!opts.minify));
+          .pipe(deparser(false /* remove all optional whitespace */));
         return collectStream(stream).then(chunks => {
           const minified = chunks.map(c => c.toString()).join("");
           return `export default ${JSON.stringify(minified)};`;

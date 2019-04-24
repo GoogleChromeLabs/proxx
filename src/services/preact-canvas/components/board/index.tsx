@@ -81,6 +81,7 @@ export default class Board extends Component<Props> {
 
   componentWillUnmount() {
     window.removeEventListener("resize", this._onWindowResize);
+    window.removeEventListener("scroll", this._onWindowScroll);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     // Stop rAF
     this._updateLoopRunning = false;

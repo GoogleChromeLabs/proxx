@@ -42,7 +42,7 @@ interface State {
   toReveal: number;
   startTime: number;
   endTime: number;
-  // This should never not be set as we prevent the game from starting until the
+  // This should always be set as we prevent the game from starting until the
   // renderer is loaded.
   renderer?: Renderer;
 }
