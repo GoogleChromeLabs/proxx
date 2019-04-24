@@ -11,17 +11,15 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { StateChange } from "src/gamelogic/index.js";
-import { Cell, GridChanges } from "../../../../gamelogic/types.js";
-import {
-  AnimationDesc,
-  AnimationName
-} from "../../../../rendering/animation.js";
-import { bind } from "../../../../utils/bind.js";
-import { GameChangeCallback } from "../../index.js";
+import { StateChange } from "src/gamelogic/index";
+import { Cell, GridChanges } from "../../../../gamelogic/types";
+import { AnimationDesc, AnimationName } from "../../../../rendering/animation";
+import { bind } from "../../../../utils/bind";
+import { staticDevicePixelRatio } from "../../../../utils/static-dpr";
+import { GameChangeCallback } from "../../index";
 
 import { removeAnimations } from "src/rendering/animation-helpers.js";
-import { rippleSpeed } from "src/rendering/constants.js";
+import { rippleSpeed } from "src/rendering/constants";
 import { Renderer } from "src/rendering/renderer.js";
 import {
   board,
@@ -43,9 +41,11 @@ const defaultCell: Cell = {
 
 export interface Props {
   onCellClick: (cell: [number, number, Cell], alt: boolean) => void;
+  onDangerModeChange: (v: boolean) => void;
   width: number;
   height: number;
   renderer: Renderer;
+  dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
@@ -60,12 +60,15 @@ export default class Board extends Component<Props> {
     HTMLButtonElement,
     [number, number, Cell]
   >();
+
   private _animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
   private _updateLoopRunning = false;
   private _changeBuffer: GridChanges = [];
   private _lastTs: number = performance.now();
 
   componentDidMount() {
+    window.scrollTo(0, 0);
+    document.documentElement.classList.add("in-game");
     this._createTable(this.props.width, this.props.height);
     this.props.gameChangeSubscribe(this._doManualDomHandling);
     this._animationsInit();
@@ -77,11 +80,16 @@ export default class Board extends Component<Props> {
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
+    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
+    document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("scroll", this._onWindowScroll);
+    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     // Stop rAF
     this._updateLoopRunning = false;
@@ -109,6 +117,20 @@ export default class Board extends Component<Props> {
   private _onWindowScroll() {
     this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
+  }
+
+  @bind
+  private _onKeyDown(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
   }
 
   @bind
@@ -229,10 +251,17 @@ export default class Board extends Component<Props> {
           this._animationLists.set(btn, animationList);
         }
       });
-      animationList.unshift({
-        name: AnimationName.NUMBER,
-        start: ts + 100
-      });
+      if (cell.hasMine) {
+        animationList.push({
+          name: AnimationName.MINED,
+          start: ts + 100
+        });
+      } else if (cell.touchingMines >= 0) {
+        animationList.unshift({
+          name: AnimationName.NUMBER,
+          start: ts + 100
+        });
+      }
       animationList.push({
         name: AnimationName.FLASH_OUT,
         start: ts + 100

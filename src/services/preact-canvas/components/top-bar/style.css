@@ -3,10 +3,15 @@
   margin: var(--side-margin);
   margin-bottom: 0;
   padding: 0 0 10px;
-  position: fixed;
+  position: absolute;
   left: 0;
   right: 0;
   top: 0;
+}
+
+/* The in-game class is set by the game component */
+:global .in-game :local .top-bar {
+  position: fixed;
 }
 
 .top-bar::before {
@@ -36,6 +41,7 @@
   order: 2;
   text-align: center;
   font-size: inherit;
+  font-weight: normal;
   margin: 0;
   padding: 0;
 }

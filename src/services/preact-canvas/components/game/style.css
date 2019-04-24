@@ -1,10 +1,12 @@
 .game {
-  height: 100%;
+  display: flex;
+  flex: 1;
+  align-items: center;
 }
 
 .toggle-label {
   position: fixed;
-  bottom: 10px;
+  bottom: 9px;
   left: 50%;
   white-space: nowrap;
   transform: translateX(-50%);
@@ -15,7 +17,7 @@
 
 @media (min-width: 320px) {
   .toggle-label {
-    bottom: 22px;
+    bottom: 17px;
   }
 }
 
@@ -44,4 +46,50 @@
 
 .checkbox {
   display: none;
+}
+
+.again-button,
+.main-button {
+  text-transform: uppercase;
+  display: block;
+  width: 100%;
+  /** PostCSS adding classes in wrong order :( */
+  margin: 0.6rem 0.4rem !important;
+  font-size: 1.1rem;
+  letter-spacing: 0.2rem;
+}
+
+.again-button {
+  composes: button from "../../utils.css";
+}
+
+.main-button {
+  composes: button-alt from "../../utils.css";
+  /** PostCSS adding classes in wrong order :( */
+  background: #000 !important;
+}
+
+.exit-row {
+  position: fixed;
+  bottom: 38px;
+  left: 0;
+  right: 0;
+  margin: 0 var(--side-margin);
+}
+
+@media (min-width: 320px) {
+  .exit-row {
+    bottom: 77px;
+  }
+}
+
+@media (min-width: 440px) {
+  .exit-row-inner {
+    display: flex;
+  }
+}
+
+.exit-row-inner {
+  max-width: 33rem;
+  margin: 0 auto;
 }

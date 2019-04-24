@@ -11,7 +11,8 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Square, Timer } from "../icons";
+import { minSec } from "../../../../utils/format";
+import { Square, Timer } from "../icons/additional";
 import {
   squareIcon,
   squaresLeft,
@@ -67,12 +68,7 @@ class Time extends Component<TimeProps, {}> {
 
     this._intervalId = setInterval(() => {
       requestAnimationFrame(() => {
-        const diff = Date.now() - this._start!;
-        const minutes = Math.floor(diff / (1000 * 60));
-        const seconds = Math.floor((diff / 1000) % 60);
-        const minStr = minutes < 10 ? "0" + minutes : "" + minutes;
-        const secStr = seconds < 10 ? "0" + seconds : "" + seconds;
-        this.base!.textContent = `${minStr}:${secStr}`;
+        this.base!.textContent = minSec(Date.now() - this._start!);
       });
     }, 1000);
   }
@@ -83,25 +79,31 @@ class Time extends Component<TimeProps, {}> {
 }
 
 export interface Props {
-  toRevealTotal: number;
-  toReveal: number;
-  timerRunning: boolean;
+  toRevealTotal?: number;
+  toReveal?: number;
+  timerRunning?: boolean;
+  titleOnly?: boolean;
 }
 
 export interface State {}
 
 // tslint:disable-next-line:max-classes-per-file
 export default class TopBar extends Component<Props, State> {
-  render({ toReveal, toRevealTotal, timerRunning }: Props) {
+  render({ toReveal, toRevealTotal, timerRunning, titleOnly }: Props) {
     return (
       <div class={topBar}>
         <h1 class={title}>Graviton</h1>
-        <div class={squaresLeft}>
-          <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
-        </div>
-        <div class={time}>
-          <Time running={timerRunning} /> <Timer class={timeIcon} />
-        </div>
+        {!titleOnly && (
+          <div class={squaresLeft}>
+            <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
+          </div>
+        )}
+        {!titleOnly && (
+          <div class={time}>
+            <Time running={timerRunning!} />
+            <Timer class={timeIcon} animate={timerRunning} />
+          </div>
+        )}
       </div>
     );
   }
