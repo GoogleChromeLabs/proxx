@@ -91,8 +91,10 @@ export interface State {}
 export default class TopBar extends Component<Props, State> {
   render({ toReveal, toRevealTotal, timerRunning, titleOnly }: Props) {
     return (
-      <div class={topBar}>
-        <h1 class={title}>Graviton</h1>
+      <div class={topBar} aria-labelledby="game-title" role="banner">
+        <h1 class={title} id="game-title">
+          Graviton
+        </h1>
         {!titleOnly && (
           <div class={squaresLeft}>
             <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
