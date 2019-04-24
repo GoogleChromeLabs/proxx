@@ -100,6 +100,7 @@ export default class Board extends Component<Props> {
 
   @bind
   private _onWindowResize() {
+    this._onWindowScroll();
     this.props.renderer.onResize();
   }
 
