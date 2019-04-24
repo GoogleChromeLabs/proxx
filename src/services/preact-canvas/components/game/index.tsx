@@ -124,7 +124,14 @@ export default class Game extends Component<Props, State> {
               onDangerModeChange={this.props.onDangerModeChange}
             />,
             playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
-              <label class={toggleLabel}>
+              <label
+                class={toggleLabel}
+                tabIndex={0}
+                onKeyUp={this.onKeyUp}
+                role="button"
+                aria-pressed={!dangerMode}
+                aria-label="game mode"
+              >
                 Reveal
                 <input
                   class={checkbox}
@@ -132,7 +139,14 @@ export default class Game extends Component<Props, State> {
                   onChange={this.onDangerModeChange}
                   checked={!dangerMode}
                 />
-                <span class={toggle} /> Flag
+                <span
+                  class={toggle}
+                  role="status"
+                  aria-label={`${
+                    !dangerMode ? "set to flag mode" : "set to reveal mode"
+                  }`}
+                />{" "}
+                Flag
               </label>
             ) : playMode === PlayMode.Lost ? (
               <div class={exitRow}>
@@ -165,6 +179,13 @@ export default class Game extends Component<Props, State> {
 
   componentWillUnmount() {
     this.props.gameChangeUnsubscribe(this.onGameChange);
+  }
+
+  @bind
+  private onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Enter") {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
   }
 
   @bind
