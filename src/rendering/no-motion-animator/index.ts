@@ -51,7 +51,9 @@ export default class NoMotionAnimator implements Animator {
       });
     }
     if (
-      (cell.touchingFlags > 0 && cell.touchingFlags >= cell.touchingMines) ||
+      (cell.revealed &&
+        cell.touchingFlags > 0 &&
+        cell.touchingFlags >= cell.touchingMines) ||
       (!cell.revealed && cell.flagged)
     ) {
       animationList.push({

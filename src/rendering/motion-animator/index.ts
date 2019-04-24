@@ -204,9 +204,21 @@ export default class MotionAnimator implements Animator {
 
     this._renderer.beforeRenderFrame();
     for (const detail of this._cellDetails) {
-      this._renderer.beforeCell(detail.x, detail.y, detail.cell!);
+      this._renderer.beforeCell(
+        detail.x,
+        detail.y,
+        detail.cell!,
+        detail.animationList,
+        ts
+      );
       this._animateTile(detail, ts);
-      this._renderer.afterCell(detail.x, detail.y, detail.cell!);
+      this._renderer.afterCell(
+        detail.x,
+        detail.y,
+        detail.cell!,
+        detail.animationList,
+        ts
+      );
     }
 
     if (this._renderLoopRunning) {
