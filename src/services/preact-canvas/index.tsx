@@ -23,6 +23,10 @@ import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
 import GameLoading from "./components/game-loading";
 import Intro from "./components/intro/index.js";
+import {
+  nebula as nebulaStyle,
+  notDangerMode as notDangerModeStyle
+} from "./components/nebula/style.css";
 import { game as gameClassName, main } from "./style.css";
 
 // If the user tries to start a game when we aren't ready, how long do we wait before showing the
@@ -105,7 +109,9 @@ class PreactService extends Component<Props, State> {
     return (
       <div class={gameClassName}>
         <Nebula
-          loading={() => <div />}
+          loading={() => (
+            <div class={[nebulaStyle, notDangerModeStyle].join(" ")} />
+          )}
           dangerMode={game ? dangerMode : false}
         />
         {mainComponent}
