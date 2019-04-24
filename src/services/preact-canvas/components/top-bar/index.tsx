@@ -96,12 +96,12 @@ export default class TopBar extends Component<Props, State> {
           Graviton
         </h1>
         {!titleOnly && (
-          <div class={squaresLeft}>
+          <div class={squaresLeft} role="status">
             <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
           </div>
         )}
         {!titleOnly && (
-          <div class={time}>
+          <div class={time} role="timer">
             <Time running={timerRunning!} />
             <Timer class={timeIcon} animate={timerRunning} />
           </div>
