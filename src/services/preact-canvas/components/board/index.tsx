@@ -44,6 +44,7 @@ export interface Props {
   width: number;
   height: number;
   renderer: Renderer;
+  animator: Animator;
   dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
@@ -52,7 +53,6 @@ export interface Props {
 export default class Board extends Component<Props> {
   private _canvas?: HTMLCanvasElement;
   private _table?: HTMLTableElement;
-  private _animator?: Animator;
   private _buttons: HTMLButtonElement[] = [];
   private _firstCellRect?: ClientRect | DOMRect;
   private _additionalButtonData = new WeakMap<
@@ -84,9 +84,7 @@ export default class Board extends Component<Props> {
     window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
-    if (this._animator) {
-      this._animator.stop();
-    }
+    this.props.animator.stop();
   }
 
   shouldComponentUpdate() {
@@ -138,9 +136,7 @@ export default class Board extends Component<Props> {
       const btn = this._buttons[y * this.props.width + x];
       this._updateButton(btn, cell, x, y);
     }
-    if (this._animator) {
-      this._animator.updateCells(stateChange.gridChanges);
-    }
+    this.props.animator.updateCells(stateChange.gridChanges);
   }
 
   private _createTable(width: number, height: number) {
@@ -181,12 +177,12 @@ export default class Board extends Component<Props> {
   }
 
   private _animatorInit() {
-    this._animator = new NoMotionAnimator(
-      // this._animator = new MotionAnimator(
-      this.props.width,
-      this.props.height,
-      this.props.renderer
-    );
+    // this._animator = new NoMotionAnimator(
+    //   // this._animator = new MotionAnimator(
+    //   this.props.width,
+    //   this.props.height,
+    //   this.props.renderer
+    // );
   }
 
   private _queryFirstCellRect() {

@@ -47,10 +47,6 @@ export interface Renderer {
   stop(): void;
 }
 
-let bestRendererPromise: Promise<Renderer>;
-let webGlRendererPromise: Promise<Renderer>;
-let canvasRendererPromise: Promise<Renderer>;
-
 function supportsSufficientWebGL(): boolean {
   try {
     // tslint:disable-next-line:no-unused-expression
@@ -62,69 +58,13 @@ function supportsSufficientWebGL(): boolean {
   return true;
 }
 
-const enum RendererType {
-  WebGL,
-  Canvas2D
-}
-
-export async function getBestRenderer(): Promise<Renderer> {
-  if (bestRendererPromise) {
-    return bestRendererPromise;
+const parsedURL = new URL(location.href);
+export function shouldUseMotion(): boolean {
+  if (parsedURL.searchParams.has("force-nomotion")) {
+    return false;
   }
-  const parsedURL = new URL(location.href);
-  let isForcedRendererType = false;
-  let rendererType = RendererType.Canvas2D;
-
-  // Allow the user to force a certain renderer with a query parameter.
-  if (parsedURL.searchParams.has("force-renderer")) {
-    isForcedRendererType = true;
-    const renderer = parsedURL.searchParams
-      .get("force-renderer")!
-      .toLowerCase();
-    switch (renderer) {
-      case "webgl":
-        rendererType = RendererType.WebGL;
-        break;
-      case "2d":
-        rendererType = RendererType.Canvas2D;
-        break;
-      default:
-        throw Error(`Unknown renderer "${renderer}"`);
-    }
+  if (parsedURL.searchParams.has("force-motion")) {
+    return true;
   }
-
-  // If no force has been used, use feature detection.
-  if (!isForcedRendererType) {
-    if (supportsSufficientWebGL()) {
-      rendererType = RendererType.WebGL;
-    }
-  }
-
-  switch (rendererType) {
-    case RendererType.WebGL:
-      bestRendererPromise = getWebGlRenderer();
-      break;
-    case RendererType.Canvas2D:
-      bestRendererPromise = getCanvasRenderer();
-      break;
-  }
-  return bestRendererPromise;
-}
-
-export async function getCanvasRenderer(): Promise<Renderer> {
-  if (!canvasRendererPromise) {
-    canvasRendererPromise = import("./canvas-2d-renderer/index.js").then(
-      m => new m.default()
-    );
-  }
-  return canvasRendererPromise;
-}
-
-export async function getWebGlRenderer(): Promise<Renderer> {
-  if (!webGlRendererPromise) {
-    webGlRendererPromise = import("./webgl-renderer/index.js").then(
-      m => new m.default()
-    );
-  }
-  return webGlRendererPromise;
+  return supportsSufficientWebGL() && matchMedia("(min-width: 320px)").matches;
 }

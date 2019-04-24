@@ -13,7 +13,6 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
-import { getBestRenderer } from "src/rendering/renderer";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { GameType } from "../state";
@@ -60,8 +59,7 @@ const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
 
-const rendererPromise = getBestRenderer();
-const gamePerquisites = Promise.all([texturePromise, rendererPromise]);
+const gamePerquisites = Promise.all([texturePromise]);
 
 const immedateGameSessionKey = "instantGame";
 
