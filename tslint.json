@@ -15,8 +15,7 @@
     "no-empty-interface": false,
     "only-arrow-functions": false,
     "variable-name": [true, "allow-leading-underscore"],
-    "object-literal-sort-keys": false,
-    "no-namespace": false
+    "object-literal-sort-keys": false
   },
   "rulesDirectory": [],
   "linterOptions": {

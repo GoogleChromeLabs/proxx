@@ -16,7 +16,6 @@ import { Component, h, render, VNode } from "preact";
 import { getBestRenderer } from "src/rendering/renderer";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
-import initInert from "../../utils/inert";
 import { GameType } from "../state";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
@@ -32,7 +31,6 @@ import {
   nebula as nebulaStyle,
   notDangerMode as notDangerModeStyle
 } from "./components/nebula/style.css";
-import Settings from "./components/settings";
 import { game as gameClassName, main } from "./style.css";
 
 // If the user tries to start a game when we aren't ready, how long do we wait before showing the
@@ -50,9 +48,6 @@ interface State {
   settingsOpen: boolean;
   motionPreference: boolean;
 }
-
-// install inert polyfill for A11y
-initInert();
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
 
@@ -107,7 +102,16 @@ class PreactService extends Component<Props, State> {
       if (awaitingGame) {
         mainComponent = <GameLoading />;
       } else {
-        mainComponent = <Intro onStartGame={this._onStartGame} />;
+        mainComponent = settingsOpen ? (
+          <Settings
+            loading={() => <div />}
+            onCloseClicked={this._onSettingsCloseClicked}
+            motion={motionPreference}
+            onMotionPrefChange={this._onMotionPrefChange}
+          />
+        ) : (
+          <Intro onStartGame={this._onStartGame} />
+        );
       }
     } else {
       mainComponent = (
@@ -123,7 +127,6 @@ class PreactService extends Component<Props, State> {
           stateService={this._stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
-          inert={settingsOpen}
         />
       );
     }
@@ -137,11 +140,14 @@ class PreactService extends Component<Props, State> {
           dangerMode={game ? dangerMode : false}
         />
         {mainComponent}
-        <BottomBar
-          onFullscreenClick={this._onFullscreenClick}
-          onSettingsClick={this._onSettingsClick}
-          inert={settingsOpen}
-        />
+        {!settingsOpen ? (
+          <BottomBar
+            onFullscreenClick={this._onFullscreenClick}
+            onSettingsClick={this._onSettingsClick}
+            onBackClick={this._onBackClick}
+            game={game}
+          />
+        ) : null}
       </div>
     );
   }
@@ -228,6 +234,12 @@ class PreactService extends Component<Props, State> {
     await gamePerquisites;
     const stateService = await this.props.stateServicePromise;
     stateService.initGame(width, height, mines);
+  }
+  
+
+  @bind
+  private _onBackClick() {
+    this.state.stateService!.reset();
   }
 
   private async _init({ stateServicePromise }: Props) {

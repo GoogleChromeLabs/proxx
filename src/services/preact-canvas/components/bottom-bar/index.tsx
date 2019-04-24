@@ -11,24 +11,41 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
+import { GameType } from "src/services/state";
+import { Back } from "../icons/additional";
 import { Fullscreen, Settings } from "../icons/initial";
 import { bottomBar, icons } from "./style.css";
 
 export interface Props {
   onFullscreenClick: () => void;
   onSettingsClick: () => void;
-  inert?: boolean;
+  onBackClick: () => void;
+  game?: GameType;
 }
 
 export interface State {}
 
 export default class BottomBar extends Component<Props, State> {
-  render({ onFullscreenClick, onSettingsClick, inert }: Props) {
+  render({ onFullscreenClick, onSettingsClick, onBackClick, game }: Props) {
     return (
-      <div class={bottomBar} inert={inert}>
-        <button class={icons} onClick={onSettingsClick}>
-          <Settings />
-        </button>
+      <div class={bottomBar}>
+        {game ? (
+          <button
+            class={icons}
+            onClick={onBackClick}
+            aria-label="Back to main menu"
+          >
+            <Back />
+          </button>
+        ) : (
+          <button
+            class={icons}
+            onClick={onSettingsClick}
+            aria-label="Open settings menu"
+          >
+            <Settings />
+          </button>
+        )}
         <button class={icons} onClick={onFullscreenClick}>
           <Fullscreen />
         </button>

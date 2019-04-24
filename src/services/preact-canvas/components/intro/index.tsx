@@ -94,8 +94,11 @@ export interface Props {
 <<<<<<< HEAD
 =======
   loading: boolean;
+<<<<<<< HEAD
   inert: boolean;
 >>>>>>> make inert work
+=======
+>>>>>>> move settings meny out of game, only avilable to start screen
 }
 
 interface State {
@@ -125,12 +128,12 @@ export default class Intro extends Component<Props, State> {
   render(_props: Props, { width, height, mines, presetName }: State) {
 =======
   render(
-    { loading, inert }: Props,
+    { loading }: Props,
     { width, height, mines, presetName, longLoad }: State
   ) {
 >>>>>>> make inert work
     return (
-      <div class={introStyle} inert={inert}>
+      <div class={introStyle}>
         <TopBar titleOnly />
         <form onSubmit={this._startGame} class={startFormStyle}>
           <div class={settingsRowStyle}>

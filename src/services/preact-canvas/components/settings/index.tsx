@@ -19,7 +19,6 @@ import {
   buttonOff as btnOffStyle,
   buttonOn as btnOnStyle,
   closeButton as closebtnStyle,
-  closed as closedStyle,
   settings as settingsStyle,
   settingsContent as settingsContentStyle,
   settingsWindow as settingsWindowStyle
@@ -28,7 +27,6 @@ import {
 interface Props {
   onCloseClicked: () => void;
   onMotionPrefChange: () => void;
-  open: boolean;
   motion: boolean;
 }
 
@@ -44,15 +42,11 @@ export default class Settings extends Component<Props, State> {
   private focusItem?: HTMLElement;
 
   render(
-    { onCloseClicked, onMotionPrefChange, open, motion }: Props,
+    { onCloseClicked, onMotionPrefChange, motion }: Props,
     { aboutVisible }: State
   ) {
     return (
-      <div
-        role="dialog"
-        aria-label="settings dialog"
-        class={[settingsStyle, `${open ? "" : closedStyle}`].join(" ")}
-      >
+      <div role="dialog" aria-label="settings dialog" class={settingsStyle}>
         <button
           aria-label={`close button`}
           class={closebtnStyle}
@@ -86,11 +80,8 @@ export default class Settings extends Component<Props, State> {
     );
   }
 
-  componentDidUpdate() {
-    if (this.props.open) {
-      this.focusItem!.focus();
-      return;
-    }
+  componentDidMount() {
+    this.focusItem!.focus();
   }
 
   @bind

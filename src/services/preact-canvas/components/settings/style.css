@@ -1,28 +1,22 @@
 .settings {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 1);
-  overflow-x: auto;
-}
-
-.settings.closed {
-  display: none;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: scroll;
 }
 
 .settings .settings-window {
   display: flex;
   flex-direction: column;
-  xalign-items: center;
-  xjustify-content: center;
   height: 100%;
+  max-width: 33rem;
+  width: 100%;
 }
 
 .settings .settings-window .settings-content {
   width: 100%;
-  max-width: 33rem;
   padding: 20px;
   margin: auto;
   box-sizing: border-box;
