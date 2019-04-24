@@ -148,14 +148,14 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift" || event.key === "#") {
+    if (event.key === "Control" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
 
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Shift") {
+    if (event.key === "Control") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
