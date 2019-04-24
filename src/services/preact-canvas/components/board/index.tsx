@@ -178,7 +178,7 @@ export default class Board extends Component<Props, State> {
     this.table = document.createElement("table");
     this.table.classList.add(gameTable);
     this.table.setAttribute("role", "grid");
-    this.table.setAttribute("aria-label", `game grid`);
+    this.table.setAttribute("aria-label", "The game grid");
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.setAttribute("role", "row");
