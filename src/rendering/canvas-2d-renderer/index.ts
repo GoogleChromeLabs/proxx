@@ -41,7 +41,7 @@ import vertexShader from "./vertex.glsl";
 
 export default class Canvas2DRenderer implements Renderer {
   private _canvas?: HTMLCanvasElement;
-  private _ctx?: CanvasRenderingContext2D;
+  private _ctx?: CanvasRenderingContext2D | null;
   private _firstCellRect?: DOMRect | ClientRect;
   private _tileSize?: number;
 
@@ -57,7 +57,7 @@ export default class Canvas2DRenderer implements Renderer {
     this._tileSize = cellSize + 2 * cellPadding;
 
     this.onResize();
-    this._ctx = this._canvas!.getContext("2d")!;
+    this._ctx = this._canvas!.getContext("2d");
     if (!this._ctx) {
       throw Error("Could not instantiate 2D renderer");
     }
