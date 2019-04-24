@@ -183,7 +183,7 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.code === "Space") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
