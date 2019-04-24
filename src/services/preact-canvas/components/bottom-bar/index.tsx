@@ -23,7 +23,11 @@ export default class BottomBar extends Component<Props, State> {
   render({ onFullscreenClick }: Props) {
     return (
       <div class={bottomBar}>
-        <button class={fullscreen} onClick={onFullscreenClick}>
+        <button
+          class={fullscreen}
+          onClick={onFullscreenClick}
+          aria-label="fullscreen mode"
+        >
           <Fullscreen />
         </button>
       </div>
