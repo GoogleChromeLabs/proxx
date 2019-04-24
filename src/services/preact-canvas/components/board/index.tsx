@@ -150,15 +150,24 @@ export default class Board extends Component<Props> {
 
   private _createTable(width: number, height: number) {
     const tableContainer = document.querySelector("." + containerStyle);
+<<<<<<< HEAD
     this._table = document.createElement("table");
     this._table.classList.add(gameTable);
+=======
+    this.table = document.createElement("table");
+    this.table.classList.add(gameTable);
+    this.table.setAttribute("role", "grid");
+    this.table.setAttribute("aria-label", "The game grid");
+>>>>>>> focus on table after start
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
+      tr.setAttribute("role", "row");
       tr.classList.add(gameRow);
       for (let col = 0; col < width; col++) {
         const y = row;
         const x = col;
         const td = document.createElement("td");
+        td.setAttribute("role", "gridcell");
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
