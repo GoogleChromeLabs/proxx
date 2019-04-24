@@ -108,7 +108,7 @@ class PreactService extends Component<Props, State> {
         mainComponent = settingsOpen ? (
           <Settings
             loading={() => <div />}
-            onCloseClicked={this._onSettingsCloseClicked}
+            onCloseClicked={this._onSettingsCloseClick}
             motion={motionPreference}
             onMotionPrefChange={this._onMotionPrefChange}
           />
@@ -182,7 +182,7 @@ class PreactService extends Component<Props, State> {
   }
 
   @bind
-  private _onSettingsCloseClicked() {
+  private _onSettingsCloseClick() {
     this.setState({ settingsOpen: false });
     this.previousFocus!.focus();
   }
