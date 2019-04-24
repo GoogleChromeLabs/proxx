@@ -12,9 +12,12 @@
  */
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
+import { lazyGenerateTextures } from "src/rendering/animation";
+import { getRendererInstance, Renderer } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
+import { getCellSizes } from "src/utils/cell-sizing";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
@@ -49,6 +52,10 @@ interface State {
   playMode: PlayMode;
   toReveal: number;
   startTime: number;
+  endTime: number;
+  // This should always be set as we prevent the game from starting until the
+  // renderer is loaded.
+  renderer?: Renderer;
   completeTime: number;
   bestTime: number;
 }
@@ -69,8 +76,11 @@ export default class Game extends Component<Props, State> {
       toReveal: props.toRevealTotal,
       startTime: 0,
       completeTime: 0,
-      bestTime: 0
+      bestTime: 0,
+      endTime: 0
     };
+
+    getRendererInstance().then(renderer => this.setState({ renderer }));
   }
 
   render(
@@ -82,7 +92,7 @@ export default class Game extends Component<Props, State> {
       gameChangeUnsubscribe,
       toRevealTotal
     }: Props,
-    { playMode, toReveal, completeTime, bestTime }: State
+    { playMode, toReveal, renderer, completeTime, bestTime }: State
   ) {
     const timerRunning = playMode === PlayMode.Playing;
 
@@ -101,12 +111,13 @@ export default class Game extends Component<Props, State> {
             time={completeTime}
             bestTime={bestTime}
           />
-        ) : (
+        ) : renderer ? (
           [
             <Board
               width={width}
               height={height}
               dangerMode={dangerMode}
+              renderer={renderer}
               gameChangeSubscribe={gameChangeSubscribe}
               gameChangeUnsubscribe={gameChangeUnsubscribe}
               onCellClick={this.onCellClick}
@@ -138,6 +149,8 @@ export default class Game extends Component<Props, State> {
               undefined
             )
           ]
+        ) : (
+          <div />
         )}
       </div>
     );

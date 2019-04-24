@@ -13,24 +13,14 @@
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index";
 import { Cell, GridChanges } from "../../../../gamelogic/types";
-import {
-  AnimationDesc,
-  AnimationName,
-  Context,
-  flaggedAnimation,
-  flashInAnimation,
-  flashOutAnimation,
-  highlightInAnimation,
-  highlightOutAnimation,
-  idleAnimation,
-  minedAnimation,
-  numberAnimation
-} from "../../../../rendering/animation";
+import { AnimationDesc, AnimationName } from "../../../../rendering/animation";
 import { bind } from "../../../../utils/bind";
 import { staticDevicePixelRatio } from "../../../../utils/static-dpr";
 import { GameChangeCallback } from "../../index";
 
+import { removeAnimations } from "src/rendering/animation-helpers.js";
 import { rippleSpeed } from "src/rendering/constants";
+import { Renderer } from "src/rendering/renderer.js";
 import {
   board,
   button as buttonStyle,
@@ -54,77 +44,55 @@ export interface Props {
   onDangerModeChange: (v: boolean) => void;
   width: number;
   height: number;
+  renderer: Renderer;
   dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
 
-function distanceFromCenter(
-  x: number,
-  y: number,
-  width: number,
-  height: number
-): number {
-  const centerX = width / 2;
-  const centerY = height / 2;
-  // Measure the distance from the center point of the game board
-  // to the center of the field (hence the +0.5)
-  const dx = x + 0.5 - centerX;
-  const dy = y + 0.5 - centerY;
-  // Distance of our point to origin
-  return (
-    Math.sqrt(dx * dx + dy * dy) /
-    Math.sqrt(centerX * centerX + centerY * centerY)
-  );
-}
-
-function removeAnimations(
-  al: AnimationDesc[],
-  names: AnimationName[]
-): AnimationDesc[] {
-  return al.filter(a => !names.includes(a.name));
-}
-
 export default class Board extends Component<Props> {
-  private canvas?: HTMLCanvasElement;
-  private ctx?: CanvasRenderingContext2D;
-  private table?: HTMLTableElement;
-  private cellsToRedraw: Set<HTMLButtonElement> = new Set();
-  private buttons: HTMLButtonElement[] = [];
-  private canvasRect?: ClientRect | DOMRect;
-  private flashedCells = new Set<HTMLButtonElement>();
-  private firstCellRect?: ClientRect | DOMRect;
-  private additionalButtonData = new WeakMap<
+  private _canvas?: HTMLCanvasElement;
+  private _table?: HTMLTableElement;
+  private _buttons: HTMLButtonElement[] = [];
+  private _flashedCells = new Set<HTMLButtonElement>();
+  private _firstCellRect?: ClientRect | DOMRect;
+  private _additionalButtonData = new WeakMap<
     HTMLButtonElement,
     [number, number, Cell]
   >();
-  private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
-  private renderLoopRunning = false;
-  private changeBuffer: GridChanges = [];
+
+  private _animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
+  private _updateLoopRunning = false;
+  private _changeBuffer: GridChanges = [];
+  private _lastTs: number = performance.now();
 
   componentDidMount() {
     window.scrollTo(0, 0);
     document.documentElement.classList.add("in-game");
-    this.createTable(this.props.width, this.props.height);
-    this.props.gameChangeSubscribe(this.doManualDomHandling);
-    this.canvasInit();
-    this.animationsInit();
+    this._createTable(this.props.width, this.props.height);
+    this.props.gameChangeSubscribe(this._doManualDomHandling);
+    this._animationsInit();
+    this._rendererInit();
+    this._queryFirstCellRect();
+    this.props.renderer.updateFirstRect(this._firstCellRect!);
+    this._updateLoopRunning = true;
+    requestAnimationFrame(this._animationLoop);
 
-    window.addEventListener("resize", this.onWindowResize);
+    window.addEventListener("resize", this._onWindowResize);
+    window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keydown", this._onKeyDown);
     window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
-    this.props.gameChangeUnsubscribe(this.doManualDomHandling);
-
-    window.removeEventListener("resize", this.onWindowResize);
+    window.removeEventListener("resize", this._onWindowResize);
+    window.removeEventListener("scroll", this._onWindowScroll);
     window.removeEventListener("keydown", this._onKeyDown);
     window.removeEventListener("keyup", this._onKeyUp);
-
+    this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     // Stop rAF
-    this.renderLoopRunning = false;
+    this._updateLoopRunning = false;
   }
 
   shouldComponentUpdate() {
@@ -137,6 +105,18 @@ export default class Board extends Component<Props> {
         <div class={containerStyle} />
       </div>
     );
+  }
+
+  @bind
+  private _onWindowResize() {
+    this._onWindowScroll();
+    this.props.renderer.onResize();
+  }
+
+  @bind
+  private _onWindowScroll() {
+    this._queryFirstCellRect();
+    this.props.renderer.updateFirstRect(this._firstCellRect!);
   }
 
   @bind
@@ -154,22 +134,24 @@ export default class Board extends Component<Props> {
   }
 
   @bind
-  private onWindowResize() {
-    this.canvasInit();
-  }
-
-  @bind
-  private doManualDomHandling(stateChange: StateChange) {
+  private _doManualDomHandling(stateChange: StateChange) {
     if (!stateChange.gridChanges) {
       return;
     }
-    this.changeBuffer.push(...stateChange.gridChanges);
+    // Queue up changes to be consumed by animation rAF
+    this._changeBuffer.push(...stateChange.gridChanges);
+
+    // Update DOM straight away
+    for (const [x, y, cell] of stateChange.gridChanges) {
+      const btn = this._buttons[y * this.props.width + x];
+      this._updateButton(btn, cell, x, y);
+    }
   }
 
-  private createTable(width: number, height: number) {
+  private _createTable(width: number, height: number) {
     const tableContainer = document.querySelector("." + containerStyle);
-    this.table = document.createElement("table");
-    this.table.classList.add(gameTable);
+    this._table = document.createElement("table");
+    this._table.classList.add(gameTable);
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.classList.add(gameRow);
@@ -180,27 +162,29 @@ export default class Board extends Component<Props> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-        this.additionalButtonData.set(button, [x, y, defaultCell]);
-        this.updateButton(button, defaultCell, x, y);
-        this.buttons.push(button);
+        this._additionalButtonData.set(button, [x, y, defaultCell]);
+        this._updateButton(button, defaultCell, x, y);
+        this._buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
       }
-      this.table.appendChild(tr);
+      this._table.appendChild(tr);
     }
-    this.canvas = document.createElement("canvas");
-    this.canvas.classList.add(canvasStyle);
-    this.base!.appendChild(this.canvas);
-    tableContainer!.appendChild(this.table);
-    this.table.addEventListener("click", this.onClick);
-    this.table.addEventListener("mouseup", this.onMouseUp);
-    this.table.addEventListener("contextmenu", event => event.preventDefault());
+    this._canvas = this.props.renderer.createCanvas();
+    this._canvas.classList.add(canvasStyle);
+    this.base!.appendChild(this._canvas);
+    tableContainer!.appendChild(this._table);
+    this._table.addEventListener("click", this._onClick);
+    this._table.addEventListener("mouseup", this._onMouseUp);
+    this._table.addEventListener("contextmenu", event =>
+      event.preventDefault()
+    );
   }
 
-  private updateAnimation(btn: HTMLButtonElement) {
+  private _updateAnimation(btn: HTMLButtonElement) {
     const ts = performance.now();
-    const [x, y, cell] = this.additionalButtonData.get(btn)!;
-    let animationList = this.animationLists.get(btn)!;
+    const [x, y, cell] = this._additionalButtonData.get(btn)!;
+    let animationList = this._animationLists.get(btn)!;
 
     if (!cell.revealed && !cell.flagged) {
       animationList[0].name = AnimationName.IDLE;
@@ -217,7 +201,7 @@ export default class Board extends Component<Props> {
             AnimationName.HIGHLIGHT_IN,
             AnimationName.HIGHLIGHT_OUT
           ]);
-          this.animationLists.set(btn, animationList);
+          this._animationLists.set(btn, animationList);
         }
       });
     } else if (!cell.revealed && cell.flagged) {
@@ -231,7 +215,11 @@ export default class Board extends Component<Props> {
       const isHighlighted = animationList.some(
         a => a.name === AnimationName.HIGHLIGHT_IN
       );
-      if (cell.touchingFlags >= cell.touchingMines && !isHighlighted) {
+      if (
+        cell.touchingFlags >= cell.touchingMines &&
+        cell.touchingMines > 0 &&
+        !isHighlighted
+      ) {
         animationList.push({
           name: AnimationName.HIGHLIGHT_IN,
           start: ts
@@ -246,13 +234,13 @@ export default class Board extends Component<Props> {
           start: ts
         });
       }
-      this.animationLists.set(btn, animationList);
+      this._animationLists.set(btn, animationList);
       // This button already played the flash animation
-      if (this.flashedCells.has(btn)) {
+      if (this._flashedCells.has(btn)) {
         return;
       }
       animationList = removeAnimations(animationList, [AnimationName.IDLE]);
-      this.flashedCells.add(btn);
+      this._flashedCells.add(btn);
       animationList.push({
         name: AnimationName.FLASH_IN,
         start: ts,
@@ -260,7 +248,7 @@ export default class Board extends Component<Props> {
           animationList = removeAnimations(animationList, [
             AnimationName.FLASH_IN
           ]);
-          this.animationLists.set(btn, animationList);
+          this._animationLists.set(btn, animationList);
         }
       });
       if (cell.hasMine) {
@@ -268,7 +256,7 @@ export default class Board extends Component<Props> {
           name: AnimationName.MINED,
           start: ts + 100
         });
-      } else if (cell.touchingMines > 0) {
+      } else if (cell.touchingMines >= 0) {
         animationList.unshift({
           name: AnimationName.NUMBER,
           start: ts + 100
@@ -280,12 +268,12 @@ export default class Board extends Component<Props> {
       });
     }
 
-    this.animationLists.set(btn, animationList);
+    this._animationLists.set(btn, animationList);
   }
 
-  private drawCell(btn: HTMLButtonElement, ts: number) {
-    const { width, height, left, top } = this.firstCellRect!;
-    const [bx, by, cell] = this.additionalButtonData.get(btn)!;
+  private _maybeAnimateTile(btn: HTMLButtonElement, ts: number) {
+    const { width, height, left, top } = this._firstCellRect!;
+    const [bx, by, cell] = this._additionalButtonData.get(btn)!;
     const x = bx * width + left;
     const y = by * height + top;
 
@@ -293,97 +281,61 @@ export default class Board extends Component<Props> {
     if (
       x + width < 0 ||
       y + height < 0 ||
-      x > this.canvasRect!.width ||
-      y > this.canvasRect!.height
+      x > window.innerWidth ||
+      y > window.innerHeight
     ) {
       return;
     }
 
-    const ctx = this.ctx!;
-    const animationList = this.animationLists.get(btn);
+    const animationList = this._animationLists.get(btn);
     if (!animationList) {
       return;
     }
     for (const animation of animationList) {
-      const context: Context = { ts, ctx, width, height, animation };
-      ctx.save();
-      ctx.translate(x, y);
-      switch (animation.name) {
-        case AnimationName.IDLE:
-          idleAnimation(context);
-          break;
-        case AnimationName.FLAGGED:
-          flaggedAnimation(context);
-          break;
-        case AnimationName.MINED:
-          minedAnimation(context);
-          break;
-        case AnimationName.HIGHLIGHT_IN:
-          highlightInAnimation(context);
-          break;
-        case AnimationName.HIGHLIGHT_OUT:
-          highlightOutAnimation(context);
-          break;
-        case AnimationName.FLASH_IN:
-          flashInAnimation(context);
-          break;
-        case AnimationName.FLASH_OUT:
-          flashOutAnimation(context);
-          break;
-        case AnimationName.NUMBER:
-          numberAnimation(cell.touchingMines, context);
-          break;
-      }
-      ctx.restore();
+      this.props.renderer.render(bx, by, cell, animation, ts);
     }
   }
 
-  private canvasInit() {
-    this.canvasRect = this.canvas!.getBoundingClientRect();
-    this.queryFirstCellRect();
-    this.canvas!.width = this.canvasRect.width * staticDevicePixelRatio;
-    this.canvas!.height = this.canvasRect.height * staticDevicePixelRatio;
-    this.ctx = this.canvas!.getContext("2d")!;
-    this.ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-
-    if (this.renderLoopRunning) {
-      return;
-    }
-
-    const that = this;
-    let lastTs = performance.now();
-    requestAnimationFrame(function f(ts) {
-      that.consumeChangeBuffer(ts - lastTs);
-      lastTs = ts;
-
-      that.renderCanvas(ts);
-      if (that.renderLoopRunning) {
-        requestAnimationFrame(f);
-      }
-    });
-    this.renderLoopRunning = true;
+  private _rendererInit() {
+    this.props.renderer.init(this.props.width, this.props.height);
   }
 
-  private consumeChangeBuffer(delta: number) {
-    const width = this.props.width;
+  @bind
+  private _animationLoop(ts: number) {
+    const delta = ts - this._lastTs;
+    this._lastTs = ts;
+
+    // Update DOM and animations according to incoming grid changes
+    this._consumeChangeBuffer(delta);
+
+    // Iterate over all the buttons and update the data in the `dynamicTileData`
+    // buffer.
+    for (const cell of this._buttons) {
+      this._maybeAnimateTile(cell, ts);
+    }
+    if (this._updateLoopRunning) {
+      requestAnimationFrame(this._animationLoop);
+    }
+  }
+
+  private _consumeChangeBuffer(delta: number) {
+    const { width } = this.props;
     // Reveal ~5 fields per frame
     const numConsume = Math.floor((delta * 5) / 16);
-    const slice = this.changeBuffer.splice(0, numConsume);
+    const slice = this._changeBuffer.splice(0, numConsume);
     for (const [x, y, cellProps] of slice) {
-      const btn = this.buttons[y * width + x];
-      this.updateButton(btn, cellProps, x, y);
-      this.cellsToRedraw.add(btn);
-      this.updateAnimation(btn);
+      const btn = this._buttons[y * width + x];
+      this._updateAnimation(btn);
     }
   }
 
-  private animationsInit() {
+  private _animationsInit() {
     const startTime = performance.now();
     const rippleFactor =
       rippleSpeed * Math.max(this.props.width, this.props.height);
-    for (const button of this.buttons) {
-      const [x, y] = this.additionalButtonData.get(button)!;
-      this.animationLists.set(button, [
+    for (const button of this._buttons) {
+      const [x, y] = this._additionalButtonData.get(button)!;
+      this._animationLists.set(button, [
         {
           name: AnimationName.IDLE,
           start:
@@ -396,32 +348,24 @@ export default class Board extends Component<Props> {
     }
   }
 
-  private renderCanvas(ts: number) {
-    this.ctx!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
-    this.queryFirstCellRect();
-
-    for (const cell of this.buttons) {
-      this.drawCell(cell, ts);
-    }
-    this.cellsToRedraw.clear();
-  }
-
-  private queryFirstCellRect() {
-    this.firstCellRect = this.buttons[0].closest("td")!.getBoundingClientRect();
+  private _queryFirstCellRect() {
+    this._firstCellRect = this._buttons[0]
+      .closest("td")!
+      .getBoundingClientRect();
   }
 
   @bind
-  private onMouseUp(event: MouseEvent) {
+  private _onMouseUp(event: MouseEvent) {
     if (event.button !== 2) {
       return;
     }
 
     event.preventDefault();
-    this.onClick(event, true);
+    this._onClick(event, true);
   }
 
   @bind
-  private onClick(event: MouseEvent | TouchEvent, alt = false) {
+  private _onClick(event: MouseEvent | TouchEvent, alt = false) {
     const target = event.target as HTMLElement;
     const button = target.closest("button");
     if (!button) {
@@ -429,11 +373,11 @@ export default class Board extends Component<Props> {
     }
     event.preventDefault();
 
-    const cell = this.additionalButtonData.get(button)!;
+    const cell = this._additionalButtonData.get(button)!;
     this.props.onCellClick(cell, alt);
   }
 
-  private updateButton(
+  private _updateButton(
     btn: HTMLButtonElement,
     cell: Cell,
     x: number,
@@ -454,6 +398,25 @@ export default class Board extends Component<Props> {
     }
 
     btn.setAttribute("aria-label", cellState);
-    this.additionalButtonData.get(btn)![2] = cell;
+    this._additionalButtonData.get(btn)![2] = cell;
   }
+}
+
+function distanceFromCenter(
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): number {
+  const centerX = width / 2;
+  const centerY = height / 2;
+  // Measure the distance from the center point of the game board
+  // to the center of the field (hence the +0.5)
+  const dx = x + 0.5 - centerX;
+  const dy = y + 0.5 - centerY;
+  // Distance of our point to origin
+  return (
+    Math.sqrt(dx * dx + dy * dy) /
+    Math.sqrt(centerX * centerX + centerY * centerY)
+  );
 }

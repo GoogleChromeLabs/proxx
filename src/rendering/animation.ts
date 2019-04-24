@@ -61,7 +61,7 @@ export interface Context {
 }
 
 // Calls and unsets the `done` callback if available.
-function processDoneCallback(animation: AnimationDesc) {
+export function processDoneCallback(animation: AnimationDesc) {
   if (!animation.done) {
     return;
   }
@@ -139,10 +139,7 @@ export function minedAnimation({
     return;
   }
   ctx.save();
-  ctx.fillStyle = "#f00";
-  ctx.beginPath();
-  ctx.arc(cellSize / 2, cellSize / 2, cellSize * 0.3, 0, 2 * Math.PI);
-  ctx.fill();
+  staticTextureDrawer!(STATIC_TEXTURE.MINE, ctx, cellSize);
   ctx.restore();
 }
 
@@ -249,8 +246,10 @@ export function flashOutAnimation({
   ctx.restore();
 }
 
-let idleAnimationTextureDrawer: TextureDrawer | null = null;
-let staticTextureDrawer: TextureDrawer | null = null;
+export let idleAnimationTextureDrawer: TextureDrawer | null = null;
+export let idleSprites: HTMLImageElement[] | null = null;
+export let staticTextureDrawer: TextureDrawer | null = null;
+export let staticSprites: HTMLImageElement[] | null = null;
 
 export async function lazyGenerateTextures() {
   const { cellPadding, cellSize } = getCellSizes();
@@ -261,17 +260,26 @@ export async function lazyGenerateTextures() {
     cellPadding,
     idleAnimationNumFrames
   );
-  idleAnimationTextureDrawer = await cacheTextureGenerator(
+  ({
+    drawer: idleAnimationTextureDrawer,
+    caches: idleSprites
+  } = await cacheTextureGenerator(
     uncachedIATG,
     textureSize,
     idleAnimationNumFrames,
-    { maxWidth: spriteSize, maxHeight: spriteSize }
-  );
+    {
+      maxWidth: spriteSize,
+      maxHeight: spriteSize
+    }
+  ));
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
-  staticTextureDrawer = await cacheTextureGenerator(
+  ({
+    drawer: staticTextureDrawer,
+    caches: staticSprites
+  } = await cacheTextureGenerator(
     uncachedSTG,
     textureSize,
     STATIC_TEXTURE.LAST_MARKER,
     { maxWidth: spriteSize, maxHeight: spriteSize }
-  );
+  ));
 }

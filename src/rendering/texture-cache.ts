@@ -36,6 +36,11 @@ const defaultSizeConstraints = {
   maxHeight: 32768
 };
 
+export interface TextureCache {
+  drawer: TextureDrawer;
+  caches: HTMLImageElement[];
+}
+
 // Wraps an existing TextureGenerator and caches the generated
 // frames in an img.
 export async function cacheTextureGenerator(
@@ -43,7 +48,7 @@ export async function cacheTextureGenerator(
   textureSize: number,
   numFrames: number,
   constraints: Partial<SizeConstraints> = {}
-): Promise<TextureDrawer> {
+): Promise<TextureCache> {
   const { maxWidth, maxHeight } = { ...defaultSizeConstraints, ...constraints };
   const maxFramesPerRow = Math.floor(
     maxWidth / (textureSize * staticDevicePixelRatio)
@@ -58,17 +63,8 @@ export async function cacheTextureGenerator(
 
   for (let spriteIndex = 0; spriteIndex < numSprites; spriteIndex++) {
     const framesLeftToCache = numFrames - spriteIndex * maxFramesPerSprite;
-    const width =
-      Math.min(maxFramesPerRow, framesLeftToCache) *
-      textureSize *
-      staticDevicePixelRatio;
-    const height =
-      Math.min(
-        maxRowsPerSprite,
-        Math.ceil(framesLeftToCache / maxFramesPerRow)
-      ) *
-      textureSize *
-      staticDevicePixelRatio;
+    const width = maxWidth;
+    const height = maxHeight;
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -111,7 +107,7 @@ export async function cacheTextureGenerator(
     await task();
   }
 
-  return (
+  const drawer = (
     idx: number,
     targetCtx: CanvasRenderingContext2D,
     cellSize: number
@@ -137,4 +133,5 @@ export async function cacheTextureGenerator(
       cellSize
     );
   };
+  return { drawer, caches };
 }

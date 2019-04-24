@@ -13,6 +13,7 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
+import { getRendererInstance } from "src/rendering/renderer";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { GameType } from "../state";
@@ -50,11 +51,12 @@ const Game = deferred(
   import("./components/game/index.js").then(m => m.default)
 );
 
+const offlineModulePromise = import("../../offline");
 const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
-
-const offlineModulePromise = import("../../offline");
+const rendererPromise = getRendererInstance();
+const gamePerquisites = Promise.all([texturePromise, rendererPromise]);
 
 const immedateGameSessionKey = "instantGame";
 
@@ -154,7 +156,7 @@ class PreactService extends Component<Props, State> {
     }, loadingScreenTimeout);
 
     // Wait for everything to be ready:
-    await texturePromise;
+    await gamePerquisites;
     const stateService = await this.props.stateServicePromise;
     stateService.initGame(width, height, mines);
   }
@@ -185,7 +187,7 @@ class PreactService extends Component<Props, State> {
     });
 
     if (instantGameDataStr) {
-      await texturePromise;
+      await gamePerquisites;
       const { width, height, mines } = JSON.parse(instantGameDataStr) as {
         width: number;
         height: number;
