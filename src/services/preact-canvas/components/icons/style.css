@@ -11,11 +11,20 @@
 .time-icon::after {
   content: "";
   background: #fff;
-  height: 24%;
+  height: 28%;
   width: 8.6%;
   position: absolute;
-  top: 28%;
+  top: 30%;
   left: 45.7%;
+  transform-origin: 50% 86%;
   animation: time-spin 10s linear infinite;
-  transform-origin: 50% 72%;
+  animation-play-state: paused;
+}
+
+.time-icon-animate::after {
+  animation-play-state: running;
+}
+
+.time-icon-svg {
+  display: block;
 }

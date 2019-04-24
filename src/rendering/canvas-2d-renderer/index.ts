@@ -45,7 +45,7 @@ interface GridEntry {
 
 export default class Canvas2DRenderer implements Renderer {
   private _canvas?: HTMLCanvasElement;
-  private _ctx?: CanvasRenderingContext2D;
+  private _ctx?: CanvasRenderingContext2D | null;
   private _firstCellRect?: DOMRect | ClientRect;
   private _canvasRect?: DOMRect | ClientRect;
   private _tileSize?: number;
@@ -72,7 +72,7 @@ export default class Canvas2DRenderer implements Renderer {
 
     this._initGrid();
     this.onResize();
-    this._ctx = this._canvas!.getContext("2d")!;
+    this._ctx = this._canvas!.getContext("2d");
     if (!this._ctx) {
       throw Error("Could not instantiate 2D renderer");
     }
@@ -265,6 +265,19 @@ export default class Canvas2DRenderer implements Renderer {
       staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, this._ctx!, this._tileSize!);
     }
     this._ctx!.restore();
+  }
+
+  private [AnimationName.MINED](
+    x: number,
+    y: number,
+    cell: Cell,
+    animation: AnimationDesc,
+    ts: number
+  ) {
+    if (animation.start > ts) {
+      return;
+    }
+    staticTextureDrawer!(STATIC_TEXTURE.MINE, this._ctx!, this._tileSize!);
   }
 
   private [AnimationName.HIGHLIGHT_IN](

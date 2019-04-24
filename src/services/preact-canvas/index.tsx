@@ -21,8 +21,17 @@ import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
+import GameLoading from "./components/game-loading";
 import Intro from "./components/intro/index.js";
+import {
+  nebula as nebulaStyle,
+  notDangerMode as notDangerModeStyle
+} from "./components/nebula/style.css";
 import { game as gameClassName, main } from "./style.css";
+
+// If the user tries to start a game when we aren't ready, how long do we wait before showing the
+// loading screen?
+const loadingScreenTimeout = 1000;
 
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;
@@ -30,10 +39,8 @@ interface Props {
 
 interface State {
   game?: GameType;
-  stateService?: Remote<StateService>;
   dangerMode: boolean;
-  texturesReady: boolean;
-  rendererReady: boolean;
+  awaitingGame: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -48,49 +55,52 @@ const Game = deferred(
   import("./components/game/index.js").then(m => m.default)
 );
 
+const offlineModulePromise = import("../../offline");
 const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
 
 const rendererPromise = getBestRenderer();
+const gamePerquisites = Promise.all([texturePromise, rendererPromise]);
+
+const immedateGameSessionKey = "instantGame";
 
 class PreactService extends Component<Props, State> {
   state: State = {
     dangerMode: false,
-    texturesReady: false,
-    rendererReady: false
+    awaitingGame: false
   };
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
+  private _awaitingGameTimeout: number = -1;
+  private _stateService?: Remote<StateService>;
 
   constructor(props: Props) {
     super(props);
     this._init(props);
   }
 
-  render(
-    _props: Props,
-    { game, stateService, dangerMode, texturesReady, rendererReady }: State
-  ) {
+  render(_props: Props, { game, dangerMode, awaitingGame }: State) {
     let mainComponent: VNode;
 
     if (!game) {
-      mainComponent = (
-        <Intro
-          onStartGame={this._onStartGame}
-          spinner={!stateService || !texturesReady || !rendererReady}
-        />
-      );
+      if (awaitingGame) {
+        mainComponent = <GameLoading />;
+      } else {
+        mainComponent = <Intro onStartGame={this._onStartGame} />;
+      }
     } else {
       mainComponent = (
         <Game
           loading={() => <div />}
+          key={game.id}
           width={game.width}
           height={game.height}
+          mines={game.mines}
           toRevealTotal={game.toRevealTotal}
           gameChangeSubscribe={this._onGameChangeSubscribe}
           gameChangeUnsubscribe={this._onGameChangeUnsubscribe}
-          stateService={stateService!}
+          stateService={this._stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
         />
@@ -100,37 +110,15 @@ class PreactService extends Component<Props, State> {
     return (
       <div class={gameClassName}>
         <Nebula
-          loading={() => <div />}
+          loading={() => (
+            <div class={[nebulaStyle, notDangerModeStyle].join(" ")} />
+          )}
           dangerMode={game ? dangerMode : false}
         />
         {mainComponent}
         <BottomBar onFullscreenClick={this._onFullscreenClick} />
       </div>
     );
-  }
-
-  componentDidMount() {
-    window.addEventListener("keydown", this._onKeyDown);
-    window.addEventListener("keyup", this._onKeyUp);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("keydown", this._onKeyDown);
-    window.removeEventListener("keyup", this._onKeyUp);
-  }
-
-  @bind
-  private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift") {
-      this._onDangerModeChange(!this.state.dangerMode);
-    }
-  }
-
-  @bind
-  private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Shift") {
-      this._onDangerModeChange(!this.state.dangerMode);
-    }
   }
 
   @bind
@@ -154,24 +142,49 @@ class PreactService extends Component<Props, State> {
   }
 
   @bind
-  private _onStartGame(width: number, height: number, mines: number) {
-    this.state.stateService!.initGame(width, height, mines);
+  private async _onStartGame(width: number, height: number, mines: number) {
+    const { updateReady, skipWaiting } = await offlineModulePromise;
+
+    if (updateReady) {
+      // There's an update available. Let's load it as part of starting the game…
+      await skipWaiting();
+
+      sessionStorage.setItem(
+        immedateGameSessionKey,
+        JSON.stringify({ width, height, mines })
+      );
+
+      location.reload();
+      return;
+    }
+
+    this._awaitingGameTimeout = setTimeout(() => {
+      this.setState({ awaitingGame: true });
+    }, loadingScreenTimeout);
+
+    // Wait for everything to be ready:
+    await gamePerquisites;
+    const stateService = await this.props.stateServicePromise;
+    stateService.initGame(width, height, mines);
   }
 
-  private async _init(props: Props) {
-    texturePromise.then(() => {
-      this.setState({ texturesReady: true });
-    });
-    rendererPromise.then(() => {
-      this.setState({ rendererReady: true });
-    });
+  private async _init({ stateServicePromise }: Props) {
+    // Is this the reload after an update?
+    const instantGameDataStr = sessionStorage.getItem(immedateGameSessionKey);
 
-    const stateService = await props.stateServicePromise;
-    this.setState({ stateService });
+    if (instantGameDataStr) {
+      sessionStorage.removeItem(immedateGameSessionKey);
+      this.setState({ awaitingGame: true });
+    }
 
-    localStateSubscribe(stateService, stateChange => {
+    offlineModulePromise.then(({ init }) => init());
+
+    this._stateService = await stateServicePromise;
+
+    localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {
-        this.setState({ game: stateChange.game });
+        clearTimeout(this._awaitingGameTimeout);
+        this.setState({ game: stateChange.game, awaitingGame: false });
       }
       if ("gameStateChange" in stateChange) {
         for (const callback of this._gameChangeSubscribers) {
@@ -179,6 +192,17 @@ class PreactService extends Component<Props, State> {
         }
       }
     });
+
+    if (instantGameDataStr) {
+      await gamePerquisites;
+      const { width, height, mines } = JSON.parse(instantGameDataStr) as {
+        width: number;
+        height: number;
+        mines: number;
+      };
+
+      this._stateService.initGame(width, height, mines);
+    }
   }
 }
 

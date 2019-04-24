@@ -17,22 +17,27 @@ import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
 import dependencyGraph from "./dependency-graph-plugin.js";
 import chunkNamePlugin from "./chunk-name-plugin.js";
+import resourceListPlugin from "./resource-list-plugin";
 import postcss from "rollup-plugin-postcss";
 import glsl from "./glsl-plugin.js";
 import cssModuleTypes from "./css-module-types.js";
 import assetPlugin from "./asset-plugin.js";
 import { readFileSync } from "fs";
+import constsPlugin from "./consts-plugin.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
 
 export default {
-  input: "src/bootstrap.ts",
+  input: {
+    bootstrap: "src/bootstrap.ts",
+    sw: "src/sw/index.ts"
+  },
   output: {
     dir: "dist",
     format: "amd",
     sourcemap: true,
-    entryFileNames: "[name]-[hash].js",
+    entryFileNames: "[name].js",
     chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
@@ -46,6 +51,9 @@ export default {
       namedExports(name) {
         return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
       }
+    }),
+    constsPlugin({
+      version: require("./package.json").version
     }),
     typescript({
       // Make sure we are using our version of TypeScript.
@@ -61,7 +69,12 @@ export default {
       clean: true
     }),
     glsl(),
-    assetPlugin(),
+    assetPlugin({
+      initialAssets: [
+        "./src/assets/space-mono-normal.woff2",
+        "./src/assets/space-mono-bold.woff2"
+      ]
+    }),
     chunkNamePlugin(),
     nodeResolve(),
     loadz0r({
@@ -79,7 +92,10 @@ export default {
         return loadz0r.isEntryModule(chunk, inputs);
       }
     }),
-    dependencyGraph(),
+    dependencyGraph({
+      propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
+    }),
+    resourceListPlugin(),
     terser()
   ]
 };

@@ -15,6 +15,7 @@ import { Component, h } from "preact";
 import { lazyGenerateTextures } from "src/rendering/animation";
 import { getBestRenderer, Renderer } from "src/rendering/renderer";
 import StateService from "src/services/state";
+import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
 import { getCellSizes } from "src/utils/cell-sizing";
 import { GameChangeCallback } from "../..";
@@ -24,12 +25,22 @@ import initFocusHandling from "../../../../utils/focus-visible";
 import Board from "../board";
 import deferred from "../deferred";
 import TopBar from "../top-bar";
-import { checkbox, game as gameClass, toggle, toggleLabel } from "./style.css";
+import {
+  againButton,
+  checkbox,
+  exitRow,
+  exitRowInner,
+  game as gameClass,
+  mainButton,
+  toggle,
+  toggleLabel
+} from "./style.css";
 
 export interface Props {
   stateService: Remote<StateService>;
   width: number;
   height: number;
+  mines: number;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
   onDangerModeChange: (v: boolean) => void;
@@ -42,13 +53,15 @@ interface State {
   toReveal: number;
   startTime: number;
   endTime: number;
-  // This should never not be set as we prevent the game from starting until the
+  // This should always be set as we prevent the game from starting until the
   // renderer is loaded.
   renderer?: Renderer;
+  completeTime: number;
+  bestTime: number;
 }
 
 // tslint:disable-next-line:variable-name
-const End = deferred(import("../end/index.js").then(m => m.default));
+const Win = deferred(import("../win/index.js").then(m => m.default));
 
 // The second this file is loaded, activate focus handling
 initFocusHandling();
@@ -62,6 +75,8 @@ export default class Game extends Component<Props, State> {
       playMode: PlayMode.Pending,
       toReveal: props.toRevealTotal,
       startTime: 0,
+      completeTime: 0,
+      bestTime: 0,
       endTime: 0
     };
 
@@ -77,7 +92,7 @@ export default class Game extends Component<Props, State> {
       gameChangeUnsubscribe,
       toRevealTotal
     }: Props,
-    { playMode, toReveal, renderer }: State
+    { playMode, toReveal, renderer, completeTime, bestTime }: State
   ) {
     const timerRunning = playMode === PlayMode.Playing;
 
@@ -88,34 +103,55 @@ export default class Game extends Component<Props, State> {
           toReveal={toReveal}
           toRevealTotal={toRevealTotal}
         />
-        {playMode === PlayMode.Won || playMode === PlayMode.Lost ? (
-          <End
+        {playMode === PlayMode.Won ? (
+          <Win
             loading={() => <div />}
-            type={playMode}
+            onMainMenu={this.onReset}
             onRestart={this.onRestart}
+            time={completeTime}
+            bestTime={bestTime}
           />
         ) : renderer ? (
-          <Board
-            width={width}
-            height={height}
-            gameChangeSubscribe={gameChangeSubscribe}
-            gameChangeUnsubscribe={gameChangeUnsubscribe}
-            onCellClick={this.onCellClick}
-            renderer={renderer}
-          />
+          [
+            <Board
+              width={width}
+              height={height}
+              dangerMode={dangerMode}
+              renderer={renderer}
+              gameChangeSubscribe={gameChangeSubscribe}
+              gameChangeUnsubscribe={gameChangeUnsubscribe}
+              onCellClick={this.onCellClick}
+              onDangerModeChange={this.props.onDangerModeChange}
+            />,
+            playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
+              <label class={toggleLabel}>
+                Reveal
+                <input
+                  class={checkbox}
+                  type="checkbox"
+                  onChange={this.onDangerModeChange}
+                  checked={!dangerMode}
+                />
+                <span class={toggle} /> Flag
+              </label>
+            ) : playMode === PlayMode.Lost ? (
+              <div class={exitRow}>
+                <div class={exitRowInner}>
+                  <button class={againButton} onClick={this.onRestart}>
+                    Try again
+                  </button>
+                  <button class={mainButton} onClick={this.onReset}>
+                    Main menu
+                  </button>
+                </div>
+              </div>
+            ) : (
+              undefined
+            )
+          ]
         ) : (
           <div />
         )}
-        <label class={toggleLabel}>
-          Reveal
-          <input
-            class={checkbox}
-            type="checkbox"
-            onChange={this.onDangerModeChange}
-            checked={!dangerMode}
-          />
-          <span class={toggle} /> Flag
-        </label>
       </div>
     );
   }
@@ -132,12 +168,17 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onRestart() {
+  private onReset() {
     this.props.stateService.reset();
   }
 
   @bind
-  private onGameChange(gameChange: StateChange) {
+  private onRestart() {
+    this.props.stateService.restart();
+  }
+
+  @bind
+  private async onGameChange(gameChange: StateChange) {
     const newState: Partial<State> = {};
 
     if (
@@ -149,7 +190,14 @@ export default class Game extends Component<Props, State> {
       if (gameChange.playMode! === PlayMode.Playing) {
         newState.startTime = Date.now();
       } else if (gameChange.playMode! === PlayMode.Won) {
-        newState.endTime = Date.now();
+        newState.completeTime = Date.now() - this.state.startTime;
+        newState.bestTime = await submitTime(
+          this.props.width,
+          this.props.height,
+          this.props.mines,
+          newState.completeTime
+        );
+        this.props.onDangerModeChange(false);
       }
     }
 
@@ -174,6 +222,12 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onCellClick(cellData: [number, number, Cell], alt: boolean) {
+    if (
+      this.state.playMode !== PlayMode.Pending &&
+      this.state.playMode !== PlayMode.Playing
+    ) {
+      return;
+    }
     const [x, y, cell] = cellData;
     let { dangerMode } = this.props;
 

@@ -12,7 +12,7 @@
  */
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
-import { Cell, GridChanges } from "../../../../gamelogic/types.js";
+import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
 
@@ -40,9 +40,11 @@ const defaultCell: Cell = {
 
 export interface Props {
   onCellClick: (cell: [number, number, Cell], alt: boolean) => void;
+  onDangerModeChange: (v: boolean) => void;
   width: number;
   height: number;
   renderer: Renderer;
+  dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
@@ -59,6 +61,8 @@ export default class Board extends Component<Props> {
   >();
 
   componentDidMount() {
+    window.scrollTo(0, 0);
+    document.documentElement.classList.add("in-game");
     this._createTable(this.props.width, this.props.height);
     this.props.gameChangeSubscribe(this._doManualDomHandling);
     this._rendererInit();
@@ -68,10 +72,16 @@ export default class Board extends Component<Props> {
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
+    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
+    document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
+    window.removeEventListener("scroll", this._onWindowScroll);
+    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     if (this._animator) {
@@ -93,6 +103,7 @@ export default class Board extends Component<Props> {
 
   @bind
   private _onWindowResize() {
+    this._onWindowScroll();
     this.props.renderer.onResize();
   }
 
@@ -100,6 +111,20 @@ export default class Board extends Component<Props> {
   private _onWindowScroll() {
     this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
+  }
+
+  @bind
+  private _onKeyDown(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "Shift") {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
   }
 
   @bind

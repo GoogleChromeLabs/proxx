@@ -10,23 +10,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, h } from "preact";
-import { Fullscreen } from "../icons/initial";
-import { bottomBar, fullscreen } from "./style.css";
-
-export interface Props {
-  onFullscreenClick: () => void;
-}
-export interface State {}
-
-export default class BottomBar extends Component<Props, State> {
-  render({ onFullscreenClick }: Props) {
-    return (
-      <div class={bottomBar}>
-        <button class={fullscreen} onClick={onFullscreenClick}>
-          <Fullscreen />
-        </button>
-      </div>
-    );
-  }
+export function minSec(ms: number): string {
+  const minutes = Math.floor(ms / (1000 * 60));
+  const seconds = Math.floor((ms / 1000) % 60);
+  const minStr = minutes < 10 ? "0" + minutes : "" + minutes;
+  const secStr = seconds < 10 ? "0" + seconds : "" + seconds;
+  return `${minStr}:${secStr}`;
 }

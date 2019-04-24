@@ -13,13 +13,73 @@
 import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 
+import { Arrow } from "../icons/initial.js";
+import TopBar from "../top-bar/index.js";
 import {
-  button as buttonStyle,
-  gameSetting as gameSettingStyle,
+  field as fieldStyle,
   intro as introStyle,
-  manualSettings as manualSettingsStyle,
-  spinner as spinnerStyle
+  label as labelStyle,
+  labelText as labelTextStyle,
+  numberDownArrow as numberDownArrowStyle,
+  numberUpArrow as numberUpArrowStyle,
+  selectArrow as selectArrowStyle,
+  settingsRow as settingsRowStyle,
+  startButton as startButtonStyle,
+  startForm as startFormStyle
 } from "./style.css";
+
+interface NumberFieldProps extends JSX.HTMLAttributes {
+  inputRef: JSX.HTMLAttributes["ref"];
+}
+
+class NumberField extends Component<NumberFieldProps, {}> {
+  private _input?: HTMLInputElement;
+
+  render(props: NumberFieldProps) {
+    const { children, inputRef, ...inputProps } = props;
+
+    return (
+      <label class={labelStyle}>
+        <Arrow class={numberUpArrowStyle} onClick={this._onUpClick} />
+        <Arrow class={numberDownArrowStyle} onClick={this._onDownClick} />
+        <span class={labelTextStyle}>{props.children}</span>
+        <input
+          ref={el => {
+            this._input = el;
+            if (inputRef) {
+              inputRef(el);
+            }
+          }}
+          class={fieldStyle}
+          type="number"
+          {...inputProps}
+        />
+      </label>
+    );
+  }
+
+  @bind
+  private _onUpClick() {
+    this._input!.valueAsNumber = Math.min(
+      this._input!.valueAsNumber + 1,
+      Number(this._input!.max)
+    );
+    this._dispatch();
+  }
+
+  @bind
+  private _onDownClick() {
+    this._input!.valueAsNumber = Math.max(
+      this._input!.valueAsNumber - 1,
+      Number(this._input!.min)
+    );
+    this._dispatch();
+  }
+
+  private _dispatch() {
+    this._input!.dispatchEvent(new Event("change"));
+  }
+}
 
 const presets = {
   advanced: { width: 16, height: 16, mines: 40 },
@@ -31,7 +91,6 @@ type PresetName = keyof typeof presets;
 
 export interface Props {
   onStartGame: (width: number, height: number, mines: number) => void;
-  spinner: boolean;
 }
 
 interface State {
@@ -41,6 +100,7 @@ interface State {
   mines: number;
 }
 
+// tslint:disable-next-line:max-classes-per-file
 export default class Intro extends Component<Props, State> {
   state: State = {
     presetName: "beginner",
@@ -52,68 +112,69 @@ export default class Intro extends Component<Props, State> {
   private _heightInput?: HTMLInputElement;
   private _minesInput?: HTMLInputElement;
 
-  render({ spinner }: Props, { width, height, mines, presetName }: State) {
+  componentDidMount() {
+    window.scrollTo(0, 0);
+  }
+
+  render(_props: Props, { width, height, mines, presetName }: State) {
     return (
       <div class={introStyle}>
-        <form onSubmit={this._startGame}>
-          <h1>Graviton</h1>
-          <label>
-            Preset:
-            <select
-              ref={el => (this._presetSelect = el)}
-              onChange={this._onSelectChange}
-              value={presetName}
-            >
-              <option value="beginner">Beginner</option>
-              <option value="advanced">Advanced</option>
-              <option value="expert">Expert</option>
-              <option value="custom">Custom</option>
-            </select>
-          </label>
-          <div class={manualSettingsStyle}>
-            <label class={gameSettingStyle}>
-              Width:
-              <input
-                type="number"
-                min="5"
-                max="40"
-                step="1"
-                value={width}
-                ref={el => (this._widthInput = el)}
-                onChange={this._onSettingInput}
-              />
-            </label>
-            <label class={gameSettingStyle}>
-              Height:
-              <input
-                type="number"
-                min="5"
-                max="40"
-                step="1"
-                value={height}
-                ref={el => (this._heightInput = el)}
-                onChange={this._onSettingInput}
-              />
-            </label>
-            <label class={gameSettingStyle}>
-              Black holes:
-              <input
-                type="number"
-                min="1"
-                max={width * height}
-                step="1"
-                value={mines}
-                ref={el => (this._minesInput = el)}
-                onChange={this._onSettingInput}
-              />
+        <TopBar titleOnly />
+        <form onSubmit={this._startGame} class={startFormStyle}>
+          <div class={settingsRowStyle}>
+            <label class={labelStyle}>
+              <span class={labelTextStyle}>Preset</span>
+              <Arrow class={selectArrowStyle} />
+              <select
+                class={fieldStyle}
+                ref={el => (this._presetSelect = el)}
+                onChange={this._onSelectChange}
+                value={presetName}
+              >
+                <option value="beginner">Beginner</option>
+                <option value="advanced">Advanced</option>
+                <option value="expert">Expert</option>
+                <option value="custom">Custom</option>
+              </select>
             </label>
           </div>
-          <button
-            class={[buttonStyle, spinner ? spinnerStyle : ""].join(" ")}
-            disabled={spinner}
-          >
-            {spinner ? "Loading" : "Start"}
-          </button>
+          <div class={settingsRowStyle}>
+            <NumberField
+              min="5"
+              max="40"
+              step="1"
+              value={width}
+              inputRef={el => (this._widthInput = el)}
+              onChange={this._onSettingInput}
+            >
+              Width
+            </NumberField>
+            <NumberField
+              min="5"
+              max="40"
+              step="1"
+              value={height}
+              inputRef={el => (this._heightInput = el)}
+              onChange={this._onSettingInput}
+            >
+              Height
+            </NumberField>
+          </div>
+          <div class={settingsRowStyle}>
+            <NumberField
+              min="1"
+              max={width * height}
+              step="1"
+              value={mines}
+              inputRef={el => (this._minesInput = el)}
+              onChange={this._onSettingInput}
+            >
+              Black holes
+            </NumberField>
+          </div>
+          <div class={settingsRowStyle}>
+            <button class={startButtonStyle}>Start</button>
+          </div>
         </form>
       </div>
     );

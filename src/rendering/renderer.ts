@@ -71,14 +71,17 @@ export async function getBestRenderer(): Promise<Renderer> {
   if (bestRendererPromise) {
     return bestRendererPromise;
   }
-  const parsedURL = new URL(location.toString());
+  const parsedURL = new URL(location.href);
   let isForcedRendererType = false;
   let rendererType = RendererType.Canvas2D;
 
   // Allow the user to force a certain renderer with a query parameter.
   if (parsedURL.searchParams.has("force-renderer")) {
     isForcedRendererType = true;
-    switch (parsedURL.searchParams.get("force-renderer")!.toLowerCase()) {
+    const renderer = parsedURL.searchParams
+      .get("force-renderer")!
+      .toLowerCase();
+    switch (renderer) {
       case "webgl":
         rendererType = RendererType.WebGL;
         break;
@@ -86,7 +89,7 @@ export async function getBestRenderer(): Promise<Renderer> {
         rendererType = RendererType.Canvas2D;
         break;
       default:
-        console.error("Unknown renderer");
+        throw Error(`Unknown renderer "${renderer}"`);
     }
   }
 

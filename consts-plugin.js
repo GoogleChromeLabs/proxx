@@ -10,28 +10,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-const el = document.createElement("div");
-Object.assign(el.style, {
-  backgroundColor: "red",
-  height: "100px",
-  position: "absolute",
-  right: "50px",
-  top: "50px",
-  width: "100px",
-  willChange: "transform"
-});
-document.body.appendChild(el);
-
-let angle = 0;
-let start = 0;
-requestAnimationFrame(function f(ts) {
-  if (!start) {
-    start = ts;
-  }
-  el.style.transform = "rotate(" + angle + "deg)";
-  angle = ((ts - start) * 360) / 1000;
-  requestAnimationFrame(f);
-});
-
-export default 0;
+export default function constsPlugin(consts) {
+  return {
+    name: "consts-plugin",
+    async resolveId(id) {
+      if (id !== "consts:") {
+        return;
+      }
+      return id;
+    },
+    load(id) {
+      if (id !== "consts:") {
+        return;
+      }
+      return Object.entries(consts)
+        .map(
+          ([key, value]) => `export const ${key} = ${JSON.stringify(value)};`
+        )
+        .join("");
+    }
+  };
+}
