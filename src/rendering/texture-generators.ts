@@ -47,8 +47,6 @@ export function idleAnimationTextureGeneratorFactory(
     const ts = Math.floor(idx % numFrames) / numFrames;
 
     ctx.save();
-    // ctx.fillStyle = "black";
-    // ctx.fillRect(0, 0, textureSize, textureSize);
     ctx.translate(textureSize / 2, textureSize / 2);
 
     roundedRectangle(
