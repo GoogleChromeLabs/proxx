@@ -1,6 +1,7 @@
 import { get, set } from "idb-keyval";
 
-const DEFAULT: boolean = true;
+const DEFAULT: boolean = !matchMedia("(prefers-reduced-motion: reduce)")
+  .matches;
 
 /**
  * Set motion preference (true means animation is ON)

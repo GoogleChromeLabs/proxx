@@ -26,10 +26,7 @@ export default class About extends Component {
           mauris.
         </p>
         <h2>Github</h2>
-        <p>
-          Source code can be found at our Github repository{" "}
-          <a>http://www.github.com/GoogleChromeLabs/[reponame]</a>
-        </p>
+        <p>Source code can be found at our Github repository [link]</p>
         <h2>Credits</h2>
         <p>Here is where credit goes</p>
         <h2>Privacy policy</h2>

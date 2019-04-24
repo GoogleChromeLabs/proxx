@@ -67,6 +67,12 @@ const Game = deferred(
 );
 
 const offlineModulePromise = import("../../offline");
+
+// tslint:disable-next-line:variable-name
+const Settings = deferred(
+  import("./components/settings/index.js").then(m => m.default)
+);
+
 const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
@@ -117,7 +123,7 @@ class PreactService extends Component<Props, State> {
           stateService={this._stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
-          inert={settingsOpen ? true : false}
+          inert={settingsOpen}
         />
       );
     }
@@ -134,7 +140,7 @@ class PreactService extends Component<Props, State> {
         <BottomBar
           onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
-          inert={settingsOpen ? true : false}
+          inert={settingsOpen}
         />
       </div>
     );
@@ -237,14 +243,9 @@ class PreactService extends Component<Props, State> {
 
     this._stateService = await stateServicePromise;
 
-    const motionPreference = await getMotionPreference();
-    const prmMediaQuery = window.matchMedia("(prefers-reduced-motion)").matches;
-    if (motionPreference !== prmMediaQuery) {
-      await setMotionPreference(prmMediaQuery);
-      this.setState({ motionPreference: prmMediaQuery });
-    } else {
+    getMotionPreference().then(motionPreference => {
       this.setState({ motionPreference });
-    }
+    });
 
     localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {

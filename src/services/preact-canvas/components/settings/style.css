@@ -25,6 +25,7 @@
   max-width: 33rem;
   padding: 20px;
   margin: auto;
+  box-sizing: border-box;
 }
 
 .close-button {

@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { bind } from "src/utils/bind.js";
 import About from "../about";
-import { Close } from "../icons/initial";
+import { Close } from "../icons/additional";
 import {
   button as btnStyle,
   buttonOff as btnOffStyle,
