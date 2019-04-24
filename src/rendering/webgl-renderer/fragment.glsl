@@ -23,7 +23,7 @@ void main() {
 
   float tile_x = dynamic_tile_data_a2.x;
   float tile_y = dynamic_tile_data_a2.y;
-  float touching_number = dynamic_tile_data_a2.z;
+  float static_tile = dynamic_tile_data_a2.z;
   float idle_animation_time = dynamic_tile_data_a2.w;
 
   float highlight_opacity = dynamic_tile_data_b2.x;
@@ -32,7 +32,7 @@ void main() {
   float boxes_opacity = dynamic_tile_data_b2.w;
 
   float f;
-  if(touching_number < 0.) {
+  if(static_tile < 0.) {
     float idle_frame = floor(idle_animation_time * idle_frames);
     float frames_per_axis = floor(sprite_size /tile_size);
     float frames_per_sprite = frames_per_axis * frames_per_axis;
@@ -55,8 +55,8 @@ void main() {
       f = texture2D(idle_sprites[3], idle_tex_uv).r;
     }
     f *= boxes_opacity;
-  } else if (touching_number >= 1.) {
-    vec2 number_tex_uv = (vec2(touching_number, 0.) + normalized_uv) * tile_size / sprite_size;
+  } else if (static_tile >= 1.) {
+    vec2 number_tex_uv = (vec2(mod(static_tile, 10.), floor(static_tile/10.)) + normalized_uv) * tile_size / sprite_size;
     f = mix(f, 1., texture2D(static_sprite, number_tex_uv).r);
   }
 

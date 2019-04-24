@@ -36,13 +36,14 @@ import {
   spriteSize
 } from "../constants";
 import { Renderer } from "../renderer";
+import { STATIC_TEXTURE } from "../texture-generators";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
 const enum DynamicTileDataA {
   TILE_X,
   TILE_Y,
-  TOUCHING,
+  STATIC_TILE,
   IDLE_ANIMATION_TIME
 }
 
@@ -233,7 +234,7 @@ export default class WebGlRenderer implements Renderer {
   ) {
     const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
     const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
-    dynamicTileDataA[DynamicTileDataA.TOUCHING] = cell.touchingMines;
+    dynamicTileDataA[DynamicTileDataA.STATIC_TILE] = cell.touchingMines;
 
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] =
       cell.touchingMines <= 0 ? revealedAlpha : 0;
@@ -334,6 +335,21 @@ export default class WebGlRenderer implements Renderer {
     }
     dynamicTileDataB[DynamicTileDataB.FLASH_OPACITY] =
       1 - easeInOutCubic(normalized);
+  }
+
+  private [AnimationName.MINED](
+    x: number,
+    y: number,
+    cell: Cell,
+    animation: AnimationDesc,
+    ts: number
+  ) {
+    const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
+    const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
+    dynamicTileDataA[DynamicTileDataA.STATIC_TILE] = STATIC_TEXTURE.MINE;
+
+    dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 0;
+    dynamicTileDataB[DynamicTileDataB.BOXES_OPACITY] = 0;
   }
 
   private _getDynamicTileDataAForTile(
@@ -448,7 +464,7 @@ export default class WebGlRenderer implements Renderer {
             return x;
           case DynamicTileDataA.TILE_Y:
             return y;
-          case DynamicTileDataA.TOUCHING:
+          case DynamicTileDataA.STATIC_TILE:
             return -1; // Equivalent to “unrevealed”
           case DynamicTileDataA.IDLE_ANIMATION_TIME:
             return 0;

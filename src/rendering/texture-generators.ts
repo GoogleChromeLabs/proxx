@@ -102,6 +102,7 @@ export const enum STATIC_TEXTURE {
   NUMBER_7,
   NUMBER_8, // = 8
   FLASH,
+  MINE,
   LAST_MARKER // Not a valid frame, just a marker for the last item in the enum
 }
 export function staticTextureGeneratorFactory(
@@ -124,9 +125,12 @@ export function staticTextureGeneratorFactory(
     ctx2.clearRect(0, 0, textureSize, textureSize);
 
     ctx2.save();
+    ctx.save();
+
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, textureSize, textureSize);
 
+    ctx.translate(textureSize / 2, textureSize / 2);
     ctx2.translate(textureSize / 2, textureSize / 2);
     if (idx === STATIC_TEXTURE.OUTLINE) {
       ctx2.strokeStyle = "white";
@@ -177,7 +181,13 @@ export function staticTextureGeneratorFactory(
       ctx2.clip();
       ctx2.fillStyle = white;
       ctx2.fillRect(-halfSize, -halfSize, size, size);
+    } else if (idx === STATIC_TEXTURE.MINE) {
+      ctx.fillStyle = "#f00";
+      ctx.beginPath();
+      ctx.arc(0, 0, halfSize, 0, 2 * Math.PI);
+      ctx.fill();
     }
+    ctx.restore();
     ctx2.restore();
 
     ctx.save();

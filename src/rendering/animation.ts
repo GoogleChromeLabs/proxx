@@ -139,10 +139,7 @@ export function minedAnimation({
     return;
   }
   ctx.save();
-  ctx.fillStyle = "#f00";
-  ctx.beginPath();
-  ctx.arc(cellSize / 2, cellSize / 2, cellSize * 0.3, 0, 2 * Math.PI);
-  ctx.fill();
+  staticTextureDrawer!(STATIC_TEXTURE.MINE, ctx, cellSize);
   ctx.restore();
 }
 
