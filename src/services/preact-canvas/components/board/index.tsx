@@ -66,7 +66,6 @@ export default class Board extends Component<Props> {
     this._createTable(this.props.width, this.props.height);
     this.props.gameChangeSubscribe(this._doManualDomHandling);
     this._rendererInit();
-    this._animatorInit();
     this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
 
@@ -174,15 +173,6 @@ export default class Board extends Component<Props> {
 
   private _rendererInit() {
     this.props.renderer.init(this.props.width, this.props.height);
-  }
-
-  private _animatorInit() {
-    // this._animator = new NoMotionAnimator(
-    //   // this._animator = new MotionAnimator(
-    //   this.props.width,
-    //   this.props.height,
-    //   this.props.renderer
-    // );
   }
 
   private _queryFirstCellRect() {
