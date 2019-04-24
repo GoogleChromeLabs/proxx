@@ -8,9 +8,9 @@ const DEFAULT: boolean = !matchMedia("(prefers-reduced-motion: reduce)")
  *
  * @param motion
  */
-export async function setMotionPreference(motion: boolean): Promise<boolean> {
+export async function setMotionPreference(motion: boolean): Promise<void> {
   set("motion", motion);
-  return motion;
+  return;
 }
 
 export async function getMotionPreference(): Promise<boolean> {

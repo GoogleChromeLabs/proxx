@@ -153,9 +153,8 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private async _onMotionPrefChange() {
-    const motionPreference = await setMotionPreference(
-      !this.state.motionPreference
-    );
+    const motionPreference = !this.state.motionPreference;
+    await setMotionPreference(motionPreference);
     this.setState({ motionPreference });
   }
 
