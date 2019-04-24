@@ -183,19 +183,14 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private _onSettingsCloseClicked() {
-    this._onSettingsClick();
+    this.setState({ settingsOpen: false });
+    this.previousFocus!.focus();
   }
 
   @bind
   private _onSettingsClick() {
-    if (!this.state.settingsOpen) {
-      this.previousFocus = document.activeElement as HTMLElement;
-    }
-    this.setState({ settingsOpen: !this.state.settingsOpen });
-
-    if (!this.state.settingsOpen && this.previousFocus) {
-      this.previousFocus.focus();
-    }
+    this.previousFocus = document.activeElement as HTMLElement;
+    this.setState({ settingsOpen: true });
   }
 
   @bind

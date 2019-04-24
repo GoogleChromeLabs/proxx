@@ -34,7 +34,7 @@ export default class BottomBar extends Component<Props, State> {
     display
   }: Props) {
     return (
-      <div class={[bottomBar, display ? "" : hidden].join(" ")}>
+      <div class={[bottomBar, display ? "" : hidden].join("")}>
         {buttonType === "back" ? (
           <button
             class={icons}
