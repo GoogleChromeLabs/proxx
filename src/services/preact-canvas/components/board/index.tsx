@@ -310,6 +310,7 @@ export default class Board extends Component<Props> {
 
     // Iterate over all the buttons and update the data in the `dynamicTileData`
     // buffer.
+    this.props.renderer.beforeRenderFrame();
     for (const cell of this._buttons) {
       this._maybeAnimateTile(cell, ts);
     }

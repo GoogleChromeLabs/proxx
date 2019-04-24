@@ -141,6 +141,10 @@ export default class WebGlRenderer implements Renderer {
     this._shaderBox!.resize();
   }
 
+  beforeRenderFrame() {
+    // Nothing to do here
+  }
+
   render(
     x: number,
     y: number,

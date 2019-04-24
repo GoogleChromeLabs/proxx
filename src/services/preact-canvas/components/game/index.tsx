@@ -13,7 +13,7 @@
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import { lazyGenerateTextures } from "src/rendering/animation";
-import { getRendererInstance, Renderer } from "src/rendering/renderer";
+import { getBestRenderer, Renderer } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
@@ -80,7 +80,7 @@ export default class Game extends Component<Props, State> {
       endTime: 0
     };
 
-    getRendererInstance().then(renderer => this.setState({ renderer }));
+    getBestRenderer().then(renderer => this.setState({ renderer }));
   }
 
   render(

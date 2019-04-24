@@ -46,27 +46,27 @@ void main() {
     // WebGL 1 can only access arrays with compile-time constant indices.
     // So be it.
     if(sprite_idx == 0) {
-      f = texture2D(idle_sprites[0], idle_tex_uv).r;
+      f = texture2D(idle_sprites[0], idle_tex_uv).a;
     } else if (sprite_idx == 1) {
-      f = texture2D(idle_sprites[1], idle_tex_uv).r;
+      f = texture2D(idle_sprites[1], idle_tex_uv).a;
     } else if (sprite_idx == 2) {
-      f = texture2D(idle_sprites[2], idle_tex_uv).r;
+      f = texture2D(idle_sprites[2], idle_tex_uv).a;
     } else if (sprite_idx == 3) {
-      f = texture2D(idle_sprites[3], idle_tex_uv).r;
+      f = texture2D(idle_sprites[3], idle_tex_uv).a;
     }
     f *= boxes_opacity;
   } else if (static_tile >= 1.) {
     vec2 number_tex_uv = (vec2(mod(static_tile, 10.), floor(static_tile/10.)) + normalized_uv) * tile_size / sprite_size;
-    f = mix(f, 1., texture2D(static_sprite, number_tex_uv).r);
+    f = mix(f, 1., texture2D(static_sprite, number_tex_uv).a);
   }
 
   // Blend static outline on top
   vec2 outline_tex_uv = (vec2(0.) + normalized_uv) * tile_size / sprite_size;
-  f = mix(f, 1., texture2D(static_sprite, outline_tex_uv).r * border_opacity);
+  f = mix(f, 1., texture2D(static_sprite, outline_tex_uv).a * border_opacity);
 
   // Blend flash on top
   vec2 flash_tex_uv = (vec2(9., 0.) + normalized_uv) * tile_size / sprite_size;
-  f = mix(f, 1., texture2D(static_sprite, flash_tex_uv).r * flash_opacity);
+  f = mix(f, 1., texture2D(static_sprite, flash_tex_uv).a * flash_opacity);
 
   // Change color according to highlight setting
   vec4 target_color = mix(white, turquoise, highlight_opacity);
