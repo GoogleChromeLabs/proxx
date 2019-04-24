@@ -24,6 +24,10 @@ import GameLoading from "./components/game-loading";
 import Intro from "./components/intro/index.js";
 import { game as gameClassName, main } from "./style.css";
 
+// If the user tries to start a game when we aren't ready, how long do we wait before showing the
+// loading screen?
+const loadingScreenTimeout = 1000;
+
 interface Props {
   stateServicePromise: Promise<Remote<StateService>>;
 }
@@ -147,7 +151,7 @@ class PreactService extends Component<Props, State> {
 
     this._awaitingGameTimeout = setTimeout(() => {
       this.setState({ awaitingGame: true });
-    }, 1000);
+    }, loadingScreenTimeout);
 
     // Wait for everything to be ready:
     await texturePromise;
