@@ -106,7 +106,14 @@ class PreactService extends Component<Props, State> {
 
   render(
     _props: Props,
-    { game, dangerMode, awaitingGame, gridDefaults, settingsOpen, motionPreference }: State
+    {
+      game,
+      dangerMode,
+      awaitingGame,
+      gridDefaults,
+      settingsOpen,
+      motionPreference
+    }: State
   ) {
     let mainComponent: VNode;
 
