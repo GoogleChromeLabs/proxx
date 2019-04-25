@@ -11,7 +11,7 @@ uniform float sprite_size;
 uniform float tile_size;
 uniform sampler2D idle_sprites[4];
 uniform sampler2D static_sprite;
-
+uniform vec2 paddings;
 
 void main() {
   vec4 white = vec4(1.);
@@ -70,6 +70,12 @@ void main() {
 
   // Change color according to highlight setting
   vec4 target_color = mix(white, turquoise, highlight_opacity);
+
+  // Fade out at the border
+  vec2 border_fade =
+    smoothstep(paddings/2., paddings, gl_FragCoord.xy) *
+    (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings/2., gl_FragCoord.xy));
+  f *= min(border_fade.x, border_fade.y);
 
   gl_FragColor = mix(transparent, target_color, f);
 }
