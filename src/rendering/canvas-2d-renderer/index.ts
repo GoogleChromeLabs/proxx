@@ -52,6 +52,7 @@ export default class Canvas2DRenderer implements Renderer {
   private _grid: GridEntry[] = [];
   private _numTilesX?: number;
   private _numTilesY?: number;
+  private _lastFocus = [-1, -1];
 
   get numTiles() {
     return this._numTilesX! * this._numTilesY!;
@@ -125,7 +126,7 @@ export default class Canvas2DRenderer implements Renderer {
     animationList: AnimationDesc[],
     ts: number
   ) {
-    // Nothing to do here
+    this._maybeRenderFocusRing(x, y);
   }
 
   render(
@@ -146,7 +147,13 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   setFocus(x: number, y: number) {
-    // TODO
+    if (this._lastFocus[0] > -1) {
+      const [lastX, lastY] = this._lastFocus;
+      this._lastFocus = [-1, -1];
+      this._rerenderCell(lastX, lastY, { clear: true });
+    }
+    this._lastFocus = [x, y];
+    this._rerenderCell(x, y, { clear: true });
   }
 
   private _initGrid() {
@@ -395,12 +402,33 @@ export default class Canvas2DRenderer implements Renderer {
 
     for (let y = 0; y < this._numTilesY!; y++) {
       for (let x = 0; x < this._numTilesX!; x++) {
-        const { cell, animationList } = this._grid[y * this._numTilesX! + x];
-        const ts = performance.now();
-        for (const animation of animationList) {
-          this.render(x, y, cell!, animation, ts);
-        }
+        this._rerenderCell(x, y);
       }
     }
+  }
+
+  private _rerenderCell(x: number, y: number, { clear = false } = {}) {
+    if (clear) {
+      this._ctx!.save();
+      this._setupContextForTile(x, y);
+      this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
+      this._ctx!.restore();
+    }
+    const { cell, animationList } = this._grid[y * this._numTilesX! + x];
+    const ts = performance.now();
+    for (const animation of animationList) {
+      this.render(x, y, cell!, animation, ts);
+    }
+    this._maybeRenderFocusRing(x, y);
+  }
+
+  private _maybeRenderFocusRing(x: number, y: number) {
+    if (this._lastFocus[0] !== x || this._lastFocus[1] !== y) {
+      return;
+    }
+    this._ctx!.save();
+    this._setupContextForTile(x, y);
+    staticTextureDrawer!(STATIC_TEXTURE.FOCUS, this._ctx!, this._tileSize!);
+    this._ctx!.restore();
   }
 }
