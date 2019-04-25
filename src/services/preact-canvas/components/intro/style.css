@@ -40,7 +40,7 @@
   font: inherit;
   padding: 2em var(--padding-sides) 0.8em;
   -webkit-appearance: none;
-  -moz-appearance: none;
+  -moz-appearance: textfield;
   border: none;
   border-bottom: 1px solid #fff;
   width: 100%;
@@ -108,21 +108,4 @@
   margin: 0 var(--item-margin) !important;
   text-transform: uppercase;
   letter-spacing: 0.15rem;
-  will-change: opacity;
-  transition: opacity 0.4s ease-in-out;
-}
-
-.start-button:disabled {
-  opacity: 0.7;
-}
-
-.start-button-text-hide {
-  will-change: opacity;
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.start-button-text-show {
-  composes: start-button-text-hide;
-  opacity: 1;
 }

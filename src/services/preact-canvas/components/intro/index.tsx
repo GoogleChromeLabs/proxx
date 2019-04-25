@@ -13,6 +13,12 @@
 import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 
+import { GridType } from "../..";
+import {
+  getPresetName,
+  PresetName,
+  presets
+} from "../../../state/grid-default";
 import { Arrow } from "../icons/initial.js";
 import TopBar from "../top-bar/index.js";
 import {
@@ -25,8 +31,6 @@ import {
   selectArrow as selectArrowStyle,
   settingsRow as settingsRowStyle,
   startButton as startButtonStyle,
-  startButtonTextHide,
-  startButtonTextShow,
   startForm as startFormStyle
 } from "./style.css";
 
@@ -83,52 +87,53 @@ class NumberField extends Component<NumberFieldProps, {}> {
   }
 }
 
-const presets = {
-  advanced: { width: 16, height: 16, mines: 40 },
-  beginner: { width: 8, height: 8, mines: 10 },
-  expert: { width: 24, height: 24, mines: 99 }
-};
-
-type PresetName = keyof typeof presets;
+function getStateUpdateFromDefaults(defaults: GridType) {
+  const { width, height, mines } = defaults;
+  return {
+    width,
+    height,
+    mines,
+    presetName: getPresetName(width, height, mines)
+  };
+}
 
 export interface Props {
   onStartGame: (width: number, height: number, mines: number) => void;
-  loading: boolean;
+  defaults?: GridType;
 }
 
 interface State {
-  presetName: PresetName | "custom";
-  width: number;
-  height: number;
-  mines: number;
-  longLoad: boolean;
+  presetName?: PresetName | "custom";
+  width?: number;
+  height?: number;
+  mines?: number;
 }
 
 // tslint:disable-next-line:max-classes-per-file
 export default class Intro extends Component<Props, State> {
-  state: State = {
-    presetName: "beginner",
-    longLoad: false,
-    ...presets.beginner
-  };
-
   private _presetSelect?: HTMLSelectElement;
   private _widthInput?: HTMLInputElement;
   private _heightInput?: HTMLInputElement;
   private _minesInput?: HTMLInputElement;
 
-  componentDidMount() {
-    window.scrollTo(0, 0);
-
-    setTimeout(() => {
-      this.setState({ longLoad: true });
-    }, 1000);
+  constructor(props: Props) {
+    super(props);
+    if (props.defaults) {
+      this.state = getStateUpdateFromDefaults(props.defaults);
+    }
   }
 
-  render(
-    { loading }: Props,
-    { width, height, mines, presetName, longLoad }: State
-  ) {
+  componentDidMount() {
+    window.scrollTo(0, 0);
+  }
+
+  componentWillReceiveProps({ defaults }: Props) {
+    if (defaults && !this.props.defaults) {
+      this.setState(getStateUpdateFromDefaults(defaults));
+    }
+  }
+
+  render(_props: Props, { width, height, mines, presetName }: State) {
     return (
       <div class={introStyle}>
         <TopBar titleOnly />
@@ -138,34 +143,39 @@ export default class Intro extends Component<Props, State> {
               <span class={labelTextStyle}>Preset</span>
               <Arrow class={selectArrowStyle} />
               <select
+                required
                 class={fieldStyle}
                 ref={el => (this._presetSelect = el)}
                 onChange={this._onSelectChange}
-                value={presetName}
+                value={presetName || ""}
               >
-                <option value="beginner">Beginner</option>
-                <option value="advanced">Advanced</option>
-                <option value="expert">Expert</option>
-                <option value="custom">Custom</option>
+                {presetName && [
+                  <option value="beginner">Beginner</option>,
+                  <option value="advanced">Advanced</option>,
+                  <option value="expert">Expert</option>,
+                  <option value="custom">Custom</option>
+                ]}
               </select>
             </label>
           </div>
           <div class={settingsRowStyle}>
             <NumberField
+              required
               min="5"
               max="40"
               step="1"
-              value={width}
+              value={width || ""}
               inputRef={el => (this._widthInput = el)}
               onChange={this._onSettingInput}
             >
               Width
             </NumberField>
             <NumberField
+              required
               min="5"
               max="40"
               step="1"
-              value={height}
+              value={height || ""}
               inputRef={el => (this._heightInput = el)}
               onChange={this._onSettingInput}
             >
@@ -174,8 +184,9 @@ export default class Intro extends Component<Props, State> {
           </div>
           <div class={settingsRowStyle}>
             <NumberField
+              required
               min="1"
-              max={width * height}
+              max={width && height ? width * height : ""}
               step="1"
               value={mines}
               inputRef={el => (this._minesInput = el)}
@@ -185,21 +196,7 @@ export default class Intro extends Component<Props, State> {
             </NumberField>
           </div>
           <div class={settingsRowStyle}>
-            <button class={startButtonStyle} disabled={loading}>
-              <span
-                class={
-                  longLoad || !loading
-                    ? startButtonTextShow
-                    : startButtonTextHide
-                }
-              >
-                {loading
-                  ? longLoad
-                    ? "…Loading…"
-                    : "\u00A0" // non-breaking space, to retain height
-                  : "Start"}
-              </span>
-            </button>
+            <button class={startButtonStyle}>Start</button>
           </div>
         </form>
       </div>
@@ -231,26 +228,10 @@ export default class Intro extends Component<Props, State> {
     const height = this._heightInput!.valueAsNumber;
     const mines = this._minesInput!.valueAsNumber;
 
-    for (const [presetName, preset] of Object.entries(presets)) {
-      if (
-        width === preset.width &&
-        height === preset.height &&
-        mines === preset.mines
-      ) {
-        this.setState({
-          height: preset.height,
-          mines: preset.mines,
-          presetName: presetName as PresetName,
-          width: preset.width
-        });
-        return;
-      }
-    }
-
     this.setState({
       height,
       mines: mines >= width * height ? width * height - 1 : mines,
-      presetName: "custom",
+      presetName: getPresetName(width, height, mines),
       width
     });
   }
@@ -259,9 +240,9 @@ export default class Intro extends Component<Props, State> {
   private _startGame(event: Event) {
     event.preventDefault();
     this.props.onStartGame(
-      this.state.width,
-      this.state.height,
-      this.state.mines
+      this.state.width!,
+      this.state.height!,
+      this.state.mines!
     );
   }
 }

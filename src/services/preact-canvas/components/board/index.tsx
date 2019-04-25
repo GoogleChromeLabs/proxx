@@ -12,25 +12,14 @@
  */
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
-import { focusRing, rippleSpeed } from "src/rendering/constants.js";
-import { isFeaturePhone } from "src/utils/static-dpr";
-import { Cell, GridChanges } from "../../../../gamelogic/types.js";
-import {
-  AnimationDesc,
-  AnimationName,
-  Context,
-  flaggedAnimation,
-  flashInAnimation,
-  flashOutAnimation,
-  highlightInAnimation,
-  highlightOutAnimation,
-  idleAnimation,
-  minedAnimation,
-  numberAnimation
-} from "../../../../rendering/animation";
-import { bind } from "../../../../utils/bind";
-import { staticDevicePixelRatio } from "../../../../utils/static-dpr";
-import { GameChangeCallback } from "../../index";
+import { Animator } from "src/rendering/animator.js";
+import { Renderer } from "src/rendering/renderer.js";
+// import { focusRing, rippleSpeed } from "src/rendering/constants.js";
+// import { isFeaturePhone } from "src/utils/static-dpr";
+import { Cell } from "../../../../gamelogic/types.js";
+import { bind } from "../../../../utils/bind.js";
+import { GameChangeCallback } from "../../index.js";
+
 import {
   board,
   button as buttonStyle,
@@ -54,6 +43,8 @@ export interface Props {
   onDangerModeChange: (v: boolean) => void;
   width: number;
   height: number;
+  renderer: Renderer;
+  animator: Animator;
   dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
@@ -63,73 +54,43 @@ interface State {
   keyNavigation: boolean;
 }
 
-function distanceFromCenter(
-  x: number,
-  y: number,
-  width: number,
-  height: number
-): number {
-  const centerX = width / 2;
-  const centerY = height / 2;
-  // Measure the distance from the center point of the game board
-  // to the center of the field (hence the +0.5)
-  const dx = x + 0.5 - centerX;
-  const dy = y + 0.5 - centerY;
-  // Distance of our point to origin
-  return (
-    Math.sqrt(dx * dx + dy * dy) /
-    Math.sqrt(centerX * centerX + centerY * centerY)
-  );
-}
-
-function removeAnimations(
-  al: AnimationDesc[],
-  names: AnimationName[]
-): AnimationDesc[] {
-  return al.filter(a => !names.includes(a.name));
-}
-
 export default class Board extends Component<Props, State> {
   state: State = {
     keyNavigation: false
   };
-  private canvas?: HTMLCanvasElement;
-  private ctx?: CanvasRenderingContext2D;
-  private table?: HTMLTableElement;
-  private cellsToRedraw: Set<HTMLButtonElement> = new Set();
-  private buttons: HTMLButtonElement[] = [];
-  private canvasRect?: ClientRect | DOMRect;
-  private flashedCells = new Set<HTMLButtonElement>();
-  private firstCellRect?: ClientRect | DOMRect;
-  private additionalButtonData = new WeakMap<
+
+  private _canvas?: HTMLCanvasElement;
+  private _table?: HTMLTableElement;
+  private _buttons: HTMLButtonElement[] = [];
+  private _firstCellRect?: ClientRect | DOMRect;
+  private _additionalButtonData = new WeakMap<
     HTMLButtonElement,
     [number, number, Cell]
   >();
-  private animationLists = new WeakMap<HTMLButtonElement, AnimationDesc[]>();
-  private renderLoopRunning = false;
-  private changeBuffer: GridChanges = [];
 
   componentDidMount() {
     window.scrollTo(0, 0);
     document.documentElement.classList.add("in-game");
-    this.createTable(this.props.width, this.props.height);
-    this.props.gameChangeSubscribe(this.doManualDomHandling);
-    this.canvasInit();
-    this.animationsInit();
+    this._createTable(this.props.width, this.props.height);
+    this.props.gameChangeSubscribe(this._doManualDomHandling);
+    this._rendererInit();
+    this._queryFirstCellRect();
+    this.props.renderer.updateFirstRect(this._firstCellRect!);
 
-    window.addEventListener("resize", this.onWindowResize);
+    window.addEventListener("resize", this._onWindowResize);
+    window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keydown", this._onKeyDown);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
-    this.props.gameChangeUnsubscribe(this.doManualDomHandling);
-
-    window.removeEventListener("resize", this.onWindowResize);
+    window.removeEventListener("resize", this._onWindowResize);
+    window.removeEventListener("scroll", this._onWindowScroll);
     window.removeEventListener("keydown", this._onKeyDown);
-
-    // Stop rAF
-    this.renderLoopRunning = false;
+    window.removeEventListener("keyup", this._onKeyUp);
+    this.props.gameChangeUnsubscribe(this._doManualDomHandling);
+    this.props.renderer.stop();
+    this.props.animator.stop();
   }
 
   shouldComponentUpdate() {
@@ -145,6 +106,18 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
+  private _onWindowResize() {
+    this._onWindowScroll();
+    this.props.renderer.onResize();
+  }
+
+  @bind
+  private _onWindowScroll() {
+    this._queryFirstCellRect();
+    this.props.renderer.updateFirstRect(this._firstCellRect!);
+  }
+
+  @bind
   private _onKeyDown(event: KeyboardEvent) {
     if (event.key === "f" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
@@ -152,22 +125,23 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private onWindowResize() {
-    this.canvasInit();
-  }
-
-  @bind
-  private doManualDomHandling(stateChange: StateChange) {
+  private _doManualDomHandling(stateChange: StateChange) {
     if (!stateChange.gridChanges) {
       return;
     }
-    this.changeBuffer.push(...stateChange.gridChanges);
+
+    // Update DOM straight away
+    for (const [x, y, cell] of stateChange.gridChanges) {
+      const btn = this._buttons[y * this.props.width + x];
+      this._updateButton(btn, cell, x, y);
+    }
+    this.props.animator.updateCells(stateChange.gridChanges);
   }
 
-  private createTable(width: number, height: number) {
+  private _createTable(width: number, height: number) {
     const tableContainer = document.querySelector("." + containerStyle);
-    this.table = document.createElement("table");
-    this.table.classList.add(gameTable);
+    this._table = document.createElement("table");
+    this._table.classList.add(gameTable);
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
       tr.classList.add(gameRow);
@@ -188,246 +162,35 @@ export default class Board extends Component<Props, State> {
         button.addEventListener("mouseenter", event => {
           this.moveFocusOnHover(event);
         });
-        this.additionalButtonData.set(button, [x, y, defaultCell]);
-        this.updateButton(button, defaultCell);
-        this.buttons.push(button);
+        this._additionalButtonData.set(button, [x, y, defaultCell]);
+        this._updateButton(button, defaultCell, x, y);
+        this._buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
       }
-      this.table.appendChild(tr);
+      this._table.appendChild(tr);
     }
-    this.canvas = document.createElement("canvas");
-    this.canvas.classList.add(canvasStyle);
-    this.base!.appendChild(this.canvas);
-    tableContainer!.appendChild(this.table);
-    this.table.addEventListener("keydown", this.onKeyDownOnTable);
-    this.table.addEventListener("keyup", this.onKeyUpOnTable);
-    this.table.addEventListener("mouseup", this.onMouseUp);
-    this.table.addEventListener("mousedown", this.onMouseDown);
-    this.table.addEventListener("contextmenu", event => event.preventDefault());
+    this._canvas = this.props.renderer.createCanvas();
+    this._canvas.classList.add(canvasStyle);
+    this.base!.appendChild(this._canvas);
+    tableContainer!.appendChild(this._table);
+    this._table.addEventListener("keydown", this.onKeyDownOnTable);
+    this._table.addEventListener("keyup", this.onKeyUpOnTable);
+    this._table.addEventListener("mouseup", this.onMouseUp);
+    this._table.addEventListener("mousedown", this.onMouseDown);
+    this._table.addEventListener("contextmenu", event =>
+      event.preventDefault()
+    );
   }
 
-  private updateAnimation(btn: HTMLButtonElement) {
-    const ts = performance.now();
-    const [x, y, cell] = this.additionalButtonData.get(btn)!;
-    let animationList = this.animationLists.get(btn)!;
-
-    if (!cell.revealed && !cell.flagged) {
-      animationList[0].name = AnimationName.IDLE;
-      animationList[0].fadeStart = ts;
-      animationList = removeAnimations(animationList, [
-        AnimationName.HIGHLIGHT_IN,
-        AnimationName.HIGHLIGHT_OUT
-      ]);
-      animationList.push({
-        name: AnimationName.HIGHLIGHT_OUT,
-        start: ts,
-        done: () => {
-          animationList = removeAnimations(animationList, [
-            AnimationName.HIGHLIGHT_IN,
-            AnimationName.HIGHLIGHT_OUT
-          ]);
-          this.animationLists.set(btn, animationList);
-        }
-      });
-    } else if (!cell.revealed && cell.flagged) {
-      animationList[0].name = AnimationName.FLAGGED;
-      animationList[0].fadeStart = ts;
-      animationList.push({
-        name: AnimationName.HIGHLIGHT_IN,
-        start: ts
-      });
-    } else if (cell.revealed) {
-      const isHighlighted = animationList.some(
-        a => a.name === AnimationName.HIGHLIGHT_IN
-      );
-      if (cell.touchingFlags >= cell.touchingMines && !isHighlighted) {
-        animationList.push({
-          name: AnimationName.HIGHLIGHT_IN,
-          start: ts
-        });
-      } else if (cell.touchingFlags < cell.touchingMines && isHighlighted) {
-        animationList = removeAnimations(animationList, [
-          AnimationName.HIGHLIGHT_IN,
-          AnimationName.HIGHLIGHT_OUT
-        ]);
-        animationList.push({
-          name: AnimationName.HIGHLIGHT_OUT,
-          start: ts
-        });
-      }
-      this.animationLists.set(btn, animationList);
-      // This button already played the flash animation
-      if (this.flashedCells.has(btn)) {
-        return;
-      }
-      animationList = removeAnimations(animationList, [AnimationName.IDLE]);
-      this.flashedCells.add(btn);
-      animationList.push({
-        name: AnimationName.FLASH_IN,
-        start: ts,
-        done: () => {
-          animationList = removeAnimations(animationList, [
-            AnimationName.FLASH_IN
-          ]);
-          this.animationLists.set(btn, animationList);
-        }
-      });
-      if (cell.hasMine) {
-        animationList.push({
-          name: AnimationName.MINED,
-          start: ts + 100
-        });
-      } else if (cell.touchingMines > 0) {
-        animationList.unshift({
-          name: AnimationName.NUMBER,
-          start: ts + 100
-        });
-      }
-      animationList.push({
-        name: AnimationName.FLASH_OUT,
-        start: ts + 100
-      });
-    }
-
-    this.animationLists.set(btn, animationList);
+  private _rendererInit() {
+    this.props.renderer.init(this.props.width, this.props.height);
   }
 
-  private drawCell(btn: HTMLButtonElement, ts: number) {
-    const { width, height, left, top } = this.firstCellRect!;
-    const [bx, by, cell] = this.additionalButtonData.get(btn)!;
-    const x = bx * width + left;
-    const y = by * height + top;
-
-    // If cell is out of bounds, skip it
-    if (
-      x + width < 0 ||
-      y + height < 0 ||
-      x > this.canvasRect!.width ||
-      y > this.canvasRect!.height
-    ) {
-      return;
-    }
-
-    const isFocused = btn === document.activeElement;
-    const ctx = this.ctx!;
-    const animationList = this.animationLists.get(btn);
-    if (!animationList) {
-      return;
-    }
-
-    for (const animation of animationList) {
-      const context: Context = { ts, ctx, width, height, animation };
-      ctx.save();
-      ctx.translate(x, y);
-      switch (animation.name) {
-        case AnimationName.IDLE:
-          idleAnimation(context);
-          break;
-        case AnimationName.FLAGGED:
-          flaggedAnimation(context);
-          break;
-        case AnimationName.MINED:
-          minedAnimation(context);
-          break;
-        case AnimationName.HIGHLIGHT_IN:
-          highlightInAnimation(context);
-          break;
-        case AnimationName.HIGHLIGHT_OUT:
-          highlightOutAnimation(context);
-          break;
-        case AnimationName.FLASH_IN:
-          flashInAnimation(context);
-          break;
-        case AnimationName.FLASH_OUT:
-          flashOutAnimation(context);
-          break;
-        case AnimationName.NUMBER:
-          numberAnimation(cell.touchingMines, context);
-          break;
-      }
-
-      if (isFocused && (isFeaturePhone || this.state.keyNavigation)) {
-        // TODO: Design
-        // currently just a green focus ring
-        ctx.strokeStyle = focusRing;
-        ctx.strokeRect(0, 0, width, height);
-      }
-
-      ctx.restore();
-    }
-  }
-
-  private canvasInit() {
-    this.canvasRect = this.canvas!.getBoundingClientRect();
-    this.queryFirstCellRect();
-    this.canvas!.width = this.canvasRect.width * staticDevicePixelRatio;
-    this.canvas!.height = this.canvasRect.height * staticDevicePixelRatio;
-    this.ctx = this.canvas!.getContext("2d")!;
-    this.ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-
-    if (this.renderLoopRunning) {
-      return;
-    }
-
-    const that = this;
-    let lastTs = performance.now();
-    requestAnimationFrame(function f(ts) {
-      that.consumeChangeBuffer(ts - lastTs);
-      lastTs = ts;
-
-      that.renderCanvas(ts);
-      if (that.renderLoopRunning) {
-        requestAnimationFrame(f);
-      }
-    });
-    this.renderLoopRunning = true;
-  }
-
-  private consumeChangeBuffer(delta: number) {
-    const width = this.props.width;
-    // Reveal ~5 fields per frame
-    const numConsume = Math.floor((delta * 5) / 16);
-    const slice = this.changeBuffer.splice(0, numConsume);
-    for (const [x, y, cellProps] of slice) {
-      const btn = this.buttons[y * width + x];
-      this.updateButton(btn, cellProps);
-      this.cellsToRedraw.add(btn);
-      this.updateAnimation(btn);
-    }
-  }
-
-  private animationsInit() {
-    const startTime = performance.now();
-    const rippleFactor =
-      rippleSpeed * Math.max(this.props.width, this.props.height);
-    for (const button of this.buttons) {
-      const [x, y] = this.additionalButtonData.get(button)!;
-      this.animationLists.set(button, [
-        {
-          name: AnimationName.IDLE,
-          start:
-            startTime -
-            rippleFactor +
-            distanceFromCenter(x, y, this.props.width, this.props.height) *
-              rippleFactor
-        }
-      ]);
-    }
-  }
-
-  private renderCanvas(ts: number) {
-    this.ctx!.clearRect(0, 0, this.canvas!.width, this.canvas!.height);
-    this.queryFirstCellRect();
-
-    for (const cell of this.buttons) {
-      this.drawCell(cell, ts);
-    }
-    this.cellsToRedraw.clear();
-  }
-
-  private queryFirstCellRect() {
-    this.firstCellRect = this.buttons[0].closest("td")!.getBoundingClientRect();
+  private _queryFirstCellRect() {
+    this._firstCellRect = this._buttons[0]
+      .closest("td")!
+      .getBoundingClientRect();
   }
 
   // Mouse move will change focused button. This is needed for simulateClick.
@@ -528,11 +291,16 @@ export default class Board extends Component<Props, State> {
     }
     event.preventDefault();
 
-    const buttonData = this.additionalButtonData.get(button)!;
+    const buttonData = this._additionalButtonData.get(button)!;
     this.props.onCellClick(buttonData, alt);
   }
 
-  private updateButton(btn: HTMLButtonElement, cell: Cell) {
+  private _updateButton(
+    btn: HTMLButtonElement,
+    cell: Cell,
+    x: number,
+    y: number
+  ) {
     let cellState;
     if (!cell.revealed) {
       cellState = cell.flagged ? `flag` : `hidden`;
@@ -545,6 +313,6 @@ export default class Board extends Component<Props, State> {
     }
 
     btn.setAttribute("aria-label", cellState);
-    this.additionalButtonData.get(btn)![2] = cell;
+    this._additionalButtonData.get(btn)![2] = cell;
   }
 }

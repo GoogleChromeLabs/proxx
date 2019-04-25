@@ -3,8 +3,13 @@ declare module "chunk-name:*" {
   export default value;
 }
 
-interface Window {
-  debug?: Promise<typeof import("./services/debug/index.js")>;
+declare module "resource-list:" {
+  const value: string[];
+  export default value;
+}
+
+declare module "consts:" {
+  export const version: string;
 }
 
 declare module "*.glsl" {

@@ -52,16 +52,8 @@ export interface AnimationDesc {
   done?: () => void;
 }
 
-export interface Context {
-  ts: number;
-  ctx: CanvasRenderingContext2D;
-  width: number;
-  height: number;
-  animation: AnimationDesc;
-}
-
 // Calls and unsets the `done` callback if available.
-function processDoneCallback(animation: AnimationDesc) {
+export function processDoneCallback(animation: AnimationDesc) {
   if (!animation.done) {
     return;
   }
@@ -69,188 +61,10 @@ function processDoneCallback(animation: AnimationDesc) {
   delete animation.done;
 }
 
-export function idleAnimation({
-  ts,
-  ctx,
-  animation,
-  width: cellSize
-}: Context) {
-  const animationLength = idleAnimationLength;
-  const normalized = ((ts - animation.start) / animationLength) % 1;
-  const idx = Math.floor(normalized * idleAnimationNumFrames);
-
-  let fadeInNormalized =
-    (ts - (animation.fadeStart || 0)) / fadeInAnimationLength;
-  if (fadeInNormalized > 1) {
-    fadeInNormalized = 1;
-  }
-
-  ctx.save();
-  ctx.globalAlpha = remap(
-    0,
-    1,
-    1,
-    fadedLinesAlpha,
-    easeOutQuad(fadeInNormalized)
-  );
-  idleAnimationTextureDrawer!(idx, ctx, cellSize);
-  ctx.globalAlpha = 1;
-  staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, ctx, cellSize);
-  ctx.restore();
-}
-
-export function flaggedAnimation({
-  ts,
-  ctx,
-  animation,
-  width: cellSize
-}: Context) {
-  const animationLength = idleAnimationLength;
-  const normalized = ((ts - animation.start) / animationLength) % 1;
-  const idx = Math.floor(normalized * idleAnimationNumFrames);
-
-  let fadeOutNormalized =
-    (ts - (animation.fadeStart || 0)) / fadeOutAnimationLength;
-  if (fadeOutNormalized > 1) {
-    fadeOutNormalized = 1;
-  }
-
-  ctx.save();
-  ctx.globalAlpha = remap(
-    0,
-    1,
-    fadedLinesAlpha,
-    1,
-    easeOutQuad(fadeOutNormalized)
-  );
-  idleAnimationTextureDrawer!(idx, ctx, cellSize);
-  ctx.globalAlpha = 1;
-  staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, ctx, cellSize);
-  ctx.restore();
-}
-
-export function minedAnimation({
-  width: cellSize,
-  ctx,
-  animation,
-  ts
-}: Context) {
-  if (animation.start > ts) {
-    return;
-  }
-  ctx.save();
-  ctx.fillStyle = "#f00";
-  ctx.beginPath();
-  ctx.arc(cellSize / 2, cellSize / 2, cellSize * 0.3, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.restore();
-}
-
-export function highlightInAnimation({
-  ts,
-  ctx,
-  width,
-  height,
-  animation
-}: Context) {
-  const animationLength = fadeInAnimationLength;
-  let normalized = (ts - animation.start) / animationLength;
-
-  if (normalized < 0) {
-    normalized = 0;
-  }
-  if (normalized > 1) {
-    processDoneCallback(animation);
-    normalized = 1;
-  }
-
-  ctx.save();
-  ctx.globalCompositeOperation = "source-atop";
-  ctx.globalAlpha = easeOutQuad(normalized);
-  ctx.fillStyle = turquoise;
-  ctx.fillRect(0, 0, width, height);
-  ctx.restore();
-}
-
-export function highlightOutAnimation({
-  ts,
-  ctx,
-  width,
-  height,
-  animation
-}: Context) {
-  const animationLength = fadeOutAnimationLength;
-  let normalized = (ts - animation.start) / animationLength;
-
-  if (normalized < 0) {
-    normalized = 0;
-  }
-  if (normalized > 1) {
-    processDoneCallback(animation);
-    normalized = 1;
-  }
-
-  ctx.save();
-  ctx.globalCompositeOperation = "source-atop";
-  ctx.globalAlpha = 1 - easeOutQuad(normalized);
-  ctx.fillStyle = turquoise;
-  ctx.fillRect(0, 0, width, height);
-  ctx.restore();
-}
-
-export function numberAnimation(
-  touching: number,
-  { ctx, width: cellSize }: Context
-) {
-  ctx.save();
-  staticTextureDrawer!(touching, ctx, cellSize);
-  ctx.restore();
-}
-
-export function flashInAnimation({
-  ts,
-  ctx,
-  animation,
-  width: cellSize
-}: Context) {
-  const animationLength = flashInAnimationLength;
-  let normalized = (ts - animation.start) / animationLength;
-  if (normalized < 0) {
-    return;
-  }
-  if (normalized > 1) {
-    processDoneCallback(animation);
-    normalized = 1;
-  }
-  ctx.save();
-  ctx.globalAlpha = easeOutQuad(normalized);
-  staticTextureDrawer!(STATIC_TEXTURE.FLASH, ctx, cellSize);
-  ctx.restore();
-}
-
-export function flashOutAnimation({
-  ts,
-  ctx,
-  animation,
-  width: cellSize
-}: Context) {
-  const animationLength = flashOutAnimationLength;
-  let normalized = (ts - animation.start) / animationLength;
-  if (normalized < 0) {
-    return;
-  }
-  if (normalized > 1) {
-    processDoneCallback(animation);
-    normalized = 1;
-  }
-  ctx.save();
-  ctx.globalAlpha = 1 - easeInOutCubic(normalized);
-  staticTextureDrawer!(STATIC_TEXTURE.FLASH, ctx, cellSize);
-  ctx.restore();
-}
-
-let idleAnimationTextureDrawer: TextureDrawer | null = null;
-let staticTextureDrawer: TextureDrawer | null = null;
+export let idleAnimationTextureDrawer: TextureDrawer | null = null;
+export let idleSprites: HTMLImageElement[] | null = null;
+export let staticTextureDrawer: TextureDrawer | null = null;
+export let staticSprites: HTMLImageElement[] | null = null;
 
 export async function lazyGenerateTextures() {
   const { cellPadding, cellSize } = getCellSizes();
@@ -261,17 +75,28 @@ export async function lazyGenerateTextures() {
     cellPadding,
     idleAnimationNumFrames
   );
-  idleAnimationTextureDrawer = await cacheTextureGenerator(
+  ({
+    drawer: idleAnimationTextureDrawer,
+    caches: idleSprites
+  } = await cacheTextureGenerator(
+    "idle",
     uncachedIATG,
     textureSize,
     idleAnimationNumFrames,
-    { maxWidth: spriteSize, maxHeight: spriteSize }
-  );
+    {
+      maxWidth: spriteSize,
+      maxHeight: spriteSize
+    }
+  ));
   const uncachedSTG = staticTextureGeneratorFactory(textureSize, cellPadding);
-  staticTextureDrawer = await cacheTextureGenerator(
+  ({
+    drawer: staticTextureDrawer,
+    caches: staticSprites
+  } = await cacheTextureGenerator(
+    "static",
     uncachedSTG,
     textureSize,
     STATIC_TEXTURE.LAST_MARKER,
     { maxWidth: spriteSize, maxHeight: spriteSize }
-  );
+  ));
 }

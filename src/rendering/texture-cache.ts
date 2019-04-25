@@ -11,6 +11,10 @@
  * limitations under the License.
  */
 
+import { version } from "consts:";
+
+import { del, get, set } from "idb-keyval";
+
 import { task } from "../utils/scheduling";
 import { staticDevicePixelRatio } from "../utils/static-dpr.js";
 import { TextureGenerator } from "./texture-generators.js";
@@ -36,15 +40,99 @@ const defaultSizeConstraints = {
   maxHeight: 32768
 };
 
+export interface TextureCache {
+  drawer: TextureDrawer;
+  caches: HTMLImageElement[];
+}
+
+const TEXTURE_CACHE_IDB_PREFIX = "texturecache";
 // Wraps an existing TextureGenerator and caches the generated
 // frames in an img.
 export async function cacheTextureGenerator(
+  name: string,
   drawTexture: TextureGenerator,
   textureSize: number,
   numFrames: number,
   constraints: Partial<SizeConstraints> = {}
-): Promise<TextureDrawer> {
-  const { maxWidth, maxHeight } = { ...defaultSizeConstraints, ...constraints };
+): Promise<TextureCache> {
+  const fullConstraints = { ...defaultSizeConstraints, ...constraints };
+  const maxFramesPerRow = Math.floor(
+    fullConstraints.maxWidth / (textureSize * staticDevicePixelRatio)
+  );
+  const maxRowsPerSprite = Math.floor(
+    fullConstraints.maxHeight / (textureSize * staticDevicePixelRatio)
+  );
+  const maxFramesPerSprite = maxFramesPerRow * maxRowsPerSprite;
+
+  let blobs: Blob[];
+
+  const prefix = `${TEXTURE_CACHE_IDB_PREFIX}:${name}`;
+  const cachedTextureVersion = await get(`${prefix}:version`);
+  if (cachedTextureVersion !== version) {
+    await del(`${prefix}:version`);
+    await del(`${prefix}:blobs`);
+    blobs = await createBlobs(
+      drawTexture,
+      textureSize,
+      numFrames,
+      fullConstraints
+    );
+    await set(`${prefix}:version`, version);
+    await set(`${prefix}:blobs`, blobs);
+  } else {
+    blobs = await get(`${prefix}:blobs`);
+  }
+
+  // Ok, strap in, because this next bit is stupid.
+  // iOS devices seem to crash when they have some number of large canvases in memory.
+  // But! They seem to handle large images just fine.
+  // So, we have to convert our canvas into an image!
+  // Hooray! The day is saved.
+  const caches = new Array(blobs.length);
+  for (let i = 0; i < blobs.length; i++) {
+    const image = new Image();
+    image.src = URL.createObjectURL(blobs[i]);
+    await new Promise(r => (image.onload = r));
+    caches[i] = image;
+    await task();
+  }
+
+  const drawer = (
+    idx: number,
+    targetCtx: CanvasRenderingContext2D,
+    cellSize: number
+  ) => {
+    idx = Math.floor(idx % numFrames);
+    const sprite = Math.floor(idx / maxFramesPerSprite);
+    const idxInSprite = idx % maxFramesPerSprite;
+    const xIndex = idxInSprite % maxFramesPerRow;
+    const yIndex = Math.floor(idxInSprite / maxFramesPerRow);
+    const img = caches[sprite];
+    const x = xIndex * textureSize;
+    const y = yIndex * textureSize;
+
+    targetCtx.drawImage(
+      img,
+      x * staticDevicePixelRatio,
+      y * staticDevicePixelRatio,
+      textureSize * staticDevicePixelRatio,
+      textureSize * staticDevicePixelRatio,
+      0,
+      0,
+      cellSize,
+      cellSize
+    );
+  };
+  return { drawer, caches };
+}
+
+async function createBlobs(
+  drawTexture: TextureGenerator,
+  textureSize: number,
+  numFrames: number,
+  constraints: SizeConstraints
+) {
+  const { maxWidth, maxHeight } = constraints;
   const maxFramesPerRow = Math.floor(
     maxWidth / (textureSize * staticDevicePixelRatio)
   );
@@ -54,21 +142,11 @@ export async function cacheTextureGenerator(
   const maxFramesPerSprite = maxFramesPerRow * maxRowsPerSprite;
   const numSprites = Math.ceil(numFrames / maxFramesPerSprite);
 
-  const caches: HTMLImageElement[] = [];
-
+  const blobs: Blob[] = [];
   for (let spriteIndex = 0; spriteIndex < numSprites; spriteIndex++) {
     const framesLeftToCache = numFrames - spriteIndex * maxFramesPerSprite;
-    const width =
-      Math.min(maxFramesPerRow, framesLeftToCache) *
-      textureSize *
-      staticDevicePixelRatio;
-    const height =
-      Math.min(
-        maxRowsPerSprite,
-        Math.ceil(framesLeftToCache / maxFramesPerRow)
-      ) *
-      textureSize *
-      staticDevicePixelRatio;
+    const width = maxWidth;
+    const height = maxHeight;
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -97,44 +175,8 @@ export async function cacheTextureGenerator(
       // Await a task to give the main thread a chance to breathe.
       await task();
     }
-
-    // Ok, strap in, because this next bit is stupid.
-    // iOS devices seem to crash when they have some number of large canvases in memory.
-    // But! They seem to handle large images just fine.
-    // So, we have to convert our canvas into an image!
-    // Hooray! The day is saved.
     const blob = await new Promise<Blob | null>(r => canvas.toBlob(r));
-    const image = new Image();
-    image.src = URL.createObjectURL(blob);
-    await new Promise(r => (image.onload = r));
-    caches[spriteIndex] = image;
-    await task();
+    blobs.push(blob!);
   }
-
-  return (
-    idx: number,
-    targetCtx: CanvasRenderingContext2D,
-    cellSize: number
-  ) => {
-    idx = Math.floor(idx % numFrames);
-    const sprite = Math.floor(idx / maxFramesPerSprite);
-    const idxInSprite = idx % maxFramesPerSprite;
-    const xIndex = idxInSprite % maxFramesPerRow;
-    const yIndex = Math.floor(idxInSprite / maxFramesPerRow);
-    const img = caches[sprite];
-    const x = xIndex * textureSize;
-    const y = yIndex * textureSize;
-
-    targetCtx.drawImage(
-      img,
-      x * staticDevicePixelRatio,
-      y * staticDevicePixelRatio,
-      textureSize * staticDevicePixelRatio,
-      textureSize * staticDevicePixelRatio,
-      0,
-      0,
-      cellSize,
-      cellSize
-    );
-  };
+  return blobs;
 }

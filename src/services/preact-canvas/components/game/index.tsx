@@ -12,9 +12,13 @@
  */
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
+import { lazyGenerateTextures } from "src/rendering/animation";
+import { Animator } from "src/rendering/animator";
+import { Renderer, shouldUseMotion } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
+import { getCellSizes } from "src/utils/cell-sizing";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
@@ -49,6 +53,11 @@ interface State {
   playMode: PlayMode;
   toReveal: number;
   startTime: number;
+  endTime: number;
+  // This should always be set as we prevent the game from starting until the
+  // renderer is loaded.
+  renderer?: Renderer;
+  animator?: Animator;
   completeTime: number;
   bestTime: number;
 }
@@ -69,8 +78,11 @@ export default class Game extends Component<Props, State> {
       toReveal: props.toRevealTotal,
       startTime: 0,
       completeTime: 0,
-      bestTime: 0
+      bestTime: 0,
+      endTime: 0
     };
+
+    this._init();
   }
 
   render(
@@ -78,11 +90,12 @@ export default class Game extends Component<Props, State> {
       dangerMode,
       width,
       height,
+      mines,
       gameChangeSubscribe,
       gameChangeUnsubscribe,
       toRevealTotal
     }: Props,
-    { playMode, toReveal, completeTime, bestTime }: State
+    { playMode, toReveal, animator, renderer, completeTime, bestTime }: State
   ) {
     const timerRunning = playMode === PlayMode.Playing;
 
@@ -100,13 +113,18 @@ export default class Game extends Component<Props, State> {
             onRestart={this.onRestart}
             time={completeTime}
             bestTime={bestTime}
+            width={width}
+            height={height}
+            mines={mines}
           />
-        ) : (
+        ) : renderer && animator ? (
           [
             <Board
               width={width}
               height={height}
               dangerMode={dangerMode}
+              animator={animator}
+              renderer={renderer}
               gameChangeSubscribe={gameChangeSubscribe}
               gameChangeUnsubscribe={gameChangeUnsubscribe}
               onCellClick={this.onCellClick}
@@ -138,6 +156,8 @@ export default class Game extends Component<Props, State> {
               undefined
             )
           ]
+        ) : (
+          <div />
         )}
       </div>
     );
@@ -152,6 +172,47 @@ export default class Game extends Component<Props, State> {
 
   componentWillUnmount() {
     this.props.gameChangeUnsubscribe(this.onGameChange);
+  }
+
+  private async _init() {
+    let renderer: Renderer;
+    let animator: Animator;
+
+    if (shouldUseMotion()) {
+      // tslint:disable-next-line:variable-name
+      const [RendererClass, AnimatorClass] = await Promise.all([
+        import("../../../../rendering/webgl-renderer/index.js").then(
+          m => m.default
+        ),
+        import("../../../../rendering/motion-animator/index.js").then(
+          m => m.default
+        )
+      ]);
+      renderer = new RendererClass();
+      animator = new AnimatorClass(
+        this.props.width,
+        this.props.height,
+        renderer
+      );
+    } else {
+      // tslint:disable-next-line:variable-name
+      const [RendererClass, AnimatorClass] = await Promise.all([
+        import("../../../../rendering/canvas-2d-renderer/index.js").then(
+          m => m.default
+        ),
+        import("../../../../rendering/no-motion-animator/index.js").then(
+          m => m.default
+        )
+      ]);
+      renderer = new RendererClass();
+      animator = new AnimatorClass(
+        this.props.width,
+        this.props.height,
+        renderer
+      );
+    }
+
+    this.setState({ renderer, animator });
   }
 
   @bind
