@@ -549,7 +549,7 @@ export default class WebGlRenderer implements Renderer {
   }
 
   @bind
-  private _renderLoop(ts: number) {
+  private _renderLoop() {
     this._shaderBox!.updateVBO("dynamic_tile_data_a", this._dynamicTileDataA!);
     this._shaderBox!.updateVBO("dynamic_tile_data_b", this._dynamicTileDataB!);
 

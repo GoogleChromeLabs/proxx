@@ -15,13 +15,16 @@ import { Cell, GridChanges } from "src/gamelogic/types";
 import { AnimationDesc, AnimationName } from "../animation";
 import { Animator } from "../animator";
 import { Renderer } from "../renderer";
+import { freeze, getTime } from "../time-provider";
 
 export default class NoMotionAnimator implements Animator {
   constructor(
     private _numTilesX: number,
     private _numTilesY: number,
     private _renderer: Renderer
-  ) {}
+  ) {
+    freeze();
+  }
 
   get numTiles() {
     return this._numTilesX * this._numTilesY;
@@ -39,43 +42,53 @@ export default class NoMotionAnimator implements Animator {
 
   private _renderCell(x: number, y: number, cell: Cell) {
     const animationList: AnimationDesc[] = [];
-    if (!cell.revealed) {
+    const start = getTime();
+
+    if (!cell.revealed && !cell.flagged) {
       animationList.push({
         name: AnimationName.IDLE,
-        start: 0
+        start
       });
-    } else if (cell.hasMine) {
+    } else if (!cell.revealed && cell.flagged) {
+      animationList.push({
+        name: AnimationName.FLAGGED,
+        fadeStart: start - 1000,
+        start
+      });
+    } else if (cell.revealed && cell.hasMine) {
       animationList.push({
         name: AnimationName.MINED,
-        start: 0
+        start
       });
     } else {
       animationList.unshift({
         name: AnimationName.NUMBER,
-        start: 0
+        start
       });
     }
     if (
       (cell.revealed &&
-        cell.touchingFlags > 0 &&
+        cell.touchingMines > 0 &&
         cell.touchingFlags >= cell.touchingMines) ||
       (!cell.revealed && cell.flagged)
     ) {
       animationList.push({
         name: AnimationName.HIGHLIGHT_IN,
-        start: 0
+        fadeStart: start - 1000,
+        start
       });
     } else {
       animationList.push({
         name: AnimationName.HIGHLIGHT_OUT,
-        start: 0
+        fadeStart: start - 1000,
+        start
       });
     }
 
-    this._renderer.beforeCell(x, y, cell, animationList, 1000);
+    this._renderer.beforeCell(x, y, cell, animationList, start);
     for (const animation of animationList) {
-      this._renderer.render(x, y, cell, animation, 1000);
+      this._renderer.render(x, y, cell, animation, start);
     }
-    this._renderer.afterCell(x, y, cell, animationList, 1000);
+    this._renderer.afterCell(x, y, cell, animationList, start);
   }
 }

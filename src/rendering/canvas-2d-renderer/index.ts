@@ -35,6 +35,7 @@ import {
 } from "../constants";
 import { Renderer } from "../renderer";
 import { STATIC_TEXTURE } from "../texture-generators";
+import { getTime } from "../time-provider";
 
 interface GridEntry {
   x: number;
@@ -146,7 +147,7 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   private _initGrid() {
-    const start = performance.now();
+    const start = getTime();
     this._grid = new Array(this.numTiles);
 
     for (let y = 0; y < this._numTilesY!; y++) {
@@ -287,8 +288,9 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    const start = animation.fadeStart || animation.start;
     const animationLength = fadeInAnimationLength;
-    let normalized = (ts - animation.start) / animationLength;
+    let normalized = (ts - start) / animationLength;
 
     if (normalized < 0) {
       normalized = 0;
@@ -318,8 +320,9 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    const start = animation.fadeStart || animation.start;
     const animationLength = fadeOutAnimationLength;
-    let normalized = (ts - animation.start) / animationLength;
+    let normalized = (ts - start) / animationLength;
 
     if (normalized < 0) {
       normalized = 0;
@@ -392,7 +395,7 @@ export default class Canvas2DRenderer implements Renderer {
     for (let y = 0; y < this._numTilesY!; y++) {
       for (let x = 0; x < this._numTilesX!; x++) {
         const { cell, animationList } = this._grid[y * this._numTilesX! + x];
-        const ts = performance.now();
+        const ts = getTime();
         for (const animation of animationList) {
           this.render(x, y, cell!, animation, ts);
         }
