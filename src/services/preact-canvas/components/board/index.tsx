@@ -193,7 +193,7 @@ export default class Board extends Component<Props, State> {
   @bind
   private setFocus(button: HTMLButtonElement) {
     button.focus();
-    if (isFeaturePhone) {
+    if (isFeaturePhone || this.state.keyNavigation) {
       const [x, y] = this._additionalButtonData.get(button)!;
       this.props.renderer.setFocus(x, y);
     }
