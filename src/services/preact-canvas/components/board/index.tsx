@@ -198,7 +198,7 @@ export default class Board extends Component<Props, State> {
           this.moveFocusOnHover(event);
         });
         this.additionalButtonData.set(button, [x, y, defaultCell]);
-        this.updateButton(button, defaultCell, x, y);
+        this.updateButton(button, defaultCell);
         this.buttons.push(button);
         td.appendChild(button);
         tr.appendChild(td);
@@ -400,7 +400,7 @@ export default class Board extends Component<Props, State> {
     const slice = this.changeBuffer.splice(0, numConsume);
     for (const [x, y, cellProps] of slice) {
       const btn = this.buttons[y * width + x];
-      this.updateButton(btn, cellProps, x, y);
+      this.updateButton(btn, cellProps);
       this.cellsToRedraw.add(btn);
       this.updateAnimation(btn);
     }
@@ -541,18 +541,12 @@ export default class Board extends Component<Props, State> {
     this.props.onCellClick(buttonData, alt);
   }
 
-  private updateButton(
-    btn: HTMLButtonElement,
-    cell: Cell,
-    x: number,
-    y: number
-  ) {
+  private updateButton(btn: HTMLButtonElement, cell: Cell) {
     let cellState;
-    const position = `${x + 1}, ${y + 1}`;
     if (!cell.revealed) {
       cellState = cell.flagged ? `flag` : `hidden`;
     } else if (cell.hasMine) {
-      cellState = `mine`; // should it say black hole?
+      cellState = `black hole`;
     } else if (cell.touchingMines === 0) {
       cellState = `blank`;
     } else {
