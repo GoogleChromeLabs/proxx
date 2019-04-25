@@ -13,9 +13,11 @@
 import { Component, h } from "preact";
 
 import { minSec } from "../../../../utils/format";
+import { getPresetName } from "../../../state/grid-default";
 import { EndSquare, Timer } from "../icons/additional";
 import {
   againButton,
+  gridName as gridNameStyle,
   mainButton,
   score,
   scoreRow,
@@ -28,19 +30,42 @@ import {
   winState
 } from "./style.css";
 
-export interface Props {
+interface Props {
   onRestart: () => void;
   onMainMenu: () => void;
   time: number;
   bestTime: number;
+  width: number;
+  height: number;
+  mines: number;
 }
 
-export default class End extends Component<Props> {
+interface State {
+  gridName: string;
+}
+
+export default class End extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    const { width, height, mines } = props;
+    const presetName: string = getPresetName(width, height, mines);
+
+    this.state = {
+      gridName:
+        presetName +
+        (presetName === "custom" ? ` - ${width}x${height}:${mines}` : "")
+    };
+  }
+
   componentDidMount() {
     window.scrollTo(0, 0);
   }
 
-  render({ onRestart, onMainMenu, time, bestTime }: Props) {
+  render(
+    { onRestart, onMainMenu, time, bestTime }: Props,
+    { gridName }: State
+  ) {
     const timeStr = minSec(time);
     const bestTimeStr = minSec(bestTime);
 
@@ -49,7 +74,8 @@ export default class End extends Component<Props> {
         <div class={winInner}>
           <EndSquare class={winSquare} />
           <h2 class={winState}>
-            {time === bestTime ? "New high score!" : "You win!"}
+            {time === bestTime ? "New high score!" : "You win!"}{" "}
+            <span class={gridNameStyle}>({gridName})</span>
           </h2>
           <div class={scoreRow}>
             <div class={score}>

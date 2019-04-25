@@ -145,6 +145,26 @@ export default class WebGlRenderer implements Renderer {
     // Nothing to do here
   }
 
+  beforeCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    // Nothing to do here
+  }
+
+  afterCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    // Nothing to do here
+  }
+
   render(
     x: number,
     y: number,
@@ -236,6 +256,9 @@ export default class WebGlRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    if (ts < animation.start) {
+      return;
+    }
     const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
     const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
     dynamicTileDataA[DynamicTileDataA.STATIC_TILE] = cell.touchingMines;

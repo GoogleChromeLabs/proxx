@@ -97,3 +97,7 @@
 .main-button {
   composes: button-alt from "../../utils.css";
 }
+
+.grid-name {
+  display: block;
+}

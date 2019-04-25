@@ -1,3 +1,5 @@
+import { noSw } from "../utils/constants";
+
 /** Tell the service worker to skip waiting. Resolves once the controller has changed. */
 export async function skipWaiting() {
   const reg = await navigator.serviceWorker.getRegistration();
@@ -65,9 +67,7 @@ async function watchForUpdate() {
 
 /** Set up the service worker and monitor changes */
 export async function init() {
-  const thisURL = new URL(location.href);
-
-  if (thisURL.searchParams.has("no-sw")) {
+  if (noSw) {
     const reg = await navigator.serviceWorker.getRegistration();
     if (reg) {
       await reg.unregister();
