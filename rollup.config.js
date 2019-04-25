@@ -76,7 +76,8 @@ export default {
     assetPlugin({
       initialAssets: [
         "./src/assets/space-mono-normal.woff2",
-        "./src/assets/space-mono-bold.woff2"
+        "./src/assets/space-mono-bold.woff2",
+        "./src/assets/favicon.ico"
       ],
       transformAssets(asset) {
         if (asset.fileName.includes("manifest-")) {

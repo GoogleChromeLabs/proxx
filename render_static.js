@@ -40,6 +40,7 @@ async function generateShell(file, dependencygraph) {
     ).fileName,
     boldFontFile: findAssetWithName(dependencygraph, "space-mono-bold.woff2")
       .fileName,
+    favicon: findAssetWithName(dependencygraph, "favicon.ico"),
     dependencygraph,
     pkg: require("./package.json"),
     fs

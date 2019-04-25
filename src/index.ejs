@@ -6,6 +6,8 @@ html {
 </style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="theme-color" content="#371155">
+<link rel="shortcut icon" href="<%=favicon%>" type="image/x-icon">
 <link rel="prefetch" href="<%=workerFile%>">
 <% for (const [i, font] of [normalFontFile, boldFontFile].entries()) { %>
   <link rel="preload" as="font" href="<%= font %>" crossorigin>
