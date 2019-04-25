@@ -1,8 +1,15 @@
 {
-  "name": "minesweeper",
+  "name": "Proxx",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
+  "author": "Surma <surma@surma.link>",
+  "license": "Apache-2.0",
+  "contributors": [
+    "Jake Archibald",
+    "Mariko Kosaka",
+    "Paul Kinlan"
+  ],
   "scripts": {
     "build:markup": "node ./render_static.js",
     "gzip": "gzip -k9nr dist",
@@ -21,8 +28,6 @@
       "pre-commit": "npm test"
     }
   },
-  "author": "Surma <surma@surma.link>",
-  "license": "Apache-2.0",
   "dependencies": {
     "@babel/core": "^7.4.3",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
