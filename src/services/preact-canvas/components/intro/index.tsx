@@ -13,8 +13,12 @@
 import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 
-import { presets } from "src/services/state/grid-default.js";
 import { GridType } from "../..";
+import {
+  getPresetName,
+  PresetName,
+  presets
+} from "../../../state/grid-default";
 import { Arrow } from "../icons/initial.js";
 import TopBar from "../top-bar/index.js";
 import {
@@ -81,26 +85,6 @@ class NumberField extends Component<NumberFieldProps, {}> {
   private _dispatch() {
     this._input!.dispatchEvent(new Event("change"));
   }
-}
-
-type PresetName = keyof typeof presets;
-
-function getPresetName(
-  width: number,
-  height: number,
-  mines: number
-): PresetName | "custom" {
-  for (const [presetName, preset] of Object.entries(presets)) {
-    if (
-      width === preset.width &&
-      height === preset.height &&
-      mines === preset.mines
-    ) {
-      return presetName as PresetName;
-    }
-  }
-
-  return "custom";
 }
 
 function getStateUpdateFromDefaults(defaults: GridType) {

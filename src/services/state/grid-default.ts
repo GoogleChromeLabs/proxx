@@ -26,3 +26,23 @@ export const presets = {
   beginner: { width: 8, height: 8, mines: 10 },
   expert: { width: 24, height: 24, mines: 99 }
 };
+
+export type PresetName = keyof typeof presets;
+
+export function getPresetName(
+  width: number,
+  height: number,
+  mines: number
+): PresetName | "custom" {
+  for (const [presetName, preset] of Object.entries(presets)) {
+    if (
+      width === preset.width &&
+      height === preset.height &&
+      mines === preset.mines
+    ) {
+      return presetName as PresetName;
+    }
+  }
+
+  return "custom";
+}
