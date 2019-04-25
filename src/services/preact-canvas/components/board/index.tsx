@@ -119,7 +119,6 @@ export default class Board extends Component<Props, State> {
 
     window.addEventListener("resize", this.onWindowResize);
     window.addEventListener("keydown", this._onKeyDown);
-    window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
@@ -128,7 +127,6 @@ export default class Board extends Component<Props, State> {
 
     window.removeEventListener("resize", this.onWindowResize);
     window.removeEventListener("keydown", this._onKeyDown);
-    window.removeEventListener("keyup", this._onKeyUp);
 
     // Stop rAF
     this.renderLoopRunning = false;
@@ -148,14 +146,7 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Control" || event.key === "#") {
-      this.props.onDangerModeChange(!this.props.dangerMode);
-    }
-  }
-
-  @bind
-  private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Control") {
+    if (event.key === "f" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
