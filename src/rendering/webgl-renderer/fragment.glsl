@@ -21,7 +21,7 @@ void main() {
 
   vec2 normalized_uv = vec2(0., 1.) + vec2(1., -1.)*uv;
 
-  float tile_x = dynamic_tile_data_a2.x;
+  float has_focus = dynamic_tile_data_a2.x;
   float tile_y = dynamic_tile_data_a2.y;
   float static_tile = dynamic_tile_data_a2.z;
   float idle_animation_time = dynamic_tile_data_a2.w;
@@ -71,5 +71,14 @@ void main() {
   // Change color according to highlight setting
   vec4 target_color = mix(white, turquoise, highlight_opacity);
 
-  gl_FragColor = mix(transparent, target_color, f);
+  vec4 tile = mix(transparent, target_color, f);
+
+  // Add focus ring
+  vec2 focus_tex_uv = (vec2(1., 1.) + normalized_uv) * tile_size / sprite_size;
+  vec4 focused_tile = mix(
+    tile,
+    white,
+    texture2D(static_sprite, focus_tex_uv).a * has_focus
+  );
+  gl_FragColor = focused_tile;
 }

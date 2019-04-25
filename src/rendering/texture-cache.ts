@@ -15,6 +15,7 @@ import { version } from "consts:";
 
 import { del, get, set } from "idb-keyval";
 
+import { noSw } from "src/utils/constants";
 import { task } from "../utils/scheduling";
 import { staticDevicePixelRatio } from "../utils/static-dpr.js";
 import { TextureGenerator } from "./texture-generators.js";
@@ -68,7 +69,7 @@ export async function cacheTextureGenerator(
 
   const prefix = `${TEXTURE_CACHE_IDB_PREFIX}:${name}`;
   const cachedTextureVersion = await get(`${prefix}:version`);
-  if (cachedTextureVersion !== version) {
+  if (cachedTextureVersion !== version || noSw) {
     await del(`${prefix}:version`);
     await del(`${prefix}:blobs`);
     blobs = await createBlobs(

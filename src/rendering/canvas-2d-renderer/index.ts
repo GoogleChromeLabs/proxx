@@ -145,6 +145,10 @@ export default class Canvas2DRenderer implements Renderer {
     this._ctx!.restore();
   }
 
+  setFocus(x: number, y: number) {
+    // TODO
+  }
+
   private _initGrid() {
     const start = performance.now();
     this._grid = new Array(this.numTiles);

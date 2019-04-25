@@ -194,14 +194,8 @@ export default class Board extends Component<Props, State> {
   private setFocus(button: HTMLButtonElement) {
     button.focus();
     if (isFeaturePhone) {
-      const [x, y] = this._additionalButtonData.get(button);
-      // QUESTION FOR SURMA:
-      //
-      // When focus moved && the game is run on feature phone,
-      // board needs to tell renderer (or animator?) that
-      // it needs a focus ring drawn at {x, y} cell position.
-      //
-      // HOW???
+      const [x, y] = this._additionalButtonData.get(button)!;
+      this.props.renderer.setFocus(x, y);
     }
   }
 
