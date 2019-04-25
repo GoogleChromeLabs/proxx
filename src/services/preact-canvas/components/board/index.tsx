@@ -14,12 +14,10 @@ import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
 import { Animator } from "src/rendering/animator.js";
 import { Renderer } from "src/rendering/renderer.js";
-// import { focusRing, rippleSpeed } from "src/rendering/constants.js";
-// import { isFeaturePhone } from "src/utils/static-dpr";
+import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
-
 import {
   board,
   button as buttonStyle,
@@ -87,7 +85,6 @@ export default class Board extends Component<Props, State> {
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("scroll", this._onWindowScroll);
     window.removeEventListener("keydown", this._onKeyDown);
-    window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -193,19 +190,34 @@ export default class Board extends Component<Props, State> {
       .getBoundingClientRect();
   }
 
+  @bind
+  private setFocus(button: HTMLButtonElement) {
+    button.focus();
+    if (isFeaturePhone) {
+      const [x, y] = this._additionalButtonData.get(button);
+      // QUESTION FOR SURMA:
+      //
+      // When focus moved && the game is run on feature phone,
+      // board needs to tell renderer (or animator?) that
+      // it needs a focus ring drawn at {x, y} cell position.
+      //
+      // HOW???
+    }
+  }
+
   // Mouse move will change focused button. This is needed for simulateClick.
   @bind
   private moveFocusOnHover(event: MouseEvent) {
     this.setState({ keyNavigation: false });
-    const target = event.target as HTMLElement;
-    target.focus();
+    const button = event.target as HTMLButtonElement;
+    this.setFocus(button);
   }
 
   @bind
   private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
     this.setState({ keyNavigation: true });
     const currentBtn = document.activeElement as HTMLButtonElement;
-    const btnInfo = this.additionalButtonData.get(currentBtn)!;
+    const btnInfo = this._additionalButtonData.get(currentBtn)!;
     const x = btnInfo[0];
     const y = btnInfo[1];
     const width = this.props.width;
@@ -221,14 +233,14 @@ export default class Board extends Component<Props, State> {
     }
 
     const nextIndex = newX + newY * width;
-    const nextBtn = this.buttons[nextIndex];
+    const nextBtn = this._buttons[nextIndex];
 
     // Change `tabindex="0"` to the next button so that when user tab out of the game
     // (to select setting menu, for example) they comeback to where they left off.
     currentBtn.setAttribute("tabindex", "-1");
     nextBtn.setAttribute("tabindex", "0");
 
-    nextBtn.focus();
+    this.setFocus(nextBtn);
   }
 
   @bind

@@ -34,4 +34,3 @@ const staticScreenHeight = screen.height;
 // in Q1 2019, all KaiOS devices ship with QVGA and Xiaomi's Qin1 is also QVGA.
 export const isFeaturePhone =
   Math.min(staticScreenWidth, staticScreenHeight) <= 240;
-
