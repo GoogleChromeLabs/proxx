@@ -16,7 +16,8 @@ import { basename } from "path";
 
 const defaultOpts = {
   prefix: "asset-url",
-  initialAssets: []
+  initialAssets: [],
+  transformAssets: () => {}
 };
 
 export default function assetPlugin(opts) {
@@ -44,6 +45,19 @@ export default function assetPlugin(opts) {
         readFileSync(id.slice(prefix.length))
       );
       return `export default import.meta.ROLLUP_ASSET_URL_${assetId}`;
+    },
+    async generateBundle(_, bundle) {
+      for (const bundleEntry of Object.values(bundle)) {
+        if (!bundleEntry.isAsset) {
+          continue;
+        }
+        const newBundleEntry = await opts.transformAssets(bundleEntry);
+        if (!newBundleEntry) {
+          continue;
+        }
+        delete bundle[bundleEntry.fileName];
+        bundle[newBundleEntry.fileName] = newBundleEntry;
+      }
     }
   };
 }

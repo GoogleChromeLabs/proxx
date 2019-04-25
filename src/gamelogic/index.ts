@@ -311,7 +311,6 @@ export default class MinesweeperGame {
   /**
    * @param x
    * @param y
-   * @param objsCloned A weakmap to track which objects have already been cloned.
    */
   private _reveal(x: number, y: number): void {
     // The set contains the cell position as if it were a single flat array.
