@@ -205,14 +205,19 @@ class PreactService extends Component<Props, State> {
 
     localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {
-        const game = stateChange.game!;
-        clearTimeout(this._awaitingGameTimeout);
-        setGridDefault(game.width, game.height, game.mines);
-        this.setState({
-          game,
-          awaitingGame: false,
-          gridDefaults: game
-        });
+        const game = stateChange.game;
+
+        if (game) {
+          clearTimeout(this._awaitingGameTimeout);
+          setGridDefault(game.width, game.height, game.mines);
+          this.setState({
+            game,
+            awaitingGame: false,
+            gridDefaults: game
+          });
+        } else {
+          this.setState({ game });
+        }
       }
       if ("gameStateChange" in stateChange) {
         for (const callback of this._gameChangeSubscribers) {
