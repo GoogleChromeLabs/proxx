@@ -88,6 +88,7 @@ export default class Game extends Component<Props, State> {
       dangerMode,
       width,
       height,
+      mines,
       gameChangeSubscribe,
       gameChangeUnsubscribe,
       toRevealTotal
@@ -110,6 +111,9 @@ export default class Game extends Component<Props, State> {
             onRestart={this.onRestart}
             time={completeTime}
             bestTime={bestTime}
+            width={width}
+            height={height}
+            mines={mines}
           />
         ) : renderer ? (
           [
