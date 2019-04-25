@@ -161,8 +161,6 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private async _onStartGame(width: number, height: number, mines: number) {
-    setGridDefault(width, height, mines);
-
     const { updateReady, skipWaiting } = await offlineModulePromise;
 
     if (updateReady) {
@@ -207,8 +205,14 @@ class PreactService extends Component<Props, State> {
 
     localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {
+        const game = stateChange.game!;
         clearTimeout(this._awaitingGameTimeout);
-        this.setState({ game: stateChange.game, awaitingGame: false });
+        setGridDefault(game.width, game.height, game.mines);
+        this.setState({
+          game,
+          awaitingGame: false,
+          gridDefaults: game
+        });
       }
       if ("gameStateChange" in stateChange) {
         for (const callback of this._gameChangeSubscribers) {

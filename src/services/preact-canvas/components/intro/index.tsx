@@ -144,7 +144,7 @@ export default class Intro extends Component<Props, State> {
   }
 
   componentWillReceiveProps({ defaults }: Props) {
-    if (defaults && this.props.defaults !== defaults) {
+    if (defaults && !this.props.defaults) {
       this.setState(getStateUpdateFromDefaults(defaults));
     }
   }
