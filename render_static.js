@@ -42,6 +42,8 @@ async function generateShell(file, dependencygraph) {
       .fileName,
     favicon: findAssetWithName(dependencygraph, "favicon.ico").fileName,
     dependencygraph,
+    icon: findAssetWithName(dependencygraph, "icon-maskable.png").fileName,
+    dependencygraph,
     pkg: require("./package.json"),
     fs
   });
