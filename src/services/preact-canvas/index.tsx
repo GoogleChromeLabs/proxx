@@ -59,7 +59,7 @@ const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
 
-const gamePerquisites = Promise.all([texturePromise]);
+const gamePerquisites = texturePromise;
 
 const immedateGameSessionKey = "instantGame";
 
