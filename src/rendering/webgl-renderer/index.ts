@@ -145,6 +145,26 @@ export default class WebGlRenderer implements Renderer {
     // Nothing to do here
   }
 
+  beforeCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    // Nothing to do here
+  }
+
+  afterCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    // Nothing to do here
+  }
+
   render(
     x: number,
     y: number,

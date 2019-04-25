@@ -12,7 +12,6 @@
  */
 
 import { Cell } from "src/gamelogic/types";
-import { bind } from "src/utils/bind";
 import { getCellSizes } from "src/utils/cell-sizing";
 import { staticDevicePixelRatio } from "src/utils/static-dpr";
 import {
@@ -36,14 +35,27 @@ import {
 } from "../constants";
 import { Renderer } from "../renderer";
 import { STATIC_TEXTURE } from "../texture-generators";
-import fragmentShader from "./fragment.glsl";
-import vertexShader from "./vertex.glsl";
+
+interface GridEntry {
+  x: number;
+  y: number;
+  cell?: Cell;
+  animationList: AnimationDesc[];
+}
 
 export default class Canvas2DRenderer implements Renderer {
   private _canvas?: HTMLCanvasElement;
   private _ctx?: CanvasRenderingContext2D | null;
   private _firstCellRect?: DOMRect | ClientRect;
+  private _canvasRect?: DOMRect | ClientRect;
   private _tileSize?: number;
+  private _grid: GridEntry[] = [];
+  private _numTilesX?: number;
+  private _numTilesY?: number;
+
+  get numTiles() {
+    return this._numTilesX! * this._numTilesY!;
+  }
 
   createCanvas(): HTMLCanvasElement {
     this._canvas = document.createElement("canvas");
@@ -51,11 +63,14 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   init(numTilesX: number, numTilesY: number) {
+    this._numTilesX = numTilesX;
+    this._numTilesY = numTilesY;
     const { cellPadding, cellSize } = getCellSizes();
     // This does _not_ need to get multiplied by `devicePixelRatio` as we will
     // be scaling the canvas instead.
     this._tileSize = cellSize + 2 * cellPadding;
 
+    this._initGrid();
     this.onResize();
     this._ctx = this._canvas!.getContext("2d");
     if (!this._ctx) {
@@ -65,6 +80,8 @@ export default class Canvas2DRenderer implements Renderer {
 
   updateFirstRect(rect: ClientRect | DOMRect) {
     this._firstCellRect = rect;
+
+    this._rerender();
   }
 
   stop() {
@@ -75,13 +92,40 @@ export default class Canvas2DRenderer implements Renderer {
     if (!this._canvas) {
       return;
     }
-    const rect = this._canvas!.getBoundingClientRect();
-    this._canvas.width = rect.width * staticDevicePixelRatio;
-    this._canvas.height = rect.height * staticDevicePixelRatio;
+    this._canvasRect = this._canvas!.getBoundingClientRect();
+    this._canvas.width = this._canvasRect.width * staticDevicePixelRatio;
+    this._canvas.height = this._canvasRect.height * staticDevicePixelRatio;
   }
 
   beforeRenderFrame() {
-    this._ctx!.clearRect(0, 0, this._canvas!.width, this._canvas!.height);
+    // Nothing to do here
+  }
+
+  beforeCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    this._ctx!.save();
+    this._setupContextForTile(x, y);
+    this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
+    this._ctx!.restore();
+
+    const gridCell = this._grid[y * this._numTilesX! + x];
+    gridCell.animationList = animationList.slice();
+    gridCell.cell = cell;
+  }
+
+  afterCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    // Nothing to do here
   }
 
   render(
@@ -91,15 +135,57 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    if (!this._isTileInView(x, y)) {
+      return;
+    }
     this._ctx!.save();
+    this._setupContextForTile(x, y);
+    // @ts-ignore
+    this[animation.name](x, y, cell, animation, ts);
+    this._ctx!.restore();
+  }
+
+  private _initGrid() {
+    const start = performance.now();
+    this._grid = new Array(this.numTiles);
+
+    for (let y = 0; y < this._numTilesY!; y++) {
+      for (let x = 0; x < this._numTilesX!; x++) {
+        this._grid[y * this._numTilesX! + x] = {
+          animationList: [
+            {
+              name: AnimationName.IDLE,
+              start
+            }
+          ],
+          x,
+          y
+        };
+      }
+    }
+  }
+
+  private _setupContextForTile(x: number, y: number) {
     this._ctx!.scale(staticDevicePixelRatio, staticDevicePixelRatio);
     // Adjust for scroll position
     this._ctx!.translate(this._firstCellRect!.left, this._firstCellRect!.top);
     // Put tile that is supposed to be rendered at (0, 0)
     this._ctx!.translate(x * this._tileSize!, y * this._tileSize!);
-    // @ts-ignore
-    this[animation.name](x, y, cell, animation, ts);
-    this._ctx!.restore();
+  }
+
+  private _isTileInView(bx: number, by: number) {
+    const { left, top, width, height } = this._firstCellRect!;
+    const x = bx * width + left;
+    const y = by * height + top;
+    if (
+      x + width < 0 ||
+      y + height < 0 ||
+      x > this._canvasRect!.width ||
+      y > this._canvasRect!.height
+    ) {
+      return false;
+    }
+    return true;
   }
 
   private [AnimationName.IDLE](
@@ -298,5 +384,19 @@ export default class Canvas2DRenderer implements Renderer {
     this._ctx!.globalAlpha = 1 - easeInOutCubic(normalized);
     staticTextureDrawer!(STATIC_TEXTURE.FLASH, this._ctx!, this._tileSize!);
     this._ctx!.restore();
+  }
+
+  private _rerender() {
+    this._ctx!.clearRect(0, 0, this._canvas!.width, this._canvas!.height);
+
+    for (let y = 0; y < this._numTilesY!; y++) {
+      for (let x = 0; x < this._numTilesX!; x++) {
+        const { cell, animationList } = this._grid[y * this._numTilesX! + x];
+        const ts = performance.now();
+        for (const animation of animationList) {
+          this.render(x, y, cell!, animation, ts);
+        }
+      }
+    }
   }
 }
