@@ -16,8 +16,9 @@ import { deg2rad, remap, smoothpulse } from "./animation-helpers.js";
 import { roundedRectangle } from "./canvas-helper.js";
 
 import {
-  blurFactor,
+  blackHoleBlur,
   borderRadius,
+  glowFactor,
   innerCircleRadius,
   numberCircleRadius,
   numberFontSizeFactor,
@@ -118,7 +119,8 @@ export function staticTextureGeneratorFactory(
   cvs2.width = cvs2.height = textureSize * staticDevicePixelRatio;
   const ctx2 = cvs2.getContext("2d")!;
   ctx2.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-
+  let blurIntensity = glowFactor;
+  let blitOnTop = true;
   return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx2.clearRect(0, 0, textureSize, textureSize);
 
@@ -177,16 +179,30 @@ export function staticTextureGeneratorFactory(
       ctx2.fillStyle = white;
       ctx2.fillRect(-halfSize, -halfSize, size, size);
     } else if (idx === STATIC_TEXTURE.MINE) {
-      ctx.fillStyle = "#f00";
-      ctx.beginPath();
-      ctx.arc(0, 0, halfSize, 0, 2 * Math.PI);
-      ctx.fill();
+      blitOnTop = false;
+      blurIntensity = blackHoleBlur;
+      const gradient = ctx2.createLinearGradient(
+        -0.2 * halfSize,
+        -halfSize,
+        0.2 * halfSize,
+        halfSize * 1.5
+      );
+      gradient.addColorStop(0 / 4, "#2e0200");
+      gradient.addColorStop(1 / 4, "#760f02");
+      gradient.addColorStop(2 / 4, "#dd5500");
+      gradient.addColorStop(3 / 4, "#fcd759");
+      gradient.addColorStop(4 / 4, "#fff8d7");
+      ctx2.fillStyle = gradient;
+      ctx2.beginPath();
+      ctx2.arc(0, 0, halfSize * 0.8, 0, 2 * Math.PI, true);
+      ctx2.arc(0, 0, halfSize * 0.2, 0, 2 * Math.PI, false);
+      ctx2.fill();
     }
     ctx.restore();
     ctx2.restore();
 
     ctx.save();
-    const blur = (textureSize * blurFactor).toFixed(1);
+    const blur = (textureSize * blurIntensity).toFixed(1);
     ctx.filter = `blur(${blur}px)`;
     ctx.drawImage(
       cvs2,
@@ -199,18 +215,20 @@ export function staticTextureGeneratorFactory(
       textureSize,
       textureSize
     );
-    ctx.filter = "none";
-    ctx.drawImage(
-      cvs2,
-      0,
-      0,
-      cvs2.width,
-      cvs2.height,
-      0,
-      0,
-      textureSize,
-      textureSize
-    );
+    if (blitOnTop) {
+      ctx.filter = "none";
+      ctx.drawImage(
+        cvs2,
+        0,
+        0,
+        cvs2.width,
+        cvs2.height,
+        0,
+        0,
+        textureSize,
+        textureSize
+      );
+    }
     ctx.restore();
   };
 }
