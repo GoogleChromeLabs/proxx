@@ -13,7 +13,7 @@
 
 import { Cell } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
-import { getCellSizes } from "src/utils/cell-sizing";
+import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
 import ShaderBox from "src/utils/shaderbox";
 import { staticDevicePixelRatio } from "src/utils/static-dpr";
 import {
@@ -118,6 +118,11 @@ export default class WebGlRenderer implements Renderer {
     this._shaderBox!.setUniform1f("sprite_size", spriteSize);
     this._shaderBox!.setUniform1f("tile_size", tileSize);
     this._shaderBox!.setUniform1f("idle_frames", idleAnimationNumFrames);
+    const { verticalPadding, horizontalPadding } = getPaddings();
+    this._shaderBox!.setUniform2f("paddings", [
+      horizontalPadding * staticDevicePixelRatio,
+      verticalPadding * staticDevicePixelRatio
+    ]);
 
     this._startRenderLoop();
   }
@@ -428,6 +433,7 @@ export default class WebGlRenderer implements Renderer {
      *   (they are assumed to be square).
      * - `tile_size`: A single float for the size of each tile in pixels.
      * - `idle_frames`: Number of frames the idle animation has.
+     * - `paddings`: The vertical and horizontal paddings that define the fade-out.
      */
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this._canvas,
@@ -440,7 +446,8 @@ export default class WebGlRenderer implements Renderer {
         "static_sprite",
         "sprite_size",
         "tile_size",
-        "idle_frames"
+        "idle_frames",
+        "paddings"
       ],
       scaling: staticDevicePixelRatio,
       mesh: [
@@ -549,7 +556,7 @@ export default class WebGlRenderer implements Renderer {
   }
 
   @bind
-  private _renderLoop(ts: number) {
+  private _renderLoop() {
     this._shaderBox!.updateVBO("dynamic_tile_data_a", this._dynamicTileDataA!);
     this._shaderBox!.updateVBO("dynamic_tile_data_b", this._dynamicTileDataB!);
 

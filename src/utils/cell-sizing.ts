@@ -22,3 +22,13 @@ export function getCellSizes() {
   );
   return { cellSize, cellPadding };
 }
+
+export function getPaddings() {
+  const verticalPadding = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--bar-avoid")
+  );
+  const horizontalPadding = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--side-margin")
+  );
+  return { verticalPadding, horizontalPadding };
+}

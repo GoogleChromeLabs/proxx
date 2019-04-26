@@ -11,7 +11,7 @@ uniform float sprite_size;
 uniform float tile_size;
 uniform sampler2D idle_sprites[4];
 uniform sampler2D static_sprite;
-
+uniform vec2 paddings;
 
 void main() {
   vec4 white = vec4(1.);
@@ -31,11 +31,12 @@ void main() {
   float border_opacity = dynamic_tile_data_b2.z;
   float boxes_opacity = dynamic_tile_data_b2.w;
 
+  float frames_per_axis = floor(sprite_size /tile_size);
+  float frames_per_sprite = frames_per_axis * frames_per_axis;
+
   float f;
   if(static_tile < 0.) {
     float idle_frame = floor(idle_animation_time * idle_frames);
-    float frames_per_axis = floor(sprite_size /tile_size);
-    float frames_per_sprite = frames_per_axis * frames_per_axis;
 
     int sprite_idx = int(floor(idle_frame / frames_per_sprite));
     float frame_in_sprite = mod(idle_frame, frames_per_sprite);
@@ -56,7 +57,7 @@ void main() {
     }
     f *= boxes_opacity;
   } else if (static_tile >= 1.) {
-    vec2 number_tex_uv = (vec2(mod(static_tile, 10.), floor(static_tile/10.)) + normalized_uv) * tile_size / sprite_size;
+    vec2 number_tex_uv = (vec2(mod(static_tile, frames_per_axis), floor(static_tile/frames_per_axis)) + normalized_uv) * tile_size / sprite_size;
     f = mix(f, 1., texture2D(static_sprite, number_tex_uv).a);
   }
 
@@ -70,6 +71,13 @@ void main() {
 
   // Change color according to highlight setting
   vec4 target_color = mix(white, turquoise, highlight_opacity);
+
+  // Fade out at the border
+  vec2 padding_factor = vec2(0., .5);
+  vec2 border_fade =
+    smoothstep(paddings*padding_factor, paddings, gl_FragCoord.xy) *
+    (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings*padding_factor, gl_FragCoord.xy));
+  f *= min(border_fade.x, border_fade.y);
 
   gl_FragColor = mix(transparent, target_color, f);
 }

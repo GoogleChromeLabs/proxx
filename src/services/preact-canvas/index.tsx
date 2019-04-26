@@ -13,6 +13,14 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
+import {
+  nebulaDangerDark,
+  nebulaDangerLight,
+  nebulaSafeDark,
+  nebulaSafeLight,
+  ShaderColor,
+  shaderColor
+} from "src/rendering/constants";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { prerender } from "../../utils/constants";
@@ -55,6 +63,10 @@ interface State {
   awaitingGame: boolean;
   settingsOpen: boolean;
   motionPreference: boolean;
+  mainColorLight: ShaderColor;
+  mainColorDark: ShaderColor;
+  altColorLight: ShaderColor;
+  altColorDark: ShaderColor;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -91,7 +103,11 @@ class PreactService extends Component<Props, State> {
     dangerMode: false,
     awaitingGame: false,
     settingsOpen: false,
-    motionPreference: true
+    motionPreference: true,
+    altColorDark: nebulaDangerDark,
+    altColorLight: nebulaDangerLight,
+    mainColorDark: nebulaSafeDark,
+    mainColorLight: nebulaSafeLight
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -106,7 +122,18 @@ class PreactService extends Component<Props, State> {
 
   render(
     _props: Props,
-    { game, dangerMode, awaitingGame, gridDefaults, settingsOpen, motionPreference }: State
+    {
+      game,
+      dangerMode,
+      awaitingGame,
+      gridDefaults,
+      settingsOpen,
+      motionPreference
+      altColorDark,
+      altColorLight,
+      mainColorDark,
+      mainColorLight
+    }: State
   ) {
     let mainComponent: VNode;
 
@@ -152,7 +179,11 @@ class PreactService extends Component<Props, State> {
           loading={() => (
             <div class={[nebulaStyle, notDangerModeStyle].join(" ")} />
           )}
-          dangerMode={game ? dangerMode : false}
+          useAltColor={game ? dangerMode : false}
+          altColorDark={altColorDark}
+          altColorLight={altColorLight}
+          mainColorDark={mainColorDark}
+          mainColorLight={mainColorLight}
         />
         {mainComponent}
         <BottomBar
