@@ -36,6 +36,13 @@
   transform: rotate(45deg);
   filter: drop-shadow(0 0 10px #fff);
   margin-bottom: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 320px) {
+  .win-square {
+    margin-top: 0;
+  }
 }
 
 .win-square::after {
