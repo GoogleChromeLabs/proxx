@@ -30,11 +30,11 @@ import {
   exitRow,
   exitRowInner,
   game as gameClass,
-  mainButton,
-  toggle,
-  toggleLabel,
   leftToggleLabel,
-  rightToggleLabel
+  mainButton,
+  rightToggleLabel,
+  toggle,
+  toggleLabel
 } from "./style.css";
 
 export interface Props {
@@ -133,7 +133,7 @@ export default class Game extends Component<Props, State> {
             playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
               <label class={toggleLabel}>
                 <span aria-hidden="true" class={leftToggleLabel}>
-                  Reveal
+                  Clear
                 </span>
                 <input
                   class={checkbox}
