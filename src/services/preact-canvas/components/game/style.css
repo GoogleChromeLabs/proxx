@@ -24,28 +24,42 @@
 .toggle {
   display: inline-block;
   background: white;
-  height: 15px;
-  width: 40px;
-  border-radius: 15px;
+  height: 16px;
+  width: 32px;
+  border-radius: 16px;
 }
 
 .toggle::before {
   content: "";
-  margin-top: 2px;
-  margin-left: 2px;
-  height: 11px;
-  width: 11px;
+  margin: 4px;
+  height: 8px;
+  width: 8px;
   border-radius: 100%;
   background: #000;
   display: block;
 }
 
 :checked+.toggle::before {
-  transform: translate(25px);
+  margin-left: auto;
 }
 
 .checkbox {
   display: none;
+}
+
+.left-toggle-label,
+.right-toggle-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.left-toggle-label {
+  right: 100%;
+}
+
+.right-toggle-label {
+  left: 100%;
 }
 
 .again-button,
