@@ -429,16 +429,21 @@ export default class Canvas2DRenderer implements Renderer {
     const { width, height } = this._canvasRect!;
 
     const gradients = [
+      // Left border gradient
       {
         start: [0, 0],
         end: [horizontalPadding, 0],
-        rect: new DOMRect(0, 0, horizontalPadding, height)
+        rect: new DOMRect(0, 0, horizontalPadding, height),
+        whitePoint: 0
       },
+      // Top border gradient
       {
         start: [0, 0],
         end: [0, verticalPadding],
-        rect: new DOMRect(0, 0, width, verticalPadding)
+        rect: new DOMRect(0, 0, width, verticalPadding),
+        whitePoint: 0.5
       },
+      // Right border gradient
       {
         start: [width, height],
         end: [width - horizontalPadding, height],
@@ -447,23 +452,26 @@ export default class Canvas2DRenderer implements Renderer {
           0,
           horizontalPadding,
           height
-        )
+        ),
+        whitePoint: 0
       },
+      // Bottom border gradient
       {
         start: [width, height],
         end: [width, height - verticalPadding],
-        rect: new DOMRect(0, height - verticalPadding, width, verticalPadding)
+        rect: new DOMRect(0, height - verticalPadding, width, verticalPadding),
+        whitePoint: 0.5
       }
     ];
 
-    this._gradients = gradients.map(({ start, end, rect }) => {
+    this._gradients = gradients.map(({ start, end, rect, whitePoint }) => {
       const gradient = ctx.createLinearGradient(
         start[0],
         start[1],
         end[0],
         end[1]
       );
-      gradient.addColorStop(0.5, "#fff");
+      gradient.addColorStop(whitePoint, "#fff");
       gradient.addColorStop(1, "transparent");
       return { gradient, rect };
     });

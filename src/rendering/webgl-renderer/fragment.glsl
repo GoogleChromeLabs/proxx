@@ -72,9 +72,10 @@ void main() {
   vec4 target_color = mix(white, turquoise, highlight_opacity);
 
   // Fade out at the border
+  vec2 padding_factor = vec2(0., .5);
   vec2 border_fade =
-    smoothstep(paddings/2., paddings, gl_FragCoord.xy) *
-    (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings/2., gl_FragCoord.xy));
+    smoothstep(paddings*padding_factor, paddings, gl_FragCoord.xy) *
+    (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings*padding_factor, gl_FragCoord.xy));
   f *= min(border_fade.x, border_fade.y);
 
   gl_FragColor = mix(transparent, target_color, f);
