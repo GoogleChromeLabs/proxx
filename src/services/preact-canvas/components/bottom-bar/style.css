@@ -3,7 +3,7 @@
   justify-content: flex-end;
   margin: var(--side-margin);
   margin-top: 0;
-  padding: 10px 0 0;
+  padding: var(--bar-padding) 0 0;
   position: relative;
   left: 0;
   right: 0;
