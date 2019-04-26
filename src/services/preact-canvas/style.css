@@ -7,8 +7,8 @@ html {
   --cell-padding: 2px;
   --side-margin: 10px;
   --icon-size: 15px;
-  --bar-avoid: 51px;
-  --bar-padding: 18px;
+  --bar-avoid: 40px;
+  --bar-padding: 5px;
   --border-radius: 7px;
 }
 
