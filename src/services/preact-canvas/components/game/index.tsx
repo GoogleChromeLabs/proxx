@@ -12,20 +12,18 @@
  */
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
-import { lazyGenerateTextures } from "src/rendering/animation";
 import { Animator } from "src/rendering/animator";
 import { Renderer, shouldUseMotion } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
-import { getCellSizes } from "src/utils/cell-sizing";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
 import initFocusHandling from "../../../../utils/focus-visible";
 import Board from "../board";
-import deferred from "../deferred";
 import TopBar from "../top-bar";
+import Win from "../win";
 import {
   againButton,
   checkbox,
@@ -61,9 +59,6 @@ interface State {
   completeTime: number;
   bestTime: number;
 }
-
-// tslint:disable-next-line:variable-name
-const Win = deferred(import("../win/index.js").then(m => m.default));
 
 // The second this file is loaded, activate focus handling
 initFocusHandling();
@@ -108,7 +103,6 @@ export default class Game extends Component<Props, State> {
         />
         {playMode === PlayMode.Won ? (
           <Win
-            loading={() => <div />}
             onMainMenu={this.onReset}
             onRestart={this.onRestart}
             time={completeTime}
