@@ -61,13 +61,19 @@ export default class Board extends Component<Props> {
   >();
 
   componentDidMount() {
-    window.scrollTo(0, 0);
     document.documentElement.classList.add("in-game");
     this._createTable(this.props.width, this.props.height);
     this.props.gameChangeSubscribe(this._doManualDomHandling);
     this._rendererInit();
     this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
+
+    // Center scroll position
+    const root = document.documentElement;
+    window.scrollTo(
+      root.scrollWidth / 2 - root.offsetWidth / 2,
+      root.scrollHeight / 2 - root.offsetHeight / 2
+    );
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
