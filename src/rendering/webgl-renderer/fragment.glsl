@@ -81,15 +81,13 @@ void main() {
     white,
     texture2D(static_sprite, focus_tex_uv).a * has_focus
    );
-  // HALP SURMA : WHAT DO I DO NOW 
-  // gl_FragColor = focused_tile;
+  gl_FragColor = focused_tile;
 
   // Fade out at the border
   vec2 padding_factor = vec2(0., .5);
   vec2 border_fade =
     smoothstep(paddings*padding_factor, paddings, gl_FragCoord.xy) *
     (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings*padding_factor, gl_FragCoord.xy));
-  f *= min(border_fade.x, border_fade.y);
 
-  gl_FragColor = mix(transparent, target_color, f);
+  gl_FragColor = mix(transparent, gl_FragColor, min(border_fade.x, border_fade.y));
 }
