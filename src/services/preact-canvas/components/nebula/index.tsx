@@ -22,19 +22,17 @@ import {
   notDangerMode as notDangerModeStyle
 } from "./style.css";
 
-import {
-  nebulaDangerDark,
-  nebulaDangerLight,
-  nebulaSafeDark,
-  nebulaSafeLight
-} from "../../../../rendering/constants.js";
-
+import { ShaderColor } from "src/rendering/constants.js";
 import { debug } from "../../../../utils/constants";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
 export interface Props {
-  dangerMode: boolean;
+  useAltColor: boolean;
+  mainColorLight: ShaderColor;
+  mainColorDark: ShaderColor;
+  altColorLight: ShaderColor;
+  altColorDark: ShaderColor;
 }
 
 interface State {}
@@ -42,7 +40,7 @@ interface State {}
 export default class Nebula extends Component<Props, State> {
   private _timePeriod = 60000;
   private _fadeSpeed = 10;
-  private _dangerModeBlend = 0;
+  private _altColorBlend = 0;
   private _shaderBox?: ShaderBox;
   private _loopRunning = false;
 
@@ -51,7 +49,7 @@ export default class Nebula extends Component<Props, State> {
       canvas: this.base as HTMLCanvasElement,
       scaling: 1 / 5,
       uniforms: [
-        "danger_mode",
+        "alt_color",
         "time",
         "nebula_movement_range",
         "nebula_zoom",
@@ -59,21 +57,17 @@ export default class Nebula extends Component<Props, State> {
         "circle1_offset",
         "circle2_offset",
         "circle3_offset",
-        "nebula_danger_dark",
-        "nebula_danger_light",
-        "nebula_safe_dark",
-        "nebula_safe_light"
+        "alt_color_dark",
+        "alt_color_light",
+        "main_color_dark",
+        "main_color_light"
       ]
     });
     if (!this._shaderBox) {
       return;
     }
 
-    this._shaderBox.setUniform4f("nebula_danger_dark", nebulaDangerDark);
-    this._shaderBox.setUniform4f("nebula_danger_light", nebulaDangerLight);
-    this._shaderBox.setUniform4f("nebula_safe_dark", nebulaSafeDark);
-    this._shaderBox.setUniform4f("nebula_safe_light", nebulaSafeLight);
-    this._shaderBox.setUniform1f("danger_mode", 0);
+    this._shaderBox.setUniform1f("alt_color", 0);
     this._shaderBox.setUniform1f("nebula_movement_range", 2);
     this._shaderBox.setUniform1f("nebula_zoom", 0.5);
     this._shaderBox.setUniform1f("vortex_strength", 0.1);
@@ -100,11 +94,23 @@ export default class Nebula extends Component<Props, State> {
     window.removeEventListener("resize", this._onResize);
   }
 
-  render({ dangerMode }: Props) {
+  render({
+    useAltColor,
+    altColorLight,
+    altColorDark,
+    mainColorLight,
+    mainColorDark
+  }: Props) {
+    if (this._shaderBox) {
+      this._shaderBox.setUniform4f("alt_color_dark", altColorDark);
+      this._shaderBox.setUniform4f("alt_color_light", altColorLight);
+      this._shaderBox.setUniform4f("main_color_dark", mainColorDark);
+      this._shaderBox.setUniform4f("main_color_light", mainColorLight);
+    }
     return (
       <canvas
         class={`${nebulaStyle} ${
-          dangerMode ? dangerModeStyle : notDangerModeStyle
+          useAltColor ? dangerModeStyle : notDangerModeStyle
         }`}
       />
     );
@@ -136,10 +142,10 @@ export default class Nebula extends Component<Props, State> {
       "time",
       (ts % this._timePeriod) / this._timePeriod
     );
-    this._dangerModeBlend +=
-      ((this.props.dangerMode ? 1 : 0) - this._dangerModeBlend) /
+    this._altColorBlend +=
+      ((this.props.useAltColor ? 1 : 0) - this._altColorBlend) /
       this._fadeSpeed;
-    this._shaderBox!.setUniform1f("danger_mode", this._dangerModeBlend);
+    this._shaderBox!.setUniform1f("alt_color", this._altColorBlend);
     this._shaderBox!.draw();
     if (this._loopRunning) {
       requestAnimationFrame(this._loop);

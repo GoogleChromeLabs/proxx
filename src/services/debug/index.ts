@@ -23,12 +23,12 @@ export function nebula(nebula: Nebula, shaderBox: ShaderBox) {
   const nebulaUniforms = {
     set dangerMode(v: boolean) {
       // @ts-ignore
-      nebula.props.dangerMode = v;
+      nebula.props.useAltColor = v;
       nebula.forceUpdate();
     },
 
     get dangerMode(): boolean {
-      return nebula.props.dangerMode;
+      return nebula.props.useAltColor;
     }
   };
 
