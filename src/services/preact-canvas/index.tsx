@@ -128,7 +128,7 @@ class PreactService extends Component<Props, State> {
       awaitingGame,
       gridDefaults,
       settingsOpen,
-      motionPreference
+      motionPreference,
       altColorDark,
       altColorLight,
       mainColorDark,
