@@ -73,7 +73,7 @@ export default class Board extends Component<Props> {
     window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keydown", this._onKeyDown);
     window.addEventListener("keyup", this._onKeyUp);
-    window.addEventListener("wheel", this._onWindowWheel);
+    window.addEventListener("wheel", this._onWindowWheel, { passive: false });
   }
 
   componentWillUnmount() {
