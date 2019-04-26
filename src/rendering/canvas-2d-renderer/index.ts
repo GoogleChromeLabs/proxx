@@ -103,6 +103,7 @@ export default class Canvas2DRenderer implements Renderer {
     this._canvas.width = this._canvasRect.width * staticDevicePixelRatio;
     this._canvas.height = this._canvasRect.height * staticDevicePixelRatio;
     this._prepareGradients();
+    this._rerender();
   }
 
   beforeRenderFrame() {
@@ -182,7 +183,10 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   private _isTileInView(bx: number, by: number) {
-    const { left, top, width, height } = this._firstCellRect!;
+    if (!this._firstCellRect) {
+      return false;
+    }
+    const { left, top, width, height } = this._firstCellRect;
     const x = bx * width + left;
     const y = by * height + top;
     if (
