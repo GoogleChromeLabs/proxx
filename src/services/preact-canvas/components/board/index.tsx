@@ -73,6 +73,7 @@ export default class Board extends Component<Props> {
     window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keydown", this._onKeyDown);
     window.addEventListener("keyup", this._onKeyUp);
+    window.addEventListener("wheel", this._onWindowWheel);
   }
 
   componentWillUnmount() {
@@ -81,6 +82,7 @@ export default class Board extends Component<Props> {
     window.removeEventListener("scroll", this._onWindowScroll);
     window.removeEventListener("keydown", this._onKeyDown);
     window.removeEventListener("keyup", this._onKeyUp);
+    window.removeEventListener("wheel", this._onWindowWheel);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -102,6 +104,15 @@ export default class Board extends Component<Props> {
   private _onWindowResize() {
     this._onWindowScroll();
     this.props.renderer.onResize();
+  }
+
+  @bind
+  private _onWindowWheel(event: WheelEvent) {
+    if (event.deltaMode !== WheelEvent.DOM_DELTA_PIXEL) {
+      return;
+    }
+    event.preventDefault();
+    window.scrollBy(event.deltaX, event.deltaY);
   }
 
   @bind
