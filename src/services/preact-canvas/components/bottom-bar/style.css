@@ -37,3 +37,9 @@
 html:fullscreen .fullscreen {
   visibility: hidden;
 }
+
+@media (display-mode: fullscreen) {
+  .fullscreen {
+    visibility: hidden;
+  }
+}
