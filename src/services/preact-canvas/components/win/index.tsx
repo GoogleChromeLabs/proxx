@@ -14,7 +14,7 @@ import { Component, h } from "preact";
 
 import { minSec } from "../../../../utils/format";
 import { getPresetName } from "../../../state/grid-default";
-import { EndSquare, Timer } from "../icons/additional";
+import { Timer } from "../icons/additional";
 import {
   againButton,
   gridName as gridNameStyle,
@@ -72,7 +72,17 @@ export default class End extends Component<Props, State> {
     return (
       <div class={winScreen}>
         <div class={winInner}>
-          <EndSquare class={winSquare} />
+          <div class={winSquare}>
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <div />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <h2 class={winState}>
             {time === bestTime ? "New high score!" : "You win!"}{" "}
             <span class={gridNameStyle}>({gridName})</span>
