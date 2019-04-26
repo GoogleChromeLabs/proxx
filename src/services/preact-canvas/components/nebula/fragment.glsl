@@ -4,13 +4,13 @@ precision mediump float;
 varying vec2 uv;
 uniform vec2 iResolution;
 
-uniform vec4 nebula_danger_dark;
-uniform vec4 nebula_danger_light;
-uniform vec4 nebula_safe_dark;
-uniform vec4 nebula_safe_light;
+uniform vec4 alt_color_dark;
+uniform vec4 alt_color_light;
+uniform vec4 main_color_dark;
+uniform vec4 main_color_light;
 
 uniform float time;
-uniform float danger_mode;
+uniform float alt_color;
 uniform float nebula_movement_range;
 uniform float nebula_zoom;
 uniform float vortex_strength;
@@ -112,8 +112,8 @@ void main() {
     float f = fbm(p * nebula_zoom + vec2(nebula_time * nebula_movement_range * nebula_zoom, 0.0));
     // Set color acccording to insensity
     nebula_color = mix(
-      mix(nebula_safe_dark, nebula_danger_dark, danger_mode),
-      mix(nebula_safe_light, nebula_danger_light, danger_mode),
+      mix(main_color_dark, alt_color_dark, alt_color),
+      mix(main_color_light, alt_color_light, alt_color),
       easeInOutExpo(f)
     );
   }
@@ -132,7 +132,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, nebula_danger_light*.1, circle_mask));
+    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, alt_color_light*.1, circle_mask));
   }
 
 
@@ -149,7 +149,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, nebula_danger_light*.1, circle_mask));
+    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, alt_color_light*.1, circle_mask));
   }
 
   // Circle 3
@@ -165,7 +165,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, nebula_danger_light*.1, circle_mask));
+    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, alt_color_light*.1, circle_mask));
   }
 
   // Soft light blending

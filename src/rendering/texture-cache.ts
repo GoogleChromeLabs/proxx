@@ -65,23 +65,25 @@ export async function cacheTextureGenerator(
   );
   const maxFramesPerSprite = maxFramesPerRow * maxRowsPerSprite;
 
-  let blobs: Blob[];
+  let buffers: ArrayBuffer[];
 
   const prefix = `${TEXTURE_CACHE_IDB_PREFIX}:${name}`;
+  const expectedVersion = `${version}:${textureSize}`;
   const cachedTextureVersion = await get(`${prefix}:version`);
-  if (cachedTextureVersion !== version || noSw) {
+
+  if (cachedTextureVersion !== expectedVersion || noSw) {
     await del(`${prefix}:version`);
-    await del(`${prefix}:blobs`);
-    blobs = await createBlobs(
+    await del(`${prefix}:buffers`);
+    buffers = await createBuffers(
       drawTexture,
       textureSize,
       numFrames,
       fullConstraints
     );
-    await set(`${prefix}:version`, version);
-    await set(`${prefix}:blobs`, blobs);
+    await set(`${prefix}:version`, expectedVersion);
+    await set(`${prefix}:buffers`, buffers);
   } else {
-    blobs = await get(`${prefix}:blobs`);
+    buffers = await get(`${prefix}:buffers`);
   }
 
   // Ok, strap in, because this next bit is stupid.
@@ -89,10 +91,12 @@ export async function cacheTextureGenerator(
   // But! They seem to handle large images just fine.
   // So, we have to convert our canvas into an image!
   // Hooray! The day is saved.
-  const caches = new Array(blobs.length);
-  for (let i = 0; i < blobs.length; i++) {
+  const caches = new Array(buffers.length);
+  for (let i = 0; i < buffers.length; i++) {
     const image = new Image();
-    image.src = URL.createObjectURL(blobs[i]);
+    image.src = URL.createObjectURL(
+      new Blob([buffers[i]], { type: "image/png" })
+    );
     await new Promise(r => (image.onload = r));
     caches[i] = image;
     await task();
@@ -127,7 +131,7 @@ export async function cacheTextureGenerator(
   return { drawer, caches };
 }
 
-async function createBlobs(
+async function createBuffers(
   drawTexture: TextureGenerator,
   textureSize: number,
   numFrames: number,
@@ -143,7 +147,7 @@ async function createBlobs(
   const maxFramesPerSprite = maxFramesPerRow * maxRowsPerSprite;
   const numSprites = Math.ceil(numFrames / maxFramesPerSprite);
 
-  const blobs: Blob[] = [];
+  const buffers: ArrayBuffer[] = [];
   for (let spriteIndex = 0; spriteIndex < numSprites; spriteIndex++) {
     const framesLeftToCache = numFrames - spriteIndex * maxFramesPerSprite;
     const width = maxWidth;
@@ -176,8 +180,11 @@ async function createBlobs(
       // Await a task to give the main thread a chance to breathe.
       await task();
     }
-    const blob = await new Promise<Blob | null>(r => canvas.toBlob(r));
-    blobs.push(blob!);
+    const blob = await new Promise<Blob | null>(r =>
+      canvas.toBlob(r, "image/png")
+    );
+    const buffer = await new Response(blob!).arrayBuffer();
+    buffers.push(buffer);
   }
-  return blobs;
+  return buffers;
 }

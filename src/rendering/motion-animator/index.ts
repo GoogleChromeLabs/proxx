@@ -18,6 +18,7 @@ import { removeAnimations } from "../animation-helpers";
 import { Animator } from "../animator";
 import { rippleSpeed } from "../constants";
 import { Renderer } from "../renderer";
+import { getTime, unfreeze } from "../time-provider";
 
 interface CellDetails {
   animationList: AnimationDesc[];
@@ -33,13 +34,14 @@ export default class MotionAnimator implements Animator {
   // assigned in the constructor.
   private _cellDetails: CellDetails[] = null as any;
   private _changeBuffer: GridChanges = [];
-  private _lastTs = performance.now();
+  private _lastTs = getTime();
 
   constructor(
     private _numTilesX: number,
     private _numTilesY: number,
     private _renderer: Renderer
   ) {
+    unfreeze();
     this._initCellDetails();
     this._startRenderLoop();
   }
@@ -58,7 +60,7 @@ export default class MotionAnimator implements Animator {
   }
 
   private _initCellDetails() {
-    const startTime = performance.now();
+    const startTime = getTime();
     const rippleFactor =
       rippleSpeed * Math.max(this._numTilesX, this._numTilesY);
     this._cellDetails = new Array(this.numTiles);
@@ -86,7 +88,7 @@ export default class MotionAnimator implements Animator {
   private _updateAnimation(details: CellDetails) {
     // tslint:disable-next-line:prefer-const
     let { cell, animationList } = details;
-    const ts = performance.now();
+    const ts = getTime();
     if (!cell) {
       console.warn("Unknown cell");
       return;
@@ -202,7 +204,8 @@ export default class MotionAnimator implements Animator {
   }
 
   @bind
-  private _renderLoop(ts: number) {
+  private _renderLoop() {
+    const ts = getTime();
     const delta = ts - this._lastTs;
     this._lastTs = ts;
 

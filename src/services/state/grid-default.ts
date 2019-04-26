@@ -15,16 +15,16 @@ export async function getGridDefault(): Promise<GridType> {
   const gridDefault = await get(key);
 
   if (!gridDefault) {
-    return presets.beginner;
+    return presets.normal;
   }
 
   return gridDefault as GridType;
 }
 
 export const presets = {
-  advanced: { width: 16, height: 16, mines: 40 },
-  beginner: { width: 8, height: 8, mines: 10 },
-  expert: { width: 24, height: 24, mines: 99 }
+  easy: { width: 8, height: 8, mines: 10 },
+  normal: { width: 16, height: 16, mines: 40 },
+  hard: { width: 24, height: 24, mines: 99 }
 };
 
 export type PresetName = keyof typeof presets;

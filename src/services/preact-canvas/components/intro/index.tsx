@@ -140,7 +140,7 @@ export default class Intro extends Component<Props, State> {
         <form onSubmit={this._startGame} class={startFormStyle}>
           <div class={settingsRowStyle}>
             <label class={labelStyle}>
-              <span class={labelTextStyle}>Preset</span>
+              <span class={labelTextStyle}>Difficulty</span>
               <Arrow class={selectArrowStyle} />
               <select
                 required
@@ -150,9 +150,9 @@ export default class Intro extends Component<Props, State> {
                 value={presetName || ""}
               >
                 {presetName && [
-                  <option value="beginner">Beginner</option>,
-                  <option value="advanced">Advanced</option>,
-                  <option value="expert">Expert</option>,
+                  <option value="easy">Easy</option>,
+                  <option value="normal">Normal</option>,
+                  <option value="hard">Hard</option>,
                   <option value="custom">Custom</option>
                 ]}
               </select>
