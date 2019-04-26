@@ -13,6 +13,14 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, h, render, VNode } from "preact";
+import {
+  nebulaDangerDark,
+  nebulaDangerLight,
+  nebulaSafeDark,
+  nebulaSafeLight,
+  ShaderColor,
+  shaderColor
+} from "src/rendering/constants";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
 import { prerender } from "../../utils/constants";
@@ -49,6 +57,10 @@ interface State {
   gridDefaults?: GridType;
   dangerMode: boolean;
   awaitingGame: boolean;
+  mainColorLight: ShaderColor;
+  mainColorDark: ShaderColor;
+  altColorLight: ShaderColor;
+  altColorDark: ShaderColor;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -77,7 +89,11 @@ const immedateGameSessionKey = "instantGame";
 class PreactService extends Component<Props, State> {
   state: State = {
     dangerMode: false,
-    awaitingGame: false
+    awaitingGame: false,
+    altColorDark: nebulaDangerDark,
+    altColorLight: nebulaDangerLight,
+    mainColorDark: nebulaSafeDark,
+    mainColorLight: nebulaSafeLight
   };
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
@@ -91,7 +107,16 @@ class PreactService extends Component<Props, State> {
 
   render(
     _props: Props,
-    { game, dangerMode, awaitingGame, gridDefaults }: State
+    {
+      game,
+      dangerMode,
+      awaitingGame,
+      gridDefaults,
+      altColorDark,
+      altColorLight,
+      mainColorDark,
+      mainColorLight
+    }: State
   ) {
     let mainComponent: VNode;
 
@@ -130,7 +155,11 @@ class PreactService extends Component<Props, State> {
           loading={() => (
             <div class={[nebulaStyle, notDangerModeStyle].join(" ")} />
           )}
-          dangerMode={game ? dangerMode : false}
+          useAltColor={game ? dangerMode : false}
+          altColorDark={altColorDark}
+          altColorLight={altColorLight}
+          mainColorDark={mainColorDark}
+          mainColorLight={mainColorLight}
         />
         {mainComponent}
         <BottomBar onFullscreenClick={this._onFullscreenClick} />

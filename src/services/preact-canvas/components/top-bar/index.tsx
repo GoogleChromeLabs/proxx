@@ -92,7 +92,7 @@ export default class TopBar extends Component<Props, State> {
   render({ toReveal, toRevealTotal, timerRunning, titleOnly }: Props) {
     return (
       <div class={topBar}>
-        <h1 class={title}>Graviton</h1>
+        <h1 class={title}>Proxx</h1>
         {!titleOnly && (
           <div class={squaresLeft}>
             <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
