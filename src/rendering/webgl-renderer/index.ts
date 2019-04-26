@@ -119,7 +119,6 @@ export default class WebGlRenderer implements Renderer {
     this._shaderBox!.setUniform1f("tile_size", tileSize);
     this._shaderBox!.setUniform1f("idle_frames", idleAnimationNumFrames);
     const { verticalPadding, horizontalPadding } = getPaddings();
-    console.log(verticalPadding, horizontalPadding);
     this._shaderBox!.setUniform2f("paddings", [
       horizontalPadding * staticDevicePixelRatio,
       verticalPadding * staticDevicePixelRatio
