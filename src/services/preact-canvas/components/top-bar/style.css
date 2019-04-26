@@ -36,7 +36,6 @@
 }
 
 .title {
-  display: none;
   flex: 1;
   order: 2;
   text-align: center;
@@ -46,9 +45,9 @@
   padding: 0;
 }
 
-@media (min-width: 350px) {
-  .title {
-    display: block;
+@media (max-width: 350px) {
+  :global .in-game :local .title {
+    display: none;
   }
 }
 

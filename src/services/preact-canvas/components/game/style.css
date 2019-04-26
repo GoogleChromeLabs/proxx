@@ -6,7 +6,7 @@
 
 .toggle-label {
   position: fixed;
-  bottom: 9px;
+  bottom: 8px;
   left: 50%;
   white-space: nowrap;
   transform: translateX(-50%);
@@ -17,12 +17,13 @@
 
 @media (min-width: 320px) {
   .toggle-label {
-    bottom: 17px;
+    bottom: 27px;
   }
 }
 
 .toggle {
-  display: inline-block;
+  display: block;
+  overflow: hidden;
   background: white;
   height: 16px;
   width: 32px;
@@ -52,6 +53,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  margin: 0 0.6rem;
 }
 
 .left-toggle-label {
