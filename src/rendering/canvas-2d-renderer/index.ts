@@ -12,8 +12,7 @@
  */
 
 import { Cell } from "src/gamelogic/types";
-import { bind } from "src/utils/bind";
-import { getCellSizes } from "src/utils/cell-sizing";
+import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
 import { staticDevicePixelRatio } from "src/utils/static-dpr";
 import {
   AnimationDesc,
@@ -36,35 +35,60 @@ import {
 } from "../constants";
 import { Renderer } from "../renderer";
 import { STATIC_TEXTURE } from "../texture-generators";
-import fragmentShader from "./fragment.glsl";
-import vertexShader from "./vertex.glsl";
+import { getTime } from "../time-provider";
+
+interface GridEntry {
+  x: number;
+  y: number;
+  cell?: Cell;
+  animationList: AnimationDesc[];
+}
+
+interface FadeOutGradient {
+  gradient: CanvasGradient;
+  rect: DOMRect;
+}
 
 export default class Canvas2DRenderer implements Renderer {
   private _canvas?: HTMLCanvasElement;
   private _ctx?: CanvasRenderingContext2D | null;
   private _firstCellRect?: DOMRect | ClientRect;
+  private _canvasRect?: DOMRect | ClientRect;
   private _tileSize?: number;
+  private _grid: GridEntry[] = [];
+  private _numTilesX?: number;
+  private _numTilesY?: number;
+  private _gradients?: FadeOutGradient[];
+
+  get numTiles() {
+    return this._numTilesX! * this._numTilesY!;
+  }
 
   createCanvas(): HTMLCanvasElement {
     this._canvas = document.createElement("canvas");
+    this._ctx = this._canvas!.getContext("2d");
+    if (!this._ctx) {
+      throw Error("Could not instantiate 2D renderer");
+    }
     return this._canvas;
   }
 
   init(numTilesX: number, numTilesY: number) {
+    this._numTilesX = numTilesX;
+    this._numTilesY = numTilesY;
     const { cellPadding, cellSize } = getCellSizes();
     // This does _not_ need to get multiplied by `devicePixelRatio` as we will
     // be scaling the canvas instead.
     this._tileSize = cellSize + 2 * cellPadding;
 
+    this._initGrid();
     this.onResize();
-    this._ctx = this._canvas!.getContext("2d");
-    if (!this._ctx) {
-      throw Error("Could not instantiate 2D renderer");
-    }
   }
 
   updateFirstRect(rect: ClientRect | DOMRect) {
     this._firstCellRect = rect;
+
+    this._rerender();
   }
 
   stop() {
@@ -75,13 +99,42 @@ export default class Canvas2DRenderer implements Renderer {
     if (!this._canvas) {
       return;
     }
-    const rect = this._canvas!.getBoundingClientRect();
-    this._canvas.width = rect.width * staticDevicePixelRatio;
-    this._canvas.height = rect.height * staticDevicePixelRatio;
+    this._canvasRect = this._canvas!.getBoundingClientRect();
+    this._canvas.width = this._canvasRect.width * staticDevicePixelRatio;
+    this._canvas.height = this._canvasRect.height * staticDevicePixelRatio;
+    this._prepareGradients();
+    this._rerender();
   }
 
   beforeRenderFrame() {
-    this._ctx!.clearRect(0, 0, this._canvas!.width, this._canvas!.height);
+    // Nothing to do here
+  }
+
+  beforeCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    this._ctx!.save();
+    this._setupContextForTile(x, y);
+    this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
+    this._ctx!.restore();
+
+    const gridCell = this._grid[y * this._numTilesX! + x];
+    gridCell.animationList = animationList.slice();
+    gridCell.cell = cell;
+  }
+
+  afterCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animationList: AnimationDesc[],
+    ts: number
+  ) {
+    // Nothing to do here
   }
 
   render(
@@ -91,15 +144,60 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    if (!this._isTileInView(x, y)) {
+      return;
+    }
     this._ctx!.save();
+    this._setupContextForTile(x, y);
+    // @ts-ignore
+    this[animation.name](x, y, cell, animation, ts);
+    this._ctx!.restore();
+  }
+
+  private _initGrid() {
+    const start = getTime();
+    this._grid = new Array(this.numTiles);
+
+    for (let y = 0; y < this._numTilesY!; y++) {
+      for (let x = 0; x < this._numTilesX!; x++) {
+        this._grid[y * this._numTilesX! + x] = {
+          animationList: [
+            {
+              name: AnimationName.IDLE,
+              start
+            }
+          ],
+          x,
+          y
+        };
+      }
+    }
+  }
+
+  private _setupContextForTile(x: number, y: number) {
     this._ctx!.scale(staticDevicePixelRatio, staticDevicePixelRatio);
     // Adjust for scroll position
     this._ctx!.translate(this._firstCellRect!.left, this._firstCellRect!.top);
     // Put tile that is supposed to be rendered at (0, 0)
     this._ctx!.translate(x * this._tileSize!, y * this._tileSize!);
-    // @ts-ignore
-    this[animation.name](x, y, cell, animation, ts);
-    this._ctx!.restore();
+  }
+
+  private _isTileInView(bx: number, by: number) {
+    if (!this._firstCellRect) {
+      return false;
+    }
+    const { left, top, width, height } = this._firstCellRect;
+    const x = bx * width + left;
+    const y = by * height + top;
+    if (
+      x + width < 0 ||
+      y + height < 0 ||
+      x > this._canvasRect!.width ||
+      y > this._canvasRect!.height
+    ) {
+      return false;
+    }
+    return true;
   }
 
   private [AnimationName.IDLE](
@@ -201,8 +299,9 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    const start = animation.fadeStart || animation.start;
     const animationLength = fadeInAnimationLength;
-    let normalized = (ts - animation.start) / animationLength;
+    let normalized = (ts - start) / animationLength;
 
     if (normalized < 0) {
       normalized = 0;
@@ -232,8 +331,9 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    const start = animation.fadeStart || animation.start;
     const animationLength = fadeOutAnimationLength;
-    let normalized = (ts - animation.start) / animationLength;
+    let normalized = (ts - start) / animationLength;
 
     if (normalized < 0) {
       normalized = 0;
@@ -298,5 +398,90 @@ export default class Canvas2DRenderer implements Renderer {
     this._ctx!.globalAlpha = 1 - easeInOutCubic(normalized);
     staticTextureDrawer!(STATIC_TEXTURE.FLASH, this._ctx!, this._tileSize!);
     this._ctx!.restore();
+  }
+
+  private _rerender() {
+    this._ctx!.clearRect(0, 0, this._canvas!.width, this._canvas!.height);
+
+    for (let y = 0; y < this._numTilesY!; y++) {
+      for (let x = 0; x < this._numTilesX!; x++) {
+        const { cell, animationList } = this._grid[y * this._numTilesX! + x];
+        const ts = getTime();
+        for (const animation of animationList) {
+          this.render(x, y, cell!, animation, ts);
+        }
+      }
+    }
+
+    this._drawFadeOut();
+  }
+
+  private _drawFadeOut() {
+    const ctx = this._ctx!;
+    ctx.save();
+    ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
+    ctx.globalCompositeOperation = "destination-out";
+    for (const { gradient, rect } of this._gradients!) {
+      ctx.fillStyle = gradient;
+      this._ctx!.fillRect(rect.x, rect.y, rect.width, rect.height);
+    }
+    ctx.restore();
+  }
+
+  private _prepareGradients() {
+    const ctx = this._ctx!;
+    ctx.save();
+    ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
+    const { verticalPadding, horizontalPadding } = getPaddings();
+    const { width, height } = this._canvasRect!;
+
+    const gradients = [
+      // Left border gradient
+      {
+        start: [0, 0],
+        end: [horizontalPadding, 0],
+        rect: new DOMRect(0, 0, horizontalPadding, height),
+        whitePoint: 0
+      },
+      // Top border gradient
+      {
+        start: [0, 0],
+        end: [0, verticalPadding],
+        rect: new DOMRect(0, 0, width, verticalPadding),
+        whitePoint: 0.5
+      },
+      // Right border gradient
+      {
+        start: [width, height],
+        end: [width - horizontalPadding, height],
+        rect: new DOMRect(
+          width - horizontalPadding,
+          0,
+          horizontalPadding,
+          height
+        ),
+        whitePoint: 0
+      },
+      // Bottom border gradient
+      {
+        start: [width, height],
+        end: [width, height - verticalPadding],
+        rect: new DOMRect(0, height - verticalPadding, width, verticalPadding),
+        whitePoint: 0.5
+      }
+    ];
+
+    this._gradients = gradients.map(({ start, end, rect, whitePoint }) => {
+      const gradient = ctx.createLinearGradient(
+        start[0],
+        start[1],
+        end[0],
+        end[1]
+      );
+      gradient.addColorStop(whitePoint, "#fff");
+      gradient.addColorStop(1, "transparent");
+      return { gradient, rect };
+    });
+    ctx.restore();
   }
 }

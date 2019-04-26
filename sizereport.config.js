@@ -1,5 +1,5 @@
 module.exports = {
-  repo: "GoogleChromeLabs/graviton",
+  repo: "GoogleChromeLabs/proxx",
   path: "dist/**/*",
   branch: "master"
 };

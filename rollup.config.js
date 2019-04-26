@@ -24,6 +24,8 @@ import cssModuleTypes from "./css-module-types.js";
 import assetPlugin from "./asset-plugin.js";
 import { readFileSync } from "fs";
 import constsPlugin from "./consts-plugin.js";
+import ejsAssetPlugin from "./ejs-asset-plugin.js";
+import assetTransformPlugin from "./asset-transform-plugin.js";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -69,11 +71,23 @@ export default {
       clean: true
     }),
     glsl(),
+    ejsAssetPlugin({
+      "./src/manifest.ejs": "manifest.json"
+    }),
     assetPlugin({
       initialAssets: [
         "./src/assets/space-mono-normal.woff2",
-        "./src/assets/space-mono-bold.woff2"
+        "./src/assets/space-mono-bold.woff2",
+        "./src/assets/favicon.ico"
       ]
+    }),
+    assetTransformPlugin(asset => {
+      if (asset.fileName.includes("manifest-")) {
+        // Remove name hashing
+        asset.fileName = "manifest.json";
+        // Minify
+        asset.source = JSON.stringify(JSON.parse(asset.source));
+      }
     }),
     chunkNamePlugin(),
     nodeResolve(),
