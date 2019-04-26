@@ -75,9 +75,10 @@ export default class Nebula extends Component<Props, State> {
     this._shaderBox.setUniform1f("circle2_offset", 1.4);
     this._shaderBox.setUniform1f("circle3_offset", 0);
     this._onResize();
+    this._updateColors();
 
     window.addEventListener("resize", this._onResize);
-    this.start();
+    this._start();
 
     if (debug) {
       import("../../../../services/debug/index.js").then(m =>
@@ -90,23 +91,12 @@ export default class Nebula extends Component<Props, State> {
     if (!this._shaderBox) {
       return;
     }
-    this.stop();
+    this._stop();
     window.removeEventListener("resize", this._onResize);
   }
 
-  render({
-    useAltColor,
-    altColorLight,
-    altColorDark,
-    mainColorLight,
-    mainColorDark
-  }: Props) {
-    if (this._shaderBox) {
-      this._shaderBox.setUniform4f("alt_color_dark", altColorDark);
-      this._shaderBox.setUniform4f("alt_color_light", altColorLight);
-      this._shaderBox.setUniform4f("main_color_dark", mainColorDark);
-      this._shaderBox.setUniform4f("main_color_light", mainColorLight);
-    }
+  render({ useAltColor }: Props) {
+    this._updateColors();
     return (
       <canvas
         class={`${nebulaStyle} ${
@@ -116,7 +106,19 @@ export default class Nebula extends Component<Props, State> {
     );
   }
 
-  private start() {
+  private _updateColors() {
+    if (this._shaderBox) {
+      this._shaderBox.setUniform4f("alt_color_dark", this.props.altColorDark);
+      this._shaderBox.setUniform4f("alt_color_light", this.props.altColorLight);
+      this._shaderBox.setUniform4f("main_color_dark", this.props.mainColorDark);
+      this._shaderBox.setUniform4f(
+        "main_color_light",
+        this.props.mainColorLight
+      );
+    }
+  }
+
+  private _start() {
     if (this._loopRunning) {
       return;
     }
@@ -124,7 +126,7 @@ export default class Nebula extends Component<Props, State> {
     requestAnimationFrame(this._loop);
   }
 
-  private stop() {
+  private _stop() {
     this._loopRunning = false;
   }
 
