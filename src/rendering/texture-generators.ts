@@ -17,6 +17,8 @@ import { roundedRectangle } from "./canvas-helper.js";
 
 import {
   blackHoleBlur,
+  blackHoleInnerRadius,
+  blackHoleOuterRadius,
   borderRadius,
   glowFactor,
   innerCircleRadius,
@@ -194,8 +196,8 @@ export function staticTextureGeneratorFactory(
       gradient.addColorStop(4 / 4, "#fff8d7");
       ctx2.fillStyle = gradient;
       ctx2.beginPath();
-      ctx2.arc(0, 0, halfSize * 0.8, 0, 2 * Math.PI, true);
-      ctx2.arc(0, 0, halfSize * 0.2, 0, 2 * Math.PI, false);
+      ctx2.arc(0, 0, halfSize * blackHoleOuterRadius, 0, 2 * Math.PI, true);
+      ctx2.arc(0, 0, halfSize * blackHoleInnerRadius, 0, 2 * Math.PI, false);
       ctx2.fill();
     }
     ctx.restore();

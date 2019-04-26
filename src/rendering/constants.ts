@@ -47,6 +47,9 @@ export const innerCircleRadius = 64 / 650;
 export const numberCircleRadius = 0.9;
 export const numberFontSizeFactor = 0.5;
 export const glowFactor = 0.1;
-export const blackHoleBlur = 0.12;
+
+export const blackHoleBlur = 0.14;
+export const blackHoleOuterRadius = 0.8;
+export const blackHoleInnerRadius = 0.3;
 
 export const idleAnimationNumFrames = (idleAnimationLength * 60) / 1000;
