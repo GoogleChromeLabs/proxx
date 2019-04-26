@@ -65,7 +65,6 @@
 .square-icon {
   width: var(--icon-size);
   height: var(--icon-size);
-  fill: #fff;
 }
 
 .time-icon {
@@ -74,4 +73,7 @@
 
 .square-icon {
   margin-right: 0.4em;
+  fill: none;
+  stroke-width: 2px;
+  stroke: #fff;
 }
