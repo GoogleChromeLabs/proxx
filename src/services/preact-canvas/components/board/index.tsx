@@ -14,6 +14,7 @@ import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
 import { Animator } from "src/rendering/animator.js";
 import { Renderer } from "src/rendering/renderer.js";
+import { putCanvas } from "src/utils/canvas-pool.js";
 import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
@@ -94,6 +95,7 @@ export default class Board extends Component<Props, State> {
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
+    putCanvas(this._canvas!);
   }
 
   shouldComponentUpdate() {

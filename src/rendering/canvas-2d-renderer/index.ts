@@ -12,6 +12,7 @@
  */
 
 import { Cell } from "src/gamelogic/types";
+import { getCanvas } from "src/utils/canvas-pool";
 import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
 import { staticDevicePixelRatio } from "src/utils/static-dpr";
 import {
@@ -66,7 +67,7 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   createCanvas(): HTMLCanvasElement {
-    this._canvas = document.createElement("canvas");
+    this._canvas = getCanvas();
     this._ctx = this._canvas!.getContext("2d");
     if (!this._ctx) {
       throw Error("Could not instantiate 2D renderer");

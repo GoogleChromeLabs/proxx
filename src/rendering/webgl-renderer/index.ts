@@ -13,6 +13,7 @@
 
 import { Cell } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
+import { getCanvas } from "src/utils/canvas-pool";
 import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
 import ShaderBox from "src/utils/shaderbox";
 import { staticDevicePixelRatio } from "src/utils/static-dpr";
@@ -101,7 +102,7 @@ export default class WebGlRenderer implements Renderer {
   private _renderLoopRunning = false;
 
   createCanvas(): HTMLCanvasElement {
-    this._canvas = document.createElement("canvas");
+    this._canvas = getCanvas();
     return this._canvas;
   }
 
