@@ -9,7 +9,10 @@ const expectedCaches = [staticCache];
 self.addEventListener("install", event => {
   const resourcesToCache = resourceList.filter(
     item =>
-      item !== "sw.js" && item !== "bootstrap.js" && !item.includes("manifest-")
+      item !== "sw.js" &&
+      item !== "bootstrap.js" &&
+      !item.includes("manifest-") &&
+      !item.includes("icon-")
   );
   const toCache = ["/", ...resourcesToCache];
 
