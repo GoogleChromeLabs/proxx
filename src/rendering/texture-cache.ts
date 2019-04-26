@@ -67,20 +67,21 @@ export async function cacheTextureGenerator(
   let buffers: ArrayBuffer[];
 
   const prefix = `${TEXTURE_CACHE_IDB_PREFIX}:${name}`;
+  const expectedVersion = `${version}:${textureSize}`;
   const cachedTextureVersion = await get(`${prefix}:version`);
-  if (cachedTextureVersion !== version) {
+  if (cachedTextureVersion !== expectedVersion) {
     await del(`${prefix}:version`);
-    await del(`${prefix}:blobs`);
+    await del(`${prefix}:buffers`);
     buffers = await createBuffers(
       drawTexture,
       textureSize,
       numFrames,
       fullConstraints
     );
-    await set(`${prefix}:version`, version);
-    await set(`${prefix}:blobs`, buffers);
+    await set(`${prefix}:version`, expectedVersion);
+    await set(`${prefix}:buffers`, buffers);
   } else {
-    buffers = await get(`${prefix}:blobs`);
+    buffers = await get(`${prefix}:buffers`);
   }
 
   // Ok, strap in, because this next bit is stupid.
