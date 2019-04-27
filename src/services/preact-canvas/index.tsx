@@ -12,7 +12,7 @@
  */
 
 import { Remote } from "comlink/src/comlink.js";
-import { Component, h, render, VNode } from "preact";
+import { Component, ComponentConstructor, h, render, VNode } from "preact";
 import {
   nebulaDangerDark,
   nebulaDangerLight,
@@ -65,14 +65,19 @@ interface State {
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
 
+// These component imports are prevented in 'prerender' mode as they dump CSS onto the page.
 // tslint:disable-next-line:variable-name
 const Nebula = deferred(
-  import("./components/nebula/index.js").then(m => m.default)
+  prerender
+    ? (new Promise(() => 0) as Promise<ComponentConstructor<any, any>>)
+    : import("./components/nebula/index.js").then(m => m.default)
 );
 
 // tslint:disable-next-line:variable-name
 const Game = deferred(
-  import("./components/game/index.js").then(m => m.default)
+  prerender
+    ? (new Promise(() => 0) as Promise<ComponentConstructor<any, any>>)
+    : import("./components/game/index.js").then(m => m.default)
 );
 
 const offlineModulePromise = import("../../offline");
