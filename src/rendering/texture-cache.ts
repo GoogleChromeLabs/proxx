@@ -68,7 +68,7 @@ export async function cacheTextureGenerator(
   let buffers: ArrayBuffer[];
 
   const prefix = `${TEXTURE_CACHE_IDB_PREFIX}:${name}`;
-  const expectedVersion = `${version}:${textureSize}`;
+  const expectedVersion = `${version}:${textureSize}:${staticDevicePixelRatio}`;
   const cachedTextureVersion = await get(`${prefix}:version`);
 
   if (cachedTextureVersion !== expectedVersion || noCache) {
