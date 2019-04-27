@@ -45,7 +45,7 @@
 }
 
 .checkbox {
-  display: none;
+  opacity: 0;
 }
 
 .left-toggle-label,
