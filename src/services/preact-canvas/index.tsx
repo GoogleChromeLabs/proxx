@@ -176,6 +176,7 @@ class PreactService extends Component<Props, State> {
           stateService={this._stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
+          useMotion={this.state.motionPreference}
         />
       );
     }

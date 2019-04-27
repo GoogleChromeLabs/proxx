@@ -47,6 +47,7 @@ export interface Props {
   onDangerModeChange: (v: boolean) => void;
   dangerMode: boolean;
   toRevealTotal: number;
+  useMotion: boolean;
 }
 
 interface State {
@@ -183,7 +184,7 @@ export default class Game extends Component<Props, State> {
     let renderer: Renderer;
     let animator: Animator;
 
-    if (shouldUseMotion()) {
+    if (shouldUseMotion() && this.props.useMotion) {
       // tslint:disable-next-line:variable-name
       const [RendererClass, AnimatorClass] = await Promise.all([
         import("../../../../rendering/webgl-renderer/index.js").then(

@@ -67,7 +67,7 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   createCanvas(): HTMLCanvasElement {
-    this._canvas = getCanvas();
+    this._canvas = getCanvas("2d");
     this._ctx = this._canvas!.getContext("2d");
     if (!this._ctx) {
       throw Error("Could not instantiate 2D renderer");
