@@ -45,7 +45,19 @@ async function generateShell(file, dependencygraph) {
     icon: findAssetWithName(dependencygraph, "icon-maskable.png").fileName,
     dependencygraph,
     pkg: require("./package.json"),
-    fs
+    fs,
+    title: "Proxx - a space game",
+    description:
+      "A space themed minesweeper. Clear the fields and flag blackholes to survive!",
+    // image_url: `https://proxx.app/${findAssetWithName(dependencygraph, "name").fileName}`,
+    image_url: "https://proxx.app/dummyimagelink",
+    image_alt: "Game screen of the Proxx game",
+    image_width: "1200",
+    image_height: "675",
+    image_type: "image/jpeg",
+    twitter_account: "@chromiumdev",
+    url: "https://proxx.app",
+    locale: "en_US"
   });
 }
 
