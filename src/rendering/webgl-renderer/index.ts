@@ -13,6 +13,7 @@
 
 import { Cell } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
+import { getCanvas } from "src/utils/canvas-pool";
 import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
 import ShaderBox from "src/utils/shaderbox";
 import { staticDevicePixelRatio } from "src/utils/static-dpr";
@@ -41,7 +42,7 @@ import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
 const enum DynamicTileDataA {
-  TILE_X,
+  HAS_FOCUS,
   TILE_Y,
   STATIC_TILE,
   IDLE_ANIMATION_TIME
@@ -96,11 +97,12 @@ export default class WebGlRenderer implements Renderer {
   private _shaderBox?: ShaderBox;
   private _numTilesX?: number;
   private _numTilesY?: number;
+  private _lastFocus = [-1, -1];
 
   private _renderLoopRunning = false;
 
   createCanvas(): HTMLCanvasElement {
-    this._canvas = document.createElement("canvas");
+    this._canvas = getCanvas();
     this._canvas.setAttribute("aria-hidden", "true");
     return this._canvas;
   }
@@ -182,6 +184,23 @@ export default class WebGlRenderer implements Renderer {
     // @ts-ignore
     this[animation.name](x, y, cell, animation, ts);
 
+    this._updateDynamicTileData(x, y);
+  }
+
+  setFocus(x: number, y: number) {
+    if (this._lastFocus[0] > -1) {
+      const [lastX, lastY] = this._lastFocus;
+      const dynamicTileDataA = this._getDynamicTileDataAForTile(lastX, lastY);
+      dynamicTileDataA[DynamicTileDataA.HAS_FOCUS] = 0;
+      this._updateDynamicTileData(lastX, lastY);
+    }
+    const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
+    dynamicTileDataA[DynamicTileDataA.HAS_FOCUS] = 1;
+    this._updateDynamicTileData(x, y);
+    this._lastFocus = [x, y];
+  }
+
+  private _updateDynamicTileData(x: number, y: number) {
     // Go through the _other_ 3 vertices and copy the (potentially modified)
     // dynamic tile data from vertex 0 to their respective buffers.
     // TODO: We can prevent running these loops by switching to ANGLE instanced
@@ -495,8 +514,8 @@ export default class WebGlRenderer implements Renderer {
         const x = fieldIdx % numTilesX;
         const y = Math.floor(fieldIdx / numTilesX);
         switch (idx % 4) {
-          case DynamicTileDataA.TILE_X:
-            return x;
+          case DynamicTileDataA.HAS_FOCUS:
+            return 0;
           case DynamicTileDataA.TILE_Y:
             return y;
           case DynamicTileDataA.STATIC_TILE:

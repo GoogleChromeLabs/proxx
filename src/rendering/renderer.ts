@@ -22,6 +22,7 @@ export interface Renderer {
   createCanvas(): HTMLCanvasElement;
   onResize(): void;
   updateFirstRect(rect: ClientRect | DOMRect): void;
+  setFocus(x: number, y: number): void;
   beforeRenderFrame(): void;
   beforeCell(
     x: number,
