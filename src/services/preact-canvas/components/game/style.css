@@ -22,11 +22,7 @@
 }
 
 .toggle {
-  position: absolute;
   display: block;
-  top: 50%;
-  right: 100%;
-  transform: translateY(-50%);
   overflow: hidden;
   background: rgba(255,255,255, .3);
   border: 1px solid white;
@@ -65,8 +61,20 @@
   margin-left: auto;
 }
 
-.toggle-label-text {
+.left-toggle-label,
+.right-toggle-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   margin: 0 0.6rem;
+}
+
+.left-toggle-label {
+  right: 100%;
+}
+
+.right-toggle-label {
+  left: 100%;
 }
 
 .again-button,
