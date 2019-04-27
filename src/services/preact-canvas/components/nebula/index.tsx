@@ -74,7 +74,7 @@ export default class Nebula extends Component<Props, State> {
     this._onResize();
 
     this._prevColors = [this.props.colorLight, this.props.colorDark];
-    this._updateColors(this._prevColors, this._prevColors);
+    this._updateColors();
 
     window.addEventListener("resize", this._onResize);
     this._start();
@@ -94,10 +94,13 @@ export default class Nebula extends Component<Props, State> {
     window.removeEventListener("resize", this._onResize);
   }
 
-  componentWillUpdate({ colorLight, colorDark }: Props) {
+  componentWillUpdate() {
     this._prevColors = [this.props.colorLight, this.props.colorDark];
     this._colorBlend = 0;
-    this._updateColors(this._prevColors, [colorLight, colorDark]);
+  }
+
+  componentDidUpdate() {
+    this._updateColors();
   }
 
   render({ colorLight, colorDark }: Props) {
@@ -113,26 +116,23 @@ export default class Nebula extends Component<Props, State> {
     );
   }
 
-  private _updateColors(
-    [startColorLight, startColorDark]: Color[],
-    [endColorLight, endColorDark]: Color[]
-  ) {
+  private _updateColors() {
     if (this._shaderBox) {
       this._shaderBox.setUniform4f(
         "main_color_light",
-        toShaderColor(startColorLight)
+        toShaderColor(this._prevColors[0])
       );
       this._shaderBox.setUniform4f(
         "main_color_dark",
-        toShaderColor(startColorDark)
+        toShaderColor(this._prevColors[1])
       );
       this._shaderBox.setUniform4f(
         "alt_color_light",
-        toShaderColor(endColorLight)
+        toShaderColor(this.props.colorLight)
       );
       this._shaderBox.setUniform4f(
         "alt_color_dark",
-        toShaderColor(endColorDark)
+        toShaderColor(this.props.colorDark)
       );
     }
   }
