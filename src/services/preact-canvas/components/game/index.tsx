@@ -12,13 +12,11 @@
  */
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
-import { lazyGenerateTextures } from "src/rendering/animation";
 import { Animator } from "src/rendering/animator";
 import { Renderer, shouldUseMotion } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
-import { getCellSizes } from "src/utils/cell-sizing";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
@@ -32,7 +30,9 @@ import {
   exitRow,
   exitRowInner,
   game as gameClass,
+  leftToggleLabel,
   mainButton,
+  rightToggleLabel,
   toggle,
   toggleLabel
 } from "./style.css";
@@ -132,14 +132,19 @@ export default class Game extends Component<Props, State> {
             />,
             playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
               <label class={toggleLabel}>
-                Reveal
+                <span aria-hidden="true" class={leftToggleLabel}>
+                  Clear
+                </span>
                 <input
                   class={checkbox}
                   type="checkbox"
                   onChange={this.onDangerModeChange}
                   checked={!dangerMode}
                 />
-                <span class={toggle} /> Flag
+                <span class={toggle} />
+                <span aria-hidden="true" class={rightToggleLabel}>
+                  Flag
+                </span>
               </label>
             ) : playMode === PlayMode.Lost ? (
               <div class={exitRow}>

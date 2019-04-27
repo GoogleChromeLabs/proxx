@@ -13,7 +13,7 @@
 export function minSec(ms: number): string {
   const minutes = Math.floor(ms / (1000 * 60));
   const seconds = Math.floor((ms / 1000) % 60);
-  const minStr = minutes < 10 ? "0" + minutes : "" + minutes;
-  const secStr = seconds < 10 ? "0" + seconds : "" + seconds;
+  const minStr = minutes.toString().padStart(2, "0");
+  const secStr = seconds.toString().padStart(2, "0");
   return `${minStr}:${secStr}`;
 }

@@ -8,7 +8,7 @@
   display: inline-block;
   opacity: 0;
   margin: auto;
-  padding: var(--bar-avoid) var(--side-margin);
+  padding: var(--bar-avoid) calc(var(--side-margin) - var(--cell-padding));
 }
 
 .game-row {
