@@ -45,6 +45,7 @@ interface State {
 }
 
 export default class End extends Component<Props, State> {
+  private _playAgainBtn?: HTMLButtonElement;
   constructor(props: Props) {
     super(props);
 
@@ -60,6 +61,7 @@ export default class End extends Component<Props, State> {
 
   componentDidMount() {
     window.scrollTo(0, 0);
+    this._playAgainBtn!.focus();
   }
 
   render(
@@ -88,7 +90,11 @@ export default class End extends Component<Props, State> {
               <div class={timeStyle}>{bestTimeStr}</div>
             </div>
           </div>
-          <button class={againButton} onClick={onRestart}>
+          <button
+            class={againButton}
+            onClick={onRestart}
+            ref={el => (this._playAgainBtn = el)}
+          >
             Play again
           </button>
           <button class={mainButton} onClick={onMainMenu}>

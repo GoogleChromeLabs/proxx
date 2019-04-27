@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
+import { PlayMode } from "../../../../gamelogic/types";
 import { minSec } from "../../../../utils/format";
 import { Square, Timer } from "../icons/additional";
 import {
@@ -83,28 +84,26 @@ export interface Props {
   toReveal?: number;
   timerRunning?: boolean;
   titleOnly?: boolean;
+  playMode?: PlayMode;
 }
 
-export interface State {
-  gameStatus: "remaining" | "game lost";
-}
+export interface State {}
 
 // tslint:disable-next-line:max-classes-per-file
 export default class TopBar extends Component<Props, State> {
-  state: State = {
-    gameStatus: "remaining"
-  };
-
   componentWillReceiveProps({ timerRunning }: Props) {
     if (timerRunning === this.props.timerRunning) {
       return;
     }
-    if (!timerRunning) {
-      this.setState({ gameStatus: "game lost" });
-    }
   }
 
-  render({ toReveal, toRevealTotal, timerRunning, titleOnly }: Props) {
+  render({
+    toReveal,
+    toRevealTotal,
+    timerRunning,
+    titleOnly,
+    playMode
+  }: Props) {
     return (
       <div class={topBar} aria-labelledby="game-title" role="banner">
         <h1 class={title}>Proxx</h1>
@@ -112,7 +111,7 @@ export default class TopBar extends Component<Props, State> {
           <div
             class={squaresLeft}
             role="status"
-            aria-label={this.state.gameStatus}
+            aria-label={this.gameStatusText(playMode)}
           >
             <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
           </div>
@@ -125,5 +124,17 @@ export default class TopBar extends Component<Props, State> {
         )}
       </div>
     );
+  }
+
+  private gameStatusText(playMode?: PlayMode) {
+    let text: string;
+    if (playMode === PlayMode.Won) {
+      text = "You win";
+    } else if (playMode === PlayMode.Lost) {
+      text = "Game over";
+    } else {
+      text = "Remaining";
+    }
+    return text;
   }
 }

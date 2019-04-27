@@ -106,6 +106,7 @@ export default class Game extends Component<Props, State> {
           timerRunning={timerRunning}
           toReveal={toReveal}
           toRevealTotal={toRevealTotal}
+          playMode={playMode}
         />
         {playMode === PlayMode.Won ? (
           <Win
