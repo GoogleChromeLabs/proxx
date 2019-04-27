@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { version } from "consts:";
 import { Component, h } from "preact";
 
 export default class About extends Component {
@@ -25,7 +26,14 @@ export default class About extends Component {
           mauris.
         </p>
         <h2>Github</h2>
-        <p>Source code can be found at our Github repository [link]</p>
+        <p>
+          Source code can be found at our{" "}
+          <a href="https://github.com/GoogleChromeLabs/proxx">
+            Github repository
+          </a>
+          .
+        </p>
+        <p>Version: {version}</p>
         <h2>Credits</h2>
         <p>Here is where credit goes</p>
         <h2>Privacy policy</h2>

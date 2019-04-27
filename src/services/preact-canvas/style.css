@@ -38,6 +38,10 @@ body {
   height: 100%;
 }
 
+a {
+  color: white;
+}
+
 .main {
   height: 100%;
 }
