@@ -51,8 +51,10 @@ export const numberCircleRadius = 0.9;
 export const numberFontSizeFactor = 0.5;
 export const glowFactor = 0.08;
 
-export const blackHoleBlur = 0.14;
-export const blackHoleOuterRadius = 0.8;
-export const blackHoleInnerRadius = 0.3;
+export const blackHoleInnerRed = "255, 40, 75";
+export const blackHoleOuterRed = "255, 34, 106";
+export const blackHoleOuterRadius = 1;
+export const blackHoleInnerRadius = 0.9;
+export const blackHoleRadius = 0.75;
 
 export const idleAnimationNumFrames = (idleAnimationLength * 60) / 1000;
