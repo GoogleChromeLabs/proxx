@@ -107,9 +107,7 @@ export default class TopBar extends Component<Props, State> {
   render({ toReveal, toRevealTotal, timerRunning, titleOnly }: Props) {
     return (
       <div class={topBar} aria-labelledby="game-title" role="banner">
-        <h1 class={title} id="game-title">
-          Graviton
-        </h1>
+        <h1 class={title}>Proxx</h1>
         {!titleOnly && (
           <div
             class={squaresLeft}

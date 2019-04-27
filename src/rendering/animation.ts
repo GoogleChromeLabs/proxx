@@ -79,6 +79,7 @@ export async function lazyGenerateTextures() {
     drawer: idleAnimationTextureDrawer,
     caches: idleSprites
   } = await cacheTextureGenerator(
+    "idle",
     uncachedIATG,
     textureSize,
     idleAnimationNumFrames,
@@ -92,6 +93,7 @@ export async function lazyGenerateTextures() {
     drawer: staticTextureDrawer,
     caches: staticSprites
   } = await cacheTextureGenerator(
+    "static",
     uncachedSTG,
     textureSize,
     STATIC_TEXTURE.LAST_MARKER,

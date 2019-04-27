@@ -13,7 +13,8 @@
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import { lazyGenerateTextures } from "src/rendering/animation";
-import { getBestRenderer, Renderer } from "src/rendering/renderer";
+import { Animator } from "src/rendering/animator";
+import { Renderer, shouldUseMotion } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
@@ -56,6 +57,7 @@ interface State {
   // This should always be set as we prevent the game from starting until the
   // renderer is loaded.
   renderer?: Renderer;
+  animator?: Animator;
   completeTime: number;
   bestTime: number;
 }
@@ -81,7 +83,7 @@ export default class Game extends Component<Props, State> {
       endTime: 0
     };
 
-    getBestRenderer().then(renderer => this.setState({ renderer }));
+    this._init();
   }
 
   render(
@@ -89,11 +91,12 @@ export default class Game extends Component<Props, State> {
       dangerMode,
       width,
       height,
+      mines,
       gameChangeSubscribe,
       gameChangeUnsubscribe,
       toRevealTotal
     }: Props,
-    { playMode, toReveal, renderer, completeTime, bestTime }: State
+    { playMode, toReveal, animator, renderer, completeTime, bestTime }: State
   ) {
     const timerRunning = playMode === PlayMode.Playing;
 
@@ -111,13 +114,17 @@ export default class Game extends Component<Props, State> {
             onRestart={this.onRestart}
             time={completeTime}
             bestTime={bestTime}
+            width={width}
+            height={height}
+            mines={mines}
           />
-        ) : renderer ? (
+        ) : renderer && animator ? (
           [
             <Board
               width={width}
               height={height}
               dangerMode={dangerMode}
+              animator={animator}
               renderer={renderer}
               gameChangeSubscribe={gameChangeSubscribe}
               gameChangeUnsubscribe={gameChangeUnsubscribe}
@@ -176,6 +183,47 @@ export default class Game extends Component<Props, State> {
     if (this._tryAgainBtn) {
       this._tryAgainBtn.focus();
     }
+  }
+
+  private async _init() {
+    let renderer: Renderer;
+    let animator: Animator;
+
+    if (shouldUseMotion()) {
+      // tslint:disable-next-line:variable-name
+      const [RendererClass, AnimatorClass] = await Promise.all([
+        import("../../../../rendering/webgl-renderer/index.js").then(
+          m => m.default
+        ),
+        import("../../../../rendering/motion-animator/index.js").then(
+          m => m.default
+        )
+      ]);
+      renderer = new RendererClass();
+      animator = new AnimatorClass(
+        this.props.width,
+        this.props.height,
+        renderer
+      );
+    } else {
+      // tslint:disable-next-line:variable-name
+      const [RendererClass, AnimatorClass] = await Promise.all([
+        import("../../../../rendering/canvas-2d-renderer/index.js").then(
+          m => m.default
+        ),
+        import("../../../../rendering/no-motion-animator/index.js").then(
+          m => m.default
+        )
+      ]);
+      renderer = new RendererClass();
+      animator = new AnimatorClass(
+        this.props.width,
+        this.props.height,
+        renderer
+      );
+    }
+
+    this.setState({ renderer, animator });
   }
 
   @bind
