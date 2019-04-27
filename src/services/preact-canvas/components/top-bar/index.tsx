@@ -113,7 +113,11 @@ export default class TopBar extends Component<Props, State> {
             role="status"
             aria-label={this.gameStatusText(playMode)}
           >
-            <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
+            <Square class={squareIcon} />{" "}
+            {toReveal!
+              .toString()
+              .padStart(toRevealTotal!.toString().length, "0")}
+            /{toRevealTotal}
           </div>
         )}
         {!titleOnly && (

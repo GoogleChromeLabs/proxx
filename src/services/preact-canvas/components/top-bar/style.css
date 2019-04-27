@@ -2,7 +2,7 @@
   display: flex;
   margin: var(--side-margin);
   margin-bottom: 0;
-  padding: 0 0 10px;
+  padding: 0 0 var(--bar-padding);
   position: absolute;
   left: 0;
   right: 0;
@@ -36,7 +36,6 @@
 }
 
 .title {
-  display: none;
   flex: 1;
   order: 2;
   text-align: center;
@@ -46,9 +45,9 @@
   padding: 0;
 }
 
-@media (min-width: 350px) {
-  .title {
-    display: block;
+@media (max-width: 350px) {
+  :global .in-game :local .title {
+    display: none;
   }
 }
 
@@ -65,13 +64,16 @@
 .square-icon {
   width: var(--icon-size);
   height: var(--icon-size);
-  fill: #fff;
 }
 
 .time-icon {
-  margin-left: 0.4em;
+  margin-left: 0.7em;
+  fill: #fff;
 }
 
 .square-icon {
-  margin-right: 0.4em;
+  margin-right: 0.7em;
+  fill: none;
+  stroke-width: 2px;
+  stroke: #fff;
 }

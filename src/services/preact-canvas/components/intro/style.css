@@ -94,7 +94,13 @@
 
 .settings-row {
   display: flex;
-  margin: 1.2rem calc(-1 * var(--item-margin));
+  margin: 0.4rem calc(-1 * var(--item-margin));
+}
+
+@media (min-width: 320px) {
+  .settings-row {
+    margin: 1.2rem calc(-1 * var(--item-margin));
+  }
 }
 
 .settings-row>* {
