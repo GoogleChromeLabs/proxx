@@ -15,6 +15,7 @@ import { StateChange } from "src/gamelogic/index.js";
 import { Animator } from "src/rendering/animator.js";
 import { Renderer } from "src/rendering/renderer.js";
 import { putCanvas } from "src/utils/canvas-pool.js";
+import { cellFocus } from "src/utils/constants.js";
 import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
@@ -183,6 +184,8 @@ export default class Board extends Component<Props, State> {
     this._table.addEventListener("keyup", this.onKeyUpOnTable);
     this._table.addEventListener("mouseup", this.onMouseUp);
     this._table.addEventListener("mousedown", this.onMouseDown);
+    this._table.addEventListener("mouseout", this.onMouseOut);
+    this._table.addEventListener("focusout", this.onFocusOut);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
@@ -201,7 +204,7 @@ export default class Board extends Component<Props, State> {
   @bind
   private setFocus(button: HTMLButtonElement) {
     button.focus();
-    if (isFeaturePhone || this.state.keyNavigation) {
+    if (isFeaturePhone || this.state.keyNavigation || cellFocus) {
       const [x, y] = this._additionalButtonData.get(button)!;
       this.props.renderer.setFocus(x, y);
     }
@@ -293,6 +296,17 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
   }
 
+  // @bind
+  private onMouseOut(event: MouseEvent) {
+    //   console.log('mouseout!')
+    //   this.props.renderer.setFocus(-1, -1);
+  }
+
+  @bind
+  private onFocusOut(event: any) {
+    this.props.renderer.setFocus(-1, -1);
+  }
+
   @bind
   private simulateClick(
     event: MouseEvent | TouchEvent | KeyboardEvent,
@@ -300,6 +314,7 @@ export default class Board extends Component<Props, State> {
   ) {
     // find which button = cell has current focus
     const button = document.activeElement as HTMLButtonElement;
+    console.log(button);
     if (!button) {
       return;
     }
