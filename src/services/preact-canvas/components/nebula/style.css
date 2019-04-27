@@ -7,7 +7,7 @@
 }
 
 .nebula {
-  animation: fade-in .5s both 1 linear;
+  animation: fade-in .5s ease-in-out;
 }
 
 .not-danger-mode {
@@ -20,5 +20,4 @@
 
 @keyframes fade-in {
   from {opacity: 0;}
-  to {opacity: 1;}
 }
