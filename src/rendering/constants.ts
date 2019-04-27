@@ -20,13 +20,21 @@ export type ShaderColor = [number, number, number, number];
 export function shaderColor(x: [number, number, number]): ShaderColor {
   return [...x.map(x => x / 255), 1] as any;
 }
+
+export function shaderColorToRGB(color: ShaderColor): string {
+  return `rgba(${color
+    .slice(0, 3)
+    .map(v => Math.floor(v * 255))
+    .join(",")}, ${color[3]})`;
+}
+
 // Colors
 export const nebulaDangerDark = shaderColor([53, 0, 0]);
 export const nebulaDangerLight = shaderColor([117, 32, 61]);
 export const nebulaSafeDark = shaderColor([58, 10, 78]);
 export const nebulaSafeLight = shaderColor([43, 41, 111]);
-export const nebulaSettingDark = shaderColor([19, 0, 56]);
-export const nebulaSettingLight = shaderColor([41, 2, 114]);
+export const nebulaSettingDark = shaderColor([0, 0, 0]);
+export const nebulaSettingLight = shaderColor([41, 41, 41]);
 
 export const focusRing = "rgb(122, 244, 66)";
 export const turquoise = "rgb(109, 205, 218)";

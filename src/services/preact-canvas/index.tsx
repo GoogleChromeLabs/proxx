@@ -192,11 +192,8 @@ class PreactService extends Component<Props, State> {
           loading={() => (
             <div class={[nebulaStyle, notDangerModeStyle].join(" ")} />
           )}
-          useAltColor={game ? dangerMode : false}
-          altColorDark={altColorDark}
-          altColorLight={altColorLight}
-          mainColorDark={settingsOpen ? settingColorDark : mainColorDark}
-          mainColorLight={settingsOpen ? settingColorLight : mainColorLight}
+          colorDark={this._nebulaDarkColor()}
+          colorLight={this._nebulaLightColor()}
         />
         {mainComponent}
         <BottomBar
@@ -208,6 +205,26 @@ class PreactService extends Component<Props, State> {
         />
       </div>
     );
+  }
+
+  private _nebulaLightColor() {
+    if (this.state.settingsOpen) {
+      return this.state.settingColorLight;
+    }
+    if (this.state.dangerMode) {
+      return this.state.altColorLight;
+    }
+    return this.state.mainColorLight;
+  }
+
+  private _nebulaDarkColor() {
+    if (this.state.settingsOpen) {
+      return this.state.settingColorDark;
+    }
+    if (this.state.dangerMode) {
+      return this.state.altColorDark;
+    }
+    return this.state.mainColorDark;
   }
 
   @bind

@@ -20,20 +20,9 @@ import Nebula from "../preact-canvas/components/nebula/index.js";
 const gui = new dat.GUI();
 
 export function nebula(nebula: Nebula, shaderBox: ShaderBox) {
-  const nebulaUniforms = {
-    set dangerMode(v: boolean) {
-      // @ts-ignore
-      nebula.props.useAltColor = v;
-      nebula.forceUpdate();
-    },
-
-    get dangerMode(): boolean {
-      return nebula.props.useAltColor;
-    }
-  };
+  const nebulaUniforms = {};
 
   const nebulaF = gui.addFolder("Nebula");
-  nebulaF.add(nebulaUniforms, "dangerMode");
 
   for (const uniformName of shaderBox.getUniformNames()) {
     // `dangerMode` has special handling due to being a boolean
