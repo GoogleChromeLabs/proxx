@@ -38,6 +38,10 @@
   visibility: hidden;
 }
 
+.fullscreen {
+  composes: icons;
+}
+
 html:fullscreen .fullscreen {
   visibility: hidden;
 }
