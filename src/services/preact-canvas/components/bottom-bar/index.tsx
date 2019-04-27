@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { Back } from "../icons/additional";
 import { Fullscreen, Settings } from "../icons/initial";
-import { bottomBar, hidden, icons, fullscreen } from "./style.css";
+import { bottomBar, fullscreen, hidden, icons } from "./style.css";
 
 export interface Props {
   onFullscreenClick: () => void;
