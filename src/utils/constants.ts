@@ -15,4 +15,4 @@ const url = new URL(location.href);
 
 export const prerender = url.searchParams.has("prerender");
 export const debug = url.searchParams.has("debug");
-export const noSw = url.searchParams.has("no-sw");
+export const noCache = url.searchParams.has("no-cache");
