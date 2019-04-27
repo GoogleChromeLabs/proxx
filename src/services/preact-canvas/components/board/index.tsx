@@ -303,9 +303,15 @@ export default class Board extends Component<Props, State> {
     if (!button) {
       return;
     }
-    event.preventDefault();
 
-    const buttonData = this._additionalButtonData.get(button)!;
+    const buttonData = this._additionalButtonData.get(button);
+
+    if (!buttonData) {
+      // The active element isn't actually a button in our table
+      return;
+    }
+
+    event.preventDefault();
     this.props.onCellClick(buttonData, alt);
   }
 
