@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { Back } from "../icons/additional";
 import { Fullscreen, Settings } from "../icons/initial";
-import { bottomBar, hidden, icons } from "./style.css";
+import { bottomBar, hidden, icons, fullscreen } from "./style.css";
 
 export interface Props {
   onFullscreenClick: () => void;
@@ -52,7 +52,7 @@ export default class BottomBar extends Component<Props, State> {
             <Settings />
           </button>
         )}
-        <button class={icons} onClick={onFullscreenClick}>
+        <button class={fullscreen} onClick={onFullscreenClick}>
           <Fullscreen />
         </button>
       </div>
