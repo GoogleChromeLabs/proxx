@@ -16,3 +16,12 @@ declare module "*.glsl" {
   const content: string;
   export default content;
 }
+
+interface GA {
+  (...args: any[]): void;
+  q: any[];
+}
+declare var ga: GA;
+interface Window {
+  ga: GA;
+}
