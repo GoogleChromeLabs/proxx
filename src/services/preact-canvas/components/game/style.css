@@ -56,12 +56,12 @@
   background: rgba(255,255,255, 1);
 }
 
-.checkbox.focus-visible + .toggle {
+.checkbox:global(.focus-visible) + .toggle {
   outline: 5px blue;
   outline: 5px auto -webkit-focus-ring-color;
 }
 
-.checkboxx:checked + .toggle::before {
+.checkbox:checked + .toggle::before {
   margin-left: auto;
 }
 
