@@ -17,20 +17,18 @@ import { bind } from "../../../../utils/bind.js";
 
 import ShaderBox from "../../../../utils/shaderbox.js";
 import {
-  dangerMode as dangerModeStyle,
   nebula as nebulaStyle,
-  nebulaContainer as nebulaContainerStyle,
-  notDangerMode as notDangerModeStyle
+  nebulaContainer as nebulaContainerStyle
 } from "./style.css";
 
-import { ShaderColor, shaderColorToRGB } from "src/rendering/constants.js";
+import { Color, toRGB, toShaderColor } from "src/rendering/constants.js";
 import { debug } from "../../../../utils/constants";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
 export interface Props {
-  colorLight: ShaderColor;
-  colorDark: ShaderColor;
+  colorLight: Color;
+  colorDark: Color;
 }
 
 interface State {}
@@ -41,7 +39,7 @@ export default class Nebula extends Component<Props, State> {
   private _colorBlend = 0;
   private _shaderBox?: ShaderBox;
   private _loopRunning = false;
-  private _prevColors: ShaderColor[] = [];
+  private _prevColors: Color[] = [];
 
   componentDidMount() {
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
@@ -75,6 +73,9 @@ export default class Nebula extends Component<Props, State> {
     this._shaderBox.setUniform1f("circle3_offset", 0);
     this._onResize();
 
+    this._prevColors = [this.props.colorLight, this.props.colorDark];
+    this._updateColors(this._prevColors, this._prevColors);
+
     window.addEventListener("resize", this._onResize);
     this._start();
 
@@ -102,9 +103,10 @@ export default class Nebula extends Component<Props, State> {
   render({ colorLight, colorDark }: Props) {
     return (
       <div
-        style={`linear-gradient(to bottom, ${shaderColorToRGB(
+        style={`background: linear-gradient(to bottom, ${toRGB(
           colorLight
-        )}, ${shaderColorToRGB(colorDark)})`}
+        )}, ${toRGB(colorDark)})`}
+        class={nebulaContainerStyle}
       >
         <canvas class={nebulaStyle} />
       </div>
@@ -112,14 +114,26 @@ export default class Nebula extends Component<Props, State> {
   }
 
   private _updateColors(
-    [startColorLight, startColorDark]: ShaderColor[],
-    [endColorLight, endColorDark]: ShaderColor[]
+    [startColorLight, startColorDark]: Color[],
+    [endColorLight, endColorDark]: Color[]
   ) {
     if (this._shaderBox) {
-      this._shaderBox.setUniform4f("main_color_light", startColorLight);
-      this._shaderBox.setUniform4f("main_color_dark", startColorDark);
-      this._shaderBox.setUniform4f("alt_color_light", endColorLight);
-      this._shaderBox.setUniform4f("alt_color_dark", endColorDark);
+      this._shaderBox.setUniform4f(
+        "main_color_light",
+        toShaderColor(startColorLight)
+      );
+      this._shaderBox.setUniform4f(
+        "main_color_dark",
+        toShaderColor(startColorDark)
+      );
+      this._shaderBox.setUniform4f(
+        "alt_color_light",
+        toShaderColor(endColorLight)
+      );
+      this._shaderBox.setUniform4f(
+        "alt_color_dark",
+        toShaderColor(endColorDark)
+      );
     }
   }
 
