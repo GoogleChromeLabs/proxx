@@ -295,7 +295,7 @@ export default class Game extends Component<Props, State> {
         } else {
           this.props.stateService.flag(x, y);
         }
-      } else {
+      } else if (!cell.flagged) {
         this.props.stateService.reveal(x, y);
       }
     } else if (cell.touchingFlags >= cell.touchingMines) {
