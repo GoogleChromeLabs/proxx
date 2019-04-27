@@ -27,8 +27,11 @@ export default class About extends Component {
         </p>
         <h2>Github</h2>
         <p>
-          Source code can be found at our [Github
-          repository](https://github.com/GoogleChromeLabs/proxx)
+          Source code can be found at our{" "}
+          <a href="https://github.com/GoogleChromeLabs/proxx">
+            Github repository
+          </a>
+          .
         </p>
         <p>Version: {version}</p>
         <h2>Credits</h2>
