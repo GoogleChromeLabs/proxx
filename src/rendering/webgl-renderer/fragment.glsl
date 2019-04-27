@@ -13,6 +13,13 @@ uniform sampler2D idle_sprites[4];
 uniform sampler2D static_sprite;
 uniform vec2 paddings;
 
+float frames_per_axis = floor(sprite_size /tile_size);
+float frames_per_sprite = frames_per_axis * frames_per_axis;
+
+vec2 static_tile_coords(float idx) {
+  return vec2(mod(idx, frames_per_axis), floor(idx/frames_per_axis));
+}
+
 void main() {
   vec4 white = vec4(1.);
   vec4 black = vec4(vec3(0.), 1.);
@@ -31,8 +38,7 @@ void main() {
   float border_opacity = dynamic_tile_data_b2.z;
   float boxes_opacity = dynamic_tile_data_b2.w;
 
-  float frames_per_axis = floor(sprite_size /tile_size);
-  float frames_per_sprite = frames_per_axis * frames_per_axis;
+
 
   float f;
   if(static_tile < 0.) {
@@ -57,16 +63,16 @@ void main() {
     }
     f *= boxes_opacity;
   } else if (static_tile >= 1.) {
-    vec2 number_tex_uv = (vec2(mod(static_tile, frames_per_axis), floor(static_tile/frames_per_axis)) + normalized_uv) * tile_size / sprite_size;
+    vec2 number_tex_uv = (static_tile_coords(static_tile) + normalized_uv) * tile_size / sprite_size;
     f = mix(f, 1., texture2D(static_sprite, number_tex_uv).a);
   }
 
   // Blend static outline on top
-  vec2 outline_tex_uv = (vec2(0.) + normalized_uv) * tile_size / sprite_size;
+  vec2 outline_tex_uv = (static_tile_coords(0.) + normalized_uv) * tile_size / sprite_size;
   f = mix(f, 1., texture2D(static_sprite, outline_tex_uv).a * border_opacity);
 
   // Blend flash on top
-  vec2 flash_tex_uv = (vec2(9., 0.) + normalized_uv) * tile_size / sprite_size;
+  vec2 flash_tex_uv = (static_tile_coords(9.) + normalized_uv) * tile_size / sprite_size;
   f = mix(f, 1., texture2D(static_sprite, flash_tex_uv).a * flash_opacity);
 
   // Change color according to highlight setting
@@ -75,7 +81,7 @@ void main() {
   vec4 tile = mix(transparent, target_color, f);
 
   // Add focus ring
-  vec2 focus_tex_uv = (vec2(1., 1.) + normalized_uv) * tile_size / sprite_size;
+  vec2 focus_tex_uv = (static_tile_coords(11.) + normalized_uv) * tile_size / sprite_size;
   vec4 focused_tile = mix(
     tile,
     white,
