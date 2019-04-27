@@ -68,6 +68,7 @@ initFocusHandling();
 
 export default class Game extends Component<Props, State> {
   state: State;
+  private _tryAgainBtn?: HTMLButtonElement;
 
   constructor(props: Props) {
     super(props);
@@ -124,32 +125,24 @@ export default class Game extends Component<Props, State> {
               onDangerModeChange={this.props.onDangerModeChange}
             />,
             playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
-              <label
-                class={toggleLabel}
-                role="button"
-                aria-pressed={!dangerMode}
-                aria-label="game mode"
-              >
-                Reveal
+              <label class={toggleLabel}>
                 <input
                   class={checkbox}
                   type="checkbox"
+                  role="switch checkbox"
                   onChange={this.onDangerModeChange}
                   checked={!dangerMode}
                 />
-                <span
-                  class={toggle}
-                  role="status"
-                  aria-label={`${
-                    !dangerMode ? "set to flag mode" : "set to reveal mode"
-                  }`}
-                />{" "}
-                Flag
+                <span class={toggle} role="status" /> Flag mode
               </label>
             ) : playMode === PlayMode.Lost ? (
               <div class={exitRow}>
                 <div class={exitRowInner}>
-                  <button class={againButton} onClick={this.onRestart}>
+                  <button
+                    class={againButton}
+                    onClick={this.onRestart}
+                    ref={el => (this._tryAgainBtn = el)}
+                  >
                     Try again
                   </button>
                   <button class={mainButton} onClick={this.onReset}>
@@ -177,6 +170,12 @@ export default class Game extends Component<Props, State> {
 
   componentWillUnmount() {
     this.props.gameChangeUnsubscribe(this.onGameChange);
+  }
+
+  componentDidUpdate() {
+    if (this._tryAgainBtn) {
+      this._tryAgainBtn.focus();
+    }
   }
 
   @bind

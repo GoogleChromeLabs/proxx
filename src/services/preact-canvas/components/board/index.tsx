@@ -78,7 +78,7 @@ export default class Board extends Component<Props> {
     this._updateLoopRunning = true;
     requestAnimationFrame(this._animationLoop);
     this._table!.focus();
-    
+
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keydown", this._onKeyDown);

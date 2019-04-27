@@ -47,6 +47,7 @@ export default class Canvas2DRenderer implements Renderer {
 
   createCanvas(): HTMLCanvasElement {
     this._canvas = document.createElement("canvas");
+    this._canvas.setAttribute("aria-hidden", "true");
     return this._canvas;
   }
 

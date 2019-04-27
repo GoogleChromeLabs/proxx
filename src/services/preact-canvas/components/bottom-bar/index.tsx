@@ -22,7 +22,7 @@ export interface State {}
 export default class BottomBar extends Component<Props, State> {
   render({ onFullscreenClick }: Props) {
     return (
-      <div class={bottomBar}>
+      <div class={bottomBar} role="menubar">
         <button
           class={fullscreen}
           onClick={onFullscreenClick}

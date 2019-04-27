@@ -24,7 +24,8 @@
 .toggle {
   overflow: hidden;
   display: inline-block;
-  background: white;
+  background: rgba(255,255,255, .3);
+  border: 1px solid white;
   height: 15px;
   width: 40px;
   border-radius: 15px;
@@ -43,15 +44,16 @@
   height: 11px;
   width: 11px;
   border-radius: 100%;
-  background: #000;
+  background: black;
   display: block;
 }
 
 :checked+.toggle::before {
   transform: translate(25px);
+  background: rgba(255,255,255, 1);
 }
 
-.checkbox:focus + .toggle {
+.checkbox.focus-visible + .toggle {
   outline: 5px blue;
   outline: 5px auto -webkit-focus-ring-color;
 }

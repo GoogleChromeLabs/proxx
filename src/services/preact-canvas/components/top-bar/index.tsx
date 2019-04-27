@@ -60,11 +60,7 @@ class Time extends Component<TimeProps, {}> {
   }
 
   render() {
-    return (
-      <div role="timer" aria-label="game timer">
-        00:00
-      </div>
-    );
+    return <div role="timer">00:00</div>;
   }
 
   private _startTimer() {
@@ -89,10 +85,25 @@ export interface Props {
   titleOnly?: boolean;
 }
 
-export interface State {}
+export interface State {
+  gameStatus: "remaining" | "game lost";
+}
 
 // tslint:disable-next-line:max-classes-per-file
 export default class TopBar extends Component<Props, State> {
+  state: State = {
+    gameStatus: "remaining"
+  };
+
+  componentWillReceiveProps({ timerRunning }: Props) {
+    if (timerRunning === this.props.timerRunning) {
+      return;
+    }
+    if (!timerRunning) {
+      this.setState({ gameStatus: "game lost" });
+    }
+  }
+
   render({ toReveal, toRevealTotal, timerRunning, titleOnly }: Props) {
     return (
       <div class={topBar} aria-labelledby="game-title" role="banner">
@@ -100,7 +111,11 @@ export default class TopBar extends Component<Props, State> {
           Graviton
         </h1>
         {!titleOnly && (
-          <div class={squaresLeft} role="status" aria-label="remaining">
+          <div
+            class={squaresLeft}
+            role="status"
+            aria-label={this.state.gameStatus}
+          >
             <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
           </div>
         )}
