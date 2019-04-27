@@ -30,11 +30,10 @@ import {
   exitRow,
   exitRowInner,
   game as gameClass,
-  leftToggleLabel,
   mainButton,
-  rightToggleLabel,
   toggle,
-  toggleLabel
+  toggleLabel,
+  toggleLabelText
 } from "./style.css";
 
 export interface Props {
@@ -141,8 +140,8 @@ export default class Game extends Component<Props, State> {
                   onChange={this.onDangerModeChange}
                   checked={!dangerMode}
                 />
-                <span class={toggle} role="status" /> 
-                <span aria-hidden="true" class={rightToggleLabel}>
+                <span class={toggle} role="status" />
+                <span aria-hidden="true" class={toggleLabelText}>
                   Flag mode
                 </span>
               </label>
