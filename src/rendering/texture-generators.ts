@@ -22,6 +22,7 @@ import {
   blackHoleOuterRed,
   blackHoleRadius,
   borderRadius,
+  glowAlpha,
   glowFactor,
   innerCircleRadius,
   numberCircleRadius,
@@ -242,8 +243,11 @@ export function staticTextureGeneratorFactory(
     ctx2.restore();
 
     ctx.save();
-    const blur = (textureSize * blurIntensity).toFixed(1);
+    const blur = (textureSize * staticDevicePixelRatio * blurIntensity).toFixed(
+      1
+    );
     ctx.filter = `blur(${blur}px)`;
+    ctx.globalAlpha = glowAlpha;
     ctx.drawImage(
       cvs2,
       0,
@@ -257,6 +261,7 @@ export function staticTextureGeneratorFactory(
     );
     if (blitOnTop) {
       ctx.filter = "none";
+      ctx.globalAlpha = 1;
       ctx.drawImage(
         cvs2,
         0,
