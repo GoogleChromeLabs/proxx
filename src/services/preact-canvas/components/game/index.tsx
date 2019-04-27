@@ -141,7 +141,7 @@ export default class Game extends Component<Props, State> {
                   onChange={this.onDangerModeChange}
                   checked={!dangerMode}
                 />
-                <span class={toggle} role="status" /> 
+                <span class={toggle} role="status" />
                 <span aria-hidden="true" class={rightToggleLabel}>
                   Flag mode
                 </span>
