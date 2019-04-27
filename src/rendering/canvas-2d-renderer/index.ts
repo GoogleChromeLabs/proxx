@@ -505,7 +505,7 @@ export default class Canvas2DRenderer implements Renderer {
       this._ctx!.restore();
     }
     const { cell, animationList } = this._grid[y * this._numTilesX! + x];
-    const ts = performance.now();
+    const ts = getTime();
     for (const animation of animationList) {
       this.render(x, y, cell!, animation, ts);
     }
