@@ -1,0 +1,53 @@
+.settings {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: scroll;
+}
+
+.settings .settings-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 33rem;
+  width: 100%;
+}
+
+.settings .settings-window .settings-content {
+  width: 100%;
+  padding: 20px;
+  margin: auto;
+  box-sizing: border-box;
+}
+
+.close-button {
+  composes: circle-button from "../../utils.css";
+  fill: #000;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  width: var(--circlebtn-size);
+  height: var(--circlebtn-size);
+}
+
+.button, .button-on, .button-off {
+  text-transform: uppercase;
+  display: block;
+  width: 100%;
+  margin: 1.2rem 0 0 !important;
+  font-size: 1.1rem;
+  letter-spacing: 0.2rem;
+}
+
+.button {
+  composes: button from "../../utils.css";
+}
+
+.button-on{
+  composes: button-on from "../../utils.css";
+}
+.button-off{
+  composes: button-off from "../../utils.css";
+}

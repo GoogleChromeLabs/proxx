@@ -18,8 +18,9 @@ import {
   nebulaDangerLight,
   nebulaSafeDark,
   nebulaSafeLight,
-  ShaderColor,
-  shaderColor
+  nebulaSettingDark,
+  nebulaSettingLight,
+  ShaderColor
 } from "src/rendering/constants";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
@@ -28,6 +29,10 @@ import { GameType } from "../state";
 import { getGridDefault, setGridDefault } from "../state/grid-default";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
+import {
+  getMotionPreference,
+  setMotionPreference
+} from "../state/motion-preference";
 import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
 import GameLoading from "./components/game-loading";
@@ -57,10 +62,14 @@ interface State {
   gridDefaults?: GridType;
   dangerMode: boolean;
   awaitingGame: boolean;
+  settingsOpen: boolean;
+  motionPreference: boolean;
   mainColorLight: ShaderColor;
   mainColorDark: ShaderColor;
   altColorLight: ShaderColor;
   altColorDark: ShaderColor;
+  settingColorLight: ShaderColor;
+  settingColorDark: ShaderColor;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -81,6 +90,12 @@ const Game = deferred(
 );
 
 const offlineModulePromise = import("../../offline");
+
+// tslint:disable-next-line:variable-name
+const Settings = deferred(
+  import("./components/settings/index.js").then(m => m.default)
+);
+
 const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
 );
@@ -95,11 +110,16 @@ class PreactService extends Component<Props, State> {
   state: State = {
     dangerMode: false,
     awaitingGame: false,
+    settingsOpen: false,
+    motionPreference: true,
     altColorDark: nebulaDangerDark,
     altColorLight: nebulaDangerLight,
     mainColorDark: nebulaSafeDark,
-    mainColorLight: nebulaSafeLight
+    mainColorLight: nebulaSafeLight,
+    settingColorDark: nebulaSettingDark,
+    settingColorLight: nebulaSettingLight
   };
+  private previousFocus: HTMLElement | null = null;
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
   private _awaitingGameTimeout: number = -1;
@@ -117,10 +137,14 @@ class PreactService extends Component<Props, State> {
       dangerMode,
       awaitingGame,
       gridDefaults,
+      settingsOpen,
+      motionPreference,
       altColorDark,
       altColorLight,
       mainColorDark,
-      mainColorLight
+      mainColorLight,
+      settingColorDark,
+      settingColorLight
     }: State
   ) {
     let mainComponent: VNode;
@@ -129,7 +153,14 @@ class PreactService extends Component<Props, State> {
       if (awaitingGame) {
         mainComponent = <GameLoading />;
       } else {
-        mainComponent = (
+        mainComponent = settingsOpen ? (
+          <Settings
+            loading={() => <div />}
+            onCloseClicked={this._onSettingsCloseClick}
+            motion={motionPreference}
+            onMotionPrefChange={this._onMotionPrefChange}
+          />
+        ) : (
           <Intro
             onStartGame={this._onStartGame}
             defaults={prerender ? undefined : gridDefaults}
@@ -150,6 +181,7 @@ class PreactService extends Component<Props, State> {
           stateService={this._stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
+          useMotion={this.state.motionPreference}
         />
       );
     }
@@ -163,13 +195,26 @@ class PreactService extends Component<Props, State> {
           useAltColor={game ? dangerMode : false}
           altColorDark={altColorDark}
           altColorLight={altColorLight}
-          mainColorDark={mainColorDark}
-          mainColorLight={mainColorLight}
+          mainColorDark={settingsOpen ? settingColorDark : mainColorDark}
+          mainColorLight={settingsOpen ? settingColorLight : mainColorLight}
         />
         {mainComponent}
-        <BottomBar onFullscreenClick={this._onFullscreenClick} />
+        <BottomBar
+          onFullscreenClick={this._onFullscreenClick}
+          onSettingsClick={this._onSettingsClick}
+          onBackClick={this._onBackClick}
+          buttonType={game ? "back" : "settings"}
+          display={!settingsOpen} // Settings is open = Bottom bar display should be hidden
+        />
       </div>
     );
+  }
+
+  @bind
+  private async _onMotionPrefChange() {
+    const motionPreference = !this.state.motionPreference;
+    await setMotionPreference(motionPreference);
+    this.setState({ motionPreference });
   }
 
   @bind
@@ -190,6 +235,18 @@ class PreactService extends Component<Props, State> {
   @bind
   private _onFullscreenClick() {
     document.documentElement.requestFullscreen();
+  }
+
+  @bind
+  private _onSettingsCloseClick() {
+    this.setState({ settingsOpen: false });
+    this.previousFocus!.focus();
+  }
+
+  @bind
+  private _onSettingsClick() {
+    this.previousFocus = document.activeElement as HTMLElement;
+    this.setState({ settingsOpen: true });
   }
 
   @bind
@@ -219,6 +276,11 @@ class PreactService extends Component<Props, State> {
     stateService.initGame(width, height, mines);
   }
 
+  @bind
+  private _onBackClick() {
+    this._stateService!.reset();
+  }
+
   private async _init({ stateServicePromise }: Props) {
     gridDefaultPromise.then(gridDefaults => {
       this.setState({ gridDefaults });
@@ -235,6 +297,10 @@ class PreactService extends Component<Props, State> {
     offlineModulePromise.then(({ init }) => init());
 
     this._stateService = await stateServicePromise;
+
+    getMotionPreference().then(motionPreference => {
+      this.setState({ motionPreference });
+    });
 
     localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {
