@@ -136,7 +136,8 @@
   text-transform: uppercase;
   display: block;
   width: 100%;
-  margin: 1.2rem 0 0;
+  /** PostCSS classes in ordering issue, it seems */
+  margin: 1.2rem 0 0 !important;
   font-size: 1.1rem;
   letter-spacing: 0.2rem;
 }
