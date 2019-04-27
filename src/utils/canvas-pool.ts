@@ -11,10 +11,18 @@
  * limitations under the License.
  */
 
-const url = new URL(location.href);
+const canvasPool: HTMLCanvasElement[] = [];
+export function getCanvas(context: "2d" | "webgl"): HTMLCanvasElement {
+  if (canvasPool.length > 0) {
+    const pooledCanvas = canvasPool.shift()!;
+    // check if the pooled canvas has same context as the requested one
+    if (pooledCanvas.getContext(context)) {
+      return pooledCanvas;
+    }
+  }
+  return document.createElement("canvas");
+}
 
-export const prerender = url.searchParams.has("prerender");
-export const debug = url.searchParams.has("debug");
-export const noCache = url.searchParams.has("no-cache");
-export const noMotion = url.searchParams.has("force-nomotion");
-export const forceMotion = url.searchParams.has("force-motion");
+export function putCanvas(canvas: HTMLCanvasElement) {
+  canvasPool.push(canvas);
+}

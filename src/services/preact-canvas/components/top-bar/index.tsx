@@ -95,7 +95,11 @@ export default class TopBar extends Component<Props, State> {
         <h1 class={title}>Proxx</h1>
         {!titleOnly && (
           <div class={squaresLeft}>
-            <Square class={squareIcon} /> {toReveal} / {toRevealTotal}
+            <Square class={squareIcon} />{" "}
+            {toReveal!
+              .toString()
+              .padStart(toRevealTotal!.toString().length, "0")}
+            /{toRevealTotal}
           </div>
         )}
         {!titleOnly && (

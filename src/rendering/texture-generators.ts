@@ -104,13 +104,15 @@ export const enum STATIC_TEXTURE {
   NUMBER_8, // = 8
   FLASH,
   MINE,
+  FOCUS,
   LAST_MARKER // Not a valid frame, just a marker for the last item in the enum
 }
 export function staticTextureGeneratorFactory(
   textureSize: number,
   cellPadding: number
 ): TextureGenerator {
-  const size = (textureSize - cellPadding * 2) * safetyBufferFactor;
+  const fullSize = textureSize - cellPadding * 2;
+  const size = fullSize * safetyBufferFactor;
   const halfSize = size / 2;
 
   // If a texture needs a glow effect, the routine can paint
@@ -198,6 +200,17 @@ export function staticTextureGeneratorFactory(
       ctx2.beginPath();
       ctx2.arc(0, 0, halfSize * blackHoleOuterRadius, 0, 2 * Math.PI, true);
       ctx2.arc(0, 0, halfSize * blackHoleInnerRadius, 0, 2 * Math.PI, false);
+      ctx2.fill();
+    } else if (idx === STATIC_TEXTURE.FOCUS) {
+      ctx2.fillStyle = "white";
+
+      // Inner circle
+      ctx2.lineWidth = size * thickLine;
+      const radius = size * innerCircleRadius;
+      ctx2.beginPath();
+      ctx2.moveTo(radius, 0);
+      ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx2.closePath();
       ctx2.fill();
     }
     ctx.restore();

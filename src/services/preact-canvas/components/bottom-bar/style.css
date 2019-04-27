@@ -1,9 +1,9 @@
 .bottom-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin: var(--side-margin);
   margin-top: 0;
-  padding: 10px 0 0;
+  padding: var(--bar-padding) 0 0;
   position: relative;
   left: 0;
   right: 0;
@@ -27,13 +27,27 @@
   background: white;
 }
 
-.fullscreen {
+.icons {
   composes: unbutton from '../../utils.css';
   fill: #fff;
   width: var(--icon-size);
   height: var(--icon-size);
 }
 
+.hidden {
+  visibility: hidden;
+}
+
+.fullscreen {
+  composes: icons;
+}
+
 html:fullscreen .fullscreen {
   visibility: hidden;
+}
+
+@media (display-mode: fullscreen) {
+  .fullscreen {
+    visibility: hidden;
+  }
 }

@@ -70,7 +70,10 @@ export default class MinesweeperGame {
     if (_width < 1 || _height < 1) {
       throw Error("Invalid dimensions");
     }
-    if (_mines >= _width * _height) {
+
+    const maxMines = _width * _height - 9;
+
+    if (_mines > maxMines) {
       throw Error("Number of mines cannot fit in grid");
     }
 
@@ -241,8 +244,18 @@ export default class MinesweeperGame {
       .fill(undefined)
       .map((_, i) => i);
 
-    // Remove the cell played.
-    flatCellIndexes.splice(avoidY * this._width + avoidX, 1);
+    // Remove a 3x3 grid around the cell played.
+    const indexesToRemove = [avoidY * this._width + avoidX];
+
+    for (const [nextX, nextY] of this._getSurrounding(avoidX, avoidY)) {
+      indexesToRemove.push(nextY * this._width + nextX);
+    }
+
+    indexesToRemove.sort((a, b) => a - b);
+
+    for (const [removed, indexToRemove] of indexesToRemove.entries()) {
+      flatCellIndexes.splice(indexToRemove - removed, 1);
+    }
 
     // Place mines in remaining squares
     let minesToPlace = this._mines;
@@ -311,7 +324,6 @@ export default class MinesweeperGame {
   /**
    * @param x
    * @param y
-   * @param objsCloned A weakmap to track which objects have already been cloned.
    */
   private _reveal(x: number, y: number): void {
     // The set contains the cell position as if it were a single flat array.

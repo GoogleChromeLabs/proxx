@@ -15,6 +15,7 @@ import { version } from "consts:";
 
 import { del, get, set } from "idb-keyval";
 
+import { noCache } from "src/utils/constants";
 import { task } from "../utils/scheduling";
 import { staticDevicePixelRatio } from "../utils/static-dpr.js";
 import { TextureGenerator } from "./texture-generators.js";
@@ -67,9 +68,10 @@ export async function cacheTextureGenerator(
   let buffers: ArrayBuffer[];
 
   const prefix = `${TEXTURE_CACHE_IDB_PREFIX}:${name}`;
-  const expectedVersion = `${version}:${textureSize}`;
+  const expectedVersion = `${version}:${textureSize}:${staticDevicePixelRatio}`;
   const cachedTextureVersion = await get(`${prefix}:version`);
-  if (cachedTextureVersion !== expectedVersion) {
+
+  if (cachedTextureVersion !== expectedVersion || noCache) {
     await del(`${prefix}:version`);
     await del(`${prefix}:buffers`);
     buffers = await createBuffers(

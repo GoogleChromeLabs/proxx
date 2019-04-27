@@ -16,14 +16,65 @@
   margin: 0 auto;
 }
 
+@keyframes spinCCW {
+  100% {
+    transform: rotate(-315deg)
+  }
+}
+
 .win-square {
   width: var(--size);
-  height: var(--size);
-  --size: 40%;
+  padding-top: var(--size);
+  --size: 30%;
   display: block;
   margin: 0 auto;
-  fill: #fff;
-  stroke: #fff;
+  border: 3px solid #fff;
+  position: relative;
+  border-radius: 13%;
+  overflow: hidden;
+  animation: spinCCW 20s linear infinite;
+  transform: rotate(45deg);
+  filter: drop-shadow(0 0 10px #fff);
+  margin-bottom: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 320px) {
+  .win-square {
+    margin-top: 0;
+  }
+}
+
+.win-square::after {
+  content: '';
+  position: absolute;
+  width: var(--size);
+  padding-top: var(--size);
+  --size: 20%;
+  background: #fff;
+  border-radius: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin90 {
+  50% {
+    transform: rotate(90deg)
+  }
+}
+
+.win-square div {
+  position: absolute;
+  --inset: 6px;
+  top: var(--inset);
+  left: var(--inset);
+  right: var(--inset);
+  bottom: var(--inset);
+  border: 3px dotted rgba(255, 255, 255, 0.5);
+  border-radius: 13%;
+  animation: spin90 10s ease-in-out infinite;
+  overflow: hidden;
 }
 
 .win-state {
@@ -85,7 +136,8 @@
   text-transform: uppercase;
   display: block;
   width: 100%;
-  margin: 1.2rem 0 0;
+  /** PostCSS classes in ordering issue, it seems */
+  margin: 1.2rem 0 0 !important;
   font-size: 1.1rem;
   letter-spacing: 0.2rem;
 }

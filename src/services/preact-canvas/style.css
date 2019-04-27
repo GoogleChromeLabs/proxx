@@ -1,13 +1,15 @@
 html {
   /* Catch any browsers that still overscroll (eg Safari) */
   background-color: #000;
-  font-family: 'Space Mono';
+  font-family: 'Space Mono', monospace;
   font-size: 0.7em;
   --cell-size: 25px;
   --cell-padding: 2px;
   --side-margin: 10px;
   --icon-size: 15px;
-  --bar-avoid: 43px;
+  --circlebtn-size: 24px;
+  --bar-avoid: 40px;
+  --bar-padding: 5px;
   --border-radius: 7px;
 }
 
@@ -17,9 +19,11 @@ html {
     font-size: 1em;
     --cell-size: 40px;
     --cell-padding: 5px;
-    --side-margin: 20px;
+    --side-margin: 24px;
     --icon-size: 24px;
-    --bar-avoid: 70px;
+    --circlebtn-size: 48px;
+    --bar-avoid: 78px;
+    --bar-padding: 18px;
   }
 }
 
@@ -32,6 +36,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+}
+
+a {
+  color: white;
 }
 
 .main {

@@ -11,10 +11,21 @@
  * limitations under the License.
  */
 
-const url = new URL(location.href);
-
-export const prerender = url.searchParams.has("prerender");
-export const debug = url.searchParams.has("debug");
-export const noCache = url.searchParams.has("no-cache");
-export const noMotion = url.searchParams.has("force-nomotion");
-export const forceMotion = url.searchParams.has("force-motion");
+export default function assetTransformPlugin(callback) {
+  return {
+    name: "asset-transform-plugin",
+    async generateBundle(_, bundle) {
+      for (const bundleEntry of Object.values(bundle)) {
+        if (!bundleEntry.isAsset) {
+          continue;
+        }
+        const newBundleEntry = await callback(bundleEntry);
+        if (!newBundleEntry) {
+          continue;
+        }
+        delete bundle[bundleEntry.fileName];
+        bundle[newBundleEntry.fileName] = newBundleEntry;
+      }
+    }
+  };
+}

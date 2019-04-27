@@ -13,6 +13,8 @@
 
 import { Cell } from "src/gamelogic/types";
 import ShaderBox from "src/utils/shaderbox";
+import { forceMotion, noMotion } from "../utils/constants";
+import { isFeaturePhone } from "../utils/static-dpr";
 import { AnimationDesc } from "./animation";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
@@ -22,6 +24,7 @@ export interface Renderer {
   createCanvas(): HTMLCanvasElement;
   onResize(): void;
   updateFirstRect(rect: ClientRect | DOMRect): void;
+  setFocus(x: number, y: number): void;
   beforeRenderFrame(): void;
   beforeCell(
     x: number,
@@ -58,13 +61,12 @@ function supportsSufficientWebGL(): boolean {
   return true;
 }
 
-const parsedURL = new URL(location.href);
 export function shouldUseMotion(): boolean {
-  if (parsedURL.searchParams.has("force-nomotion")) {
+  if (noMotion) {
     return false;
   }
-  if (parsedURL.searchParams.has("force-motion")) {
+  if (forceMotion) {
     return true;
   }
-  return supportsSufficientWebGL() && matchMedia("(min-width: 320px)").matches;
+  return supportsSufficientWebGL() && !isFeaturePhone;
 }
