@@ -18,8 +18,9 @@ import {
   nebulaDangerLight,
   nebulaSafeDark,
   nebulaSafeLight,
-  ShaderColor,
-  shaderColor
+  nebulaSettingDark,
+  nebulaSettingLight,
+  ShaderColor
 } from "src/rendering/constants";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
@@ -67,6 +68,8 @@ interface State {
   mainColorDark: ShaderColor;
   altColorLight: ShaderColor;
   altColorDark: ShaderColor;
+  settingColorLight: ShaderColor;
+  settingColorDark: ShaderColor;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -107,7 +110,9 @@ class PreactService extends Component<Props, State> {
     altColorDark: nebulaDangerDark,
     altColorLight: nebulaDangerLight,
     mainColorDark: nebulaSafeDark,
-    mainColorLight: nebulaSafeLight
+    mainColorLight: nebulaSafeLight,
+    settingColorDark: nebulaSettingDark,
+    settingColorLight: nebulaSettingLight
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -132,7 +137,9 @@ class PreactService extends Component<Props, State> {
       altColorDark,
       altColorLight,
       mainColorDark,
-      mainColorLight
+      mainColorLight,
+      settingColorDark,
+      settingColorLight
     }: State
   ) {
     let mainComponent: VNode;
@@ -182,8 +189,8 @@ class PreactService extends Component<Props, State> {
           useAltColor={game ? dangerMode : false}
           altColorDark={altColorDark}
           altColorLight={altColorLight}
-          mainColorDark={mainColorDark}
-          mainColorLight={mainColorLight}
+          mainColorDark={settingsOpen ? settingColorDark : mainColorDark}
+          mainColorLight={settingsOpen ? settingColorLight : mainColorLight}
         />
         {mainComponent}
         <BottomBar
