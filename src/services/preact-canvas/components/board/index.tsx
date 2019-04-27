@@ -85,14 +85,14 @@ export default class Board extends Component<Props, State> {
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
-    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("scroll", this._onWindowScroll);
-    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -124,7 +124,7 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private _onKeyDown(event: KeyboardEvent) {
+  private _onKeyUp(event: KeyboardEvent) {
     if (event.key === "f" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }

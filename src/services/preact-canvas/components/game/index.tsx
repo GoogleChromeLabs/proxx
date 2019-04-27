@@ -141,9 +141,7 @@ export default class Game extends Component<Props, State> {
                   checked={!dangerMode}
                 />
                 <span class={toggle} role="status" />
-                <span aria-hidden="true" class={toggleLabelText}>
-                  Flag mode
-                </span>
+                <span class={toggleLabelText}>Flag mode</span>
               </label>
             ) : playMode === PlayMode.Lost ? (
               <div class={exitRow}>
