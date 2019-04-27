@@ -22,23 +22,12 @@
 }
 
 .toggle {
-  position: absolute;
   display: block;
-  top: 50%;
-  right: 100%;
-  transform: translateY(-50%);
   overflow: hidden;
-  background: rgba(255,255,255, .3);
-  border: 1px solid white;
+  background: white;
   height: 16px;
   width: 32px;
   border-radius: 16px;
-}
-
-.checkbox {
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
 }
 
 .toggle::before {
@@ -47,26 +36,32 @@
   height: 8px;
   width: 8px;
   border-radius: 100%;
-  background: black;
+  background: #000;
   display: block;
 }
 
 :checked+.toggle::before {
   margin-left: auto;
-  background: rgba(255,255,255, 1);
 }
 
-.checkbox.focus-visible + .toggle {
-  outline: 5px blue;
-  outline: 5px auto -webkit-focus-ring-color;
+.checkbox {
+  display: none;
 }
 
-.checkboxx:checked + .toggle::before {
-  margin-left: auto;
-}
-
-.toggle-label-text {
+.left-toggle-label,
+.right-toggle-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   margin: 0 0.6rem;
+}
+
+.left-toggle-label {
+  right: 100%;
+}
+
+.right-toggle-label {
+  left: 100%;
 }
 
 .again-button,
@@ -79,6 +74,7 @@
   font-size: 1.1rem;
   letter-spacing: 0.2rem;
 }
+
 
 .again-button {
   composes: button from "../../utils.css";
