@@ -11,8 +11,14 @@
  * limitations under the License.
  */
 
-const url = new URL(location.href);
+const canvasPool: HTMLCanvasElement[] = [];
+export function getCanvas(): HTMLCanvasElement {
+  if (canvasPool.length > 0) {
+    return canvasPool.shift()!;
+  }
+  return document.createElement("canvas");
+}
 
-export const prerender = url.searchParams.has("prerender");
-export const debug = url.searchParams.has("debug");
-export const noCache = url.searchParams.has("no-cache");
+export function putCanvas(canvas: HTMLCanvasElement) {
+  canvasPool.push(canvas);
+}

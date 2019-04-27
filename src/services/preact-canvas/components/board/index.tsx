@@ -12,14 +12,13 @@
  */
 import { Component, h } from "preact";
 import { StateChange } from "src/gamelogic/index.js";
+import { Animator } from "src/rendering/animator.js";
+import { Renderer } from "src/rendering/renderer.js";
+import { putCanvas } from "src/utils/canvas-pool.js";
+import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
-
-import { Animator } from "src/rendering/animator.js";
-import MotionAnimator from "src/rendering/motion-animator/index.js";
-import NoMotionAnimator from "src/rendering/no-motion-animator/index.js";
-import { Renderer } from "src/rendering/renderer.js";
 import {
   board,
   button as buttonStyle,
@@ -50,7 +49,15 @@ export interface Props {
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
 }
 
-export default class Board extends Component<Props> {
+interface State {
+  keyNavigation: boolean;
+}
+
+export default class Board extends Component<Props, State> {
+  state: State = {
+    keyNavigation: false
+  };
+
   private _canvas?: HTMLCanvasElement;
   private _table?: HTMLTableElement;
   private _buttons: HTMLButtonElement[] = [];
@@ -78,7 +85,6 @@ export default class Board extends Component<Props> {
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keydown", this._onKeyDown);
-    window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
@@ -86,10 +92,10 @@ export default class Board extends Component<Props> {
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("scroll", this._onWindowScroll);
     window.removeEventListener("keydown", this._onKeyDown);
-    window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
+    putCanvas(this._canvas!);
   }
 
   shouldComponentUpdate() {
@@ -118,14 +124,7 @@ export default class Board extends Component<Props> {
 
   @bind
   private _onKeyDown(event: KeyboardEvent) {
-    if (event.key === "Shift") {
-      this.props.onDangerModeChange(!this.props.dangerMode);
-    }
-  }
-
-  @bind
-  private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Shift") {
+    if (event.key === "f" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
   }
@@ -158,6 +157,16 @@ export default class Board extends Component<Props> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
+
+        // set only 1st cell tab focusable
+        if (row === 0 && col === 0) {
+          button.setAttribute("tabindex", "0");
+        } else {
+          button.setAttribute("tabindex", "-1");
+        }
+        button.addEventListener("mouseenter", event => {
+          this.moveFocusOnHover(event);
+        });
         this._additionalButtonData.set(button, [x, y, defaultCell]);
         this._updateButton(button, defaultCell, x, y);
         this._buttons.push(button);
@@ -170,8 +179,10 @@ export default class Board extends Component<Props> {
     this._canvas.classList.add(canvasStyle);
     this.base!.appendChild(this._canvas);
     tableContainer!.appendChild(this._table);
-    this._table.addEventListener("click", this._onClick);
-    this._table.addEventListener("mouseup", this._onMouseUp);
+    this._table.addEventListener("keydown", this.onKeyDownOnTable);
+    this._table.addEventListener("keyup", this.onKeyUpOnTable);
+    this._table.addEventListener("mouseup", this.onMouseUp);
+    this._table.addEventListener("mousedown", this.onMouseDown);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
@@ -188,26 +199,114 @@ export default class Board extends Component<Props> {
   }
 
   @bind
-  private _onMouseUp(event: MouseEvent) {
-    if (event.button !== 2) {
-      return;
+  private setFocus(button: HTMLButtonElement) {
+    button.focus();
+    if (isFeaturePhone || this.state.keyNavigation) {
+      const [x, y] = this._additionalButtonData.get(button)!;
+      this.props.renderer.setFocus(x, y);
     }
+  }
 
-    event.preventDefault();
-    this._onClick(event, true);
+  // Mouse move will change focused button. This is needed for simulateClick.
+  @bind
+  private moveFocusOnHover(event: MouseEvent) {
+    this.setState({ keyNavigation: false });
+    const button = event.target as HTMLButtonElement;
+    this.setFocus(button);
   }
 
   @bind
-  private _onClick(event: MouseEvent | TouchEvent, alt = false) {
-    const target = event.target as HTMLElement;
-    const button = target.closest("button");
+  private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
+    this.setState({ keyNavigation: true });
+    const currentBtn = document.activeElement as HTMLButtonElement;
+    const btnInfo = this._additionalButtonData.get(currentBtn)!;
+    const x = btnInfo[0];
+    const y = btnInfo[1];
+    const width = this.props.width;
+    const height = this.props.height;
+
+    // move x, y position by passed steps h:horizontal, v:vertical
+    const newX = x + h;
+    const newY = y + v;
+
+    // Check if [newX, newY] position is out of the game field.
+    if (newX < 0 || newX >= width || (newY < 0 || newY >= height)) {
+      return;
+    }
+
+    const nextIndex = newX + newY * width;
+    const nextBtn = this._buttons[nextIndex];
+
+    // Change `tabindex="0"` to the next button so that when user tab out of the game
+    // (to select setting menu, for example) they comeback to where they left off.
+    currentBtn.setAttribute("tabindex", "-1");
+    nextBtn.setAttribute("tabindex", "0");
+
+    this.setFocus(nextBtn);
+  }
+
+  @bind
+  private onKeyUpOnTable(event: KeyboardEvent) {
+    if (event.key === "Tab") {
+      this.setState({ keyNavigation: true });
+      this.moveFocusByKey(event, 0, 0);
+    }
+  }
+
+  @bind
+  private onKeyDownOnTable(event: KeyboardEvent) {
+    // Since click action is tied to mouseup event,
+    // listen to Enter in case of key navigation click.
+    // Key 8 support is for T9 navigation
+    if (event.key === "Enter" || event.key === "8") {
+      this.simulateClick(event);
+    } else if (event.key === "ArrowRight" || event.key === "9") {
+      this.moveFocusByKey(event, 1, 0);
+    } else if (event.key === "ArrowLeft" || event.key === "7") {
+      this.moveFocusByKey(event, -1, 0);
+    } else if (event.key === "ArrowUp" || event.key === "5") {
+      this.moveFocusByKey(event, 0, -1);
+    } else if (event.key === "ArrowDown" || event.key === "0") {
+      this.moveFocusByKey(event, 0, 1);
+    }
+  }
+
+  // Stopping event is necessary for preventing click event on KaiOS
+  // which moves focus to the mouse and end up clicking two cells,
+  // one under the mouse and one that is currently focused
+  @bind
+  private onMouseUp(event: MouseEvent) {
+    event.preventDefault();
+
+    if (event.button !== 2) {
+      // normal click
+      this.simulateClick(event);
+      return;
+    }
+    // right (two finger) click
+    this.simulateClick(event, true);
+  }
+
+  // Same as mouseup, necessary for preventing click event on KaiOS
+  @bind
+  private onMouseDown(event: MouseEvent) {
+    event.preventDefault();
+  }
+
+  @bind
+  private simulateClick(
+    event: MouseEvent | TouchEvent | KeyboardEvent,
+    alt = false
+  ) {
+    // find which button = cell has current focus
+    const button = document.activeElement as HTMLButtonElement;
     if (!button) {
       return;
     }
     event.preventDefault();
 
-    const cell = this._additionalButtonData.get(button)!;
-    this.props.onCellClick(cell, alt);
+    const buttonData = this._additionalButtonData.get(button)!;
+    this.props.onCellClick(buttonData, alt);
   }
 
   private _updateButton(
@@ -217,17 +316,14 @@ export default class Board extends Component<Props> {
     y: number
   ) {
     let cellState;
-    const position = `${x + 1}, ${y + 1}`;
     if (!cell.revealed) {
-      cellState = cell.flagged
-        ? `flag at ${position}`
-        : `hidden at ${position}`;
+      cellState = cell.flagged ? `flag` : `hidden`;
     } else if (cell.hasMine) {
-      cellState = `mine at ${position}`; // should it say black hole?
+      cellState = `black hole`;
     } else if (cell.touchingMines === 0) {
-      cellState = `blank at ${position}`;
+      cellState = `blank`;
     } else {
-      cellState = `${cell.touchingMines} at ${position}`;
+      cellState = `${cell.touchingMines}`;
     }
 
     btn.setAttribute("aria-label", cellState);
