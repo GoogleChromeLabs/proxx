@@ -342,17 +342,18 @@ export default class Board extends Component<Props, State> {
 
     event.preventDefault();
 
-    // find currently focused element.
-    const active = document.activeElement as HTMLButtonElement;
-    const activebtn = this._additionalButtonData.get(active);
-
-    if (!activebtn) {
-      // no button has focus so move focus to the button with mouse on it.
-      button.focus();
-    } else {
-      // If active button exists, then that button should be clicked.
-      // This is needed for feature phone.
-      button = active;
+    if (isFeaturePhone || cellFocusMode) {
+      // find currently focused element.
+      const active = document.activeElement as HTMLButtonElement;
+      const activebtn = this._additionalButtonData.get(active);
+      if (!activebtn) {
+        // no other butten has focus, so it's safe to focus on mouse
+        this.setFocus(button);
+      } else {
+        // If active button exists, then that button should be clicked.
+        // This is needed for feature phone.
+        button = active;
+      }
     }
 
     if (event.button !== 2) {
