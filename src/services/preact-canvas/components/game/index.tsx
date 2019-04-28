@@ -192,8 +192,12 @@ export default class Game extends Component<Props, State> {
     this.props.gameChangeUnsubscribe(this.onGameChange);
   }
 
-  componentDidUpdate() {
-    if (this._tryAgainBtn) {
+  componentDidUpdate(_: Props, previousState: State) {
+    if (
+      this.state.playMode === PlayMode.Lost &&
+      previousState.playMode !== PlayMode.Lost &&
+      this._tryAgainBtn
+    ) {
       this._tryAgainBtn.focus();
     }
   }
