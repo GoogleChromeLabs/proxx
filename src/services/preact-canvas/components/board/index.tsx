@@ -20,6 +20,7 @@ import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
+import BottomBar from "../bottom-bar/index.js";
 import {
   board,
   button as buttonStyle,
@@ -165,8 +166,8 @@ export default class Board extends Component<Props, State> {
         } else {
           button.setAttribute("tabindex", "-1");
         }
-        button.addEventListener("mouseenter", event => {
-          this.moveFocusOnHover(event);
+        button.addEventListener("blur", () => {
+          this.removeFocusVisual();
         });
         this._additionalButtonData.set(button, [x, y, defaultCell]);
         this._updateButton(button, defaultCell, x, y);
@@ -184,11 +185,12 @@ export default class Board extends Component<Props, State> {
     this._table.addEventListener("keyup", this.onKeyUpOnTable);
     this._table.addEventListener("mouseup", this.onMouseUp);
     this._table.addEventListener("mousedown", this.onMouseDown);
-    this._table.addEventListener("mouseout", this.onMouseOut);
-    this._table.addEventListener("focusout", this.onFocusOut);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
+    if (isFeaturePhone || cellFocus) {
+      this._table.addEventListener("mousemove", this.moveFocusVisualWithMouse);
+    }
   }
 
   private _rendererInit() {
@@ -202,25 +204,29 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private setFocus(button: HTMLButtonElement) {
-    button.focus();
-    if (isFeaturePhone || this.state.keyNavigation || cellFocus) {
-      const [x, y] = this._additionalButtonData.get(button)!;
-      this.props.renderer.setFocus(x, y);
-    }
+  private removeFocusVisual() {
+    this.props.renderer.setFocus(-1, -1);
   }
 
-  // Mouse move will change focused button. This is needed for simulateClick.
   @bind
-  private moveFocusOnHover(event: MouseEvent) {
-    this.setState({ keyNavigation: false });
-    const button = event.target as HTMLButtonElement;
-    this.setFocus(button);
+  private setFocusVisual(button: HTMLButtonElement) {
+    const [x, y] = this._additionalButtonData.get(button)!;
+    this.props.renderer.setFocus(x, y);
+  }
+
+  @bind
+  private moveFocusVisualWithMouse(event: MouseEvent) {
+    const target = event.target as HTMLButtonElement;
+    const btn = this._additionalButtonData.get(target);
+    if (btn) {
+      this.setFocusVisual(target);
+    } else {
+      this.removeFocusVisual();
+    }
   }
 
   @bind
   private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
-    this.setState({ keyNavigation: true });
     const currentBtn = document.activeElement as HTMLButtonElement;
     const btnInfo = this._additionalButtonData.get(currentBtn)!;
     const x = btnInfo[0];
@@ -245,13 +251,14 @@ export default class Board extends Component<Props, State> {
     currentBtn.setAttribute("tabindex", "-1");
     nextBtn.setAttribute("tabindex", "0");
 
-    this.setFocus(nextBtn);
+    nextBtn.focus();
+    this.setFocusVisual(nextBtn);
   }
 
   @bind
   private onKeyUpOnTable(event: KeyboardEvent) {
+    // TODO see if this is right
     if (event.key === "Tab") {
-      this.setState({ keyNavigation: true });
       this.moveFocusByKey(event, 0, 0);
     }
   }
@@ -279,8 +286,17 @@ export default class Board extends Component<Props, State> {
   // one under the mouse and one that is currently focused
   @bind
   private onMouseUp(event: MouseEvent) {
+    // hit test if the mouse up was on a button if not, cancel this.
+    const target = event.target as HTMLButtonElement;
+    const btn = this._additionalButtonData.get(target);
+    if (!btn) {
+      return;
+    }
+
     event.preventDefault();
 
+    // Focus on a button that's under the mouse prior to simurateClick
+    target.focus();
     if (event.button !== 2) {
       // normal click
       this.simulateClick(event);
@@ -296,17 +312,6 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
   }
 
-  // @bind
-  private onMouseOut(event: MouseEvent) {
-    //   console.log('mouseout!')
-    //   this.props.renderer.setFocus(-1, -1);
-  }
-
-  @bind
-  private onFocusOut(event: any) {
-    this.props.renderer.setFocus(-1, -1);
-  }
-
   @bind
   private simulateClick(
     event: MouseEvent | TouchEvent | KeyboardEvent,
@@ -314,7 +319,6 @@ export default class Board extends Component<Props, State> {
   ) {
     // find which button = cell has current focus
     const button = document.activeElement as HTMLButtonElement;
-    console.log(button);
     if (!button) {
       return;
     }
