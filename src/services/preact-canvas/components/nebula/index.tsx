@@ -86,6 +86,14 @@ export default class Nebula extends Component<Props, State> {
     }
   }
 
+  shouldComponentUpdate({ colorLight, colorDark }: Props) {
+    const didLightColorChange =
+      JSON.stringify(this.props.colorLight) !== JSON.stringify(colorLight);
+    const didDarkColorChange =
+      JSON.stringify(this.props.colorDark) !== JSON.stringify(colorDark);
+    return didLightColorChange || didDarkColorChange;
+  }
+
   componentWillUnmount() {
     if (!this._shaderBox) {
       return;
