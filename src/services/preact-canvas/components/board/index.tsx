@@ -169,7 +169,6 @@ export default class Board extends Component<Props, State> {
           button.setAttribute("tabindex", "-1");
         }
         button.addEventListener("blur", () => {
-          console.log("blur");
           this.removeFocusVisual();
         });
         this._additionalButtonData.set(button, [x, y, defaultCell]);
@@ -238,6 +237,7 @@ export default class Board extends Component<Props, State> {
     const targetIsBtn = this._additionalButtonData.get(targetBtn);
     if (!targetIsBtn) {
       // the mouse is not on a button
+      this.removeFocusVisual();
       return;
     }
 
@@ -246,10 +246,10 @@ export default class Board extends Component<Props, State> {
     const activeIsBtn = this._additionalButtonData.get(activeBtn);
 
     if (activeIsBtn && activeBtn !== targetBtn) {
-      // Blur the button that currently has focus and move focus to target button
+      // If different button has focus, blur the button.
       activeBtn.blur();
-      this.setFocus(targetBtn);
     }
+    this.setFocus(targetBtn);
   }
 
   @bind
