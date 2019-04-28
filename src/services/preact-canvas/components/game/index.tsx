@@ -116,6 +116,7 @@ export default class Game extends Component<Props, State> {
             width={width}
             height={height}
             mines={mines}
+            useMotion={this.props.useMotion}
           />
         ) : renderer && animator ? (
           [

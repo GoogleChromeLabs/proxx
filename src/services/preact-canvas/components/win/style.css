@@ -77,6 +77,15 @@
   overflow: hidden;
 }
 
+.win-square.no-motion {
+  animation-play-state: paused;
+}
+
+.win-square.no-motion div {
+  transform: rotate(-5deg);
+  animation-play-state: paused;
+}
+
 .win-state {
   margin: 1.4rem 0;
   text-align: center;
