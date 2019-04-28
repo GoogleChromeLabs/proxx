@@ -46,13 +46,6 @@ import { game as gameClassName, main } from "./style.css";
 // loading screen?
 const loadingScreenTimeout = 1000;
 
-const altColorDark = nebulaDangerDark;
-const altColorLight = nebulaDangerLight;
-const mainColorDark = nebulaSafeDark;
-const mainColorLight = nebulaSafeLight;
-const settingColorDark = nebulaSettingDark;
-const settingColorLight = nebulaSettingLight;
-
 export interface GridType {
   width: number;
   height: number;
@@ -208,22 +201,22 @@ class PreactService extends Component<Props, State> {
 
   private _nebulaLightColor() {
     if (this.state.settingsOpen) {
-      return settingColorLight;
+      return nebulaSettingLight;
     }
     if (this.state.dangerMode) {
-      return altColorLight;
+      return nebulaDangerLight;
     }
-    return mainColorLight;
+    return nebulaSafeLight;
   }
 
   private _nebulaDarkColor() {
     if (this.state.settingsOpen) {
-      return settingColorDark;
+      return nebulaSettingDark;
     }
     if (this.state.dangerMode) {
-      return altColorDark;
+      return nebulaDangerDark;
     }
-    return mainColorDark;
+    return nebulaSafeDark;
   }
 
   @bind
