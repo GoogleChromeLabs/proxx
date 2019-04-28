@@ -87,10 +87,8 @@ export default class Nebula extends Component<Props, State> {
   }
 
   shouldComponentUpdate({ colorLight, colorDark }: Props) {
-    const didLightColorChange =
-      JSON.stringify(this.props.colorLight) !== JSON.stringify(colorLight);
-    const didDarkColorChange =
-      JSON.stringify(this.props.colorDark) !== JSON.stringify(colorDark);
+    const didLightColorChange = !colorEqual(this.props.colorLight, colorLight);
+    const didDarkColorChange = !colorEqual(this.props.colorDark, colorDark);
     return didLightColorChange || didDarkColorChange;
   }
 
@@ -178,4 +176,8 @@ export default class Nebula extends Component<Props, State> {
       requestAnimationFrame(this._loop);
     }
   }
+}
+
+function colorEqual(c1: Color, c2: Color): boolean {
+  return c1[0] === c2[0] && c1[1] === c2[1] && c1[2] === c2[2];
 }
