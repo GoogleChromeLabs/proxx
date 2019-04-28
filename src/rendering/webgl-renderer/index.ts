@@ -103,7 +103,6 @@ export default class WebGlRenderer implements Renderer {
 
   createCanvas(): HTMLCanvasElement {
     this._canvas = getCanvas("webgl");
-    this._canvas.setAttribute("aria-hidden", "true");
     return this._canvas;
   }
 
