@@ -17,3 +17,5 @@ export const prerender = url.searchParams.has("prerender");
 export const debug = url.searchParams.has("debug");
 export const noCache = url.searchParams.has("no-cache");
 export const cellFocusMode = url.searchParams.has("cell-focus");
+export const noMotion = url.searchParams.has("force-nomotion");
+export const forceMotion = url.searchParams.has("force-motion");

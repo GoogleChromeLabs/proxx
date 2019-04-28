@@ -12,9 +12,13 @@
  */
 
 const canvasPool: HTMLCanvasElement[] = [];
-export function getCanvas(): HTMLCanvasElement {
+export function getCanvas(context: "2d" | "webgl"): HTMLCanvasElement {
   if (canvasPool.length > 0) {
-    return canvasPool.shift()!;
+    const pooledCanvas = canvasPool.shift()!;
+    // check if the pooled canvas has same context as the requested one
+    if (pooledCanvas.getContext(context)) {
+      return pooledCanvas;
+    }
   }
   return document.createElement("canvas");
 }

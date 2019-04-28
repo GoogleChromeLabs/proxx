@@ -14,6 +14,7 @@
 import workerURL from "chunk-name:./worker.js";
 import { Remote } from "comlink/src/comlink.js";
 import { game as gameUI } from "./services/preact-canvas/index.js";
+import { prerender } from "./utils/constants.js";
 import { nextEvent } from "./utils/scheduling.js";
 import { RemoteServices } from "./worker.js";
 
@@ -39,3 +40,14 @@ async function bootstrap() {
 }
 
 bootstrap().catch(e => console.error(e));
+
+if (!prerender) {
+  window.ga = window.ga || ((...args: any[]) => (ga.q = ga.q || []).push(args));
+  ga("create", "UA-139146337-1", "auto");
+  ga("set", "transport", "beacon");
+  ga("send", "pageview");
+  // Load the GA script
+  const s = document.createElement("script");
+  s.src = "https://www.google-analytics.com/analytics.js";
+  document.head!.appendChild(s);
+}
