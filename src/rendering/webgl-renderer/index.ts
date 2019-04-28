@@ -395,6 +395,9 @@ export default class WebGlRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    if (ts < animation.start) {
+      return;
+    }
     const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
     const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
     dynamicTileDataA[DynamicTileDataA.STATIC_TILE] = STATIC_TEXTURE.MINE;
