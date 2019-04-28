@@ -137,7 +137,11 @@ export default class Intro extends Component<Props, State> {
     return (
       <div class={introStyle}>
         <TopBar titleOnly />
-        <form onSubmit={this._startGame} class={startFormStyle}>
+        <form
+          onSubmit={this._startGame}
+          class={startFormStyle}
+          aria-label="game settings"
+        >
           <div class={settingsRowStyle}>
             <label class={labelStyle}>
               <span class={labelTextStyle}>Difficulty</span>

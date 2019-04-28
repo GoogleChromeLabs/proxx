@@ -20,7 +20,10 @@ export function getCanvas(context: "2d" | "webgl"): HTMLCanvasElement {
       return pooledCanvas;
     }
   }
-  return document.createElement("canvas");
+
+  const canvas = document.createElement("canvas");
+  canvas.setAttribute("aria-hidden", "true");
+  return canvas;
 }
 
 export function putCanvas(canvas: HTMLCanvasElement) {

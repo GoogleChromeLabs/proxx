@@ -40,12 +40,20 @@
   display: block;
 }
 
+.checkbox:global(.focus-visible) + .toggle {
+  outline: 5px blue;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
 :checked+.toggle::before {
   margin-left: auto;
 }
 
 .checkbox {
-  display: none;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .left-toggle-label,

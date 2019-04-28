@@ -117,7 +117,7 @@ export default class Nebula extends Component<Props, State> {
         )}, ${toRGB(colorDark)})`}
         class={nebulaContainerStyle}
       >
-        <canvas class={nebulaStyle} />
+        <canvas class={nebulaStyle} aria-hidden="true" />
       </div>
     );
   }

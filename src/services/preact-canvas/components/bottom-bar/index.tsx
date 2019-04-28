@@ -34,7 +34,7 @@ export default class BottomBar extends Component<Props, State> {
     display
   }: Props) {
     return (
-      <div class={[bottomBar, display ? "" : hidden].join("")}>
+      <div class={[bottomBar, display ? "" : hidden].join("")} role="menubar">
         {buttonType === "back" ? (
           <button
             class={icons}
@@ -52,7 +52,11 @@ export default class BottomBar extends Component<Props, State> {
             <Settings />
           </button>
         )}
-        <button class={fullscreen} onClick={onFullscreenClick}>
+        <button
+          class={fullscreen}
+          onClick={onFullscreenClick}
+          aria-label="fullscreen mode"
+        >
           <Fullscreen />
         </button>
       </div>

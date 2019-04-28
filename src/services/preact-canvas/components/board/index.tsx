@@ -87,14 +87,14 @@ export default class Board extends Component<Props, State> {
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
-    window.addEventListener("keydown", this._onKeyDown);
+    window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("scroll", this._onWindowScroll);
-    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -126,7 +126,7 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private _onKeyDown(event: KeyboardEvent) {
+  private _onKeyUp(event: KeyboardEvent) {
     if (event.key === "f" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
@@ -160,13 +160,17 @@ export default class Board extends Component<Props, State> {
     const tableContainer = document.querySelector("." + containerStyle);
     this._table = document.createElement("table");
     this._table.classList.add(gameTable);
+    this._table.setAttribute("role", "grid");
+    this._table.setAttribute("aria-label", "The game grid");
     for (let row = 0; row < height; row++) {
       const tr = document.createElement("tr");
+      tr.setAttribute("role", "row");
       tr.classList.add(gameRow);
       for (let col = 0; col < width; col++) {
         const y = row;
         const x = col;
         const td = document.createElement("td");
+        td.setAttribute("role", "gridcell");
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
