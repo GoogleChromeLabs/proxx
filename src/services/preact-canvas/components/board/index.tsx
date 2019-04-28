@@ -15,10 +15,12 @@ import { StateChange } from "src/gamelogic/index.js";
 import { Animator } from "src/rendering/animator.js";
 import { Renderer } from "src/rendering/renderer.js";
 import { putCanvas } from "src/utils/canvas-pool.js";
+import { cellFocusMode } from "src/utils/constants.js";
 import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
+import BottomBar from "../bottom-bar/index.js";
 import {
   board,
   button as buttonStyle,
@@ -66,6 +68,7 @@ export default class Board extends Component<Props, State> {
     HTMLButtonElement,
     [number, number, Cell]
   >();
+  private _currentTabableBtn?: HTMLButtonElement;
 
   componentDidMount() {
     document.documentElement.classList.add("in-game");
@@ -127,6 +130,16 @@ export default class Board extends Component<Props, State> {
     if (event.key === "f" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
     }
+
+    if (
+      (isFeaturePhone || cellFocusMode) &&
+      (event.key === "9" ||
+        event.key === "7" ||
+        event.key === "5" ||
+        event.key === "0")
+    ) {
+      this.moveFocusByKey(event, 0, 0);
+    }
   }
 
   @bind
@@ -161,12 +174,11 @@ export default class Board extends Component<Props, State> {
         // set only 1st cell tab focusable
         if (row === 0 && col === 0) {
           button.setAttribute("tabindex", "0");
+          this._currentTabableBtn = button;
         } else {
           button.setAttribute("tabindex", "-1");
         }
-        button.addEventListener("mouseenter", event => {
-          this.moveFocusOnHover(event);
-        });
+        button.addEventListener("blur", this.removeFocusVisual);
         this._additionalButtonData.set(button, [x, y, defaultCell]);
         this._updateButton(button, defaultCell, x, y);
         this._buttons.push(button);
@@ -186,6 +198,12 @@ export default class Board extends Component<Props, State> {
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
+    // On feature phone, show focus visual on mouse hover as well
+    // Have to be mousemove on table, instead of mouseenter on buttons to avoid
+    // unwanted focus move on scroll.
+    if (isFeaturePhone || cellFocusMode) {
+      this._table.addEventListener("mousemove", this.moveFocusWithMouse);
+    }
   }
 
   private _rendererInit() {
@@ -199,27 +217,63 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private setFocus(button: HTMLButtonElement) {
-    button.focus();
-    if (isFeaturePhone || this.state.keyNavigation) {
-      const [x, y] = this._additionalButtonData.get(button)!;
-      this.props.renderer.setFocus(x, y);
-    }
+  private removeFocusVisual() {
+    this.props.renderer.setFocus(-1, -1);
   }
 
-  // Mouse move will change focused button. This is needed for simulateClick.
   @bind
-  private moveFocusOnHover(event: MouseEvent) {
-    this.setState({ keyNavigation: false });
-    const button = event.target as HTMLButtonElement;
-    this.setFocus(button);
+  private setFocusVisual(button: HTMLButtonElement) {
+    const [x, y] = this._additionalButtonData.get(button)!;
+    this.props.renderer.setFocus(x, y);
+  }
+
+  @bind
+  private setFocus(newFocusBtn: HTMLButtonElement) {
+    // move tab index to targetBtn (necessary for roving tabindex)
+    this._currentTabableBtn!.setAttribute("tabIndex", "-1");
+    newFocusBtn.setAttribute("tabIndex", "0");
+    this._currentTabableBtn = newFocusBtn;
+
+    newFocusBtn.focus();
+    this.setFocusVisual(newFocusBtn);
+  }
+
+  @bind
+  private moveFocusWithMouse(event: MouseEvent) {
+    // Find if the mouse is on one of the button
+    const targetBtn = event.target as HTMLButtonElement;
+    const targetIsBtn = this._additionalButtonData.has(targetBtn);
+    if (!targetIsBtn) {
+      // the mouse is not on a button
+      this.removeFocusVisual();
+      return;
+    }
+
+    // Locate button that currently have focus
+    const activeBtn = document.activeElement as HTMLButtonElement;
+    const activeIsBtn = this._additionalButtonData.has(activeBtn);
+    if (activeIsBtn && activeBtn !== targetBtn) {
+      // If different button has focus, blur the button.
+      activeBtn.blur();
+    }
+    this.setFocus(targetBtn);
   }
 
   @bind
   private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
-    this.setState({ keyNavigation: true });
+    event.stopPropagation();
+
+    // Find which button has focus
     const currentBtn = document.activeElement as HTMLButtonElement;
-    const btnInfo = this._additionalButtonData.get(currentBtn)!;
+    let btnInfo = this._additionalButtonData.get(currentBtn);
+
+    // If no button has focus, key navigation must have came back to the table.
+    // Focus back on tabindex=0 button first.
+    if (!btnInfo) {
+      this._currentTabableBtn!.focus();
+      btnInfo = this._additionalButtonData.get(this._currentTabableBtn!)!;
+    }
+
     const x = btnInfo[0];
     const y = btnInfo[1];
     const width = this.props.width;
@@ -236,19 +290,12 @@ export default class Board extends Component<Props, State> {
 
     const nextIndex = newX + newY * width;
     const nextBtn = this._buttons[nextIndex];
-
-    // Change `tabindex="0"` to the next button so that when user tab out of the game
-    // (to select setting menu, for example) they comeback to where they left off.
-    currentBtn.setAttribute("tabindex", "-1");
-    nextBtn.setAttribute("tabindex", "0");
-
     this.setFocus(nextBtn);
   }
 
   @bind
   private onKeyUpOnTable(event: KeyboardEvent) {
     if (event.key === "Tab") {
-      this.setState({ keyNavigation: true });
       this.moveFocusByKey(event, 0, 0);
     }
   }
@@ -259,7 +306,12 @@ export default class Board extends Component<Props, State> {
     // listen to Enter in case of key navigation click.
     // Key 8 support is for T9 navigation
     if (event.key === "Enter" || event.key === "8") {
-      this.simulateClick(event);
+      const button = document.activeElement as HTMLButtonElement;
+      if (!button) {
+        return;
+      }
+      event.preventDefault();
+      this.simulateClick(button);
     } else if (event.key === "ArrowRight" || event.key === "9") {
       this.moveFocusByKey(event, 1, 0);
     } else if (event.key === "ArrowLeft" || event.key === "7") {
@@ -276,15 +328,36 @@ export default class Board extends Component<Props, State> {
   // one under the mouse and one that is currently focused
   @bind
   private onMouseUp(event: MouseEvent) {
+    // hit test if the mouse up was on a button if not, cancel.
+    let targetButton = event.target as HTMLButtonElement;
+    const targetButtonData = this._additionalButtonData.get(targetButton);
+    if (!targetButtonData) {
+      return;
+    }
+
     event.preventDefault();
+
+    if (isFeaturePhone || cellFocusMode) {
+      // find currently focused element.
+      const activeButton = document.activeElement as HTMLButtonElement;
+      const isActiveBtn = this._additionalButtonData.has(activeButton);
+      if (!isActiveBtn) {
+        // no other butten has focus, so it's safe to focus on mouse
+        this.setFocus(targetButton);
+      } else {
+        // If active button exists, then that button should be clicked.
+        // This is needed for feature phone.
+        targetButton = activeButton;
+      }
+    }
 
     if (event.button !== 2) {
       // normal click
-      this.simulateClick(event);
+      this.simulateClick(targetButton);
       return;
     }
     // right (two finger) click
-    this.simulateClick(event, true);
+    this.simulateClick(targetButton, true);
   }
 
   // Same as mouseup, necessary for preventing click event on KaiOS
@@ -294,24 +367,8 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private simulateClick(
-    event: MouseEvent | TouchEvent | KeyboardEvent,
-    alt = false
-  ) {
-    // find which button = cell has current focus
-    const button = document.activeElement as HTMLButtonElement;
-    if (!button) {
-      return;
-    }
-
-    const buttonData = this._additionalButtonData.get(button);
-
-    if (!buttonData) {
-      // The active element isn't actually a button in our table
-      return;
-    }
-
-    event.preventDefault();
+  private simulateClick(button: HTMLButtonElement, alt = false) {
+    const buttonData = this._additionalButtonData.get(button)!;
     this.props.onCellClick(buttonData, alt);
   }
 
