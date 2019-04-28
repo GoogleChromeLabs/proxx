@@ -14,13 +14,14 @@
 import { Remote } from "comlink/src/comlink.js";
 import { Component, ComponentConstructor, h, render, VNode } from "preact";
 import {
+  Color,
   nebulaDangerDark,
   nebulaDangerLight,
   nebulaSafeDark,
   nebulaSafeLight,
   nebulaSettingDark,
   nebulaSettingLight,
-  ShaderColor
+  toRGB
 } from "src/rendering/constants";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
@@ -37,10 +38,7 @@ import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
 import GameLoading from "./components/game-loading";
 import Intro from "./components/intro/index.js";
-import {
-  nebula as nebulaStyle,
-  notDangerMode as notDangerModeStyle
-} from "./components/nebula/style.css";
+import { nebulaContainer as nebulaContainerStyle } from "./components/nebula/style.css";
 import { game as gameClassName, main } from "./style.css";
 
 // If the user tries to start a game when we aren't ready, how long do we wait before showing the
@@ -64,12 +62,12 @@ interface State {
   awaitingGame: boolean;
   settingsOpen: boolean;
   motionPreference: boolean;
-  mainColorLight: ShaderColor;
-  mainColorDark: ShaderColor;
-  altColorLight: ShaderColor;
-  altColorDark: ShaderColor;
-  settingColorLight: ShaderColor;
-  settingColorDark: ShaderColor;
+  mainColorLight: Color;
+  mainColorDark: Color;
+  altColorLight: Color;
+  altColorDark: Color;
+  settingColorLight: Color;
+  settingColorDark: Color;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -138,13 +136,7 @@ class PreactService extends Component<Props, State> {
       awaitingGame,
       gridDefaults,
       settingsOpen,
-      motionPreference,
-      altColorDark,
-      altColorLight,
-      mainColorDark,
-      mainColorLight,
-      settingColorDark,
-      settingColorLight
+      motionPreference
     }: State
   ) {
     let mainComponent: VNode;
@@ -190,13 +182,15 @@ class PreactService extends Component<Props, State> {
       <div class={gameClassName}>
         <Nebula
           loading={() => (
-            <div class={[nebulaStyle, notDangerModeStyle].join(" ")} />
+            <div
+              class={nebulaContainerStyle}
+              style={`background: linear-gradient(to bottom, ${toRGB(
+                nebulaSafeLight
+              )}, ${toRGB(nebulaSafeDark)})`}
+            />
           )}
-          useAltColor={game ? dangerMode : false}
-          altColorDark={altColorDark}
-          altColorLight={altColorLight}
-          mainColorDark={settingsOpen ? settingColorDark : mainColorDark}
-          mainColorLight={settingsOpen ? settingColorLight : mainColorLight}
+          colorDark={this._nebulaDarkColor()}
+          colorLight={this._nebulaLightColor()}
         />
         {mainComponent}
         <BottomBar
@@ -208,6 +202,26 @@ class PreactService extends Component<Props, State> {
         />
       </div>
     );
+  }
+
+  private _nebulaLightColor() {
+    if (this.state.settingsOpen) {
+      return this.state.settingColorLight;
+    }
+    if (this.state.dangerMode) {
+      return this.state.altColorLight;
+    }
+    return this.state.mainColorLight;
+  }
+
+  private _nebulaDarkColor() {
+    if (this.state.settingsOpen) {
+      return this.state.settingColorDark;
+    }
+    if (this.state.dangerMode) {
+      return this.state.altColorDark;
+    }
+    return this.state.mainColorDark;
   }
 
   @bind
@@ -278,6 +292,7 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private _onBackClick() {
+    this.setState({ dangerMode: false });
     this._stateService!.reset();
   }
 

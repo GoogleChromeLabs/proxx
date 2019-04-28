@@ -16,8 +16,14 @@ import { deg2rad, remap, smoothpulse } from "./animation-helpers.js";
 import { roundedRectangle } from "./canvas-helper.js";
 
 import {
-  blurFactor,
+  blackHoleInnerRadius,
+  blackHoleInnerRed,
+  blackHoleOuterRadius,
+  blackHoleOuterRed,
+  blackHoleRadius,
   borderRadius,
+  glowAlpha,
+  glowFactor,
   innerCircleRadius,
   numberCircleRadius,
   numberFontSizeFactor,
@@ -120,7 +126,8 @@ export function staticTextureGeneratorFactory(
   cvs2.width = cvs2.height = textureSize * staticDevicePixelRatio;
   const ctx2 = cvs2.getContext("2d")!;
   ctx2.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-
+  const blurIntensity = glowFactor;
+  const blitOnTop = true;
   return (idx: number, ctx: CanvasRenderingContext2D) => {
     ctx2.clearRect(0, 0, textureSize, textureSize);
 
@@ -179,9 +186,46 @@ export function staticTextureGeneratorFactory(
       ctx2.fillStyle = white;
       ctx2.fillRect(-halfSize, -halfSize, size, size);
     } else if (idx === STATIC_TEXTURE.MINE) {
-      ctx.fillStyle = "#f00";
+      let radius = halfSize * safetyBufferFactor * blackHoleOuterRadius;
+      // Pink disc to form outer pink ring
+      ctx.fillStyle = `rgb(${blackHoleOuterRed})`;
       ctx.beginPath();
-      ctx.arc(0, 0, halfSize, 0, 2 * Math.PI);
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.fill();
+
+      // Black disc as background for the radial ring.
+      radius *= blackHoleInnerRadius;
+      ctx.fillStyle = "black";
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.fill();
+
+      // Radial gradient on top of black disc to form the
+      // inner red ring.
+      const gradient = ctx.createRadialGradient(
+        0,
+        0,
+        radius * blackHoleRadius,
+        0,
+        0,
+        radius
+      );
+      gradient.addColorStop(0, `rgba(${blackHoleInnerRed}, .5)`);
+      gradient.addColorStop(1, `rgba(${blackHoleInnerRed}, .1)`);
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.fill();
+
+      // Black disc for the actual black hole
+      radius *= blackHoleRadius;
+      ctx.fillStyle = "black";
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx.closePath();
       ctx.fill();
     } else if (idx === STATIC_TEXTURE.FOCUS) {
       ctx2.fillStyle = "white";
@@ -199,8 +243,11 @@ export function staticTextureGeneratorFactory(
     ctx2.restore();
 
     ctx.save();
-    const blur = (textureSize * blurFactor).toFixed(1);
+    const blur = (textureSize * staticDevicePixelRatio * blurIntensity).toFixed(
+      1
+    );
     ctx.filter = `blur(${blur}px)`;
+    ctx.globalAlpha = glowAlpha;
     ctx.drawImage(
       cvs2,
       0,
@@ -212,18 +259,21 @@ export function staticTextureGeneratorFactory(
       textureSize,
       textureSize
     );
-    ctx.filter = "none";
-    ctx.drawImage(
-      cvs2,
-      0,
-      0,
-      cvs2.width,
-      cvs2.height,
-      0,
-      0,
-      textureSize,
-      textureSize
-    );
+    if (blitOnTop) {
+      ctx.filter = "none";
+      ctx.globalAlpha = 1;
+      ctx.drawImage(
+        cvs2,
+        0,
+        0,
+        cvs2.width,
+        cvs2.height,
+        0,
+        0,
+        textureSize,
+        textureSize
+      );
+    }
     ctx.restore();
   };
 }

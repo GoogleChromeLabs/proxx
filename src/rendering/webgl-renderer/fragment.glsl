@@ -13,7 +13,7 @@ uniform sampler2D idle_sprites[4];
 uniform sampler2D static_sprite;
 uniform vec2 paddings;
 
-float frames_per_axis = floor(sprite_size /tile_size);
+float frames_per_axis = floor(sprite_size / tile_size);
 float frames_per_sprite = frames_per_axis * frames_per_axis;
 
 vec2 static_tile_coords(float idx) {
@@ -53,47 +53,107 @@ void main() {
     // WebGL 1 can only access arrays with compile-time constant indices.
     // So be it.
     if(sprite_idx == 0) {
-      f = texture2D(idle_sprites[0], idle_tex_uv).a;
+      vec4 sample = texture2D(idle_sprites[0], idle_tex_uv);
+      gl_FragColor= mix(
+        gl_FragColor,
+        sample,
+        sample.a * boxes_opacity
+      );
     } else if (sprite_idx == 1) {
-      f = texture2D(idle_sprites[1], idle_tex_uv).a;
+      vec4 sample = texture2D(idle_sprites[1], idle_tex_uv);
+      gl_FragColor= mix(
+        gl_FragColor,
+        sample,
+        sample.a * boxes_opacity
+      );
     } else if (sprite_idx == 2) {
-      f = texture2D(idle_sprites[2], idle_tex_uv).a;
+      vec4 sample = texture2D(idle_sprites[2], idle_tex_uv);
+      gl_FragColor= mix(
+        gl_FragColor,
+        sample,
+        sample.a * boxes_opacity
+      );
     } else if (sprite_idx == 3) {
-      f = texture2D(idle_sprites[3], idle_tex_uv).a;
+      vec4 sample = texture2D(idle_sprites[3], idle_tex_uv);
+      gl_FragColor= mix(
+        gl_FragColor,
+        sample,
+        sample.a * boxes_opacity
+      );
     }
-    f *= boxes_opacity;
-  } else if (static_tile >= 1.) {
+  } else if (static_tile >= 1. && static_tile <= 8.) {
     vec2 number_tex_uv = (static_tile_coords(static_tile) + normalized_uv) * tile_size / sprite_size;
-    f = mix(f, 1., texture2D(static_sprite, number_tex_uv).a);
+    vec4 sample = texture2D(static_sprite, number_tex_uv);
+    gl_FragColor = mix(
+      gl_FragColor,
+      sample,
+      sample.a
+    );
+
   }
 
   // Blend static outline on top
-  vec2 outline_tex_uv = (static_tile_coords(0.) + normalized_uv) * tile_size / sprite_size;
-  f = mix(f, 1., texture2D(static_sprite, outline_tex_uv).a * border_opacity);
-
-  // Blend flash on top
-  vec2 flash_tex_uv = (static_tile_coords(9.) + normalized_uv) * tile_size / sprite_size;
-  f = mix(f, 1., texture2D(static_sprite, flash_tex_uv).a * flash_opacity);
+  {
+    vec2 outline_tex_uv = (static_tile_coords(0.) + normalized_uv) * tile_size / sprite_size;
+    vec4 sample = texture2D(static_sprite, outline_tex_uv);
+    gl_FragColor = mix(
+      gl_FragColor,
+      sample,
+      sample.a * border_opacity
+    );
+  }
 
   // Change color according to highlight setting
-  vec4 target_color = mix(white, turquoise, highlight_opacity);
+  {
+    gl_FragColor = mix(
+      gl_FragColor,
+      gl_FragColor * turquoise,
+      highlight_opacity
+    );
+  }
 
-  vec4 tile = mix(transparent, target_color, f);
+  // Blend mine texture on top
+  {
+    if(static_tile == 10.) {
+      vec2 mine_tex_uv = (static_tile_coords(10.) + normalized_uv) * tile_size / sprite_size;
+      vec4 sample = texture2D(static_sprite, mine_tex_uv);
+      gl_FragColor = mix(
+        gl_FragColor,
+        sample,
+        sample.a
+      );
+    }
+  }
+
+  // Blend flash on top
+  {
+    vec2 flash_tex_uv = (static_tile_coords(9.) + normalized_uv) * tile_size / sprite_size;
+    vec4 sample = texture2D(static_sprite, flash_tex_uv);
+    gl_FragColor = mix(
+      gl_FragColor,
+      sample,
+      sample.a * flash_opacity
+    );
+  }
 
   // Add focus ring
-  vec2 focus_tex_uv = (static_tile_coords(11.) + normalized_uv) * tile_size / sprite_size;
-  vec4 focused_tile = mix(
-    tile,
-    white,
-    texture2D(static_sprite, focus_tex_uv).a * has_focus
-   );
-  gl_FragColor = focused_tile;
+  {
+    vec2 focus_tex_uv = (static_tile_coords(11.) + normalized_uv) * tile_size / sprite_size;
+    vec4 focused_tile = mix(
+      gl_FragColor,
+      white,
+      texture2D(static_sprite, focus_tex_uv).a * has_focus
+    );
+    gl_FragColor = focused_tile;
+  }
 
   // Fade out at the border
-  vec2 padding_factor = vec2(0., .5);
-  vec2 border_fade =
-    smoothstep(paddings*padding_factor, paddings, gl_FragCoord.xy) *
-    (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings*padding_factor, gl_FragCoord.xy));
+  {
+    vec2 padding_factor = vec2(0., .5);
+    vec2 border_fade =
+      smoothstep(paddings*padding_factor, paddings, gl_FragCoord.xy) *
+      (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings*padding_factor, gl_FragCoord.xy));
+    gl_FragColor = mix(transparent, gl_FragColor, min(border_fade.x, border_fade.y));
+  }
 
-  gl_FragColor = mix(transparent, gl_FragColor, min(border_fade.x, border_fade.y));
 }

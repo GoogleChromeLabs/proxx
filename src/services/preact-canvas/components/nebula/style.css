@@ -10,14 +10,6 @@
   animation: fade-in .5s ease-in-out;
 }
 
-.not-danger-mode {
-  background: linear-gradient(to bottom, rgb(57, 10, 78), rgb(43, 41, 111));
-}
-
-.danger-mode {
-  background: linear-gradient(to bottom, rgb(53, 0, 0), rgb(117, 31, 61));
-}
-
 @keyframes fade-in {
   from {opacity: 0;}
 }

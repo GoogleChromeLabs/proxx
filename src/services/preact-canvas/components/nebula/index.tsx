@@ -17,23 +17,18 @@ import { bind } from "../../../../utils/bind.js";
 
 import ShaderBox from "../../../../utils/shaderbox.js";
 import {
-  dangerMode as dangerModeStyle,
   nebula as nebulaStyle,
-  nebulaContainer as nebulaContainerStyle,
-  notDangerMode as notDangerModeStyle
+  nebulaContainer as nebulaContainerStyle
 } from "./style.css";
 
-import { ShaderColor } from "src/rendering/constants.js";
+import { Color, toRGB, toShaderColor } from "src/rendering/constants.js";
 import { debug } from "../../../../utils/constants";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
 export interface Props {
-  useAltColor: boolean;
-  mainColorLight: ShaderColor;
-  mainColorDark: ShaderColor;
-  altColorLight: ShaderColor;
-  altColorDark: ShaderColor;
+  colorLight: Color;
+  colorDark: Color;
 }
 
 interface State {}
@@ -41,9 +36,10 @@ interface State {}
 export default class Nebula extends Component<Props, State> {
   private _timePeriod = 60000;
   private _fadeSpeed = 10;
-  private _altColorBlend = 0;
+  private _colorBlend = 0;
   private _shaderBox?: ShaderBox;
   private _loopRunning = false;
+  private _prevColors: Color[] = [];
 
   componentDidMount() {
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
@@ -76,6 +72,8 @@ export default class Nebula extends Component<Props, State> {
     this._shaderBox.setUniform1f("circle2_offset", 1.4);
     this._shaderBox.setUniform1f("circle3_offset", 0);
     this._onResize();
+
+    this._prevColors = [this.props.colorLight, this.props.colorDark];
     this._updateColors();
 
     window.addEventListener("resize", this._onResize);
@@ -88,6 +86,12 @@ export default class Nebula extends Component<Props, State> {
     }
   }
 
+  shouldComponentUpdate({ colorLight, colorDark }: Props) {
+    const didLightColorChange = !colorEqual(this.props.colorLight, colorLight);
+    const didDarkColorChange = !colorEqual(this.props.colorDark, colorDark);
+    return didLightColorChange || didDarkColorChange;
+  }
+
   componentWillUnmount() {
     if (!this._shaderBox) {
       return;
@@ -96,10 +100,23 @@ export default class Nebula extends Component<Props, State> {
     window.removeEventListener("resize", this._onResize);
   }
 
-  render({ useAltColor }: Props) {
+  componentWillUpdate() {
+    this._prevColors = [this.props.colorLight, this.props.colorDark];
+    this._colorBlend = 0;
+  }
+
+  componentDidUpdate() {
     this._updateColors();
+  }
+
+  render({ colorLight, colorDark }: Props) {
     return (
-      <div>
+      <div
+        style={`background: linear-gradient(to bottom, ${toRGB(
+          colorLight
+        )}, ${toRGB(colorDark)})`}
+        class={nebulaContainerStyle}
+      >
         <canvas class={nebulaStyle} aria-hidden="true" />
       </div>
     );
@@ -107,12 +124,21 @@ export default class Nebula extends Component<Props, State> {
 
   private _updateColors() {
     if (this._shaderBox) {
-      this._shaderBox.setUniform4f("alt_color_dark", this.props.altColorDark);
-      this._shaderBox.setUniform4f("alt_color_light", this.props.altColorLight);
-      this._shaderBox.setUniform4f("main_color_dark", this.props.mainColorDark);
       this._shaderBox.setUniform4f(
         "main_color_light",
-        this.props.mainColorLight
+        toShaderColor(this._prevColors[0])
+      );
+      this._shaderBox.setUniform4f(
+        "main_color_dark",
+        toShaderColor(this._prevColors[1])
+      );
+      this._shaderBox.setUniform4f(
+        "alt_color_light",
+        toShaderColor(this.props.colorLight)
+      );
+      this._shaderBox.setUniform4f(
+        "alt_color_dark",
+        toShaderColor(this.props.colorDark)
       );
     }
   }
@@ -143,13 +169,15 @@ export default class Nebula extends Component<Props, State> {
       "time",
       (ts % this._timePeriod) / this._timePeriod
     );
-    this._altColorBlend +=
-      ((this.props.useAltColor ? 1 : 0) - this._altColorBlend) /
-      this._fadeSpeed;
-    this._shaderBox!.setUniform1f("alt_color", this._altColorBlend);
+    this._colorBlend += (1 - this._colorBlend) / this._fadeSpeed;
+    this._shaderBox!.setUniform1f("alt_color", this._colorBlend);
     this._shaderBox!.draw();
     if (this._loopRunning) {
       requestAnimationFrame(this._loop);
     }
   }
+}
+
+function colorEqual(c1: Color, c2: Color): boolean {
+  return c1[0] === c2[0] && c1[1] === c2[1] && c1[2] === c2[2];
 }
