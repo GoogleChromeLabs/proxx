@@ -79,6 +79,18 @@ class Time extends Component<TimeProps, {}> {
   }
 }
 
+function gameStatusText(playMode?: PlayMode) {
+  let text: string;
+  if (playMode === PlayMode.Won) {
+    text = "You win";
+  } else if (playMode === PlayMode.Lost) {
+    text = "Game over";
+  } else {
+    text = "Remaining";
+  }
+  return text;
+}
+
 export interface Props {
   toRevealTotal?: number;
   toReveal?: number;
@@ -111,7 +123,7 @@ export default class TopBar extends Component<Props, State> {
           <div
             class={squaresLeft}
             role="status"
-            aria-label={this.gameStatusText(playMode)}
+            aria-label={gameStatusText(playMode)}
           >
             <Square class={squareIcon} />{" "}
             {toReveal!
@@ -128,17 +140,5 @@ export default class TopBar extends Component<Props, State> {
         )}
       </div>
     );
-  }
-
-  private gameStatusText(playMode?: PlayMode) {
-    let text: string;
-    if (playMode === PlayMode.Won) {
-      text = "You win";
-    } else if (playMode === PlayMode.Lost) {
-      text = "Game over";
-    } else {
-      text = "Remaining";
-    }
-    return text;
   }
 }
