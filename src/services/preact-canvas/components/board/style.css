@@ -9,6 +9,7 @@
   opacity: 0;
   margin: auto;
   padding: var(--bar-avoid) calc(var(--side-margin) - var(--cell-padding));
+  user-select: none;
 }
 
 .game-row {
