@@ -29,6 +29,7 @@ import vertexShader from "./vertex.glsl";
 export interface Props {
   colorLight: Color;
   colorDark: Color;
+  useMotion: boolean;
 }
 
 interface State {}
@@ -42,6 +43,10 @@ export default class Nebula extends Component<Props, State> {
   private _prevColors: Color[] = [];
 
   componentDidMount() {
+    // if no annomation mode, skip WebGL setup
+    if (!this.props.useMotion) {
+      return;
+    }
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.base!.querySelector("canvas")! as HTMLCanvasElement,
       scaling: 1 / 5,
@@ -101,6 +106,9 @@ export default class Nebula extends Component<Props, State> {
   }
 
   componentWillUpdate() {
+    if (!this._shaderBox) {
+      return;
+    }
     this._prevColors = [this.props.colorLight, this.props.colorDark];
     this._colorBlend = 0;
   }
@@ -117,7 +125,11 @@ export default class Nebula extends Component<Props, State> {
         )}, ${toRGB(colorDark)})`}
         class={nebulaContainerStyle}
       >
-        <canvas class={nebulaStyle} aria-hidden="true" />
+        {this.props.useMotion ? (
+          <canvas class={nebulaStyle} aria-hidden="true" />
+        ) : (
+          ""
+        )}
       </div>
     );
   }

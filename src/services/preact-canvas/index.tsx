@@ -190,6 +190,7 @@ class PreactService extends Component<Props, State> {
           )}
           colorDark={this._nebulaDarkColor()}
           colorLight={this._nebulaLightColor()}
+          useMotion={this.state.motionPreference}
         />
         {mainComponent}
         <BottomBar
