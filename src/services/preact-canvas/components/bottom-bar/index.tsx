@@ -19,7 +19,7 @@ import {
   checkbox,
   fullscreen,
   hidden,
-  icons,
+  leftIcon,
   leftToggleLabel,
   rightToggleLabel,
   toggle,
@@ -64,7 +64,7 @@ export default class BottomBar extends Component<Props, State> {
       <div class={[bottomBar, display ? "" : hidden].join("")} role="menubar">
         {buttonType === "back" ? (
           <button
-            class={icons}
+            class={leftIcon}
             onClick={onBackClick}
             aria-label="Back to main menu"
           >
@@ -72,7 +72,7 @@ export default class BottomBar extends Component<Props, State> {
           </button>
         ) : (
           <button
-            class={icons}
+            class={leftIcon}
             onClick={onSettingsClick}
             aria-label="Open settings menu"
           >
