@@ -47,7 +47,6 @@ a {
 }
 
 .game {
-  user-select: none;
   color: #fff;
   display: flex;
   flex-flow: column;

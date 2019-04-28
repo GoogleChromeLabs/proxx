@@ -91,6 +91,7 @@ html:fullscreen .fullscreen {
   top: 50%;
   transform: translateY(-50%);
   margin: 0 0.6rem;
+  user-select: none;
 }
 
 .left-toggle-label {
