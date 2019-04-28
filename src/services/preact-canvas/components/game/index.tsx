@@ -131,27 +131,30 @@ export default class Game extends Component<Props, State> {
               onDangerModeChange={this.onDangerModeKeyToggle}
             />,
             playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
-              <label class={toggleLabel}>
-                <span aria-hidden="true" class={leftToggleLabel}>
-                  Clear
-                </span>
-                <input
-                  class={checkbox}
-                  type="checkbox"
-                  role="switch checkbox"
-                  onChange={this.onDangerModeSwitchToggle}
-                  checked={!dangerMode}
-                  aria-label="flag mode"
-                />
+              [
+                <label class={toggleLabel}>
+                  <span aria-hidden="true" class={leftToggleLabel}>
+                    Clear
+                  </span>
+                  <input
+                    class={checkbox}
+                    type="checkbox"
+                    role="switch checkbox"
+                    onChange={this.onDangerModeSwitchToggle}
+                    checked={!dangerMode}
+                    aria-label="flag mode"
+                  />
+                  <span aria-hidden="true" class={rightToggleLabel}>
+                    Flag
+                  </span>
+                </label>,
                 <span
                   class={toggle}
                   role="status"
                   ref={el => (this._flagStatus = el)}
+                  aria-live="assertive"
                 />
-                <span aria-hidden="true" class={rightToggleLabel}>
-                  Flag
-                </span>
-              </label>
+              ]
             ) : playMode === PlayMode.Lost ? (
               <div class={exitRow}>
                 <div class={exitRowInner}>
@@ -291,10 +294,15 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onDangerModeKeyToggle(state: boolean) {
-    this._flagStatus!.setAttribute(
-      "aria-label",
-      state ? "flag mode off" : "flag mode on"
-    );
+    // We only change this on key toggle, so we might be changing it to the same value. We still
+    // want it to announce, so we have to unset it and set it again.
+    this._flagStatus!.setAttribute("aria-label", "");
+    setTimeout(() => {
+      this._flagStatus!.setAttribute(
+        "aria-label",
+        state ? "flag mode off" : "flag mode on"
+      );
+    }, 0);
     this.props.onDangerModeChange(state);
   }
 
