@@ -20,7 +20,6 @@ import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
-import BottomBar from "../bottom-bar/index.js";
 import {
   board,
   button as buttonStyle,
@@ -41,7 +40,6 @@ const defaultCell: Cell = {
 
 export interface Props {
   onCellClick: (cell: [number, number, Cell], alt: boolean) => void;
-  onDangerModeChange: (v: boolean) => void;
   width: number;
   height: number;
   renderer: Renderer;
@@ -127,10 +125,6 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "f" || event.key === "#") {
-      this.props.onDangerModeChange(!this.props.dangerMode);
-    }
-
     if (
       (isFeaturePhone || cellFocusMode) &&
       (event.key === "9" ||

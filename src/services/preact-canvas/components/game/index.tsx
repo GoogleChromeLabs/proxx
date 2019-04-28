@@ -26,15 +26,10 @@ import TopBar from "../top-bar";
 import Win from "../win";
 import {
   againButton,
-  checkbox,
   exitRow,
   exitRowInner,
   game as gameClass,
-  leftToggleLabel,
-  mainButton,
-  rightToggleLabel,
-  toggle,
-  toggleLabel
+  mainButton
 } from "./style.css";
 
 export interface Props {
@@ -69,7 +64,6 @@ initFocusHandling();
 export default class Game extends Component<Props, State> {
   state: State;
   private _tryAgainBtn?: HTMLButtonElement;
-  private _flagStatus?: HTMLElement;
 
   constructor(props: Props) {
     super(props);
@@ -128,34 +122,8 @@ export default class Game extends Component<Props, State> {
               gameChangeSubscribe={gameChangeSubscribe}
               gameChangeUnsubscribe={gameChangeUnsubscribe}
               onCellClick={this.onCellClick}
-              onDangerModeChange={this.onDangerModeKeyToggle}
             />,
-            playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
-              [
-                <label class={toggleLabel}>
-                  <span aria-hidden="true" class={leftToggleLabel}>
-                    Clear
-                  </span>
-                  <input
-                    class={checkbox}
-                    type="checkbox"
-                    role="switch checkbox"
-                    onChange={this.onDangerModeSwitchToggle}
-                    checked={!dangerMode}
-                    aria-label="flag mode"
-                  />
-                  <span class={toggle} />
-                  <span aria-hidden="true" class={rightToggleLabel}>
-                    Flag
-                  </span>
-                </label>,
-                <span
-                  role="status"
-                  ref={el => (this._flagStatus = el)}
-                  aria-live="assertive"
-                />
-              ]
-            ) : playMode === PlayMode.Lost ? (
+            playMode === PlayMode.Lost ? (
               <div class={exitRow}>
                 <div class={exitRowInner}>
                   <button
@@ -287,27 +255,6 @@ export default class Game extends Component<Props, State> {
     if (Object.keys(newState).length) {
       this.setState(newState as State);
     }
-  }
-
-  @bind
-  private onDangerModeSwitchToggle(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const dangerMode = !target.checked;
-    this.props.onDangerModeChange(dangerMode);
-  }
-
-  @bind
-  private onDangerModeKeyToggle(state: boolean) {
-    // We only change this on key toggle, so we might be changing it to the same value. We still
-    // want it to announce, so we have to unset it and set it again.
-    this._flagStatus!.setAttribute("aria-label", "");
-    setTimeout(() => {
-      this._flagStatus!.setAttribute(
-        "aria-label",
-        state ? "flag mode off" : "flag mode on"
-      );
-    }, 0);
-    this.props.onDangerModeChange(state);
   }
 
   @bind
