@@ -25,15 +25,13 @@ import {
 } from "src/rendering/constants";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
+import { deviceMotionCapable, shouldUseMotion } from "../../rendering/renderer";
 import { prerender } from "../../utils/constants";
 import { GameType } from "../state";
 import { getGridDefault, setGridDefault } from "../state/grid-default";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
-import {
-  getMotionPreference,
-  setMotionPreference
-} from "../state/motion-preference";
+import { setMotionPreference } from "../state/motion-preference";
 import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
 import GameLoading from "./components/game-loading";
@@ -151,6 +149,7 @@ class PreactService extends Component<Props, State> {
             onCloseClicked={this._onSettingsCloseClick}
             motion={motionPreference}
             onMotionPrefChange={this._onMotionPrefChange}
+            disableAnimationBtn={!deviceMotionCapable}
           />
         ) : (
           <Intro
@@ -313,9 +312,8 @@ class PreactService extends Component<Props, State> {
 
     this._stateService = await stateServicePromise;
 
-    getMotionPreference().then(motionPreference => {
-      this.setState({ motionPreference });
-    });
+    const motionPreference = await shouldUseMotion();
+    this.setState({ motionPreference });
 
     localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {

@@ -13,7 +13,7 @@
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import { Animator } from "src/rendering/animator";
-import { Renderer, shouldUseMotion } from "src/rendering/renderer";
+import { Renderer } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
 import { bind } from "src/utils/bind";
@@ -206,7 +206,7 @@ export default class Game extends Component<Props, State> {
     let renderer: Renderer;
     let animator: Animator;
 
-    if (shouldUseMotion() && this.props.useMotion) {
+    if (this.props.useMotion) {
       // tslint:disable-next-line:variable-name
       const [RendererClass, AnimatorClass] = await Promise.all([
         import("../../../../rendering/webgl-renderer/index.js").then(

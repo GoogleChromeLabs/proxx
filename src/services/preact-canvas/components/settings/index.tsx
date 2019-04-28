@@ -28,6 +28,7 @@ interface Props {
   onCloseClicked: () => void;
   onMotionPrefChange: () => void;
   motion: boolean;
+  disableAnimationBtn: boolean;
 }
 
 interface State {
@@ -42,7 +43,7 @@ export default class Settings extends Component<Props, State> {
   private focusItem?: HTMLElement;
 
   render(
-    { onCloseClicked, onMotionPrefChange, motion }: Props,
+    { onCloseClicked, onMotionPrefChange, motion, disableAnimationBtn }: Props,
     { aboutVisible }: State
   ) {
     return (
@@ -67,6 +68,7 @@ export default class Settings extends Component<Props, State> {
               <button
                 class={motion ? btnOnStyle : btnOffStyle}
                 onClick={onMotionPrefChange}
+                disabled={disableAnimationBtn}
               >
                 Animations {motion ? "on" : "off"}
               </button>
