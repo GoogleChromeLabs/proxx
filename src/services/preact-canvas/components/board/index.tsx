@@ -87,14 +87,14 @@ export default class Board extends Component<Props, State> {
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("scroll", this._onWindowScroll);
-    window.addEventListener("keydown", this._onKeyDown, false);
+    window.addEventListener("keydown", this._onKeyDown);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("scroll", this._onWindowScroll);
-    window.removeEventListener("keydown", this._onKeyDown, false);
+    window.removeEventListener("keydown", this._onKeyDown);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -178,9 +178,7 @@ export default class Board extends Component<Props, State> {
         } else {
           button.setAttribute("tabindex", "-1");
         }
-        button.addEventListener("blur", () => {
-          this.removeFocusVisual();
-        });
+        button.addEventListener("blur", this.removeFocusVisual);
         this._additionalButtonData.set(button, [x, y, defaultCell]);
         this._updateButton(button, defaultCell, x, y);
         this._buttons.push(button);
@@ -244,7 +242,7 @@ export default class Board extends Component<Props, State> {
   private moveFocusWithMouse(event: MouseEvent) {
     // Find if the mouse is on one of the button
     const targetBtn = event.target as HTMLButtonElement;
-    const targetIsBtn = this._additionalButtonData.get(targetBtn);
+    const targetIsBtn = this._additionalButtonData.has(targetBtn);
     if (!targetIsBtn) {
       // the mouse is not on a button
       this.removeFocusVisual();
@@ -253,8 +251,7 @@ export default class Board extends Component<Props, State> {
 
     // Locate button that currently have focus
     const activeBtn = document.activeElement as HTMLButtonElement;
-    const activeIsBtn = this._additionalButtonData.get(activeBtn);
-
+    const activeIsBtn = this._additionalButtonData.has(activeBtn);
     if (activeIsBtn && activeBtn !== targetBtn) {
       // If different button has focus, blur the button.
       activeBtn.blur();
@@ -264,6 +261,8 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
+    event.stopPropagation();
+
     // Find which button has focus
     const currentBtn = document.activeElement as HTMLButtonElement;
     let btnInfo = this._additionalButtonData.get(currentBtn);
@@ -314,16 +313,12 @@ export default class Board extends Component<Props, State> {
       event.preventDefault();
       this.simulateClick(button);
     } else if (event.key === "ArrowRight" || event.key === "9") {
-      event.stopPropagation();
       this.moveFocusByKey(event, 1, 0);
     } else if (event.key === "ArrowLeft" || event.key === "7") {
-      event.stopPropagation();
       this.moveFocusByKey(event, -1, 0);
     } else if (event.key === "ArrowUp" || event.key === "5") {
-      event.stopPropagation();
       this.moveFocusByKey(event, 0, -1);
     } else if (event.key === "ArrowDown" || event.key === "0") {
-      event.stopPropagation();
       this.moveFocusByKey(event, 0, 1);
     }
   }
@@ -334,9 +329,9 @@ export default class Board extends Component<Props, State> {
   @bind
   private onMouseUp(event: MouseEvent) {
     // hit test if the mouse up was on a button if not, cancel.
-    let button = event.target as HTMLButtonElement;
-    const btn = this._additionalButtonData.get(button);
-    if (!btn) {
+    let targetButton = event.target as HTMLButtonElement;
+    const targetButtonData = this._additionalButtonData.get(targetButton);
+    if (!targetButtonData) {
       return;
     }
 
@@ -344,25 +339,25 @@ export default class Board extends Component<Props, State> {
 
     if (isFeaturePhone || cellFocusMode) {
       // find currently focused element.
-      const active = document.activeElement as HTMLButtonElement;
-      const activebtn = this._additionalButtonData.get(active);
-      if (!activebtn) {
+      const activeButton = document.activeElement as HTMLButtonElement;
+      const isActiveBtn = this._additionalButtonData.has(activeButton);
+      if (!isActiveBtn) {
         // no other butten has focus, so it's safe to focus on mouse
-        this.setFocus(button);
+        this.setFocus(targetButton);
       } else {
         // If active button exists, then that button should be clicked.
         // This is needed for feature phone.
-        button = active;
+        targetButton = activeButton;
       }
     }
 
     if (event.button !== 2) {
       // normal click
-      this.simulateClick(button);
+      this.simulateClick(targetButton);
       return;
     }
     // right (two finger) click
-    this.simulateClick(button, true);
+    this.simulateClick(targetButton, true);
   }
 
   // Same as mouseup, necessary for preventing click event on KaiOS
