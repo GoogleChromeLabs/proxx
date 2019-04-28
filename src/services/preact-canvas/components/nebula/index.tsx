@@ -99,7 +99,7 @@ export default class Nebula extends Component<Props, State> {
   render({ useAltColor }: Props) {
     this._updateColors();
     return (
-      <div
+      <div>
         <canvas class={nebulaStyle} aria-hidden="true" />
       </div>
     );
