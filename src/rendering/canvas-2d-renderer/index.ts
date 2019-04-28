@@ -424,6 +424,7 @@ export default class Canvas2DRenderer implements Renderer {
         for (const animation of animationList) {
           this.render(x, y, cell!, animation, ts);
         }
+        this._maybeRenderFocusRing(x, y);
       }
     }
 
