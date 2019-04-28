@@ -21,8 +21,8 @@
   transform: scaleY(0.5);
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: var(--side-margin);
+  right: var(--side-margin);
   background: white;
 }
 
@@ -33,12 +33,20 @@
   height: var(--icon-size);
 }
 
+.left-icon {
+  composes: icons;
+  /* PostCSS gets the order wrong :( */
+  margin-right: auto !important;
+}
+
 .hidden {
   visibility: hidden;
 }
 
 .fullscreen {
   composes: icons;
+  /* PostCSS gets the order wrong :( */
+  margin-left: auto !important;
 }
 
 html:fullscreen .fullscreen {
