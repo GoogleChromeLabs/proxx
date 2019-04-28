@@ -169,6 +169,7 @@ export default class Board extends Component<Props, State> {
           button.setAttribute("tabindex", "-1");
         }
         button.addEventListener("blur", () => {
+          console.log("blur");
           this.removeFocusVisual();
         });
         this._additionalButtonData.set(button, [x, y, defaultCell]);
