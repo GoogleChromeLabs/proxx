@@ -103,12 +103,6 @@ export interface State {}
 
 // tslint:disable-next-line:max-classes-per-file
 export default class TopBar extends Component<Props, State> {
-  componentWillReceiveProps({ timerRunning }: Props) {
-    if (timerRunning === this.props.timerRunning) {
-      return;
-    }
-  }
-
   render({
     toReveal,
     toRevealTotal,
