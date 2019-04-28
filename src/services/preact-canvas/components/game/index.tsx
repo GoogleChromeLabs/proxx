@@ -71,6 +71,7 @@ initFocusHandling();
 export default class Game extends Component<Props, State> {
   state: State;
   private _tryAgainBtn?: HTMLButtonElement;
+  private _flagStatus?: HTMLElement;
 
   constructor(props: Props) {
     super(props);
@@ -130,20 +131,28 @@ export default class Game extends Component<Props, State> {
               gameChangeSubscribe={gameChangeSubscribe}
               gameChangeUnsubscribe={gameChangeUnsubscribe}
               onCellClick={this.onCellClick}
-              onDangerModeChange={this.props.onDangerModeChange}
+              onDangerModeChange={this.onDangerModeKeyToggle}
             />,
             playMode === PlayMode.Playing || playMode === PlayMode.Pending ? (
               <label class={toggleLabel}>
+                <span aria-hidden="true" class={leftToggleLabel}>
+                  Clear
+                </span>
                 <input
                   class={checkbox}
                   type="checkbox"
                   role="switch checkbox"
-                  onChange={this.onDangerModeChange}
+                  onChange={this.onDangerModeSwitchToggle}
                   checked={!dangerMode}
+                  aria-label="flag mode"
                 />
-                <span class={toggle} role="status" /> 
+                <span
+                  class={toggle}
+                  role="status"
+                  ref={el => (this._flagStatus = el)}
+                />
                 <span aria-hidden="true" class={rightToggleLabel}>
-                  Flag mode
+                  Flag
                 </span>
               </label>
             ) : playMode === PlayMode.Lost ? (
@@ -277,10 +286,19 @@ export default class Game extends Component<Props, State> {
   }
 
   @bind
-  private onDangerModeChange(event: Event) {
+  private onDangerModeSwitchToggle(event: Event) {
     const target = event.target as HTMLInputElement;
     const dangerMode = !target.checked;
     this.props.onDangerModeChange(dangerMode);
+  }
+
+  @bind
+  private onDangerModeKeyToggle(state: boolean) {
+    this._flagStatus!.setAttribute(
+      "aria-label",
+      state ? "flag mode off" : "flag mode on"
+    );
+    this.props.onDangerModeChange(state);
   }
 
   @bind
