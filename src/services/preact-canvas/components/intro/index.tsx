@@ -29,6 +29,7 @@ import {
   numberDownArrow as numberDownArrowStyle,
   numberUpArrow as numberUpArrowStyle,
   selectArrow as selectArrowStyle,
+  selectField as selectFieldStyle,
   settingsRow as settingsRowStyle,
   startButton as startButtonStyle,
   startForm as startFormStyle
@@ -148,7 +149,7 @@ export default class Intro extends Component<Props, State> {
               <Arrow class={selectArrowStyle} />
               <select
                 required
-                class={fieldStyle}
+                class={selectFieldStyle}
                 ref={el => (this._presetSelect = el)}
                 onChange={this._onSelectChange}
                 value={presetName || ""}

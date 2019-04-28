@@ -13,6 +13,7 @@
 
 import { Remote } from "comlink/src/comlink.js";
 import { Component, ComponentConstructor, h, render, VNode } from "preact";
+import { PlayMode } from "src/gamelogic/types";
 import {
   Color,
   nebulaDangerDark,
@@ -62,12 +63,7 @@ interface State {
   awaitingGame: boolean;
   settingsOpen: boolean;
   motionPreference: boolean;
-  mainColorLight: Color;
-  mainColorDark: Color;
-  altColorLight: Color;
-  altColorDark: Color;
-  settingColorLight: Color;
-  settingColorDark: Color;
+  gameInPlay: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -110,12 +106,7 @@ class PreactService extends Component<Props, State> {
     awaitingGame: false,
     settingsOpen: false,
     motionPreference: true,
-    altColorDark: nebulaDangerDark,
-    altColorLight: nebulaDangerLight,
-    mainColorDark: nebulaSafeDark,
-    mainColorLight: nebulaSafeLight,
-    settingColorDark: nebulaSettingDark,
-    settingColorLight: nebulaSettingLight
+    gameInPlay: false
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -129,14 +120,15 @@ class PreactService extends Component<Props, State> {
   }
 
   render(
-    _props: Props,
+    _: Props,
     {
       game,
       dangerMode,
       awaitingGame,
       gridDefaults,
       settingsOpen,
-      motionPreference
+      motionPreference,
+      gameInPlay
     }: State
   ) {
     let mainComponent: VNode;
@@ -197,8 +189,11 @@ class PreactService extends Component<Props, State> {
           onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
           onBackClick={this._onBackClick}
+          onDangerModeChange={this._onDangerModeChange}
           buttonType={game ? "back" : "settings"}
           display={!settingsOpen} // Settings is open = Bottom bar display should be hidden
+          dangerMode={dangerMode}
+          showDangerModeToggle={gameInPlay}
         />
       </div>
     );
@@ -206,22 +201,22 @@ class PreactService extends Component<Props, State> {
 
   private _nebulaLightColor() {
     if (this.state.settingsOpen) {
-      return this.state.settingColorLight;
+      return nebulaSettingLight;
     }
     if (this.state.dangerMode) {
-      return this.state.altColorLight;
+      return nebulaDangerLight;
     }
-    return this.state.mainColorLight;
+    return nebulaSafeLight;
   }
 
   private _nebulaDarkColor() {
     if (this.state.settingsOpen) {
-      return this.state.settingColorDark;
+      return nebulaSettingDark;
     }
     if (this.state.dangerMode) {
-      return this.state.altColorDark;
+      return nebulaDangerDark;
     }
-    return this.state.mainColorDark;
+    return nebulaSafeDark;
   }
 
   @bind
@@ -327,13 +322,19 @@ class PreactService extends Component<Props, State> {
           this.setState({
             game,
             awaitingGame: false,
-            gridDefaults: game
+            gridDefaults: game,
+            gameInPlay: true
           });
         } else {
-          this.setState({ game });
+          this.setState({ game, gameInPlay: false });
         }
       }
       if ("gameStateChange" in stateChange) {
+        const playMode = stateChange.gameStateChange!.playMode;
+
+        if (playMode === PlayMode.Lost || playMode === PlayMode.Won) {
+          this.setState({ gameInPlay: false });
+        }
         for (const callback of this._gameChangeSubscribers) {
           callback(stateChange.gameStateChange!);
         }

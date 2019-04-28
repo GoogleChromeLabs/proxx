@@ -60,6 +60,11 @@
   margin: 0;
 }
 
+.select-field {
+  composes: field;
+  -moz-appearance: none;
+}
+
 .select-arrow,
 .number-up-arrow,
 .number-down-arrow {
