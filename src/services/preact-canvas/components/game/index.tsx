@@ -144,12 +144,12 @@ export default class Game extends Component<Props, State> {
                     checked={!dangerMode}
                     aria-label="flag mode"
                   />
+                  <span class={toggle} />
                   <span aria-hidden="true" class={rightToggleLabel}>
                     Flag
                   </span>
                 </label>,
                 <span
-                  class={toggle}
                   role="status"
                   ref={el => (this._flagStatus = el)}
                   aria-live="assertive"
