@@ -15,7 +15,7 @@ import { StateChange } from "src/gamelogic/index.js";
 import { Animator } from "src/rendering/animator.js";
 import { Renderer } from "src/rendering/renderer.js";
 import { putCanvas } from "src/utils/canvas-pool.js";
-import { cellFocus } from "src/utils/constants.js";
+import { cellFocusMode } from "src/utils/constants.js";
 import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
@@ -94,7 +94,7 @@ export default class Board extends Component<Props, State> {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("scroll", this._onWindowScroll);
-    window.removeEventListener("keydown", this._onKeyDown);
+    window.removeEventListener("keydown", this._onKeyDown, false);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -129,6 +129,16 @@ export default class Board extends Component<Props, State> {
   private _onKeyDown(event: KeyboardEvent) {
     if (event.key === "f" || event.key === "#") {
       this.props.onDangerModeChange(!this.props.dangerMode);
+    }
+
+    if (
+      (isFeaturePhone || cellFocusMode) &&
+      (event.key === "9" ||
+        event.key === "7" ||
+        event.key === "5" ||
+        event.key === "0")
+    ) {
+      this.moveFocusByKey(event, 0, 0);
     }
   }
 
@@ -193,7 +203,7 @@ export default class Board extends Component<Props, State> {
     // On feature phone, show focus visual on mouse hover as well
     // Have to be mousemove on table, instead of mouseenter on buttons to avoid
     // unwanted focus move on scroll.
-    if (isFeaturePhone || cellFocus) {
+    if (isFeaturePhone || cellFocusMode) {
       this._table.addEventListener("mousemove", this.moveFocusWithMouse);
     }
   }
@@ -307,10 +317,13 @@ export default class Board extends Component<Props, State> {
       event.stopPropagation();
       this.moveFocusByKey(event, 1, 0);
     } else if (event.key === "ArrowLeft" || event.key === "7") {
+      event.stopPropagation();
       this.moveFocusByKey(event, -1, 0);
     } else if (event.key === "ArrowUp" || event.key === "5") {
+      event.stopPropagation();
       this.moveFocusByKey(event, 0, -1);
     } else if (event.key === "ArrowDown" || event.key === "0") {
+      event.stopPropagation();
       this.moveFocusByKey(event, 0, 1);
     }
   }
