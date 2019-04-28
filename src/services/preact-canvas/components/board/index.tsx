@@ -74,7 +74,6 @@ export default class Board extends Component<Props, State> {
     this._rendererInit();
     this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
-    this._table!.focus();
 
     // Center scroll position
     const root = document.documentElement;
