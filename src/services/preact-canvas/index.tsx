@@ -292,6 +292,7 @@ class PreactService extends Component<Props, State> {
 
   @bind
   private _onBackClick() {
+    this.setState({ dangerMode: false });
     this._stateService!.reset();
   }
 
