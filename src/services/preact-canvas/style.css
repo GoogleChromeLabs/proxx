@@ -7,6 +7,7 @@ html {
   --cell-padding: 2px;
   --side-margin: 10px;
   --icon-size: 15px;
+  --circlebtn-size: 24px;
   --bar-avoid: 40px;
   --bar-padding: 5px;
   --border-radius: 7px;
@@ -20,6 +21,7 @@ html {
     --cell-padding: 5px;
     --side-margin: 24px;
     --icon-size: 24px;
+    --circlebtn-size: 48px;
     --bar-avoid: 78px;
     --bar-padding: 18px;
   }
@@ -34,6 +36,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+}
+
+a {
+  color: white;
 }
 
 .main {

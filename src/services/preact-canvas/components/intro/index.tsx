@@ -231,10 +231,11 @@ export default class Intro extends Component<Props, State> {
     const width = this._widthInput!.valueAsNumber;
     const height = this._heightInput!.valueAsNumber;
     const mines = this._minesInput!.valueAsNumber;
+    const maxMines = width * height - 9;
 
     this.setState({
       height,
-      mines: mines >= width * height ? width * height - 1 : mines,
+      mines: mines > maxMines ? maxMines : mines,
       presetName: getPresetName(width, height, mines),
       width
     });

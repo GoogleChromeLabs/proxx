@@ -22,8 +22,8 @@ import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
 import initFocusHandling from "../../../../utils/focus-visible";
 import Board from "../board";
-import deferred from "../deferred";
 import TopBar from "../top-bar";
+import Win from "../win";
 import {
   againButton,
   checkbox,
@@ -47,6 +47,7 @@ export interface Props {
   onDangerModeChange: (v: boolean) => void;
   dangerMode: boolean;
   toRevealTotal: number;
+  useMotion: boolean;
 }
 
 interface State {
@@ -61,9 +62,6 @@ interface State {
   completeTime: number;
   bestTime: number;
 }
-
-// tslint:disable-next-line:variable-name
-const Win = deferred(import("../win/index.js").then(m => m.default));
 
 // The second this file is loaded, activate focus handling
 initFocusHandling();
@@ -111,7 +109,6 @@ export default class Game extends Component<Props, State> {
         />
         {playMode === PlayMode.Won ? (
           <Win
-            loading={() => <div />}
             onMainMenu={this.onReset}
             onRestart={this.onRestart}
             time={completeTime}
@@ -202,7 +199,7 @@ export default class Game extends Component<Props, State> {
     let renderer: Renderer;
     let animator: Animator;
 
-    if (shouldUseMotion()) {
+    if (shouldUseMotion() && this.props.useMotion) {
       // tslint:disable-next-line:variable-name
       const [RendererClass, AnimatorClass] = await Promise.all([
         import("../../../../rendering/webgl-renderer/index.js").then(
@@ -323,7 +320,7 @@ export default class Game extends Component<Props, State> {
         } else {
           this.props.stateService.flag(x, y);
         }
-      } else {
+      } else if (!cell.flagged) {
         this.props.stateService.reveal(x, y);
       }
     } else if (cell.touchingFlags >= cell.touchingMines) {

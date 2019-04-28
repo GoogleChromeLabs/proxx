@@ -19,6 +19,7 @@ import ShaderBox from "../../../../utils/shaderbox.js";
 import {
   dangerMode as dangerModeStyle,
   nebula as nebulaStyle,
+  nebulaContainer as nebulaContainerStyle,
   notDangerMode as notDangerModeStyle
 } from "./style.css";
 
@@ -46,7 +47,7 @@ export default class Nebula extends Component<Props, State> {
 
   componentDidMount() {
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
-      canvas: this.base as HTMLCanvasElement,
+      canvas: this.base!.querySelector("canvas")! as HTMLCanvasElement,
       scaling: 1 / 5,
       uniforms: [
         "alt_color",
@@ -98,12 +99,9 @@ export default class Nebula extends Component<Props, State> {
   render({ useAltColor }: Props) {
     this._updateColors();
     return (
-      <canvas
-        class={`${nebulaStyle} ${
-          useAltColor ? dangerModeStyle : notDangerModeStyle
-        }`}
-        aria-hidden="true"
-      />
+      <div
+        <canvas class={nebulaStyle} aria-hidden="true" />
+      </div>
     );
   }
 

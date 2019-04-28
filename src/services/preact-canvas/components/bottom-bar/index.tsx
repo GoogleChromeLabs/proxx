@@ -11,18 +11,47 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { Fullscreen } from "../icons/initial";
-import { bottomBar, fullscreen } from "./style.css";
+import { Back } from "../icons/additional";
+import { Fullscreen, Settings } from "../icons/initial";
+import { bottomBar, fullscreen, hidden, icons } from "./style.css";
 
 export interface Props {
   onFullscreenClick: () => void;
+  onSettingsClick: () => void;
+  onBackClick: () => void;
+  buttonType: "back" | "settings";
+  display: boolean;
 }
+
 export interface State {}
 
 export default class BottomBar extends Component<Props, State> {
-  render({ onFullscreenClick }: Props) {
+  render({
+    onFullscreenClick,
+    onSettingsClick,
+    onBackClick,
+    buttonType,
+    display
+  }: Props) {
     return (
-      <div class={bottomBar} role="menubar">
+      <div class={[bottomBar, display ? "" : hidden].join("")} role="menubar">
+        {buttonType === "back" ? (
+          <button
+            class={icons}
+            onClick={onBackClick}
+            aria-label="Back to main menu"
+          >
+            <Back />
+          </button>
+        ) : (
+          <button
+            class={icons}
+            onClick={onSettingsClick}
+            aria-label="Open settings menu"
+          >
+            <Settings />
+          </button>
+        )}
         <button
           class={fullscreen}
           onClick={onFullscreenClick}

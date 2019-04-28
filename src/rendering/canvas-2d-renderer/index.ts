@@ -67,9 +67,8 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   createCanvas(): HTMLCanvasElement {
-    this._canvas = getCanvas();
+    this._canvas = getCanvas("2d");
     this._canvas.setAttribute("aria-hidden", "true");
-
     this._ctx = this._canvas!.getContext("2d");
     if (!this._ctx) {
       throw Error("Could not instantiate 2D renderer");
@@ -507,7 +506,7 @@ export default class Canvas2DRenderer implements Renderer {
       this._ctx!.restore();
     }
     const { cell, animationList } = this._grid[y * this._numTilesX! + x];
-    const ts = performance.now();
+    const ts = getTime();
     for (const animation of animationList) {
       this.render(x, y, cell!, animation, ts);
     }
