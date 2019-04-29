@@ -32,3 +32,13 @@ export async function submitTime(
   set(key, time);
   return time;
 }
+
+/** Get best time for a given board */
+export function getBest(
+  width: number,
+  height: number,
+  mines: number
+): Promise<number | undefined> {
+  const key = getKey(width, height, mines);
+  return get(key);
+}

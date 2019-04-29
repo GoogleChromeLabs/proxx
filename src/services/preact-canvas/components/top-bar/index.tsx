@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { PlayMode } from "../../../../gamelogic/types";
 import { minSec } from "../../../../utils/format";
-import { Square, Timer } from "../icons/additional";
+import { Square, Star, Timer } from "../icons/additional";
 import {
   squareIcon,
   squaresLeft,
@@ -98,6 +98,8 @@ export interface Props {
   titleOnly?: boolean;
   playMode?: PlayMode;
   useMotion?: boolean;
+  showBestTime?: boolean;
+  bestTime?: number;
 }
 
 export interface State {}
@@ -110,7 +112,9 @@ export default class TopBar extends Component<Props, State> {
     timerRunning,
     titleOnly,
     playMode,
-    useMotion
+    useMotion,
+    bestTime,
+    showBestTime
   }: Props) {
     return (
       <div class={topBar} role="banner">
@@ -130,8 +134,12 @@ export default class TopBar extends Component<Props, State> {
         )}
         {!titleOnly && (
           <div class={time}>
-            <Time running={timerRunning!} />
-            <Timer class={timeIcon} animate={timerRunning && useMotion} />
+            {showBestTime && bestTime
+              ? [<div>{minSec(bestTime)}</div>, <Star class={timeIcon} />]
+              : [
+                  <Time running={timerRunning!} />,
+                  <Timer class={timeIcon} animate={timerRunning && useMotion} />
+                ]}
           </div>
         )}
       </div>
