@@ -31,6 +31,16 @@
   border: 3px solid #fff;
 }
 
+.button:disabled,
+.button-alt:disabled,
+.button-on:disabled,
+.button-off:disabled {
+  cursor: default;
+  background-color: #666;
+  border-color: #666;
+  color: #000;
+}
+
 .button {
   mix-blend-mode: screen;
 }

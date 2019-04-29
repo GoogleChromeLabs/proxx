@@ -97,6 +97,7 @@ export interface Props {
   timerRunning?: boolean;
   titleOnly?: boolean;
   playMode?: PlayMode;
+  useMotion?: boolean;
 }
 
 export interface State {}
@@ -108,7 +109,8 @@ export default class TopBar extends Component<Props, State> {
     toRevealTotal,
     timerRunning,
     titleOnly,
-    playMode
+    playMode,
+    useMotion
   }: Props) {
     return (
       <div class={topBar} role="banner">
@@ -129,7 +131,7 @@ export default class TopBar extends Component<Props, State> {
         {!titleOnly && (
           <div class={time}>
             <Time running={timerRunning!} />
-            <Timer class={timeIcon} animate={timerRunning} />
+            <Timer class={timeIcon} animate={timerRunning && useMotion} />
           </div>
         )}
       </div>

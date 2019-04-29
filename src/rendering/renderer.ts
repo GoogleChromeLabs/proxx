@@ -13,8 +13,6 @@
 
 import { Cell } from "src/gamelogic/types";
 import ShaderBox from "src/utils/shaderbox";
-import { forceMotion, noMotion } from "../utils/constants";
-import { isFeaturePhone } from "../utils/static-dpr";
 import { AnimationDesc } from "./animation";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
@@ -50,7 +48,7 @@ export interface Renderer {
   stop(): void;
 }
 
-function supportsSufficientWebGL(): boolean {
+export const supportsSufficientWebGL: boolean = (() => {
   try {
     // tslint:disable-next-line:no-unused-expression
     new ShaderBox(vertexShader, fragmentShader);
@@ -59,14 +57,4 @@ function supportsSufficientWebGL(): boolean {
     return false;
   }
   return true;
-}
-
-export function shouldUseMotion(): boolean {
-  if (noMotion) {
-    return false;
-  }
-  if (forceMotion) {
-    return true;
-  }
-  return supportsSufficientWebGL() && !isFeaturePhone;
-}
+})();

@@ -16,7 +16,7 @@ import { bind } from "src/utils/bind";
 import { getCanvas } from "src/utils/canvas-pool";
 import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
 import ShaderBox from "src/utils/shaderbox";
-import { staticDevicePixelRatio } from "src/utils/static-dpr";
+import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
   AnimationDesc,
   AnimationName,

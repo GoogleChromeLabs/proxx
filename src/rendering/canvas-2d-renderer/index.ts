@@ -14,7 +14,7 @@
 import { Cell } from "src/gamelogic/types";
 import { getCanvas } from "src/utils/canvas-pool";
 import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
-import { staticDevicePixelRatio } from "src/utils/static-dpr";
+import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
   AnimationDesc,
   AnimationName,

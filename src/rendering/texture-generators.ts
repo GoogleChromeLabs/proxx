@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { staticDevicePixelRatio } from "../utils/static-dpr";
+import { staticDevicePixelRatio } from "../utils/static-display";
 import { deg2rad, remap, smoothpulse } from "./animation-helpers";
 import { roundedRectangle } from "./canvas-helper";
 

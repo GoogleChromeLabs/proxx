@@ -13,7 +13,7 @@
 
 import { getCellSizes } from "src/utils/cell-sizing.js";
 import { task } from "src/utils/scheduling.js";
-import { staticDevicePixelRatio } from "src/utils/static-dpr.js";
+import { staticDevicePixelRatio } from "src/utils/static-display.js";
 import { easeInOutCubic, easeOutQuad, remap } from "./animation-helpers.js";
 import {
   fadedLinesAlpha,

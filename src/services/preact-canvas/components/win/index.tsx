@@ -19,6 +19,7 @@ import {
   againButton,
   gridName as gridNameStyle,
   mainButton,
+  noMotion,
   score,
   scoreRow,
   time as timeStyle,
@@ -38,6 +39,7 @@ interface Props {
   width: number;
   height: number;
   mines: number;
+  useMotion: boolean;
 }
 
 interface State {
@@ -65,7 +67,7 @@ export default class End extends Component<Props, State> {
   }
 
   render(
-    { onRestart, onMainMenu, time, bestTime }: Props,
+    { onRestart, onMainMenu, time, bestTime, useMotion }: Props,
     { gridName }: State
   ) {
     const timeStr = minSec(time);
@@ -74,7 +76,7 @@ export default class End extends Component<Props, State> {
     return (
       <div class={winScreen}>
         <div class={winInner}>
-          <div class={winSquare}>
+          <div class={[winSquare, useMotion ? "" : noMotion].join(" ")}>
             <div>
               <div>
                 <div>
