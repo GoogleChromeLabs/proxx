@@ -12,18 +12,31 @@
  */
 import { version } from "consts:";
 import { Component, h } from "preact";
+import {
+  isFeaturePhone,
+  staticDevicePixelRatio
+} from "../../../../utils/static-dpr";
+import { systemData as systemDataStyle } from "./style.css";
 
-export default class About extends Component {
+interface Props {
+  motion: boolean;
+}
+
+let navigator: any;
+navigator = window.navigator;
+
+export default class About extends Component<Props> {
   render() {
     return (
       <div>
         <h1>About</h1>
         <h2>How to play</h2>
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
-          odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
-          quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
-          mauris.
+          You are on a space mission to a galaxy far away. Your job is to survey
+          the space field and flag where black holes are. If the square you
+          click on is not a black hole, you'll see how many of its neighboring
+          squares are black holes. Clear all of the squares without hitting a
+          black hole to win.
         </p>
         <h2>Github</h2>
         <p>
@@ -33,11 +46,34 @@ export default class About extends Component {
           </a>
           .
         </p>
-        <p>Version: {version}</p>
-        <h2>Credits</h2>
-        <p>Here is where credit goes</p>
         <h2>Privacy policy</h2>
-        <p>Probably need some privacy policy</p>
+        <p>
+          Google Analytics is used to record{" "}
+          <a href="https://support.google.com/analytics/answer/6004245?ref_topic=2919631">
+            basic visit data
+          </a>
+          . Highscores and your user preference are saved locally. No additional
+          data is sent to the server.
+        </p>
+        <h2>System Information</h2>
+        <ul class={systemDataStyle}>
+          <li>Version: {version} </li>
+          <li>Motion: {this.props.motion ? "on" : "off"}</li>
+          <li>Feature Phone: {isFeaturePhone ? "yes" : "no"}</li>
+          {/* <li>Device capable ?</li> */}
+          <li>
+            Standalone Mode:{" "}
+            {window.matchMedia("(display-mode: standalone)").matches
+              ? "yes"
+              : "no"}{" "}
+          </li>
+          <li>Screen Width: {window.innerWidth}px</li>
+          <li>Screen Height: {window.innerHeight}px</li>
+          <li>DPR: {staticDevicePixelRatio}</li>
+          <li>Device Memory: {navigator.deviceMemory}</li>
+          <li>Concurrency: {navigator.hardwareConcurrency}</li>
+          <li>UA: {navigator.userAgent}</li>
+        </ul>
       </div>
     );
   }

@@ -38,10 +38,6 @@ body {
   height: 100%;
 }
 
-a {
-  color: white;
-}
-
 .main {
   height: 100%;
 }
@@ -59,4 +55,16 @@ a {
 
 :global :focus:not(.focus-visible) {
   outline: none;
+}
+
+h2 {
+  font-size: 1rem;
+}
+
+p {
+  font-size: .9rem;
+}
+
+a {
+  color: #3ee5ea;
 }

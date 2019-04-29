@@ -58,7 +58,7 @@ export default class Settings extends Component<Props, State> {
         {aboutVisible ? (
           <div class={settingsWindowStyle}>
             <div class={settingsContentStyle}>
-              <About />
+              <About motion={motion} />
             </div>
           </div>
         ) : (
