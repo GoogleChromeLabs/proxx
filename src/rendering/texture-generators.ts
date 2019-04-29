@@ -11,9 +11,9 @@
  * limitations under the License.
  */
 
-import { staticDevicePixelRatio } from "../utils/static-dpr.js";
-import { deg2rad, remap, smoothpulse } from "./animation-helpers.js";
-import { roundedRectangle } from "./canvas-helper.js";
+import { staticDevicePixelRatio } from "../utils/static-dpr";
+import { deg2rad, remap, smoothpulse } from "./animation-helpers";
+import { roundedRectangle } from "./canvas-helper";
 
 import {
   blackHoleInnerRadius,
@@ -27,12 +27,13 @@ import {
   innerCircleRadius,
   numberCircleRadius,
   numberFontSizeFactor,
+  numberFontTopShiftFactor,
   numInnerRects,
   safetyBufferFactor,
   thickLine,
   thinLine,
   white
-} from "./constants.js";
+} from "./constants";
 
 export type TextureGenerator = (
   idx: number,
@@ -162,7 +163,7 @@ export function staticTextureGeneratorFactory(
       ctx2.stroke();
     } else if (idx >= 1 && idx <= 8) {
       ctx2.strokeStyle = white;
-      ctx2.lineWidth = size * thinLine;
+      ctx2.lineWidth = size * thickLine;
       ctx2.beginPath();
       ctx2.arc(0, 0, halfSize * numberCircleRadius, 0, 2 * Math.PI);
       ctx2.closePath();
@@ -171,8 +172,8 @@ export function staticTextureGeneratorFactory(
       ctx2.fillStyle = white;
       ctx2.textAlign = "center";
       ctx2.textBaseline = "middle";
-      ctx2.font = `${size * numberFontSizeFactor}px sans-serif`;
-      ctx2.fillText(`${idx}`, 0, 0);
+      ctx2.font = `${size * numberFontSizeFactor}px "Space Mono", sans-serif`;
+      ctx2.fillText(`${idx}`, 0, size * numberFontTopShiftFactor);
     } else if (idx === STATIC_TEXTURE.FLASH) {
       roundedRectangle(
         ctx2,
