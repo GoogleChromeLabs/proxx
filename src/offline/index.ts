@@ -51,8 +51,10 @@ async function watchForUpdate() {
 
   // Look for updates
   if (reg.waiting) {
+    updateReady = true;
     return;
   }
+
   const installing = await installingWorker(reg);
   await new Promise<void>(resolve => {
     installing.addEventListener("statechange", () => {
