@@ -95,9 +95,7 @@ const texturePromise = import("../../rendering/animation").then(m =>
 );
 
 const gamePerquisites = texturePromise;
-
 const gridDefaultPromise = getGridDefault();
-
 const immedateGameSessionKey = "instantGame";
 
 class PreactService extends Component<Props, State> {
@@ -186,7 +184,6 @@ class PreactService extends Component<Props, State> {
         />
         {mainComponent}
         <BottomBar
-          onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
           onBackClick={this._onBackClick}
           onDangerModeChange={this._onDangerModeChange}
@@ -239,11 +236,6 @@ class PreactService extends Component<Props, State> {
   @bind
   private _onGameChangeUnsubscribe(func: GameChangeCallback) {
     this._gameChangeSubscribers.delete(func);
-  }
-
-  @bind
-  private _onFullscreenClick() {
-    document.documentElement.requestFullscreen();
   }
 
   @bind

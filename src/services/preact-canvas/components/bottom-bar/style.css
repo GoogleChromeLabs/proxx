@@ -53,6 +53,12 @@ html:fullscreen .fullscreen {
   visibility: hidden;
 }
 
+/* For Safari. This can't be combined with the rule above, as Safari sees :fullscreen as invalid,
+and craps itself. */
+html:-webkit-full-screen .fullscreen {
+  visibility: hidden;
+}
+
 @media (display-mode: fullscreen) {
   .fullscreen {
     visibility: hidden;
