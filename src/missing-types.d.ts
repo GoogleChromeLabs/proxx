@@ -25,3 +25,7 @@ declare var ga: GA;
 interface Window {
   ga: GA;
 }
+
+interface HTMLElement {
+  webkitRequestFullscreen?: () => void;
+}
