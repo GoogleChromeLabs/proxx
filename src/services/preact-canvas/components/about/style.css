@@ -78,13 +78,12 @@
     background-position: -180px 0px;
 }
 
-.clue-icon {
+.active-clue-icon {
     background-position: -240px 0px;
 }
 
-.active-clue-icon {
+.clue-icon {
     background-position: -300px 0px;
 }
-
 
   
