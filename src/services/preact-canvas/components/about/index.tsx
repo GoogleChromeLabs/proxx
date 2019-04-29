@@ -19,6 +19,15 @@ import {
 import { Arrow } from "../icons/initial";
 import {
   aboutWrapper as aboutWrapperStyle,
+  activeClueIcon,
+  blackholeIcon,
+  clueIcon,
+  flagedIcon,
+  hiddenIcon,
+  iconGuide,
+  iconGuideItem,
+  iconGuideRow,
+  revealedIcon,
   shortcutKey as shortcutKeyStyle,
   shortcutList as shortcutListStyle,
   systemData as systemDataStyle
@@ -48,7 +57,38 @@ export default class About extends Component<Props> {
           without hitting a black hole to win.
         </p>
 
-        <div>image guide</div>
+        <div class={iconGuide}>
+          <div class={iconGuideRow}>
+            <div class={iconGuideItem}>
+              <div class={hiddenIcon} />
+              Hidden
+            </div>
+            <div class={iconGuideItem}>
+              <div class={flagedIcon} />
+              Flaged
+            </div>
+          </div>
+          <div class={iconGuideRow}>
+            <div class={iconGuideItem}>
+              <div class={revealedIcon} />
+              Revealed
+            </div>
+            <div class={iconGuideItem}>
+              <div class={blackholeIcon} />
+              Black hole
+            </div>
+          </div>
+          <div class={iconGuideRow}>
+            <div class={iconGuideItem}>
+              <div class={clueIcon} />
+              Clue
+            </div>
+            <div class={iconGuideItem}>
+              <div class={activeClueIcon} />
+              Active Clue
+            </div>
+          </div>
+        </div>
 
         <h2>Keyboard Shortcuts</h2>
         <ul class={shortcutListStyle}>
