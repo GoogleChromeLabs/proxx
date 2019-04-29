@@ -21,6 +21,7 @@ import {
   hidden,
   leftIcon,
   leftToggleLabel,
+  noFullscreen,
   rightToggleLabel,
   toggle,
   toggleContainer
@@ -137,7 +138,7 @@ export default class BottomBar extends Component<Props, State> {
             />
           </div>
         )}
-        {fullscreenSupported && (
+        {fullscreenSupported ? (
           <button
             class={fullscreen}
             onClick={goFullscreen}
@@ -145,6 +146,8 @@ export default class BottomBar extends Component<Props, State> {
           >
             <Fullscreen />
           </button>
+        ) : (
+          <div class={noFullscreen} />
         )}
       </div>
     );
