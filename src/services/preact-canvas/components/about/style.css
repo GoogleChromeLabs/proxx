@@ -3,15 +3,15 @@
     padding: 1em 0;
 }
   
-.about-wrapper  p {
+.about-wrapper p {
     font-size: 0.9em;
-  }
+}
   
-.about-wrapper  a {
+.about-wrapper a {
     color: #3ee5ea;
 }
 
-.shortcut-key{
+.shortcut-key {
     display: inline-block;
     border:solid 2px #555;
     width:24px;
@@ -39,6 +39,7 @@
 .icon-guide-row {
     display:flex;
     padding-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 .icon-guide-item {
@@ -54,12 +55,43 @@
 .blackhole-icon,
 .clue-icon,
 .active-clue-icon{
+    background-image: url('../../../../assets/icon-sprite.png');
+    background-repeat: no-repeat;
     width:60px;
     height:60px;
     background-color: #3ee5ea;
     margin-right: 20px;
-    margin-bottom: 10px;
-  }
+}
+
+.hidden-icon {
+    height: 60px;
+    background-position: 0px 0px;
+}
+
+.flaged-icon {
+    height: 60px;
+    background-position: 60px 0px;
+}
+
+.revealed-icon {
+    height: 60px;
+    background-position: 120px 0px;
+}
+
+.blackhole-icon {
+    height: 60px;
+    background-position: 180px 0px;
+}
+
+.clue-icon {
+    height: 60px;
+    background-position: 240px 0px;
+}
+
+.active-clue-icon {
+    height: 60px;
+    background-position: 300px 0px;
+}
 
 
   

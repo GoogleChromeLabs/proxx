@@ -55,27 +55,18 @@ export default class Settings extends Component<Props, State> {
         >
           <Close />
         </button>
-        {aboutVisible ? (
-          <div class={settingsWindowStyle}>
-            <div class={settingsContentStyle}>
-              <About motion={motion} />
-            </div>
+        <div class={settingsWindowStyle}>
+          <div class={settingsContentStyle}>
+            <h1>Settings</h1>
+            <button
+              class={motion ? btnOnStyle : btnOffStyle}
+              onClick={onMotionPrefChange}
+            >
+              Animations {motion ? "on" : "off"}
+            </button>
+            <About motion={motion} />
           </div>
-        ) : (
-          <div class={settingsWindowStyle}>
-            <div class={settingsContentStyle}>
-              <button
-                class={motion ? btnOnStyle : btnOffStyle}
-                onClick={onMotionPrefChange}
-              >
-                Animations {motion ? "on" : "off"}
-              </button>
-              <button class={btnStyle} onClick={this._onAboutClicked}>
-                About
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     );
   }

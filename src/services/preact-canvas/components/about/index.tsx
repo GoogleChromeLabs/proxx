@@ -53,8 +53,9 @@ export default class About extends Component<Props> {
         </p>
         <p>
           If the square you click on is not a black hole, you'll see how many of
-          its neighboring squares are black holes. Clear all of the squares
-          without hitting a black hole to win.
+          its neighboring 8 squares are black holes. Use the right click or
+          change to Flag mode then click to flag where you think the black holes
+          are and clear all of the squares without hitting a black hole to win.
         </p>
 
         <div class={iconGuide}>
