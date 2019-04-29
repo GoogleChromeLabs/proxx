@@ -48,7 +48,7 @@
   bottom: 1px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: none;
+  overscroll-behavior: contain;
 }
 
 .canvas {
