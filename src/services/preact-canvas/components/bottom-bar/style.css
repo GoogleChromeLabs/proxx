@@ -11,7 +11,7 @@
 
 /* The in-game class is set by the game component */
 :global .in-game :local .bottom-bar {
-  position: fixed;
+  position: absolute;
 }
 
 .bottom-bar::before {
@@ -49,7 +49,19 @@
   margin-left: auto !important;
 }
 
+.no-fullscreen {
+  margin-left: auto;
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
 html:fullscreen .fullscreen {
+  visibility: hidden;
+}
+
+/* For Safari. This can't be combined with the rule above, as Safari sees :fullscreen as invalid,
+and craps itself. */
+html:-webkit-full-screen .fullscreen {
   visibility: hidden;
 }
 

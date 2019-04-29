@@ -16,7 +16,7 @@ import { bind } from "src/utils/bind";
 import { getCanvas } from "src/utils/canvas-pool";
 import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
 import ShaderBox from "src/utils/shaderbox";
-import { staticDevicePixelRatio } from "src/utils/static-dpr";
+import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
   AnimationDesc,
   AnimationName,
@@ -187,16 +187,18 @@ export default class WebGlRenderer implements Renderer {
   }
 
   setFocus(x: number, y: number) {
-    if (this._lastFocus[0] > -1) {
+    if (this._lastFocus[0] > -1 && this._lastFocus[1] > -1) {
       const [lastX, lastY] = this._lastFocus;
       const dynamicTileDataA = this._getDynamicTileDataAForTile(lastX, lastY);
       dynamicTileDataA[DynamicTileDataA.HAS_FOCUS] = 0;
       this._updateDynamicTileData(lastX, lastY);
     }
-    const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
-    dynamicTileDataA[DynamicTileDataA.HAS_FOCUS] = 1;
-    this._updateDynamicTileData(x, y);
-    this._lastFocus = [x, y];
+    if (x > -1 && y > -1) {
+      const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
+      dynamicTileDataA[DynamicTileDataA.HAS_FOCUS] = 1;
+      this._updateDynamicTileData(x, y);
+      this._lastFocus = [x, y];
+    }
   }
 
   private _updateDynamicTileData(x: number, y: number) {

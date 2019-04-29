@@ -15,7 +15,6 @@ import { Remote } from "comlink/src/comlink.js";
 import { Component, ComponentConstructor, h, render, VNode } from "preact";
 import { PlayMode } from "src/gamelogic/types";
 import {
-  Color,
   nebulaDangerDark,
   nebulaDangerLight,
   nebulaSafeDark,
@@ -26,14 +25,16 @@ import {
 } from "src/rendering/constants";
 import { bind } from "src/utils/bind.js";
 import { StateChange as GameStateChange } from "../../gamelogic";
+import { supportsSufficientWebGL } from "../../rendering/renderer";
 import { prerender } from "../../utils/constants";
+import { isFeaturePhone } from "../../utils/static-display";
 import { GameType } from "../state";
 import { getGridDefault, setGridDefault } from "../state/grid-default";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import {
-  getMotionPreference,
-  setMotionPreference
+  setMotionPreference,
+  shouldUseMotion
 } from "../state/motion-preference";
 import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
@@ -97,9 +98,7 @@ const texturePromise = import("../../rendering/animation").then(m =>
 );
 
 const gamePerquisites = texturePromise;
-
 const gridDefaultPromise = getGridDefault();
-
 const immedateGameSessionKey = "instantGame";
 
 class PreactService extends Component<Props, State> {
@@ -145,6 +144,7 @@ class PreactService extends Component<Props, State> {
             onCloseClicked={this._onSettingsCloseClick}
             motion={motionPreference}
             onMotionPrefChange={this._onMotionPrefChange}
+            disableAnimationBtn={!supportsSufficientWebGL || isFeaturePhone}
           />
         ) : (
           <Intro
@@ -167,7 +167,7 @@ class PreactService extends Component<Props, State> {
           stateService={this._stateService!}
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
-          useMotion={this.state.motionPreference}
+          useMotion={motionPreference}
         />
       );
     }
@@ -185,10 +185,10 @@ class PreactService extends Component<Props, State> {
           )}
           colorDark={this._nebulaDarkColor()}
           colorLight={this._nebulaLightColor()}
+          useMotion={motionPreference}
         />
         {mainComponent}
         <BottomBar
-          onFullscreenClick={this._onFullscreenClick}
           onSettingsClick={this._onSettingsClick}
           onBackClick={this._onBackClick}
           onDangerModeChange={this._onDangerModeChange}
@@ -244,11 +244,6 @@ class PreactService extends Component<Props, State> {
   }
 
   @bind
-  private _onFullscreenClick() {
-    document.documentElement.requestFullscreen();
-  }
-
-  @bind
   private _onSettingsCloseClick() {
     this.setState({ settingsOpen: false });
     this.previousFocus!.focus();
@@ -298,6 +293,10 @@ class PreactService extends Component<Props, State> {
       this.setState({ gridDefaults });
     });
 
+    shouldUseMotion().then(motionPreference => {
+      this.setState({ motionPreference });
+    });
+
     // Is this the reload after an update?
     const instantGameDataStr = sessionStorage.getItem(immedateGameSessionKey);
 
@@ -309,10 +308,6 @@ class PreactService extends Component<Props, State> {
     offlineModulePromise.then(({ init }) => init());
 
     this._stateService = await stateServicePromise;
-
-    getMotionPreference().then(motionPreference => {
-      this.setState({ motionPreference });
-    });
 
     localStateSubscribe(this._stateService, stateChange => {
       if ("game" in stateChange) {

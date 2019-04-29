@@ -21,13 +21,26 @@ import {
   hidden,
   leftIcon,
   leftToggleLabel,
+  noFullscreen,
   rightToggleLabel,
   toggle,
   toggleContainer
 } from "./style.css";
 
+function goFullscreen() {
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen();
+  } else if (document.documentElement.webkitRequestFullscreen) {
+    document.documentElement.webkitRequestFullscreen();
+  }
+}
+
+const fullscreenSupported: boolean = !!(
+  document.documentElement.requestFullscreen ||
+  document.documentElement.webkitRequestFullscreen
+);
+
 export interface Props {
-  onFullscreenClick: () => void;
   onSettingsClick: () => void;
   onBackClick: () => void;
   onDangerModeChange: (newSetting: boolean) => void;
@@ -50,7 +63,6 @@ export default class BottomBar extends Component<Props, State> {
 
   render(
     {
-      onFullscreenClick,
       onSettingsClick,
       onBackClick,
       buttonType,
@@ -126,13 +138,17 @@ export default class BottomBar extends Component<Props, State> {
             />
           </div>
         )}
-        <button
-          class={fullscreen}
-          onClick={onFullscreenClick}
-          aria-label="fullscreen mode"
-        >
-          <Fullscreen />
-        </button>
+        {fullscreenSupported ? (
+          <button
+            class={fullscreen}
+            onClick={goFullscreen}
+            aria-label="fullscreen mode"
+          >
+            <Fullscreen />
+          </button>
+        ) : (
+          <div class={noFullscreen} />
+        )}
       </div>
     );
   }

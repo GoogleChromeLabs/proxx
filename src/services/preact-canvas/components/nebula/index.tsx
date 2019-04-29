@@ -29,6 +29,7 @@ import vertexShader from "./vertex.glsl";
 export interface Props {
   colorLight: Color;
   colorDark: Color;
+  useMotion: boolean;
 }
 
 interface State {}
@@ -42,6 +43,60 @@ export default class Nebula extends Component<Props, State> {
   private _prevColors: Color[] = [];
 
   componentDidMount() {
+    // if no animation mode, skip WebGL setup
+    if (this.props.useMotion) {
+      this._initShaderbox();
+    }
+    window.addEventListener("resize", this._onResize);
+  }
+
+  shouldComponentUpdate({ colorLight, colorDark, useMotion }: Props) {
+    if (useMotion !== this.props.useMotion) {
+      return true;
+    }
+    const didLightColorChange = !colorEqual(this.props.colorLight, colorLight);
+    const didDarkColorChange = !colorEqual(this.props.colorDark, colorDark);
+    return didLightColorChange || didDarkColorChange;
+  }
+
+  componentWillUnmount() {
+    this._stop();
+    window.removeEventListener("resize", this._onResize);
+  }
+
+  componentWillUpdate() {
+    if (!this._shaderBox) {
+      return;
+    }
+    this._prevColors = [this.props.colorLight, this.props.colorDark];
+    this._colorBlend = 0;
+  }
+
+  componentDidUpdate(oldProps: Props) {
+    if (this.props.useMotion !== oldProps.useMotion) {
+      if (this.props.useMotion) {
+        this._initShaderbox();
+      } else {
+        this._stop();
+      }
+    }
+    this._updateColors();
+  }
+
+  render({ colorLight, colorDark, useMotion }: Props) {
+    return (
+      <div
+        style={`background: linear-gradient(to bottom, ${toRGB(
+          colorLight
+        )}, ${toRGB(colorDark)})`}
+        class={nebulaContainerStyle}
+      >
+        {useMotion && <canvas class={nebulaStyle} aria-hidden="true" />}
+      </div>
+    );
+  }
+
+  private _initShaderbox() {
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.base!.querySelector("canvas")! as HTMLCanvasElement,
       scaling: 1 / 5,
@@ -60,9 +115,6 @@ export default class Nebula extends Component<Props, State> {
         "main_color_light"
       ]
     });
-    if (!this._shaderBox) {
-      return;
-    }
 
     this._shaderBox.setUniform1f("alt_color", 0);
     this._shaderBox.setUniform1f("nebula_movement_range", 2);
@@ -76,7 +128,6 @@ export default class Nebula extends Component<Props, State> {
     this._prevColors = [this.props.colorLight, this.props.colorDark];
     this._updateColors();
 
-    window.addEventListener("resize", this._onResize);
     this._start();
 
     if (debug) {
@@ -86,61 +137,26 @@ export default class Nebula extends Component<Props, State> {
     }
   }
 
-  shouldComponentUpdate({ colorLight, colorDark }: Props) {
-    const didLightColorChange = !colorEqual(this.props.colorLight, colorLight);
-    const didDarkColorChange = !colorEqual(this.props.colorDark, colorDark);
-    return didLightColorChange || didDarkColorChange;
-  }
-
-  componentWillUnmount() {
+  private _updateColors() {
     if (!this._shaderBox) {
       return;
     }
-    this._stop();
-    window.removeEventListener("resize", this._onResize);
-  }
-
-  componentWillUpdate() {
-    this._prevColors = [this.props.colorLight, this.props.colorDark];
-    this._colorBlend = 0;
-  }
-
-  componentDidUpdate() {
-    this._updateColors();
-  }
-
-  render({ colorLight, colorDark }: Props) {
-    return (
-      <div
-        style={`background: linear-gradient(to bottom, ${toRGB(
-          colorLight
-        )}, ${toRGB(colorDark)})`}
-        class={nebulaContainerStyle}
-      >
-        <canvas class={nebulaStyle} aria-hidden="true" />
-      </div>
+    this._shaderBox.setUniform4f(
+      "main_color_light",
+      toShaderColor(this._prevColors[0])
     );
-  }
-
-  private _updateColors() {
-    if (this._shaderBox) {
-      this._shaderBox.setUniform4f(
-        "main_color_light",
-        toShaderColor(this._prevColors[0])
-      );
-      this._shaderBox.setUniform4f(
-        "main_color_dark",
-        toShaderColor(this._prevColors[1])
-      );
-      this._shaderBox.setUniform4f(
-        "alt_color_light",
-        toShaderColor(this.props.colorLight)
-      );
-      this._shaderBox.setUniform4f(
-        "alt_color_dark",
-        toShaderColor(this.props.colorDark)
-      );
-    }
+    this._shaderBox.setUniform4f(
+      "main_color_dark",
+      toShaderColor(this._prevColors[1])
+    );
+    this._shaderBox.setUniform4f(
+      "alt_color_light",
+      toShaderColor(this.props.colorLight)
+    );
+    this._shaderBox.setUniform4f(
+      "alt_color_dark",
+      toShaderColor(this.props.colorDark)
+    );
   }
 
   private _start() {

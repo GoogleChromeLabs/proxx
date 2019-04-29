@@ -14,7 +14,7 @@
 import { Cell } from "src/gamelogic/types";
 import { getCanvas } from "src/utils/canvas-pool";
 import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
-import { staticDevicePixelRatio } from "src/utils/static-dpr";
+import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
   AnimationDesc,
   AnimationName,
@@ -157,13 +157,15 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   setFocus(x: number, y: number) {
-    if (this._lastFocus[0] > -1) {
+    if (this._lastFocus[0] > -1 && this._lastFocus[1] > -1) {
       const [lastX, lastY] = this._lastFocus;
       this._lastFocus = [-1, -1];
       this._rerenderCell(lastX, lastY, { clear: true });
     }
     this._lastFocus = [x, y];
-    this._rerenderCell(x, y, { clear: true });
+    if (x > -1 && y > -1) {
+      this._rerenderCell(x, y, { clear: true });
+    }
   }
 
   private _initGrid() {
@@ -422,6 +424,7 @@ export default class Canvas2DRenderer implements Renderer {
         for (const animation of animationList) {
           this.render(x, y, cell!, animation, ts);
         }
+        this._maybeRenderFocusRing(x, y);
       }
     }
 

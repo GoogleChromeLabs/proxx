@@ -28,6 +28,7 @@ interface Props {
   onCloseClicked: () => void;
   onMotionPrefChange: () => void;
   motion: boolean;
+  disableAnimationBtn: boolean;
 }
 
 interface State {}
