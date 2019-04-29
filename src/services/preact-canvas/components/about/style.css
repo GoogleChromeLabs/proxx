@@ -59,36 +59,30 @@
     background-repeat: no-repeat;
     width:60px;
     height:60px;
-    background-color: #3ee5ea;
+    margin-right:5px;
 }
 
 .hidden-icon {
-    height: 60px;
     background-position: 0px 0px;
 }
 
 .flaged-icon {
-    height: 60px;
     background-position: 60px 0px;
 }
 
 .revealed-icon {
-    height: 60px;
     background-position: 120px 0px;
 }
 
 .blackhole-icon {
-    height: 60px;
     background-position: 180px 0px;
 }
 
 .clue-icon {
-    height: 60px;
     background-position: 240px 0px;
 }
 
 .active-clue-icon {
-    height: 60px;
     background-position: 300px 0px;
 }
 
