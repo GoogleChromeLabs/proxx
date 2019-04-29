@@ -46,13 +46,13 @@ async function generateShell(file, dependencygraph) {
     dependencygraph,
     pkg: require("./package.json"),
     fs,
-    title: "PROXX — A mobile game",
+    title: "PROXX — a game",
     description:
       "Help your crew navigate space by marking out the black holes using proxx, your proximity scanner.",
     image_url: `https://proxx.app/${
       findAssetWithName(dependencygraph, "social-cover.jpg").fileName
     }`,
-    image_alt: "Game screen of the Proxx game",
+    image_alt: "Game screen of the PROXX game",
     image_width: "1200",
     image_height: "675",
     image_type: "image/jpeg",

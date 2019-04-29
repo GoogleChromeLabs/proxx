@@ -118,7 +118,7 @@ export default class TopBar extends Component<Props, State> {
   }: Props) {
     return (
       <div class={topBar} role="banner">
-        <h1 class={title}>Proxx</h1>
+        <h1 class={title}>PROXX</h1>
         {!titleOnly && (
           <div
             class={squaresLeft}

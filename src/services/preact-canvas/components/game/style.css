@@ -17,6 +17,7 @@
 
 .again-button {
   composes: button from "../../utils.css";
+  mix-blend-mode: normal;
 }
 
 .main-button {
