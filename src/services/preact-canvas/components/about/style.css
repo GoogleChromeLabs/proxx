@@ -67,23 +67,23 @@
 }
 
 .flaged-icon {
-    background-position: 60px 0px;
+    background-position: -60px 0px;
 }
 
 .revealed-icon {
-    background-position: 120px 0px;
+    background-position: -120px 0px;
 }
 
 .blackhole-icon {
-    background-position: 180px 0px;
+    background-position: -180px 0px;
 }
 
 .clue-icon {
-    background-position: 240px 0px;
+    background-position: -240px 0px;
 }
 
 .active-clue-icon {
-    background-position: 300px 0px;
+    background-position: -300px 0px;
 }
 
 

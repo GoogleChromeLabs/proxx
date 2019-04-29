@@ -15,7 +15,7 @@ import { Component, h } from "preact";
 import {
   isFeaturePhone,
   staticDevicePixelRatio
-} from "../../../../utils/static-dpr";
+} from "../../../../utils/static-display";
 import { Arrow } from "../icons/initial";
 import {
   aboutWrapper as aboutWrapperStyle,
