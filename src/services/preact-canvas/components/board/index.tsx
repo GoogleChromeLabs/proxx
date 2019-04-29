@@ -81,7 +81,7 @@ export default class Board extends Component<Props, State> {
     window.scrollTo(0, 0);
 
     // Center scroll position
-    const scroller = document.querySelector(
+    const scroller = this.base!.querySelector(
       "." + containerStyle
     ) as HTMLElement;
     scroller.scrollLeft = scroller.scrollWidth / 2 - scroller.offsetWidth / 2;
