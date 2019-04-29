@@ -13,9 +13,6 @@
 
 import { Cell } from "src/gamelogic/types";
 import ShaderBox from "src/utils/shaderbox";
-import { getMotionPreference } from "../services/state/motion-preference";
-import { motionMode } from "../utils/constants";
-import { isFeaturePhone } from "../utils/static-dpr";
 import { AnimationDesc } from "./animation";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
@@ -51,7 +48,7 @@ export interface Renderer {
   stop(): void;
 }
 
-function supportsSufficientWebGL(): boolean {
+export const supportsSufficientWebGL: boolean = (() => {
   try {
     // tslint:disable-next-line:no-unused-expression
     new ShaderBox(vertexShader, fragmentShader);
@@ -60,22 +57,4 @@ function supportsSufficientWebGL(): boolean {
     return false;
   }
   return true;
-}
-
-export const deviceMotionCapable = supportsSufficientWebGL() && !isFeaturePhone;
-
-export async function shouldUseMotion(): Promise<boolean> {
-  // Whenever `motion` query flag is set, it is honoured regardless of device or user preference
-  if (motionMode) {
-    if (motionMode === "1") {
-      return true;
-    } else if (motionMode === "0") {
-      return false;
-    }
-  }
-  // If device is capable of animation, then inquire user preference
-  if (deviceMotionCapable) {
-    return await getMotionPreference();
-  }
-  return false;
-}
+})();

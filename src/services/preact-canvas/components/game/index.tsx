@@ -87,7 +87,8 @@ export default class Game extends Component<Props, State> {
       mines,
       gameChangeSubscribe,
       gameChangeUnsubscribe,
-      toRevealTotal
+      toRevealTotal,
+      useMotion
     }: Props,
     { playMode, toReveal, animator, renderer, completeTime, bestTime }: State
   ) {
@@ -100,6 +101,7 @@ export default class Game extends Component<Props, State> {
           toReveal={toReveal}
           toRevealTotal={toRevealTotal}
           playMode={playMode}
+          useMotion={useMotion}
         />
         {playMode === PlayMode.Won ? (
           <Win

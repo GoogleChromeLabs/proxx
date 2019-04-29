@@ -17,7 +17,7 @@ import { del, get, set } from "idb-keyval";
 
 import { noCache } from "src/utils/constants";
 import { task } from "../utils/scheduling";
-import { staticDevicePixelRatio } from "../utils/static-dpr.js";
+import { staticDevicePixelRatio } from "../utils/static-display.js";
 import { TextureGenerator } from "./texture-generators.js";
 
 export type TextureDrawer = (

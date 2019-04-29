@@ -18,5 +18,10 @@ export const debug = url.searchParams.has("debug");
 export const noCache = url.searchParams.has("no-cache");
 export const cellFocusMode = url.searchParams.has("cell-focus");
 
-// expected value "1": motion, "2": no-motion
-export const motionMode = url.searchParams.get("motion");
+const forceMotionParam = url.searchParams.get("motion");
+export const forceMotionMode =
+  forceMotionParam === "0"
+    ? false
+    : forceMotionParam === "1"
+    ? true
+    : undefined;

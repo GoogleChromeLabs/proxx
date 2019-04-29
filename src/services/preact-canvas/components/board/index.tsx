@@ -16,7 +16,7 @@ import { Animator } from "src/rendering/animator.js";
 import { Renderer } from "src/rendering/renderer.js";
 import { putCanvas } from "src/utils/canvas-pool.js";
 import { cellFocusMode } from "src/utils/constants.js";
-import { isFeaturePhone } from "src/utils/static-dpr.js";
+import { isFeaturePhone } from "src/utils/static-display.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
