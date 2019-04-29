@@ -86,7 +86,7 @@ export default class About extends Component<Props> {
             </div>
             <div class={iconGuideItem}>
               <div class={activeClueIcon} />
-              Active Clue
+              Active clue
             </div>
           </div>
         </div>
