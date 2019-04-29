@@ -30,28 +30,19 @@ interface Props {
   motion: boolean;
 }
 
-interface State {
-  aboutVisible: boolean;
-}
+interface State {}
 
 export default class Settings extends Component<Props, State> {
-  state: State = {
-    aboutVisible: false
-  };
-
   private focusItem?: HTMLElement;
 
-  render(
-    { onCloseClicked, onMotionPrefChange, motion }: Props,
-    { aboutVisible }: State
-  ) {
+  render({ onCloseClicked, onMotionPrefChange, motion }: Props) {
     return (
       <div role="dialog" aria-label="settings dialog" class={settingsStyle}>
         <button
           aria-label={`close button`}
           class={closebtnStyle}
           ref={focusItem => (this.focusItem = focusItem)}
-          onClick={aboutVisible ? this._onAboutCloseClicked : onCloseClicked}
+          onClick={onCloseClicked}
         >
           <Close />
         </button>
@@ -81,16 +72,5 @@ export default class Settings extends Component<Props, State> {
     if (event.key === "Escape") {
       this.props.onCloseClicked();
     }
-  }
-
-  @bind
-  private _onAboutClicked() {
-    this.setState({ aboutVisible: true });
-    this.focusItem!.focus();
-  }
-
-  @bind
-  private _onAboutCloseClicked() {
-    this.setState({ aboutVisible: false });
   }
 }
