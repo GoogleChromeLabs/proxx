@@ -46,7 +46,7 @@ async function generateShell(file, dependencygraph) {
     dependencygraph,
     pkg: require("./package.json"),
     fs,
-    title: "Proxx - a game to avoid black holes",
+    title: "PROXX — A mobile game",
     description:
       "Help your crew navigate space by marking out the black holes using proxx, your proximity scanner.",
     image_url: `https://proxx.app/${
