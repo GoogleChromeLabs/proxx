@@ -1,0 +1,89 @@
+.about-wrapper h2 {
+    font-size: 0.9em;
+    padding: 1em 0;
+}
+  
+.about-wrapper p {
+    font-size: 0.9em;
+}
+  
+.about-wrapper a {
+    color: #3ee5ea;
+}
+
+.shortcut-key {
+    display: inline-block;
+    border:solid 2px #555;
+    width:24px;
+    height:24px;
+    border-radius: 25%;
+    text-align: center;
+    line-height:24px;
+    margin-right: 24px;
+}
+
+.shortcut-list {
+    font-size: 0.9em;
+    padding: 0;
+    list-style: none;
+}
+
+.system-data {
+    font-size: 0.6em;
+    padding:0;
+    list-style: none
+}
+
+.icon-guide {}
+
+.icon-guide-row {
+    display:flex;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.icon-guide-item {
+    font-size: 0.9em;
+    width:50%;
+    display: flex;
+    align-items: center;
+}
+
+.hidden-icon,
+.flaged-icon,
+.revealed-icon,
+.blackhole-icon,
+.clue-icon,
+.active-clue-icon{
+    background-image: url('../../../../assets/icon-sprite.png');
+    background-repeat: no-repeat;
+    width:60px;
+    height:60px;
+    margin-right:5px;
+}
+
+.hidden-icon {
+    background-position: 0px 0px;
+}
+
+.flaged-icon {
+    background-position: -60px 0px;
+}
+
+.revealed-icon {
+    background-position: -120px 0px;
+}
+
+.blackhole-icon {
+    background-position: -180px 0px;
+}
+
+.active-clue-icon {
+    background-position: -240px 0px;
+}
+
+.clue-icon {
+    background-position: -300px 0px;
+}
+
+  

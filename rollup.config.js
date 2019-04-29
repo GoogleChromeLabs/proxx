@@ -26,6 +26,7 @@ import { readFileSync } from "fs";
 import constsPlugin from "./consts-plugin.js";
 import ejsAssetPlugin from "./ejs-asset-plugin.js";
 import assetTransformPlugin from "./asset-transform-plugin.js";
+import postCSSUrl from "postcss-url";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
@@ -49,10 +50,14 @@ export default {
       modules: {
         generateScopedName: "[hash:base64:5]"
       },
-      //extract: true,
       namedExports(name) {
         return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
-      }
+      },
+      plugins: [
+        postCSSUrl({
+          url: "inline"
+        })
+      ]
     }),
     constsPlugin({
       version: require("./package.json").version

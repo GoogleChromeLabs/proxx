@@ -84,12 +84,14 @@ const Game = deferred(
     : import("./components/game/index.js").then(m => m.default)
 );
 
-const offlineModulePromise = import("../../offline");
-
 // tslint:disable-next-line:variable-name
 const Settings = deferred(
-  import("./components/settings/index.js").then(m => m.default)
+  prerender
+    ? (new Promise(() => 0) as Promise<ComponentConstructor<any, any>>)
+    : import("./components/settings/index.js").then(m => m.default)
 );
+
+const offlineModulePromise = import("../../offline");
 
 const texturePromise = import("../../rendering/animation").then(m =>
   m.lazyGenerateTextures()
