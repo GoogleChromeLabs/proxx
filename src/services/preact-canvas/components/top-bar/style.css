@@ -7,12 +7,7 @@
   left: 0;
   right: 0;
   top: 0;
-  z-index:1;
-}
-
-/* The in-game class is set by the game component */
-:global .in-game :local .top-bar {
-  position: fixed;
+  z-index: 1;
 }
 
 .top-bar::before {

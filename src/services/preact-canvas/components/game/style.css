@@ -26,7 +26,7 @@
 }
 
 .exit-row {
-  position: fixed;
+  position: absolute;
   bottom: 38px;
   left: 0;
   right: 0;

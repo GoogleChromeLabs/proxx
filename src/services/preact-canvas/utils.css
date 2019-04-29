@@ -8,7 +8,7 @@
   user-select: none;
 }
 
-.circle-button{
+.circle-button {
   composes: unbutton;
   background: #fff;
   font-weight: bold;

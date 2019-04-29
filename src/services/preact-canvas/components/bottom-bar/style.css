@@ -11,7 +11,7 @@
 
 /* The in-game class is set by the game component */
 :global .in-game :local .bottom-bar {
-  position: fixed;
+  position: absolute;
 }
 
 .bottom-bar::before {
@@ -47,6 +47,12 @@
   composes: icons;
   /* PostCSS gets the order wrong :( */
   margin-left: auto !important;
+}
+
+.no-fullscreen {
+  margin-left: auto;
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 
 html:fullscreen .fullscreen {

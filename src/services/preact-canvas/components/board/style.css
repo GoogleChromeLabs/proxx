@@ -38,14 +38,24 @@
 
 .container {
   display: flex;
-  min-height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Ok. Strap in. We don't want the URL bar to show and hide, because it doesn't make sense for our
+  UI. If the main scrolling element fills the screen, Chrome tries to be helpful and show/hide the
+  URL bar when scrolling. Adding 1px to the bottom overcomes that. Stupid. */
+  bottom: 1px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
 }
 
 .canvas {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
