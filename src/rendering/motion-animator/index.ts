@@ -104,6 +104,7 @@ export default class MotionAnimator implements Animator {
         name: AnimationName.HIGHLIGHT_OUT,
         start: ts,
         done: () => {
+          animationList = details.animationList;
           animationList = removeAnimations(animationList, [
             AnimationName.HIGHLIGHT_IN,
             AnimationName.HIGHLIGHT_OUT
@@ -152,6 +153,7 @@ export default class MotionAnimator implements Animator {
         name: AnimationName.FLASH_IN,
         start: ts,
         done: () => {
+          animationList = details.animationList;
           animationList = removeAnimations(animationList, [
             AnimationName.FLASH_IN
           ]);

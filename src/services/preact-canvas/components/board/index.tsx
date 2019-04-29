@@ -20,7 +20,6 @@ import { isFeaturePhone } from "src/utils/static-dpr.js";
 import { Cell } from "../../../../gamelogic/types.js";
 import { bind } from "../../../../utils/bind.js";
 import { GameChangeCallback } from "../../index.js";
-import BottomBar from "../bottom-bar/index.js";
 import {
   board,
   button as buttonStyle,
@@ -41,7 +40,6 @@ const defaultCell: Cell = {
 
 export interface Props {
   onCellClick: (cell: [number, number, Cell], alt: boolean) => void;
-  onDangerModeChange: (v: boolean) => void;
   width: number;
   height: number;
   renderer: Renderer;
@@ -78,22 +76,24 @@ export default class Board extends Component<Props, State> {
     this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
 
+    // If the intro was scrolled to the bottom, we need to move it back up again. The nebula
+    // overflows the viewport on devices that hide the URL bar on scroll.
+    window.scrollTo(0, 0);
+
     // Center scroll position
-    const root = document.documentElement;
-    window.scrollTo(
-      root.scrollWidth / 2 - root.offsetWidth / 2,
-      root.scrollHeight / 2 - root.offsetHeight / 2
-    );
+    const scroller = this.base!.querySelector(
+      "." + containerStyle
+    ) as HTMLElement;
+    scroller.scrollLeft = scroller.scrollWidth / 2 - scroller.offsetWidth / 2;
+    scroller.scrollTop = scroller.scrollHeight / 2 - scroller.offsetHeight / 2;
 
     window.addEventListener("resize", this._onWindowResize);
-    window.addEventListener("scroll", this._onWindowScroll);
     window.addEventListener("keyup", this._onKeyUp);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
-    window.removeEventListener("scroll", this._onWindowScroll);
     window.removeEventListener("keyup", this._onKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
@@ -108,29 +108,25 @@ export default class Board extends Component<Props, State> {
   render() {
     return (
       <div class={board}>
-        <div class={containerStyle} />
+        <div class={containerStyle} onScroll={this._onTableScroll} />
       </div>
     );
   }
 
   @bind
   private _onWindowResize() {
-    this._onWindowScroll();
+    this._onTableScroll();
     this.props.renderer.onResize();
   }
 
   @bind
-  private _onWindowScroll() {
+  private _onTableScroll() {
     this._queryFirstCellRect();
     this.props.renderer.updateFirstRect(this._firstCellRect!);
   }
 
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "f" || event.key === "#") {
-      this.props.onDangerModeChange(!this.props.dangerMode);
-    }
-
     if (
       (isFeaturePhone || cellFocusMode) &&
       (event.key === "9" ||

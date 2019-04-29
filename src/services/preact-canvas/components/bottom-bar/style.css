@@ -1,18 +1,17 @@
 .bottom-bar {
   display: flex;
   justify-content: space-between;
-  margin: var(--side-margin);
-  margin-top: 0;
-  padding: var(--bar-padding) 0 0;
+  padding: var(--bar-padding) var(--side-margin) var(--side-margin);
   position: relative;
   left: 0;
   right: 0;
   bottom: 0;
+  touch-action: none;
 }
 
 /* The in-game class is set by the game component */
 :global .in-game :local .bottom-bar {
-  position: fixed;
+  position: absolute;
 }
 
 .bottom-bar::before {
@@ -22,8 +21,8 @@
   transform: scaleY(0.5);
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: var(--side-margin);
+  right: var(--side-margin);
   background: white;
 }
 
@@ -34,15 +33,35 @@
   height: var(--icon-size);
 }
 
+.left-icon {
+  composes: icons;
+  /* PostCSS gets the order wrong :( */
+  margin-right: auto !important;
+}
+
 .hidden {
   visibility: hidden;
 }
 
 .fullscreen {
   composes: icons;
+  /* PostCSS gets the order wrong :( */
+  margin-left: auto !important;
+}
+
+.no-fullscreen {
+  margin-left: auto;
+  width: var(--icon-size);
+  height: var(--icon-size);
 }
 
 html:fullscreen .fullscreen {
+  visibility: hidden;
+}
+
+/* For Safari. This can't be combined with the rule above, as Safari sees :fullscreen as invalid,
+and craps itself. */
+html:-webkit-full-screen .fullscreen {
   visibility: hidden;
 }
 
@@ -50,4 +69,47 @@ html:fullscreen .fullscreen {
   .fullscreen {
     visibility: hidden;
   }
+}
+
+.toggle-container {
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  align-self: center;
+}
+
+.toggle {
+  display: block;
+  width: 32px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.checkbox:global(.focus-visible)+.toggle {
+  outline: 5px blue;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+.checkbox {
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.left-toggle-label,
+.right-toggle-label {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 0.6rem;
+  user-select: none;
+}
+
+.left-toggle-label {
+  right: 100%;
+}
+
+.right-toggle-label {
+  left: 100%;
 }
