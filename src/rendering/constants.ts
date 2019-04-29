@@ -53,8 +53,10 @@ export const thickLine = 20 / 650;
 export const thinLine = 12 / 650;
 export const borderRadius = 76 / 650;
 export const innerCircleRadius = 64 / 650;
-export const numberCircleRadius = 0.9;
-export const numberFontSizeFactor = 0.5;
+export const numberCircleRadius = 0.8;
+export const numberFontSizeFactor = 0.45;
+// The font doesn't center well by default
+export const numberFontTopShiftFactor = 0.03;
 export const glowFactor = 1 / 50;
 export const glowAlpha = 0.5;
 
