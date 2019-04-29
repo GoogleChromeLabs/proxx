@@ -16,7 +16,13 @@ import {
   isFeaturePhone,
   staticDevicePixelRatio
 } from "../../../../utils/static-dpr";
-import { systemData as systemDataStyle } from "./style.css";
+import { Arrow } from "../icons/initial";
+import {
+  aboutWrapper as aboutWrapperStyle,
+  shortcutKey as shortcutKeyStyle,
+  shortcutList as shortcutListStyle,
+  systemData as systemDataStyle
+} from "./style.css";
 
 interface Props {
   motion: boolean;
@@ -28,16 +34,32 @@ navigator = window.navigator;
 export default class About extends Component<Props> {
   render() {
     return (
-      <div>
+      <div class={aboutWrapperStyle}>
         <h1>About</h1>
+
         <h2>How to play</h2>
         <p>
           You are on a space mission to a galaxy far away. Your job is to survey
-          the space field and flag where black holes are. If the square you
-          click on is not a black hole, you'll see how many of its neighboring
-          squares are black holes. Clear all of the squares without hitting a
-          black hole to win.
+          the space field and flag where black holes are.
         </p>
+        <p>
+          If the square you click on is not a black hole, you'll see how many of
+          its neighboring squares are black holes. Clear all of the squares
+          without hitting a black hole to win.
+        </p>
+
+        <div>image guide</div>
+
+        <h2>Keyboard Shortcuts</h2>
+        <ul class={shortcutListStyle}>
+          <li>
+            <span class={shortcutKeyStyle} aria-label="f key">
+              F
+            </span>
+            Switch between Clear and Flag mode
+          </li>
+        </ul>
+
         <h2>Github</h2>
         <p>
           Source code can be found at our{" "}
@@ -46,6 +68,7 @@ export default class About extends Component<Props> {
           </a>
           .
         </p>
+
         <h2>Privacy policy</h2>
         <p>
           Google Analytics is used to record{" "}
@@ -55,12 +78,12 @@ export default class About extends Component<Props> {
           . Highscores and your user preference are saved locally. No additional
           data is sent to the server.
         </p>
+
         <h2>System Information</h2>
         <ul class={systemDataStyle}>
           <li>Version: {version} </li>
           <li>Motion: {this.props.motion ? "on" : "off"}</li>
           <li>Feature Phone: {isFeaturePhone ? "yes" : "no"}</li>
-          {/* <li>Device capable ?</li> */}
           <li>
             Standalone Mode:{" "}
             {window.matchMedia("(display-mode: standalone)").matches

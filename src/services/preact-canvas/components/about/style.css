@@ -1,8 +1,35 @@
-.system-data {
-    font-size: 0.6rem;
-    padding:0;
+.about-wrapper h2 {
+    font-size: 0.9em;
+    padding: 1em 0;
+}
+  
+.about-wrapper  p {
+    font-size: 0.9em;
+  }
+  
+.about-wrapper  a {
+    color: #3ee5ea;
 }
 
-.system-data li {
+.shortcut-key{
+    display: inline-block;
+    border:solid 2px #555;
+    width:24px;
+    height:24px;
+    border-radius: 25%;
+    text-align: center;
+    line-height:24px;
+    margin-right: 24px;
+}
+
+.shortcut-list {
+    font-size: 0.9em;
+    padding: 0;
+    list-style: none;
+}
+
+.system-data {
+    font-size: 0.6em;
+    padding:0;
     list-style: none
 }
