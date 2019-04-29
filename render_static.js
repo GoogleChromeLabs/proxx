@@ -49,7 +49,7 @@ async function generateShell(file, dependencygraph) {
     title: "Proxx - find black holes in space",
     description:
       "Help your crew navigate space by marking out the black holes using proxx, your proximity scanner.",
-    image_url: `http://gravitongame.netlify.com/${
+    image_url: `https://deploy-preview-234--gravitongame.netlify.com/${
       findAssetWithName(dependencygraph, "social-cover.jpg").fileName
     }`,
     image_alt: "Game screen of the Proxx game",
@@ -57,7 +57,7 @@ async function generateShell(file, dependencygraph) {
     image_height: "675",
     image_type: "image/jpeg",
     twitter_account: "@chromiumdev",
-    url: "http://gravitongame.netlify.com/",
+    url: "https://deploy-preview-234--gravitongame.netlify.com/",
     locale: "en_US"
   });
 }
