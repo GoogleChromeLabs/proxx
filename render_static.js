@@ -45,7 +45,20 @@ async function generateShell(file, dependencygraph) {
     icon: findAssetWithName(dependencygraph, "icon-maskable.png").fileName,
     dependencygraph,
     pkg: require("./package.json"),
-    fs
+    fs,
+    title: "PROXX — A mobile game",
+    description:
+      "Help your crew navigate space by marking out the black holes using proxx, your proximity scanner.",
+    image_url: `https://proxx.app/${
+      findAssetWithName(dependencygraph, "social-cover.jpg").fileName
+    }`,
+    image_alt: "Game screen of the Proxx game",
+    image_width: "1200",
+    image_height: "675",
+    image_type: "image/jpeg",
+    twitter_account: "@chromiumdev",
+    url: "https://proxx.app/",
+    locale: "en_US"
   });
 }
 
