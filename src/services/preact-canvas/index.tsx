@@ -29,6 +29,7 @@ import { supportsSufficientWebGL } from "../../rendering/renderer";
 import { prerender } from "../../utils/constants";
 import { isFeaturePhone } from "../../utils/static-display";
 import { GameType } from "../state";
+import { getBest } from "../state/best-times";
 import { getGridDefault, setGridDefault } from "../state/grid-default";
 import StateService from "../state/index.js";
 import localStateSubscribe from "../state/local-state-subscribe.js";
@@ -60,6 +61,7 @@ interface Props {
 interface State {
   game?: GameType;
   gridDefaults?: GridType;
+  bestTime?: number;
   dangerMode: boolean;
   awaitingGame: boolean;
   settingsOpen: boolean;
@@ -129,7 +131,8 @@ class PreactService extends Component<Props, State> {
       gridDefaults,
       settingsOpen,
       motionPreference,
-      gameInPlay
+      gameInPlay,
+      bestTime
     }: State
   ) {
     let mainComponent: VNode;
@@ -168,6 +171,7 @@ class PreactService extends Component<Props, State> {
           dangerMode={dangerMode}
           onDangerModeChange={this._onDangerModeChange}
           useMotion={motionPreference}
+          bestTime={bestTime}
         />
       );
     }
@@ -309,7 +313,7 @@ class PreactService extends Component<Props, State> {
 
     this._stateService = await stateServicePromise;
 
-    localStateSubscribe(this._stateService, stateChange => {
+    localStateSubscribe(this._stateService, async stateChange => {
       if ("game" in stateChange) {
         const game = stateChange.game;
 
@@ -320,7 +324,8 @@ class PreactService extends Component<Props, State> {
             game,
             awaitingGame: false,
             gridDefaults: game,
-            gameInPlay: true
+            gameInPlay: true,
+            bestTime: await getBest(game.width, game.height, game.mines)
           });
         } else {
           this.setState({ game, gameInPlay: false });

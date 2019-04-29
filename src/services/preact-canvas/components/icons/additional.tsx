@@ -51,3 +51,9 @@ export const Back = (props: JSX.HTMLAttributes) => (
     <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
   </svg>
 );
+
+export const Star = (props: JSX.HTMLAttributes) => (
+  <svg viewBox="0 0 24 24" {...props}>
+    <path d="M22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7 6.2-3.7 6.2 3.7-1.6-7L22 9.2zm-10 6.2l-3.8 2.3 1-4.3L6 10.5l4.4-.4 1.7-4 1.7 4 4.4.4-3.3 2.9 1 4.3-3.8-2.3z" />
+  </svg>
+);

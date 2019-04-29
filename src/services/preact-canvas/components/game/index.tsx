@@ -43,6 +43,7 @@ export interface Props {
   dangerMode: boolean;
   toRevealTotal: number;
   useMotion: boolean;
+  bestTime?: number;
 }
 
 interface State {
@@ -88,7 +89,8 @@ export default class Game extends Component<Props, State> {
       gameChangeSubscribe,
       gameChangeUnsubscribe,
       toRevealTotal,
-      useMotion
+      useMotion,
+      bestTime: previousBestTime
     }: Props,
     { playMode, toReveal, animator, renderer, completeTime, bestTime }: State
   ) {
@@ -102,6 +104,8 @@ export default class Game extends Component<Props, State> {
           toRevealTotal={toRevealTotal}
           playMode={playMode}
           useMotion={useMotion}
+          bestTime={previousBestTime}
+          showBestTime={playMode === PlayMode.Pending}
         />
         {playMode === PlayMode.Won ? (
           <Win
