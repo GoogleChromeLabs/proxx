@@ -392,13 +392,7 @@ export default class Board extends Component<Props, State> {
     const clickable =
       !cell.revealed ||
       (cell.touchingMines && cell.touchingFlags >= cell.touchingMines);
-
-    if (clickable) {
-      btn.removeAttribute("disabled");
-    } else {
-      btn.disabled = !clickable;
-    }
-
+    btn.disabled = !clickable;
     btn.setAttribute("aria-label", cellLabel);
     this._additionalButtonData.get(btn)![2] = cell;
   }
