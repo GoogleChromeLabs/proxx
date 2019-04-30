@@ -61,6 +61,7 @@ export function processDoneCallback(animation: AnimationDesc) {
   delete animation.done;
 }
 
+export let textureTileSize: number | null = null;
 export let idleAnimationTextureDrawer: TextureDrawer | null = null;
 export let idleSprites: HTMLImageElement[] | null = null;
 export let staticTextureDrawer: TextureDrawer | null = null;
@@ -69,6 +70,7 @@ export let staticSprites: HTMLImageElement[] | null = null;
 export async function lazyGenerateTextures() {
   const { cellPadding, cellSize } = getCellSizes();
   const textureSize = cellSize + 2 * cellPadding;
+  textureTileSize = textureSize;
 
   const uncachedIATG = idleAnimationTextureGeneratorFactory(
     textureSize,

@@ -22,7 +22,8 @@ import {
   AnimationName,
   idleSprites,
   processDoneCallback,
-  staticSprites
+  staticSprites,
+  textureTileSize
 } from "../animation";
 import { easeInOutCubic, easeOutQuad, remap } from "../animation-helpers";
 import {
@@ -117,7 +118,10 @@ export default class WebGlRenderer implements Renderer {
     this._setupTextures();
 
     this._shaderBox!.setUniform1f("sprite_size", spriteSize);
-    this._shaderBox!.setUniform1f("tile_size", this._tileSize!);
+    this._shaderBox!.setUniform1f(
+      "tile_size",
+      textureTileSize! * staticDevicePixelRatio
+    );
     this._shaderBox!.setUniform1f("idle_frames", idleAnimationNumFrames);
     const { verticalPadding, horizontalPadding } = getPaddings();
     this._shaderBox!.setUniform2f("paddings", [
