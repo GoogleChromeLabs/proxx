@@ -302,6 +302,9 @@ export default class Root extends Component<Props, State> {
     if (this.state.settingsOpen) {
       return nebulaSettingLight;
     }
+    if (!this.state.game) {
+      return nebulaSafeLight;
+    }
     if (this.state.dangerMode) {
       return nebulaDangerLight;
     }
@@ -311,6 +314,9 @@ export default class Root extends Component<Props, State> {
   private _nebulaDarkColor() {
     if (this.state.settingsOpen) {
       return nebulaSettingDark;
+    }
+    if (!this.state.game) {
+      return nebulaSafeDark;
     }
     if (this.state.dangerMode) {
       return nebulaDangerDark;
