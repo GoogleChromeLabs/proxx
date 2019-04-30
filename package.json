@@ -63,6 +63,7 @@
     "web-streams-polyfill": "^1.3.2"
   },
   "devDependencies": {
+    "characterset": "^1.3.0",
     "escape-string-regexp": "^1.0.5",
     "http-server": "^0.11.1",
     "husky": "^1.3.1",

@@ -4,6 +4,7 @@ const puppeteer = require("puppeteer");
 const ecstatic = require("ecstatic");
 const http = require("http");
 const path = require("path");
+const CharacterSet = require("characterset");
 
 function findChunkWithName(dependencygraph, name) {
   return Object.values(dependencygraph).find(desc =>
@@ -31,15 +32,35 @@ async function renderEjsFile(inPath, outPath, data) {
 }
 
 async function generateShell(file, dependencygraph) {
+  const normalCharSet = new CharacterSet(
+    "PROXXDifficultyHardEasyNormalCustomWidthHeightBlackholes 0123456789"
+  );
+  // This has to include a space, else Firefox gets confused.
+  const boldCharSet = new CharacterSet("START ");
+
   await renderEjsFile("src/index.ejs", file, {
     bootstrapFile: findChunkWithName(dependencygraph, "bootstrap.tsx").fileName,
     workerFile: findChunkWithName(dependencygraph, "worker.ts").fileName,
-    normalFontFile: findAssetWithName(
-      dependencygraph,
-      "space-mono-normal.woff2"
-    ).fileName,
-    boldFontFile: findAssetWithName(dependencygraph, "space-mono-bold.woff2")
-      .fileName,
+    fonts: [
+      {
+        asset: findAssetWithName(dependencygraph, "space-mono-normal.woff2")
+          .fileName,
+        weight: 400,
+        inline: fs
+          .readFileSync("src/assets/space-mono-inline.woff2")
+          .toString("base64"),
+        inlineRange: normalCharSet.toHexRangeString()
+      },
+      {
+        asset: findAssetWithName(dependencygraph, "space-mono-bold.woff2")
+          .fileName,
+        weight: 700,
+        inline: fs
+          .readFileSync("src/assets/space-mono-bold-inline.woff2")
+          .toString("base64"),
+        inlineRange: boldCharSet.toHexRangeString()
+      }
+    ],
     favicon: findAssetWithName(dependencygraph, "favicon.png").fileName,
     dependencygraph,
     icon: findAssetWithName(dependencygraph, "icon-maskable.png").fileName,

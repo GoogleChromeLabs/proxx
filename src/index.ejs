@@ -43,13 +43,20 @@ html {
 <link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
 <link rel="manifest" href="/manifest.json">
 <link rel="prefetch" href="<%=workerFile%>">
-<% for (const [i, font] of [normalFontFile, boldFontFile].entries()) { %>
-  <link rel="preload" as="font" href="<%= font %>" crossorigin>
+<% for (const { asset, weight, inline, inlineRange, assetRange } of fonts) { %>
+  <link rel="prefetch" as="font" href="<%= asset %>" crossorigin>
   <style>
     @font-face {
       font-family: 'Space Mono';
-      font-weight: <%= i === 0 ? 400 : 700 %>;
-      src: url(<%= font %>) format('woff2');
+      font-weight: <%= weight %>;
+      src: url('<%= asset %>') format('woff2');
+    }
+
+    @font-face {
+      font-family: 'Space Mono';
+      font-weight: <%= weight %>;
+      src: url('data:font/woff2;base64,<%= inline %>') format('woff2'), url(<%= asset %>) format('woff2');
+      unicode-range: <%= inlineRange %>;
     }
   </style>
 <% } %>
