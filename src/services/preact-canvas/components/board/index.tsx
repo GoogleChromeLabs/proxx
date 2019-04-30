@@ -378,23 +378,26 @@ export default class Board extends Component<Props, State> {
     x: number,
     y: number
   ) {
-    // Create text for aria-label, then check if the buttun should be active or disabled
-    let cellState: [string, boolean];
-    if (!cell.revealed) {
-      const label = cell.flagged ? "flag" : "hidden";
-      cellState = [label, true];
-    } else if (cell.hasMine) {
-      cellState = ["black hole", false];
-    } else if (cell.touchingMines === 0) {
-      cellState = ["blank", false];
-    } else {
-      cellState = [`${cell.touchingMines}`, cell.touchingFlags > 0];
-    }
+    let cellLabel: string;
 
-    cellState[1]
-      ? btn.removeAttribute("disabled")
-      : btn.setAttribute("disabled", "true");
-    btn.setAttribute("aria-label", cellState[0]);
+    if (!cell.revealed) {
+      cellLabel = cell.flagged ? "flag" : "hidden";
+    } else if (cell.hasMine) {
+      cellLabel = "black hole";
+    } else if (cell.touchingMines === 0) {
+      cellLabel = "blank";
+    } else {
+      cellLabel = `${cell.touchingMines}`;
+    }
+    const isDisabled =
+      cell.revealed &&
+      (cell.touchingMines <= 0 || cell.touchingFlags <= 0 || cell.hasMine);
+
+    isDisabled
+      ? btn.setAttribute("disabled", "true")
+      : btn.removeAttribute("disabled");
+
+    btn.setAttribute("aria-label", cellLabel);
     this._additionalButtonData.get(btn)![2] = cell;
   }
 }
