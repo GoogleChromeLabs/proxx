@@ -379,6 +379,7 @@ export default class Board extends Component<Props, State> {
     y: number
   ) {
     let cellState;
+
     if (!cell.revealed) {
       cellState = cell.flagged ? `flag` : `hidden`;
     } else if (cell.hasMine) {
@@ -386,9 +387,15 @@ export default class Board extends Component<Props, State> {
     } else if (cell.touchingMines === 0) {
       cellState = `blank`;
     } else {
-      cellState = `${cell.touchingMines}`;
+      cellState = `${cell.touchingMines}, ${cell.touchingFlags}`;
     }
+    // todo see if it's active number or not
 
+    if (cellState === "blank" || cellState === "black hole") {
+      btn.setAttribute("disabled", "true");
+    } else {
+      btn.removeAttribute("disabled");
+    }
     btn.setAttribute("aria-label", cellState);
     this._additionalButtonData.get(btn)![2] = cell;
   }
