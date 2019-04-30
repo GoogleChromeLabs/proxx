@@ -378,18 +378,22 @@ export default class Board extends Component<Props, State> {
     x: number,
     y: number
   ) {
-    let cellState;
-    if (!cell.revealed) {
-      cellState = cell.flagged ? `flag` : `hidden`;
-    } else if (cell.hasMine) {
-      cellState = `black hole`;
-    } else if (cell.touchingMines === 0) {
-      cellState = `blank`;
-    } else {
-      cellState = `${cell.touchingMines}`;
-    }
+    let cellLabel: string;
 
-    btn.setAttribute("aria-label", cellState);
+    if (!cell.revealed) {
+      cellLabel = cell.flagged ? "flag" : "hidden";
+    } else if (cell.hasMine) {
+      cellLabel = "black hole";
+    } else if (cell.touchingMines === 0) {
+      cellLabel = "blank";
+    } else {
+      cellLabel = `${cell.touchingMines}`;
+    }
+    const clickable =
+      !cell.revealed ||
+      (cell.touchingMines && cell.touchingFlags >= cell.touchingMines);
+    btn.disabled = !clickable;
+    btn.setAttribute("aria-label", cellLabel);
     this._additionalButtonData.get(btn)![2] = cell;
   }
 }
