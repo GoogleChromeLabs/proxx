@@ -10,14 +10,14 @@
   display: block;
   width: 100%;
   /** PostCSS adding classes in wrong order :( */
-  margin: 0.6rem 0.4rem !important;
+  margin: 0.6rem 0rem !important;
   font-size: 1.1rem;
   letter-spacing: 0.2rem;
 }
 
 .again-button {
   composes: button from "../../utils.css";
-  mix-blend-mode: normal;
+  mix-blend-mode: normal !important;
 }
 
 .main-button {
@@ -43,6 +43,12 @@
 @media (min-width: 440px) {
   .exit-row-inner {
     display: flex;
+  }
+
+  .again-button,
+  .main-button {
+  /** PostCSS adding classes in wrong order :( */
+  margin: 0.6rem 0.4rem !important;
   }
 }
 
