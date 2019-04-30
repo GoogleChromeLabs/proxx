@@ -85,7 +85,7 @@ export default {
         "./src/assets/space-mono-bold.woff2",
         "./src/assets/favicon.png",
         "./src/assets/social-cover.jpg",
-        "./src/assets/assetlinks.json",
+        "./src/assets/assetlinks.json"
       ]
     }),
     assetTransformPlugin(asset => {
