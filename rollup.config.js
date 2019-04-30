@@ -83,7 +83,7 @@ export default {
       initialAssets: [
         "./src/assets/space-mono-normal.woff2",
         "./src/assets/space-mono-bold.woff2",
-        "./src/assets/favicon.ico",
+        "./src/assets/favicon.png",
         "./src/assets/social-cover.jpg"
       ]
     }),
