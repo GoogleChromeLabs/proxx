@@ -19,6 +19,7 @@ import ShaderBox from "../../../../utils/shaderbox.js";
 import { nebula as nebulaStyle } from "./style.css";
 
 import { Color, toShaderColor } from "src/rendering/constants.js";
+import toRGB from "src/utils/to-rgb.js";
 import { debug } from "../../../../utils/constants";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
@@ -80,9 +81,14 @@ export default class Nebula extends Component<Props, State> {
     this._updateColors();
   }
 
-  render({ useMotion }: Props) {
+  render({ colorLight, colorDark, useMotion }: Props) {
     return (
-      <div>
+      <div
+        class={nebulaStyle}
+        style={`background: linear-gradient(to bottom, ${toRGB(
+          colorLight
+        )}, ${toRGB(colorDark)}`}
+      >
         {useMotion && <canvas class={nebulaStyle} aria-hidden="true" />}
       </div>
     );
