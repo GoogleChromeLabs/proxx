@@ -132,7 +132,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, alt_color_light*.1, circle_mask));
+    circle_color = clamp(circle_color + mix(black, alt_color_light*.1, circle_mask), vec4(0.), vec4(1.));
   }
 
 
@@ -149,7 +149,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, alt_color_light*.1, circle_mask));
+    circle_color = clamp(circle_color + mix(black, alt_color_light*.1, circle_mask), vec4(0.), vec4(1.));
   }
 
   // Circle 3
@@ -165,7 +165,7 @@ void main() {
     float d = length(p) - radius;
     float circle_mask = (1. - smoothstep(0., 0.01, d));
 
-    circle_color = clamp(vec4(0.), vec4(1.), circle_color + mix(black, alt_color_light*.1, circle_mask));
+    circle_color = clamp(circle_color + mix(black, alt_color_light*.1, circle_mask), vec4(0.), vec4(1.));
   }
 
   // Soft light blending
