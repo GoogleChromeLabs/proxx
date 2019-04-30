@@ -1,25 +1,5 @@
 .top-bar {
-  display: flex;
-  margin: var(--side-margin);
-  margin-bottom: 0;
-  padding: 0 0 var(--bar-padding);
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 1;
-}
-
-.top-bar::before {
-  content: '';
-  height: 1px;
-  transform-origin: 0 0;
-  transform: scaleY(0.5);
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: white;
+  composes: top-bar from "../top-bar-simple/style.css";
 }
 
 .squares-left {
@@ -32,13 +12,7 @@
 }
 
 .title {
-  flex: 1;
-  order: 2;
-  text-align: center;
-  font-size: inherit;
-  font-weight: normal;
-  margin: 0;
-  padding: 0;
+  composes: title from "../top-bar-simple/style.css";
 }
 
 @media (max-width: 350px) {

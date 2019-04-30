@@ -95,7 +95,6 @@ export interface Props {
   toRevealTotal?: number;
   toReveal?: number;
   timerRunning?: boolean;
-  titleOnly?: boolean;
   playMode?: PlayMode;
   useMotion?: boolean;
   showBestTime?: boolean;
@@ -110,7 +109,6 @@ export default class TopBar extends Component<Props, State> {
     toReveal,
     toRevealTotal,
     timerRunning,
-    titleOnly,
     playMode,
     useMotion,
     bestTime,
@@ -119,29 +117,23 @@ export default class TopBar extends Component<Props, State> {
     return (
       <div class={topBar} role="banner">
         <h1 class={title}>Proxx</h1>
-        {!titleOnly && (
-          <div
-            class={squaresLeft}
-            role="status"
-            aria-label={gameStatusText(playMode)}
-          >
-            <Square class={squareIcon} />{" "}
-            {toReveal!
-              .toString()
-              .padStart(toRevealTotal!.toString().length, "0")}
-            /{toRevealTotal}
-          </div>
-        )}
-        {!titleOnly && (
-          <div class={time}>
-            {showBestTime && bestTime
-              ? [<div>{minSec(bestTime)}</div>, <Star class={timeIcon} />]
-              : [
-                  <Time running={timerRunning!} />,
-                  <Timer class={timeIcon} animate={timerRunning && useMotion} />
-                ]}
-          </div>
-        )}
+        <div
+          class={squaresLeft}
+          role="status"
+          aria-label={gameStatusText(playMode)}
+        >
+          <Square class={squareIcon} />{" "}
+          {toReveal!.toString().padStart(toRevealTotal!.toString().length, "0")}
+          /{toRevealTotal}
+        </div>
+        <div class={time}>
+          {showBestTime && bestTime
+            ? [<div>{minSec(bestTime)}</div>, <Star class={timeIcon} />]
+            : [
+                <Time running={timerRunning!} />,
+                <Timer class={timeIcon} animate={timerRunning && useMotion} />
+              ]}
+        </div>
       </div>
     );
   }

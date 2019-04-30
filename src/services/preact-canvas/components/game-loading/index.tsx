@@ -11,14 +11,16 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import TopBar from "../top-bar/index.js";
+import TopBarSimple from "../top-bar-simple";
 import { loading, loadingInner } from "./style.css";
+
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
 export default class GameLoading extends Component<{}, {}> {
   render() {
     return (
       <div class={loading}>
-        <TopBar titleOnly />
+        <TopBarSimple />
         <div class={loadingInner}>…Loading…</div>
       </div>
     );

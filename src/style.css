@@ -1,0 +1,48 @@
+html {
+  /* Catch any browsers that still overscroll (eg Safari) */
+  background-color: #000;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.7em;
+  --cell-size: 25px;
+  --cell-padding: 2px;
+  --side-margin: 10px;
+  --icon-size: 15px;
+  --circlebtn-size: 24px;
+  --bar-avoid: 40px;
+  --bar-padding: 5px;
+  --border-radius: 7px;
+}
+
+/* We're assuming (totally safe, right?) that widths below 320 are feature phones */
+@media (min-width: 320px) {
+  html {
+    font-size: 1em;
+    --cell-size: 40px;
+    --cell-padding: 5px;
+    --side-margin: 24px;
+    --icon-size: 24px;
+    --circlebtn-size: 48px;
+    --bar-avoid: 78px;
+    --bar-padding: 18px;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+a {
+  color: white;
+}
+
+:global :focus:not(.focus-visible) {
+  outline: none;
+}
+
+.main {
+  height: 100%;
+}

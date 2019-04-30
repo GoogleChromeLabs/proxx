@@ -10,50 +10,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, ComponentConstructor, h, VNode } from "preact";
 
-interface LocalProps {
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+
+import { Component, ComponentConstructor, VNode } from "preact";
+
+interface Props<T> {
   loading: () => VNode;
+  loaded: (componentConstructor: T) => VNode;
 }
 
-interface State {
-  LoadedComponent: any;
+interface State<T> {
+  LoadedComponent?: T;
 }
 
-// There are many TypeScript sins here.
-// I really tried.
-// But I failed.
-// Forgive me.
 /**
- * Create a lazy-loading component. It takes the same props as the target component, along with a
- * 'loading' prop. This prop should be a function that returns vdom for the loading state.
+ * Create a lazy-loading component.
  *
  * @param componentPromise A promise for a component class.
  */
-export default function deferred<
-  C extends ComponentConstructor<any, any>,
-  P = C extends ComponentConstructor<infer P1, any> ? P1 : never,
-  S = C extends ComponentConstructor<any, infer S1> ? S1 : never
->(componentPromise: Promise<C>): ComponentConstructor<P & LocalProps, S> {
-  return (class Deferred extends Component<P & LocalProps, State> {
-    state: State = {
+export default function deferred<C extends ComponentConstructor<any, any>>(
+  componentPromise: Promise<C>
+): ComponentConstructor<Props<C>, State<C>> {
+  return class Deferred extends Component<Props<C>, State<C>> {
+    state: State<C> = {
       LoadedComponent: undefined
     };
 
-    constructor(props: P & LocalProps) {
+    constructor(props: Props<C>) {
       super(props);
       componentPromise.then(component => {
         this.setState({ LoadedComponent: component });
       });
     }
 
-    render(props: Readonly<P & LocalProps>, { LoadedComponent }: State) {
-      const { loading, ...otherProps } = props;
+    render({ loaded, loading }: Props<C>, { LoadedComponent }: State<C>) {
       if (LoadedComponent) {
-        return <LoadedComponent {...otherProps} />;
+        return loaded(LoadedComponent);
       }
 
       return loading();
     }
-  } as unknown) as ComponentConstructor<P & LocalProps, S>;
+  };
 }

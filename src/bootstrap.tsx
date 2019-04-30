@@ -11,35 +11,15 @@
  * limitations under the License.
  */
 
-import workerURL from "chunk-name:./worker.js";
-import { Remote } from "comlink/src/comlink.js";
-import { game as gameUI } from "./services/preact-canvas/index.js";
+import { h, render } from "preact";
+import Root from "./services/preact-canvas/index.js";
+import { main } from "./style.css";
 import { prerender } from "./utils/constants.js";
-import { nextEvent } from "./utils/scheduling.js";
-import { RemoteServices } from "./worker.js";
 
-async function startWorker(): Promise<Remote<RemoteServices>> {
-  const worker = new Worker(workerURL);
-
-  const [{ wrap }] = await Promise.all([
-    import("comlink/src/comlink.js"),
-    nextEvent(worker, "message")
-  ]);
-  // iOS Safari seems to kill a worker that doesn’t receive
-  // messages after a while. So we prevent that by sending
-  // dummy keep-alive messages.
-  setInterval(() => {
-    worker.postMessage("");
-  }, 3000);
-  return wrap(worker);
-}
-
-async function bootstrap() {
-  const remoteServices = startWorker();
-  gameUI(remoteServices.then(remoteServices => remoteServices.stateService));
-}
-
-bootstrap().catch(e => console.error(e));
+const container = document.body.querySelector("main")!;
+container.classList.add(main);
+render(<Root />, container, container.firstChild as any);
+performance.mark("UI ready");
 
 if (!prerender) {
   window.ga = window.ga || ((...args: any[]) => (ga.q = ga.q || []).push(args));

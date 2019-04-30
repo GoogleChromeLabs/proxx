@@ -10,13 +10,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Remote } from "comlink/src/comlink.js";
-import StateService, { StateChange } from ".";
+
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
 export default async function localStateSubscribe(
-  stateService: Remote<StateService>,
-  callback: (stateChanges: StateChange) => void
+  stateService: import("comlink/src/comlink").Remote<
+    import("../state").default
+  >,
+  callback: (stateChanges: import("../state").StateChange) => void
 ) {
-  const { proxy } = await import("comlink/src/comlink.js");
-  stateService.subscribe(proxy(callback));
+  const { comlinkProxy } = await import("../preact-canvas/lazy-load");
+  stateService.subscribe(comlinkProxy(callback));
 }

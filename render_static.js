@@ -32,7 +32,7 @@ async function renderEjsFile(inPath, outPath, data) {
 
 async function generateShell(file, dependencygraph) {
   await renderEjsFile("src/index.ejs", file, {
-    bootstrapFile: findChunkWithName(dependencygraph, "bootstrap.ts").fileName,
+    bootstrapFile: findChunkWithName(dependencygraph, "bootstrap.tsx").fileName,
     workerFile: findChunkWithName(dependencygraph, "worker.ts").fileName,
     normalFontFile: findAssetWithName(
       dependencygraph,
@@ -95,6 +95,8 @@ async function correctMarkup(markup, { port }) {
     /<script src="\.\/chunk-([^"]+)"[^>]+><\/script>/g,
     ""
   );
+  // Remove all inject style calls (as they're already added)
+  markup = markup.replace(/\w+\.styleInject\((["']).*?\1\);/g, "");
   return markup;
 }
 
