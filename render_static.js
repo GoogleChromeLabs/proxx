@@ -40,19 +40,19 @@ async function generateShell(file, dependencygraph) {
     ).fileName,
     boldFontFile: findAssetWithName(dependencygraph, "space-mono-bold.woff2")
       .fileName,
-    favicon: findAssetWithName(dependencygraph, "favicon.ico").fileName,
+    favicon: findAssetWithName(dependencygraph, "favicon.png").fileName,
     dependencygraph,
     icon: findAssetWithName(dependencygraph, "icon-maskable.png").fileName,
     dependencygraph,
     pkg: require("./package.json"),
     fs,
-    title: "PROXX — A mobile game",
+    title: "PROXX — a game",
     description:
       "Help your crew navigate space by marking out the black holes using proxx, your proximity scanner.",
     image_url: `https://proxx.app/${
       findAssetWithName(dependencygraph, "social-cover.jpg").fileName
     }`,
-    image_alt: "Game screen of the Proxx game",
+    image_alt: "Game screen of the PROXX game",
     image_width: "1200",
     image_height: "675",
     image_type: "image/jpeg",

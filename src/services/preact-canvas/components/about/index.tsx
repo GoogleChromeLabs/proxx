@@ -13,34 +13,47 @@
 import { version } from "consts:";
 import { Component, h } from "preact";
 import {
+  idleAnimationTextureDrawer,
+  staticTextureDrawer
+} from "src/rendering/animation";
+import { turquoise } from "src/rendering/constants";
+import { TextureDrawer } from "src/rendering/texture-cache";
+import { STATIC_TEXTURE } from "src/rendering/texture-generators";
+import { bind } from "src/utils/bind";
+import { getCellSizes } from "src/utils/cell-sizing";
+import {
   isFeaturePhone,
   staticDevicePixelRatio
 } from "../../../../utils/static-display";
 import { Arrow } from "../icons/initial";
 import {
   aboutWrapper as aboutWrapperStyle,
-  activeClueIcon,
-  blackholeIcon,
-  clueIcon,
-  flagedIcon,
-  hiddenIcon,
   iconGuide,
   iconGuideItem,
   iconGuideRow,
-  revealedIcon,
   shortcutKey as shortcutKeyStyle,
   shortcutList as shortcutListStyle,
-  systemData as systemDataStyle
+  systemData as systemDataStyle,
+  tile as tileStyle
 } from "./style.css";
 
 interface Props {
   motion: boolean;
+  texturePromise: Promise<any>;
 }
 
 let navigator: any;
 navigator = window.navigator;
 
 export default class About extends Component<Props> {
+  private _tileSize: number;
+
+  constructor() {
+    super();
+    const { cellPadding, cellSize } = getCellSizes();
+    this._tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
+  }
+
   render() {
     return (
       <div class={aboutWrapperStyle}>
@@ -61,31 +74,85 @@ export default class About extends Component<Props> {
         <div class={iconGuide}>
           <div class={iconGuideRow}>
             <div class={iconGuideItem}>
-              <div class={hiddenIcon} />
-              Hidden
+              <canvas
+                class={tileStyle}
+                ref={this._renderCanvas}
+                width={this._tileSize}
+                height={this._tileSize}
+                data-sprite="idle"
+                data-frame="0"
+                data-highlight="false"
+                data-border="true"
+              />
+              Unrevealed
             </div>
             <div class={iconGuideItem}>
-              <div class={flagedIcon} />
-              Flaged
+              <canvas
+                class={tileStyle}
+                ref={this._renderCanvas}
+                width={this._tileSize}
+                height={this._tileSize}
+                data-sprite="idle"
+                data-frame="0"
+                data-highlight="true"
+                data-border="true"
+              />
+              Flagged
             </div>
           </div>
           <div class={iconGuideRow}>
             <div class={iconGuideItem}>
-              <div class={revealedIcon} />
+              <canvas
+                class={tileStyle}
+                ref={this._renderCanvas}
+                width={this._tileSize}
+                height={this._tileSize}
+                data-sprite="none"
+                data-frame="0"
+                data-highlight="false"
+                data-border="true"
+              />
               Revealed
             </div>
             <div class={iconGuideItem}>
-              <div class={blackholeIcon} />
+              <canvas
+                class={tileStyle}
+                ref={this._renderCanvas}
+                width={this._tileSize}
+                height={this._tileSize}
+                data-sprite="static"
+                data-frame={STATIC_TEXTURE.MINE.toString()}
+                data-highlight="false"
+                data-border="false"
+              />
               Black hole
             </div>
           </div>
           <div class={iconGuideRow}>
             <div class={iconGuideItem}>
-              <div class={clueIcon} />
+              <canvas
+                class={tileStyle}
+                ref={this._renderCanvas}
+                width={this._tileSize}
+                height={this._tileSize}
+                data-sprite="static"
+                data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
+                data-highlight="false"
+                data-border="false"
+              />
               Clue
             </div>
             <div class={iconGuideItem}>
-              <div class={activeClueIcon} />
+              <canvas
+                class={tileStyle}
+                ref={this._renderCanvas}
+                width={this._tileSize}
+                height={this._tileSize}
+                data-sprite="static"
+                data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
+                data-highlight="true"
+                data-border="false"
+              />
               Active clue
             </div>
           </div>
@@ -123,7 +190,7 @@ export default class About extends Component<Props> {
         <h2>System Information</h2>
         <ul class={systemDataStyle}>
           <li>Version: {version} </li>
-          <li>Motion: {this.props.motion ? "on" : "off"}</li>
+          <li>Motion: {this.props.motion ? "true" : "false"}</li>
           <li>Feature Phone: {isFeaturePhone ? "yes" : "no"}</li>
           <li>
             Standalone Mode:{" "}
@@ -140,5 +207,40 @@ export default class About extends Component<Props> {
         </ul>
       </div>
     );
+  }
+
+  @bind
+  private async _renderCanvas(canvas: HTMLCanvasElement) {
+    await this.props.texturePromise;
+
+    const spriteName = canvas.dataset.sprite;
+    let drawer: TextureDrawer | null = null;
+    switch (spriteName) {
+      case "idle":
+        drawer = idleAnimationTextureDrawer!;
+        break;
+      case "static":
+        drawer = staticTextureDrawer!;
+        break;
+    }
+
+    const ctx = canvas.getContext("2d")!;
+    ctx.save();
+    if (drawer) {
+      const frame = Number(canvas.dataset.frame);
+      drawer(frame, ctx, this._tileSize);
+    }
+
+    const hasBorder = canvas.dataset.border!.toLowerCase() === "true";
+    if (hasBorder) {
+      staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, ctx, this._tileSize!);
+    }
+    const hasHighlight = canvas.dataset.highlight!.toLowerCase() === "true";
+    if (hasHighlight) {
+      ctx.globalCompositeOperation = "source-atop";
+      ctx.fillStyle = turquoise;
+      ctx.fillRect(0, 0, this._tileSize!, this._tileSize!);
+    }
+    ctx.restore();
   }
 }

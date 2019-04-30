@@ -228,6 +228,7 @@ export default class Root extends Component<Props, State> {
                 disableAnimationBtn={
                   !lazyImport!.supportsSufficientWebGL || isFeaturePhone
                 }
+                texturePromise={texturePromise}
               />
             )}
           />
@@ -288,7 +289,7 @@ export default class Root extends Component<Props, State> {
           onSettingsClick={this._onSettingsClick}
           onBackClick={this._onBackClick}
           onDangerModeChange={this._onDangerModeChange}
-          buttonType={game ? "back" : "settings"}
+          buttonType={game ? "back" : "info"}
           display={!settingsOpen} // Settings is open = Bottom bar display should be hidden
           dangerMode={dangerMode}
           showDangerModeToggle={gameInPlay}

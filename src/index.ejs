@@ -1,4 +1,5 @@
 <!doctype html>
+<html lang="en">
 <title><%=title%></title>
 <style>
 html {
@@ -8,7 +9,7 @@ html {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="theme-color" content="#371155">
-<link rel="shortcut icon" href="<%=favicon%>" type="image/x-icon">
+<link rel="shortcut icon" href="<%=favicon%>" type="image/png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta charset="utf-8">
@@ -52,10 +53,11 @@ html {
     }
   </style>
 <% } %>
-<main></main>
+<div id="window"></div>
 <script>
   <%- fs.readFileSync("./dist/"+bootstrapFile); %>
   <% for(const dep of dependencygraph[bootstrapFile].imports) {%>
     <%-dependencygraph[dep].code;%>
   <% } %>
 </script>
+</html>

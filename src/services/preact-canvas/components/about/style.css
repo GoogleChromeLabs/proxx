@@ -2,11 +2,11 @@
     font-size: 0.9em;
     padding: 1em 0;
 }
-  
+
 .about-wrapper p {
     font-size: 0.9em;
 }
-  
+
 .about-wrapper a {
     color: #3ee5ea;
 }
@@ -49,41 +49,8 @@
     align-items: center;
 }
 
-.hidden-icon,
-.flaged-icon,
-.revealed-icon,
-.blackhole-icon,
-.clue-icon,
-.active-clue-icon{
-    background-image: url('../../../../assets/icon-sprite.png');
-    background-repeat: no-repeat;
+.tile{
     width:60px;
     height:60px;
     margin-right:5px;
 }
-
-.hidden-icon {
-    background-position: 0px 0px;
-}
-
-.flaged-icon {
-    background-position: -60px 0px;
-}
-
-.revealed-icon {
-    background-position: -120px 0px;
-}
-
-.blackhole-icon {
-    background-position: -180px 0px;
-}
-
-.active-clue-icon {
-    background-position: -240px 0px;
-}
-
-.clue-icon {
-    background-position: -300px 0px;
-}
-
-  
