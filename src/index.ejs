@@ -1,4 +1,5 @@
 <!doctype html>
+<html lang="en">
 <title><%=title%></title>
 <style>
 html {
@@ -52,10 +53,11 @@ html {
     }
   </style>
 <% } %>
-<main></main>
+<div id="window"></div>
 <script>
   <%- fs.readFileSync("./dist/"+bootstrapFile); %>
   <% for(const dep of dependencygraph[bootstrapFile].imports) {%>
     <%-dependencygraph[dep].code;%>
   <% } %>
 </script>
+</html>

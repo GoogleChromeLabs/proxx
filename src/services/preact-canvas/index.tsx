@@ -196,7 +196,7 @@ class PreactService extends Component<Props, State> {
           onSettingsClick={this._onSettingsClick}
           onBackClick={this._onBackClick}
           onDangerModeChange={this._onDangerModeChange}
-          buttonType={game ? "back" : "settings"}
+          buttonType={game ? "back" : "info"}
           display={!settingsOpen} // Settings is open = Bottom bar display should be hidden
           dangerMode={dangerMode}
           showDangerModeToggle={gameInPlay}
@@ -357,7 +357,7 @@ class PreactService extends Component<Props, State> {
 }
 
 export async function game(stateService: Promise<Remote<StateService>>) {
-  const container = document.body.querySelector("main")!;
+  const container = document.body.querySelector("#window")!;
   container.classList.add(main);
   render(
     <PreactService stateServicePromise={stateService} />,

@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 import { bind } from "src/utils/bind";
 import { Back } from "../icons/additional";
-import { Fullscreen, Settings } from "../icons/initial";
+import { Fullscreen, Information } from "../icons/initial";
 import {
   bottomBar,
   checkbox,
@@ -44,7 +44,7 @@ export interface Props {
   onSettingsClick: () => void;
   onBackClick: () => void;
   onDangerModeChange: (newSetting: boolean) => void;
-  buttonType: "back" | "settings";
+  buttonType: "back" | "info";
   display: boolean;
   dangerMode: boolean;
   showDangerModeToggle: boolean;
@@ -86,9 +86,9 @@ export default class BottomBar extends Component<Props, State> {
           <button
             class={leftIcon}
             onClick={onSettingsClick}
-            aria-label="Open settings menu"
+            aria-label="Open information and settings"
           >
-            <Settings />
+            <Information />
           </button>
         )}
         {showDangerModeToggle && (
