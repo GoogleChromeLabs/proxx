@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Debug info**
-Please go to the “About” page (click the cog in the bottem left corner) and copy-paste/screenshot the “System Information” section.
+Please go to the “About” page (click the information icon in the bottem left corner) and copy-paste/screenshot the “System Information” section.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
