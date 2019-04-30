@@ -148,6 +148,7 @@ class PreactService extends Component<Props, State> {
             motion={motionPreference}
             onMotionPrefChange={this._onMotionPrefChange}
             disableAnimationBtn={!supportsSufficientWebGL || isFeaturePhone}
+            texturePromise={texturePromise}
           />
         ) : (
           <Intro
