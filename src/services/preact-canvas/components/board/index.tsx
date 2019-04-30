@@ -135,6 +135,7 @@ export default class Board extends Component<Props, State> {
         event.key === "0")
     ) {
       this.moveFocusByKey(event, 0, 0);
+      document.activeElement!.scrollIntoView();
     }
   }
 
@@ -297,6 +298,7 @@ export default class Board extends Component<Props, State> {
   private onKeyUpOnTable(event: KeyboardEvent) {
     if (event.key === "Tab") {
       this.moveFocusByKey(event, 0, 0);
+      document.activeElement!.scrollIntoView();
     }
   }
 
