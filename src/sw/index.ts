@@ -12,7 +12,8 @@ self.addEventListener("install", event => {
       item !== "sw.js" &&
       item !== "bootstrap.js" &&
       !item.includes("manifest-") &&
-      !item.includes("icon-")
+      !item.includes("icon-") &&
+      !item.includes("assetlinks-")
   );
   const toCache = ["/", ...resourcesToCache];
 
