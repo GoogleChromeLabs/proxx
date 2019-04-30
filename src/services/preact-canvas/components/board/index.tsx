@@ -394,7 +394,7 @@ export default class Board extends Component<Props, State> {
       (cell.touchingMines <= 0 || cell.touchingFlags <= 0 || cell.hasMine);
 
     isDisabled
-      ? btn.setAttribute("disabled", "true")
+      ? btn.setAttribute("disabled", "")
       : btn.removeAttribute("disabled");
 
     btn.setAttribute("aria-label", cellLabel);
