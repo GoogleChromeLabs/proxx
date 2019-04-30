@@ -8,6 +8,7 @@
   right: 0;
   top: 0;
   z-index: 1;
+  text-transform: uppercase;
 }
 
 .top-bar::before {

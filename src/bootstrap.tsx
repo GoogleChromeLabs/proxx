@@ -16,7 +16,7 @@ import Root from "./services/preact-canvas/index.js";
 import { main } from "./style.css";
 import { prerender } from "./utils/constants.js";
 
-const container = document.body.querySelector("main")!;
+const container = document.body.querySelector(".app")!;
 container.classList.add(main);
 render(<Root />, container, container.firstChild as any);
 performance.mark("UI ready");

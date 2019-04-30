@@ -53,7 +53,7 @@ html {
     }
   </style>
 <% } %>
-<div id="window"></div>
+<div class="app"></div>
 <script>
   <%- fs.readFileSync("./dist/"+bootstrapFile); %>
   <% for(const dep of dependencygraph[bootstrapFile].imports) {%>
