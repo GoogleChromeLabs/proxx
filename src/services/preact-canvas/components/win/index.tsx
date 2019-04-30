@@ -13,7 +13,7 @@
 import { Component, h } from "preact";
 
 import { minSec } from "../../../../utils/format";
-import { getPresetName } from "../../../state/grid-default";
+import { getPresetName } from "../../../state/grid-presets";
 import { Timer } from "../icons/additional";
 import {
   againButton,

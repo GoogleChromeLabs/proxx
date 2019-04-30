@@ -1,45 +1,15 @@
-html {
-  /* Catch any browsers that still overscroll (eg Safari) */
-  background-color: #000;
-  font-family: 'Space Mono', monospace;
-  font-size: 0.7em;
-  font-variant-ligatures: none;
-  --cell-size: 25px;
-  --cell-padding: 2px;
-  --side-margin: 10px;
-  --icon-size: 15px;
-  --circlebtn-size: 24px;
-  --bar-avoid: 40px;
-  --bar-padding: 5px;
-  --border-radius: 7px;
-}
-
-/* We're assuming (totally safe, right?) that widths below 320 are feature phones */
-@media (min-width: 320px) {
-  html {
-    font-size: 1em;
-    --cell-size: 40px;
-    --cell-padding: 5px;
-    --side-margin: 24px;
-    --icon-size: 24px;
-    --circlebtn-size: 48px;
-    --bar-avoid: 78px;
-    --bar-padding: 18px;
-  }
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overscroll-behavior: none;
-}
-
-.main {
-  height: 100%;
-}
-
+/**
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 .game {
   color: #fff;
   display: flex;
@@ -51,6 +21,10 @@ body {
   position: relative;
 }
 
-:global :focus:not(.focus-visible) {
-  outline: none;
+.nebula-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
 }

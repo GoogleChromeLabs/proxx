@@ -11,16 +11,14 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-import { bind } from "../../../../utils/bind.js";
-
-import { GridType } from "../..";
 import {
   getPresetName,
   PresetName,
   presets
-} from "../../../state/grid-default";
+} from "src/services/state/grid-presets.js";
+import { bind } from "../../../../utils/bind.js";
 import { Arrow } from "../icons/initial.js";
-import TopBar from "../top-bar/index.js";
+import TopBarSimple from "../top-bar-simple";
 import {
   field as fieldStyle,
   intro as introStyle,
@@ -34,6 +32,10 @@ import {
   startButton as startButtonStyle,
   startForm as startFormStyle
 } from "./style.css";
+
+type GridType = import("../..").GridType;
+
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
 interface NumberFieldProps extends JSX.HTMLAttributes {
   inputRef: JSX.HTMLAttributes["ref"];
@@ -137,7 +139,7 @@ export default class Intro extends Component<Props, State> {
   render(_props: Props, { width, height, mines, presetName }: State) {
     return (
       <div class={introStyle}>
-        <TopBar titleOnly />
+        <TopBarSimple />
         <form
           onSubmit={this._startGame}
           class={startFormStyle}

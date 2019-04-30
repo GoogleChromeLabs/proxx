@@ -13,21 +13,28 @@
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
-export function bind(
-  _target: any,
-  propertyKey: string,
-  descriptor: PropertyDescriptor
-) {
-  return {
-    // the first time the prototype property is accessed for an instance,
-    // define an instance property pointing to the bound function.
-    // This effectively "caches" the bound prototype method as an instance property.
-    get() {
-      const bound = descriptor.value.bind(this);
-      Object.defineProperty(this, propertyKey, {
-        value: bound
-      });
-      return bound;
+export const presets = {
+  easy: { width: 8, height: 8, mines: 10 },
+  normal: { width: 16, height: 16, mines: 40 },
+  hard: { width: 24, height: 24, mines: 99 }
+};
+
+export type PresetName = keyof typeof presets;
+
+export function getPresetName(
+  width: number,
+  height: number,
+  mines: number
+): PresetName | "custom" {
+  for (const [presetName, preset] of Object.entries(presets)) {
+    if (
+      width === preset.width &&
+      height === preset.height &&
+      mines === preset.mines
+    ) {
+      return presetName as PresetName;
     }
-  };
+  }
+
+  return "custom";
 }

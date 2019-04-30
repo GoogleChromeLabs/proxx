@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+
 const url = new URL(location.href);
 
 export const prerender = url.searchParams.has("prerender");

@@ -12,8 +12,7 @@
  */
 import { Component, h } from "preact";
 import { bind } from "src/utils/bind";
-import { Back } from "../icons/additional";
-import { Fullscreen, Information } from "../icons/initial";
+import { Back, Fullscreen, Information } from "../icons/initial";
 import {
   bottomBar,
   checkbox,
@@ -26,6 +25,8 @@ import {
   toggle,
   toggleContainer
 } from "./style.css";
+
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
 function goFullscreen() {
   if (document.documentElement.requestFullscreen) {

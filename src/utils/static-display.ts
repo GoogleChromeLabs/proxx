@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+
 // `devicePixelRatio` can change throughout the lifetime of a page. For example
 // when a browser window is moved from a low-DPI monitor to a high-DPI monitor.
 // Our rendering relies on dPR to generate the sprite sheets at the right

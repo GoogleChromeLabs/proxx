@@ -11,23 +11,8 @@
  * limitations under the License.
  */
 
-// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+import Game from "./components/game";
+import Nebula from "./components/nebula";
+import Settings from "./components/settings";
 
-export function bind(
-  _target: any,
-  propertyKey: string,
-  descriptor: PropertyDescriptor
-) {
-  return {
-    // the first time the prototype property is accessed for an instance,
-    // define an instance property pointing to the bound function.
-    // This effectively "caches" the bound prototype method as an instance property.
-    get() {
-      const bound = descriptor.value.bind(this);
-      Object.defineProperty(this, propertyKey, {
-        value: bound
-      });
-      return bound;
-    }
-  };
-}
+export { Game, Nebula, Settings };

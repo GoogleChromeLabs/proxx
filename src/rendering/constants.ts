@@ -22,18 +22,6 @@ export function toShaderColor(x: Color): ShaderColor {
   return [...x.map(x => x / 255), 1] as any;
 }
 
-export function toRGB(color: Color): string {
-  return `rgb(${color.join(",")})`;
-}
-
-// Colors
-export const nebulaDangerDark: Color = [53, 0, 0];
-export const nebulaDangerLight: Color = [117, 32, 61];
-export const nebulaSafeDark: Color = [58, 10, 78];
-export const nebulaSafeLight: Color = [43, 41, 111];
-export const nebulaSettingDark: Color = [0, 0, 0];
-export const nebulaSettingLight: Color = [41, 41, 41];
-
 export const focusRing = "rgb(122, 244, 66)";
 export const turquoise = "rgb(109, 205, 218)";
 export const white = "#fff";

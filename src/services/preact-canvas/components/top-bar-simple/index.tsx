@@ -10,24 +10,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Component, h } from "preact";
+import { title, topBar } from "./style.css";
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
-export function bind(
-  _target: any,
-  propertyKey: string,
-  descriptor: PropertyDescriptor
-) {
-  return {
-    // the first time the prototype property is accessed for an instance,
-    // define an instance property pointing to the bound function.
-    // This effectively "caches" the bound prototype method as an instance property.
-    get() {
-      const bound = descriptor.value.bind(this);
-      Object.defineProperty(this, propertyKey, {
-        value: bound
-      });
-      return bound;
-    }
-  };
+// tslint:disable-next-line:max-classes-per-file
+export default class TopBarSimple extends Component<{}, {}> {
+  render() {
+    return (
+      <div class={topBar} role="banner">
+        <h1 class={title}>Proxx</h1>
+      </div>
+    );
+  }
 }

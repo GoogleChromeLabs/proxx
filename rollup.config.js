@@ -33,7 +33,7 @@ require("rimraf").sync("dist");
 
 export default {
   input: {
-    bootstrap: "src/bootstrap.ts",
+    bootstrap: "src/bootstrap.tsx",
     sw: "src/sw/index.ts"
   },
   output: {
