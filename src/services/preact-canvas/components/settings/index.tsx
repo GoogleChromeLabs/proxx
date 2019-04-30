@@ -29,6 +29,7 @@ interface Props {
   onMotionPrefChange: () => void;
   motion: boolean;
   disableAnimationBtn: boolean;
+  texturePromise: Promise<any>;
 }
 
 interface State {}
@@ -36,7 +37,12 @@ interface State {}
 export default class Settings extends Component<Props, State> {
   private focusItem?: HTMLElement;
 
-  render({ onCloseClicked, onMotionPrefChange, motion }: Props) {
+  render({
+    onCloseClicked,
+    onMotionPrefChange,
+    motion,
+    texturePromise
+  }: Props) {
     return (
       <div role="dialog" aria-label="settings dialog" class={settingsStyle}>
         <button
@@ -56,7 +62,7 @@ export default class Settings extends Component<Props, State> {
             >
               Animations {motion ? "on" : "off"}
             </button>
-            <About motion={motion} />
+            <About motion={motion} texturePromise={texturePromise} />
           </div>
         </div>
       </div>
