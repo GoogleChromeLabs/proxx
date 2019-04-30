@@ -3,6 +3,7 @@ html {
   background-color: #000;
   font-family: 'Space Mono', monospace;
   font-size: 0.7em;
+  font-variant-ligatures: none;
   --cell-size: 25px;
   --cell-padding: 2px;
   --side-margin: 10px;
@@ -35,14 +36,10 @@ body {
   overscroll-behavior: none;
 }
 
-a {
-  color: white;
+.main {
+  height: 100%;
 }
 
 :global :focus:not(.focus-visible) {
   outline: none;
-}
-
-.main {
-  height: 100%;
 }

@@ -89,7 +89,6 @@ interface State {
   settingsOpen: boolean;
   motionPreference: boolean;
   gameInPlay: boolean;
-  lazyImportReady: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -114,8 +113,7 @@ export default class Root extends Component<Props, State> {
     awaitingGame: false,
     settingsOpen: false,
     motionPreference: true,
-    gameInPlay: false,
-    lazyImportReady: false
+    gameInPlay: false
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -134,7 +132,6 @@ export default class Root extends Component<Props, State> {
       const gridDefaultPromise = lazyImport!.getGridDefault();
 
       this.setState({
-        lazyImportReady: true,
         motionPreference: await shouldUseMotionPromise,
         gridDefaults: await gridDefaultPromise
       });
