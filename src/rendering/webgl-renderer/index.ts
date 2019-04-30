@@ -22,7 +22,8 @@ import {
   AnimationName,
   idleSprites,
   processDoneCallback,
-  staticSprites
+  staticSprites,
+  textureTileSize
 } from "../animation";
 import { easeInOutCubic, easeOutQuad, remap } from "../animation-helpers";
 import {
@@ -98,6 +99,7 @@ export default class WebGlRenderer implements Renderer {
   private _numTilesX?: number;
   private _numTilesY?: number;
   private _lastFocus = [-1, -1];
+  private _tileSize?: number;
 
   private _renderLoopRunning = false;
 
@@ -110,15 +112,16 @@ export default class WebGlRenderer implements Renderer {
     this._numTilesX = numTilesX;
     this._numTilesY = numTilesY;
 
-    const { cellPadding, cellSize } = getCellSizes();
-    const tileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
-
-    this._initShaderBox(numTilesX, numTilesY);
-    this._setupMesh(numTilesX, numTilesY, tileSize);
+    this._updateTileSize();
+    this._initShaderBox();
+    this._setupMesh();
     this._setupTextures();
 
     this._shaderBox!.setUniform1f("sprite_size", spriteSize);
-    this._shaderBox!.setUniform1f("tile_size", tileSize);
+    this._shaderBox!.setUniform1f(
+      "tile_size",
+      textureTileSize! * staticDevicePixelRatio
+    );
     this._shaderBox!.setUniform1f("idle_frames", idleAnimationNumFrames);
     const { verticalPadding, horizontalPadding } = getPaddings();
     this._shaderBox!.setUniform2f("paddings", [
@@ -146,6 +149,9 @@ export default class WebGlRenderer implements Renderer {
       return;
     }
     this._shaderBox!.resize();
+    if (this._updateTileSize()) {
+      this._updateGridMesh();
+    }
   }
 
   beforeRenderFrame() {
@@ -199,6 +205,14 @@ export default class WebGlRenderer implements Renderer {
       this._updateDynamicTileData(x, y);
       this._lastFocus = [x, y];
     }
+  }
+
+  private _updateTileSize() {
+    const { cellPadding, cellSize } = getCellSizes();
+    const newTileSize = (cellSize + 2 * cellPadding) * staticDevicePixelRatio;
+    const hasChanged = newTileSize !== this._tileSize!;
+    this._tileSize = newTileSize;
+    return hasChanged;
   }
 
   private _updateDynamicTileData(x: number, y: number) {
@@ -432,7 +446,7 @@ export default class WebGlRenderer implements Renderer {
     return new Float32Array(this._dynamicTileDataB!.buffer, byteOffset, 4);
   }
 
-  private _initShaderBox(numTilesX: number, numTilesY: number) {
+  private _initShaderBox() {
     /**
      * We are setting up a WebGL context here.
      *
@@ -494,15 +508,24 @@ export default class WebGlRenderer implements Renderer {
           usage: "DYNAMIC_DRAW"
         }
       ],
-      indices: generateVertexIndices(numTilesX, numTilesY),
+      indices: generateVertexIndices(this._numTilesX!, this._numTilesY!),
       clearColor: [0, 0, 0, 0]
     });
     this._shaderBox!.resize();
   }
 
-  private _setupMesh(numTilesX: number, numTilesY: number, tileSize: number) {
-    const mesh = generateGameFieldMesh(numTilesX, numTilesY, tileSize);
+  private _updateGridMesh() {
+    const mesh = generateGameFieldMesh(
+      this._numTilesX!,
+      this._numTilesY!,
+      this._tileSize!
+    );
     this._shaderBox!.updateVBO("pos", mesh);
+    return mesh;
+  }
+
+  private _setupMesh() {
+    const mesh = this._updateGridMesh();
 
     // Repeat these UVs for all tiles.
     const uvs = [0, 1, 0, 0, 1, 1, 1, 0];
@@ -511,12 +534,12 @@ export default class WebGlRenderer implements Renderer {
       mesh.map((_, idx) => uvs[idx % uvs.length])
     );
 
-    const numTiles = numTilesX * numTilesY;
+    const numTiles = this._numTilesX! * this._numTilesY!;
     this._dynamicTileDataA = new Float32Array(
       new Array(numTiles * 4 * 4).fill(0).map((_, idx) => {
         const fieldIdx = Math.floor(idx / 16);
-        const x = fieldIdx % numTilesX;
-        const y = Math.floor(fieldIdx / numTilesX);
+        const x = fieldIdx % this._numTilesX!;
+        const y = Math.floor(fieldIdx / this._numTilesX!);
         switch (idx % 4) {
           case DynamicTileDataA.HAS_FOCUS:
             return 0;

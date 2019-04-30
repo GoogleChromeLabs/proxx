@@ -78,10 +78,7 @@ export default class Canvas2DRenderer implements Renderer {
   init(numTilesX: number, numTilesY: number) {
     this._numTilesX = numTilesX;
     this._numTilesY = numTilesY;
-    const { cellPadding, cellSize } = getCellSizes();
-    // This does _not_ need to get multiplied by `devicePixelRatio` as we will
-    // be scaling the canvas instead.
-    this._tileSize = cellSize + 2 * cellPadding;
+    this._updateTileSize();
 
     this._initGrid();
     this.onResize();
@@ -101,6 +98,7 @@ export default class Canvas2DRenderer implements Renderer {
     if (!this._canvas) {
       return;
     }
+    this._updateTileSize();
     this._canvasRect = this._canvas!.getBoundingClientRect();
     this._canvas.width = this._canvasRect.width * staticDevicePixelRatio;
     this._canvas.height = this._canvasRect.height * staticDevicePixelRatio;
@@ -166,6 +164,13 @@ export default class Canvas2DRenderer implements Renderer {
     if (x > -1 && y > -1) {
       this._rerenderCell(x, y, { clear: true });
     }
+  }
+
+  private _updateTileSize() {
+    const { cellPadding, cellSize } = getCellSizes();
+    // This does _not_ need to get multiplied by `devicePixelRatio` as we will
+    // be scaling the canvas instead.
+    this._tileSize = cellSize + 2 * cellPadding;
   }
 
   private _initGrid() {
