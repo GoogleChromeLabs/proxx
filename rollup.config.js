@@ -84,7 +84,8 @@ export default {
         "./src/assets/space-mono-normal.woff2",
         "./src/assets/space-mono-bold.woff2",
         "./src/assets/favicon.png",
-        "./src/assets/social-cover.jpg"
+        "./src/assets/social-cover.jpg",
+        "./src/assets/assetlinks.json",
       ]
     }),
     assetTransformPlugin(asset => {
@@ -93,6 +94,8 @@ export default {
         asset.fileName = "manifest.json";
         // Minify
         asset.source = JSON.stringify(JSON.parse(asset.source));
+      } else if (asset.fileName.includes("assetlinks")) {
+        asset.fileName = ".well-known/assetlinks.json";
       }
     }),
     chunkNamePlugin(),
