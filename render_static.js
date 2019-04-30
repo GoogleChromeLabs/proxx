@@ -35,9 +35,8 @@ async function generateShell(file, dependencygraph) {
   const normalCharSet = new CharacterSet(
     "PROXXDifficultyHardEasyNormalCustomWidthHeightBlackholes 0123456789"
   );
-  const boldCharSet = new CharacterSet("START");
-  const typicalRange =
-    "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD";
+  // This has to include a space, else Firefox gets confused.
+  const boldCharSet = new CharacterSet("START ");
 
   await renderEjsFile("src/index.ejs", file, {
     bootstrapFile: findChunkWithName(dependencygraph, "bootstrap.tsx").fileName,
@@ -50,10 +49,7 @@ async function generateShell(file, dependencygraph) {
         inline: fs
           .readFileSync("src/assets/space-mono-inline.woff2")
           .toString("base64"),
-        inlineRange: normalCharSet.toHexRangeString(),
-        assetRange: CharacterSet.parseUnicodeRange(typicalRange)
-          .difference(normalCharSet)
-          .toHexRangeString()
+        inlineRange: normalCharSet.toHexRangeString()
       },
       {
         asset: findAssetWithName(dependencygraph, "space-mono-bold.woff2")
@@ -62,10 +58,7 @@ async function generateShell(file, dependencygraph) {
         inline: fs
           .readFileSync("src/assets/space-mono-bold-inline.woff2")
           .toString("base64"),
-        inlineRange: boldCharSet.toHexRangeString(),
-        assetRange: CharacterSet.parseUnicodeRange(typicalRange)
-          .difference(boldCharSet)
-          .toHexRangeString()
+        inlineRange: boldCharSet.toHexRangeString()
       }
     ],
     favicon: findAssetWithName(dependencygraph, "favicon.png").fileName,

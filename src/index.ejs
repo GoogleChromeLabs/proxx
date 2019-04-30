@@ -44,20 +44,19 @@ html {
 <link rel="manifest" href="/manifest.json">
 <link rel="prefetch" href="<%=workerFile%>">
 <% for (const { asset, weight, inline, inlineRange, assetRange } of fonts) { %>
-  <link rel="preload" as="font" href="<%= asset %>" crossorigin>
+  <link rel="prefetch" as="font" href="<%= asset %>" crossorigin>
   <style>
     @font-face {
       font-family: 'Space Mono';
       font-weight: <%= weight %>;
-      src: url('data:font/woff2;base64,<%= inline %>') format('woff2'), url(<%= asset %>) format('woff2');
-      unicode-range: <%= inlineRange %>;
+      src: url('<%= asset %>') format('woff2');
     }
 
     @font-face {
       font-family: 'Space Mono';
       font-weight: <%= weight %>;
-      src: url('<%= asset %>') format('woff2');
-      unicode-range: <%= assetRange %>;
+      src: url('data:font/woff2;base64,<%= inline %>') format('woff2'), url(<%= asset %>) format('woff2');
+      unicode-range: <%= inlineRange %>;
     }
   </style>
 <% } %>
