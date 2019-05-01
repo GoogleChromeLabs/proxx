@@ -247,6 +247,11 @@ export default class Canvas2DRenderer implements Renderer {
     idleAnimationTextureDrawer!(idx, this._ctx!, this._tileSize!);
     this._ctx!.globalAlpha = 1;
     staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, this._ctx!, this._tileSize!);
+    staticTextureDrawer!(
+      STATIC_TEXTURE.INNER_CIRCLE,
+      this._ctx!,
+      this._tileSize!
+    );
     this._ctx!.restore();
   }
 
@@ -278,6 +283,12 @@ export default class Canvas2DRenderer implements Renderer {
     idleAnimationTextureDrawer!(idx, this._ctx!, this._tileSize!);
     this._ctx!.globalAlpha = 1;
     staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, this._ctx!, this._tileSize!);
+    staticTextureDrawer!(
+      STATIC_TEXTURE.INNER_CIRCLE,
+      this._ctx!,
+      this._tileSize!
+    );
+    staticTextureDrawer!(STATIC_TEXTURE.DOT, this._ctx!, this._tileSize!);
     this._ctx!.restore();
   }
 

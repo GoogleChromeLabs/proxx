@@ -41,6 +41,7 @@ export const thickLine = 20 / 650;
 export const thinLine = 12 / 650;
 export const borderRadius = 76 / 650;
 export const innerCircleRadius = 64 / 650;
+export const flagCircleRadius = 32 / 650;
 export const numberCircleRadius = 0.8;
 export const numberFontSizeFactor = 0.45;
 // The font doesn't center well by default

@@ -22,6 +22,7 @@ import {
   blackHoleOuterRed,
   blackHoleRadius,
   borderRadius,
+  flagCircleRadius,
   glowAlpha,
   glowFactor,
   innerCircleRadius,
@@ -109,6 +110,8 @@ export const enum STATIC_TEXTURE {
   FLASH,
   MINE,
   FOCUS,
+  INNER_CIRCLE,
+  DOT,
   LAST_MARKER // Not a valid frame, just a marker for the last item in the enum
 }
 export function staticTextureGeneratorFactory(
@@ -140,15 +143,6 @@ export function staticTextureGeneratorFactory(
     if (idx === STATIC_TEXTURE.OUTLINE) {
       ctx2.strokeStyle = "white";
 
-      // Inner circle
-      ctx2.lineWidth = size * thickLine;
-      const radius = size * innerCircleRadius;
-      ctx2.beginPath();
-      ctx2.moveTo(radius, 0);
-      ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
-      ctx2.closePath();
-      ctx2.stroke();
-
       // Outline
       // Size: 650, stroke: 20, radius: 76
       roundedRectangle(
@@ -160,6 +154,16 @@ export function staticTextureGeneratorFactory(
         size * borderRadius
       );
       ctx2.lineWidth = size * thickLine;
+      ctx2.stroke();
+    } else if (idx === STATIC_TEXTURE.INNER_CIRCLE) {
+      ctx2.strokeStyle = "white";
+
+      ctx2.lineWidth = size * thickLine;
+      const radius = size * innerCircleRadius;
+      ctx2.beginPath();
+      ctx2.moveTo(radius, 0);
+      ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx2.closePath();
       ctx2.stroke();
     } else if (idx >= 1 && idx <= 8) {
       ctx2.strokeStyle = white;
@@ -238,11 +242,22 @@ export function staticTextureGeneratorFactory(
       ctx.closePath();
       ctx.fill();
     } else if (idx === STATIC_TEXTURE.FOCUS) {
+      ctx.globalAlpha = 0.3;
+      roundedRectangle(
+        ctx,
+        -halfSize,
+        -halfSize,
+        size,
+        size,
+        size * borderRadius
+      );
+      ctx.clip();
+      ctx.fillStyle = white;
+      ctx.fillRect(-halfSize, -halfSize, size, size);
+    } else if (idx === STATIC_TEXTURE.DOT) {
       ctx2.fillStyle = "white";
-
-      // Inner circle
       ctx2.lineWidth = size * thickLine;
-      const radius = size * innerCircleRadius;
+      const radius = size * flagCircleRadius;
       ctx2.beginPath();
       ctx2.moveTo(radius, 0);
       ctx2.arc(0, 0, radius, 0, 2 * Math.PI);

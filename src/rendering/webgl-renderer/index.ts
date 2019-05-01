@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+// tslint:disable:no-bitwise Forgive me, father.
+
 import { Cell } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
 import { getCanvas } from "src/utils/canvas-pool";
@@ -43,8 +45,8 @@ import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";
 
 const enum DynamicTileDataA {
-  HAS_FOCUS,
-  TILE_Y,
+  BITFIELD,
+  DOT,
   STATIC_TILE,
   IDLE_ANIMATION_TIME
 }
@@ -54,6 +56,11 @@ const enum DynamicTileDataB {
   FLASH_OPACITY,
   BORDER_OPACITY,
   BOXES_OPACITY
+}
+
+const enum BitfieldBits {
+  FOCUS,
+  INNER_CIRCLE
 }
 
 function generateCoords(x1: number, y1: number, x2: number, y2: number) {
@@ -196,12 +203,12 @@ export default class WebGlRenderer implements Renderer {
     if (this._lastFocus[0] > -1 && this._lastFocus[1] > -1) {
       const [lastX, lastY] = this._lastFocus;
       const dynamicTileDataA = this._getDynamicTileDataAForTile(lastX, lastY);
-      dynamicTileDataA[DynamicTileDataA.HAS_FOCUS] = 0;
+      dynamicTileDataA[DynamicTileDataA.BITFIELD] &= ~(1 << BitfieldBits.FOCUS);
       this._updateDynamicTileData(lastX, lastY);
     }
     if (x > -1 && y > -1) {
       const dynamicTileDataA = this._getDynamicTileDataAForTile(x, y);
-      dynamicTileDataA[DynamicTileDataA.HAS_FOCUS] = 1;
+      dynamicTileDataA[DynamicTileDataA.BITFIELD] |= 1 << BitfieldBits.FOCUS;
       this._updateDynamicTileData(x, y);
       this._lastFocus = [x, y];
     }
@@ -255,7 +262,17 @@ export default class WebGlRenderer implements Renderer {
       fadedLinesAlpha,
       easeOutQuad(fadeInNormalized)
     );
+    dynamicTileDataA[DynamicTileDataA.DOT] = remap(
+      0,
+      1,
+      1,
+      0,
+      easeOutQuad(fadeInNormalized)
+    );
+
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 1;
+    dynamicTileDataA[DynamicTileDataA.BITFIELD] |=
+      1 << BitfieldBits.INNER_CIRCLE;
   }
 
   private [AnimationName.FLAGGED](
@@ -286,6 +303,15 @@ export default class WebGlRenderer implements Renderer {
       1,
       easeOutQuad(fadeOutNormalized)
     );
+    dynamicTileDataA[DynamicTileDataA.DOT] = remap(
+      0,
+      1,
+      0,
+      1,
+      easeOutQuad(fadeOutNormalized)
+    );
+
+    dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 1;
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 1;
   }
 
@@ -305,6 +331,10 @@ export default class WebGlRenderer implements Renderer {
 
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] =
       cell.touchingMines <= 0 ? revealedAlpha : 0;
+    dynamicTileDataA[DynamicTileDataA.BITFIELD] &= ~(
+      1 << BitfieldBits.INNER_CIRCLE
+    );
+    dynamicTileDataA[DynamicTileDataA.DOT] = 0;
     dynamicTileDataB[DynamicTileDataB.BOXES_OPACITY] = 0;
   }
 
@@ -418,6 +448,9 @@ export default class WebGlRenderer implements Renderer {
     const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
     dynamicTileDataA[DynamicTileDataA.STATIC_TILE] = STATIC_TEXTURE.MINE;
 
+    dynamicTileDataA[DynamicTileDataA.BITFIELD] &= ~(
+      1 << BitfieldBits.INNER_CIRCLE
+    );
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 0;
     dynamicTileDataB[DynamicTileDataB.BOXES_OPACITY] = 0;
   }
@@ -541,10 +574,10 @@ export default class WebGlRenderer implements Renderer {
         const x = fieldIdx % this._numTilesX!;
         const y = Math.floor(fieldIdx / this._numTilesX!);
         switch (idx % 4) {
-          case DynamicTileDataA.HAS_FOCUS:
+          case DynamicTileDataA.BITFIELD:
+            return 1 << BitfieldBits.INNER_CIRCLE;
+          case DynamicTileDataA.DOT:
             return 0;
-          case DynamicTileDataA.TILE_Y:
-            return y;
           case DynamicTileDataA.STATIC_TILE:
             return -1; // Equivalent to “unrevealed”
           case DynamicTileDataA.IDLE_ANIMATION_TIME:
