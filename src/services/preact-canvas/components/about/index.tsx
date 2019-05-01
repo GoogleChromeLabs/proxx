@@ -139,7 +139,7 @@ export default class About extends Component<Props> {
 
         <p>
           If you avoid a black hole, the number tells you how many of the 8
-          surrounding tiles is a black hole. If it's blank,{" "}
+          surrounding tiles are a black hole. If it's blank,{" "}
           <strong>none</strong> of the surrounding tiles is a black hole.
         </p>
 
