@@ -70,6 +70,8 @@ export default class About extends Component<Props> {
               data-frame="0"
               data-highlight="false"
               data-border="true"
+              data-circle="true"
+              data-dot="false"
             />
             Unrevealed
           </div>
@@ -83,6 +85,8 @@ export default class About extends Component<Props> {
               data-frame={STATIC_TEXTURE.MINE.toString()}
               data-highlight="false"
               data-border="false"
+              data-circle="false"
+              data-dot="false"
             />
             Black hole
           </div>
@@ -112,6 +116,7 @@ export default class About extends Component<Props> {
               data-frame="0"
               data-highlight="false"
               data-border="true"
+              data-circle="false"
             />
             Cleared
           </div>
@@ -125,6 +130,8 @@ export default class About extends Component<Props> {
               data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
               data-highlight="false"
               data-border="false"
+              data-circle="false"
+              data-dot="false"
             />
             Clue
           </div>
@@ -149,6 +156,8 @@ export default class About extends Component<Props> {
               data-frame="0"
               data-highlight="true"
               data-border="true"
+              data-circle="true"
+              data-dot="true"
             />
             Flagged
           </div>
@@ -162,6 +171,8 @@ export default class About extends Component<Props> {
               data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
               data-highlight="true"
               data-border="false"
+              data-circle="false"
+              data-dot="false"
             />
             Active clue
           </div>
@@ -255,6 +266,14 @@ export default class About extends Component<Props> {
     const hasBorder = canvas.dataset.border!.toLowerCase() === "true";
     if (hasBorder) {
       staticTextureDrawer!(STATIC_TEXTURE.OUTLINE, ctx, this._tileSize!);
+    }
+    const hasCircle = canvas.dataset.circle!.toLowerCase() === "true";
+    if (hasCircle) {
+      staticTextureDrawer!(STATIC_TEXTURE.INNER_CIRCLE, ctx, this._tileSize!);
+    }
+    const hasDot = canvas.dataset.dot!.toLowerCase() === "true";
+    if (hasDot) {
+      staticTextureDrawer!(STATIC_TEXTURE.DOT, ctx, this._tileSize!);
     }
     const hasHighlight = canvas.dataset.highlight!.toLowerCase() === "true";
     if (hasHighlight) {
