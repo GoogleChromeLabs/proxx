@@ -60,7 +60,8 @@ export default {
       ]
     }),
     constsPlugin({
-      version: require("./package.json").version
+      version: require("./package.json").version,
+      nebulaSafeDark: require("./lib/nebula-safe-dark").color
     }),
     typescript({
       // Make sure we are using our version of TypeScript.
@@ -76,8 +77,10 @@ export default {
       clean: true
     }),
     glsl(),
-    ejsAssetPlugin({
-      "./src/manifest.ejs": "manifest.json"
+    ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
+      data: {
+        nebulaSafeDark: require("./lib/nebula-safe-dark").hex
+      }
     }),
     assetPlugin({
       initialAssets: [

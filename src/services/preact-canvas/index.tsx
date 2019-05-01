@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 import workerURL from "chunk-name:../../worker.js";
+import { nebulaSafeDark } from "consts:";
 import { Component, h, VNode } from "preact";
 import { PlayMode } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
@@ -67,7 +68,7 @@ const stateServicePromise: Promise<
 
 const nebulaDangerDark: Color = [53, 0, 0];
 const nebulaDangerLight: Color = [117, 32, 61];
-const nebulaSafeDark: Color = [58, 10, 78];
+// Looking for nebulaSafeDark? It's defined in lib/nebula-safe-dark.js
 const nebulaSafeLight: Color = [43, 41, 111];
 const nebulaSettingDark: Color = [0, 0, 0];
 const nebulaSettingLight: Color = [41, 41, 41];
