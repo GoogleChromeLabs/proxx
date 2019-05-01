@@ -200,7 +200,7 @@ export default class About extends Component<Props> {
           </li>
         </ul>
 
-        <h1>Github</h1>
+        <h1>GitHub</h1>
         <p>
           Source code can be found at our{" "}
           <a href="https://github.com/GoogleChromeLabs/proxx">
