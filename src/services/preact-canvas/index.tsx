@@ -44,9 +44,13 @@ const lazyComponents: Promise<typeof import("./lazy-components")> = new Promise(
 
 const stateServicePromise: Promise<
   import("comlink/src/comlink").Remote<import("../state").default>
-> = lazyImportReady.then(async () => {
+> = (async () => {
   const worker = new Worker(workerURL);
-  await lazyImport!.nextEvent(worker, "message");
+  await lazyImportReady;
+  const nextMessageEvent = lazyImport!.nextEvent(worker, "message");
+  worker.postMessage("ready?");
+  await nextMessageEvent;
+
   // iOS Safari seems to kill a worker that doesn't receive messages after a while. So we prevent
   // that by sending dummy keep-alive messages.
   setInterval(() => {
@@ -59,7 +63,7 @@ const stateServicePromise: Promise<
     import("src/worker").RemoteServices
   >;
   return remoteServices.stateService;
-});
+})();
 
 const nebulaDangerDark: Color = [53, 0, 0];
 const nebulaDangerLight: Color = [117, 32, 61];
