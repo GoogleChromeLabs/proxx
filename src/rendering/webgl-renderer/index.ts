@@ -44,7 +44,7 @@ import vertexShader from "./vertex.glsl";
 
 const enum DynamicTileDataA {
   HAS_FOCUS,
-  TILE_Y,
+  INNER_CIRCLE,
   STATIC_TILE,
   IDLE_ANIMATION_TIME
 }
@@ -256,6 +256,7 @@ export default class WebGlRenderer implements Renderer {
       easeOutQuad(fadeInNormalized)
     );
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 1;
+    dynamicTileDataA[DynamicTileDataA.INNER_CIRCLE] = 1;
   }
 
   private [AnimationName.FLAGGED](
@@ -305,6 +306,7 @@ export default class WebGlRenderer implements Renderer {
 
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] =
       cell.touchingMines <= 0 ? revealedAlpha : 0;
+    dynamicTileDataA[DynamicTileDataA.INNER_CIRCLE] = 0;
     dynamicTileDataB[DynamicTileDataB.BOXES_OPACITY] = 0;
   }
 
@@ -418,6 +420,7 @@ export default class WebGlRenderer implements Renderer {
     const dynamicTileDataB = this._getDynamicTileDataBForTile(x, y);
     dynamicTileDataA[DynamicTileDataA.STATIC_TILE] = STATIC_TEXTURE.MINE;
 
+    dynamicTileDataA[DynamicTileDataA.INNER_CIRCLE] = 0;
     dynamicTileDataB[DynamicTileDataB.BORDER_OPACITY] = 0;
     dynamicTileDataB[DynamicTileDataB.BOXES_OPACITY] = 0;
   }
@@ -543,8 +546,8 @@ export default class WebGlRenderer implements Renderer {
         switch (idx % 4) {
           case DynamicTileDataA.HAS_FOCUS:
             return 0;
-          case DynamicTileDataA.TILE_Y:
-            return y;
+          case DynamicTileDataA.INNER_CIRCLE:
+            return 1;
           case DynamicTileDataA.STATIC_TILE:
             return -1; // Equivalent to “unrevealed”
           case DynamicTileDataA.IDLE_ANIMATION_TIME:

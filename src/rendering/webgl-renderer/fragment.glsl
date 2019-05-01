@@ -29,7 +29,7 @@ void main() {
   vec2 normalized_uv = vec2(0., 1.) + vec2(1., -1.)*uv;
 
   float has_focus = dynamic_tile_data_a2.x;
-  float tile_y = dynamic_tile_data_a2.y;
+  float inner_circle = dynamic_tile_data_a2.y;
   float static_tile = dynamic_tile_data_a2.z;
   float idle_animation_time = dynamic_tile_data_a2.w;
 
@@ -37,8 +37,6 @@ void main() {
   float flash_opacity = dynamic_tile_data_b2.y;
   float border_opacity = dynamic_tile_data_b2.z;
   float boxes_opacity = dynamic_tile_data_b2.w;
-
-
 
   float f;
   if(static_tile < 0.) {
@@ -100,6 +98,17 @@ void main() {
       gl_FragColor,
       sample,
       sample.a * border_opacity
+    );
+  }
+
+  // Blend inner circle on top
+  {
+    vec2 outline_tex_uv = (static_tile_coords(12.) + normalized_uv) * tile_size / sprite_size;
+    vec4 sample = texture2D(static_sprite, outline_tex_uv);
+    gl_FragColor = mix(
+      gl_FragColor,
+      sample,
+      sample.a * inner_circle
     );
   }
 

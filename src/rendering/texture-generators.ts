@@ -109,6 +109,7 @@ export const enum STATIC_TEXTURE {
   FLASH,
   MINE,
   FOCUS,
+  INNER_CIRCLE,
   LAST_MARKER // Not a valid frame, just a marker for the last item in the enum
 }
 export function staticTextureGeneratorFactory(
@@ -140,15 +141,6 @@ export function staticTextureGeneratorFactory(
     if (idx === STATIC_TEXTURE.OUTLINE) {
       ctx2.strokeStyle = "white";
 
-      // Inner circle
-      ctx2.lineWidth = size * thickLine;
-      const radius = size * innerCircleRadius;
-      ctx2.beginPath();
-      ctx2.moveTo(radius, 0);
-      ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
-      ctx2.closePath();
-      ctx2.stroke();
-
       // Outline
       // Size: 650, stroke: 20, radius: 76
       roundedRectangle(
@@ -160,6 +152,16 @@ export function staticTextureGeneratorFactory(
         size * borderRadius
       );
       ctx2.lineWidth = size * thickLine;
+      ctx2.stroke();
+    } else if (idx === STATIC_TEXTURE.INNER_CIRCLE) {
+      ctx2.strokeStyle = "white";
+
+      ctx2.lineWidth = size * thickLine;
+      const radius = size * innerCircleRadius;
+      ctx2.beginPath();
+      ctx2.moveTo(radius, 0);
+      ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx2.closePath();
       ctx2.stroke();
     } else if (idx >= 1 && idx <= 8) {
       ctx2.strokeStyle = white;
