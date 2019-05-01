@@ -172,8 +172,17 @@ export function staticTextureGeneratorFactory(
       ctx2.fillStyle = white;
       ctx2.textAlign = "center";
       ctx2.textBaseline = "middle";
-      ctx2.font = `${size * numberFontSizeFactor}px "Space Mono", sans-serif`;
-      ctx2.fillText(`${idx}`, 0, size * numberFontTopShiftFactor);
+      ctx2.font = `${size * numberFontSizeFactor}px/1 "Space Mono", sans-serif`;
+      const measure = ctx2.measureText(`${idx}`);
+      let yOffset = size * numberFontTopShiftFactor;
+
+      if ("actualBoundingBoxAscent" in measure) {
+        yOffset =
+          (measure.actualBoundingBoxAscent - measure.actualBoundingBoxDescent) /
+          2;
+      }
+
+      ctx2.fillText(`${idx}`, 0, yOffset);
     } else if (idx === STATIC_TEXTURE.FLASH) {
       roundedRectangle(
         ctx2,
