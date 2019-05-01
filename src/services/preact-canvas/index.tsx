@@ -266,24 +266,24 @@ export default class Root extends Component<Props, State> {
 
     return (
       <div class={gameClassName}>
-        <div
-          class={nebulaContainer}
-          style={`background: linear-gradient(to bottom, ${toRGB(
-            nebulaSafeLight
-          )}, ${toRGB(nebulaSafeDark)})`}
-        >
-          <NebulaDeferred
-            loading={() => <div />}
-            // tslint:disable-next-line: variable-name
-            loaded={Nebula => (
-              <Nebula
-                colorDark={this._nebulaDarkColor()}
-                colorLight={this._nebulaLightColor()}
-                useMotion={motionPreference}
-              />
-            )}
-          />
-        </div>
+        <NebulaDeferred
+          loading={() => (
+            <div
+              class={nebulaContainer}
+              style={`background: linear-gradient(to bottom, ${toRGB(
+                nebulaSafeLight
+              )}, ${toRGB(nebulaSafeDark)})`}
+            />
+          )}
+          // tslint:disable-next-line: variable-name
+          loaded={Nebula => (
+            <Nebula
+              colorDark={this._nebulaDarkColor()}
+              colorLight={this._nebulaLightColor()}
+              useMotion={motionPreference}
+            />
+          )}
+        />
         {mainComponent}
         <BottomBar
           onSettingsClick={this._onSettingsClick}
@@ -302,6 +302,9 @@ export default class Root extends Component<Props, State> {
     if (this.state.settingsOpen) {
       return nebulaSettingLight;
     }
+    if (!this.state.game) {
+      return nebulaSafeLight;
+    }
     if (this.state.dangerMode) {
       return nebulaDangerLight;
     }
@@ -311,6 +314,9 @@ export default class Root extends Component<Props, State> {
   private _nebulaDarkColor() {
     if (this.state.settingsOpen) {
       return nebulaSettingDark;
+    }
+    if (!this.state.game) {
+      return nebulaSafeDark;
     }
     if (this.state.dangerMode) {
       return nebulaDangerDark;
