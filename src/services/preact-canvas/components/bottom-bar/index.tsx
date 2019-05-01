@@ -74,7 +74,7 @@ export default class BottomBar extends Component<Props, State> {
     { flagModeAnnouncement }: State
   ) {
     return (
-      <div class={[bottomBar, display ? "" : hidden].join("")} role="menubar">
+      <div class={[bottomBar, display ? "" : hidden].join(" ")} role="menubar">
         {buttonType === "back" ? (
           <button
             class={leftIcon}
