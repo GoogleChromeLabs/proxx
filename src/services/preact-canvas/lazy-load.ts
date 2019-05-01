@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-import { proxy, wrap } from "comlink";
+import { proxy, wrap } from "comlink/src/comlink";
 import { init, skipWaiting, updateReady } from "../../offline";
 import { lazyGenerateTextures } from "../../rendering/animation";
 import { supportsSufficientWebGL } from "../../rendering/renderer";
