@@ -158,7 +158,11 @@ export default class WebGlRenderer implements Renderer {
     this._updateFadeoutParameters();
   }
 
-  beforeRenderFrame() {
+  beforeUpdate() {
+    // Nothing to do here
+  }
+
+  afterUpdate() {
     // Nothing to do here
   }
 

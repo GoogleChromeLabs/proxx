@@ -214,7 +214,7 @@ export default class MotionAnimator implements Animator {
     // Update animations according to incoming grid changes
     this._consumeChangeBuffer(delta);
 
-    this._renderer.beforeRenderFrame();
+    this._renderer.beforeUpdate();
     for (const detail of this._cellDetails) {
       this._renderer.beforeCell(
         detail.x,
@@ -232,6 +232,7 @@ export default class MotionAnimator implements Animator {
         ts
       );
     }
+    this._renderer.afterUpdate();
 
     if (this._renderLoopRunning) {
       requestAnimationFrame(this._renderLoop);

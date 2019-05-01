@@ -31,9 +31,11 @@ export default class NoMotionAnimator implements Animator {
   }
 
   updateCells(changes: GridChanges) {
+    this._renderer.beforeUpdate();
     for (const [x, y, cell] of changes) {
       this._renderCell(x, y, cell);
     }
+    this._renderer.afterUpdate();
   }
 
   stop() {

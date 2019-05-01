@@ -106,8 +106,12 @@ export default class Canvas2DRenderer implements Renderer {
     this._rerender();
   }
 
-  beforeRenderFrame() {
+  beforeUpdate() {
     // Nothing to do here
+  }
+
+  afterUpdate() {
+    this._rerender();
   }
 
   beforeCell(
@@ -117,11 +121,6 @@ export default class Canvas2DRenderer implements Renderer {
     animationList: AnimationDesc[],
     ts: number
   ) {
-    this._ctx!.save();
-    this._setupContextForTile(x, y);
-    this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
-    this._ctx!.restore();
-
     const gridCell = this._grid[y * this._numTilesX! + x];
     gridCell.animationList = animationList.slice();
     gridCell.cell = cell;
@@ -144,14 +143,9 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
-    if (!this._isTileInView(x, y)) {
-      return;
-    }
-    this._ctx!.save();
-    this._setupContextForTile(x, y);
-    // @ts-ignore
-    this[animation.name](x, y, cell, animation, ts);
-    this._ctx!.restore();
+    // Nothing to do here, ironically.
+    // With the 2D renderer, we render the entire field after the entire chunk
+    // has been ingested and call _renderCell for each cell.
   }
 
   setFocus(x: number, y: number) {
@@ -164,6 +158,23 @@ export default class Canvas2DRenderer implements Renderer {
     if (x > -1 && y > -1) {
       this._rerenderCell(x, y, { clear: true });
     }
+  }
+
+  private _renderCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animation: AnimationDesc,
+    ts: number
+  ) {
+    if (!this._isTileInView(x, y)) {
+      return;
+    }
+    this._ctx!.save();
+    this._setupContextForTile(x, y);
+    // @ts-ignore
+    this[animation.name](x, y, cell, animation, ts);
+    this._ctx!.restore();
   }
 
   private _updateTileSize() {
@@ -438,7 +449,7 @@ export default class Canvas2DRenderer implements Renderer {
         const { cell, animationList } = this._grid[y * this._numTilesX! + x];
         const ts = getTime();
         for (const animation of animationList) {
-          this.render(x, y, cell!, animation, ts);
+          this._renderCell(x, y, cell!, animation, ts);
         }
         this._maybeRenderFocusRing(x, y);
       }
