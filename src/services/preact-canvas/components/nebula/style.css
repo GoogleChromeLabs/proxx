@@ -19,9 +19,11 @@
 }
 
 .nebula {
-  animation: fade-in .5s ease-in-out;
+  animation: fade-in 0.5s ease-in-out;
 }
 
 @keyframes fade-in {
-  from {opacity: 0;}
+  from {
+    opacity: 0;
+  }
 }

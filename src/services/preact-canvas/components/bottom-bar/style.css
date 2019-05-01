@@ -27,7 +27,7 @@
 }
 
 .bottom-bar::before {
-  content: '';
+  content: "";
   height: 1px;
   transform-origin: 0 0;
   transform: scaleY(0.5);
@@ -39,7 +39,7 @@
 }
 
 .icons {
-  composes: unbutton from '../../utils.css';
+  composes: unbutton from "../../utils.css";
   fill: #fff;
   width: var(--icon-size);
   height: var(--icon-size);
@@ -97,7 +97,7 @@ html:-webkit-full-screen .fullscreen {
   cursor: pointer;
 }
 
-.checkbox:global(.focus-visible)+.toggle {
+.checkbox:global(.focus-visible) + .toggle {
   outline: 5px blue;
   outline: 5px auto -webkit-focus-ring-color;
 }

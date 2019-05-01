@@ -44,7 +44,9 @@
   height: var(--circlebtn-size);
 }
 
-.button, .button-on, .button-off {
+.button,
+.button-on,
+.button-off {
   text-transform: uppercase;
   display: block;
   width: 100%;
@@ -57,9 +59,9 @@
   composes: button from "../../utils.css";
 }
 
-.button-on{
+.button-on {
   composes: button-on from "../../utils.css";
 }
-.button-off{
+.button-off {
   composes: button-off from "../../utils.css";
 }

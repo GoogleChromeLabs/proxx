@@ -47,7 +47,7 @@
 }
 
 .field {
-  background: rgba(0, 0, 0, .39);
+  background: rgba(0, 0, 0, 0.39);
   border-radius: var(--border-radius) var(--border-radius) 0 0;
   font: inherit;
   padding: 2em var(--padding-sides) 0.8em;
@@ -120,7 +120,7 @@
   }
 }
 
-.settings-row>* {
+.settings-row > * {
   flex: 1;
 }
 
