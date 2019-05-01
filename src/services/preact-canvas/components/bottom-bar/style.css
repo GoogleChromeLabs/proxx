@@ -19,6 +19,7 @@
   right: 0;
   bottom: 0;
   touch-action: none;
+  min-height: min-content;
 }
 
 /* The in-game class is set by the game component */
@@ -53,6 +54,8 @@
 
 .hidden {
   visibility: hidden;
+  pointer-events: none;
+  position: absolute;
 }
 
 .fullscreen {
