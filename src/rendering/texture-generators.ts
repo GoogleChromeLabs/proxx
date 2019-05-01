@@ -238,16 +238,18 @@ export function staticTextureGeneratorFactory(
       ctx.closePath();
       ctx.fill();
     } else if (idx === STATIC_TEXTURE.FOCUS) {
-      ctx2.fillStyle = "white";
-
-      // Inner circle
-      ctx2.lineWidth = size * thickLine;
-      const radius = size * innerCircleRadius;
-      ctx2.beginPath();
-      ctx2.moveTo(radius, 0);
-      ctx2.arc(0, 0, radius, 0, 2 * Math.PI);
-      ctx2.closePath();
-      ctx2.fill();
+      ctx.globalAlpha = 0.3;
+      roundedRectangle(
+        ctx,
+        -halfSize,
+        -halfSize,
+        size,
+        size,
+        size * borderRadius
+      );
+      ctx.clip();
+      ctx.fillStyle = white;
+      ctx.fillRect(-halfSize, -halfSize, size, size);
     }
     ctx.restore();
     ctx2.restore();
