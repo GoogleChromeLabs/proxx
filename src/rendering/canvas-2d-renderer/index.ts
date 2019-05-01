@@ -528,7 +528,7 @@ export default class Canvas2DRenderer implements Renderer {
     const { cell, animationList } = this._grid[y * this._numTilesX! + x];
     const ts = getTime();
     for (const animation of animationList) {
-      this.render(x, y, cell!, animation, ts);
+      this._renderCell(x, y, cell!, animation, ts);
     }
     this._maybeRenderFocusRing(x, y);
   }
