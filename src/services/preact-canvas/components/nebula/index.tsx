@@ -30,6 +30,8 @@ export interface Props {
   useMotion: boolean;
 }
 
+const metaTheme = document.querySelector('meta[name="theme-color"]')!;
+
 interface State {}
 
 export default class Nebula extends Component<Props, State> {
@@ -136,6 +138,13 @@ export default class Nebula extends Component<Props, State> {
   }
 
   private _updateColors() {
+    const colorDark = this.props.colorDark;
+
+    metaTheme.setAttribute(
+      "content",
+      `rgb(${colorDark[0]}, ${colorDark[1]}, ${colorDark[2]})`
+    );
+
     if (!this._shaderBox) {
       return;
     }
@@ -151,10 +160,7 @@ export default class Nebula extends Component<Props, State> {
       "alt_color_light",
       toShaderColor(this.props.colorLight)
     );
-    this._shaderBox.setUniform4f(
-      "alt_color_dark",
-      toShaderColor(this.props.colorDark)
-    );
+    this._shaderBox.setUniform4f("alt_color_dark", toShaderColor(colorDark));
   }
 
   private _start() {
