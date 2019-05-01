@@ -16,7 +16,7 @@ import { Component, h } from "preact";
 import { bind } from "../../../../utils/bind.js";
 
 import ShaderBox from "../../../../utils/shaderbox.js";
-import { nebula as nebulaStyle } from "./style.css";
+import { nebula as nebulaStyle, nebulaContainer } from "./style.css";
 
 import { Color, toShaderColor } from "src/rendering/constants.js";
 import toRGB from "src/utils/to-rgb.js";
@@ -84,7 +84,7 @@ export default class Nebula extends Component<Props, State> {
   render({ colorLight, colorDark, useMotion }: Props) {
     return (
       <div
-        class={nebulaStyle}
+        class={nebulaContainer}
         style={`background: linear-gradient(to bottom, ${toRGB(
           colorLight
         )}, ${toRGB(colorDark)}`}

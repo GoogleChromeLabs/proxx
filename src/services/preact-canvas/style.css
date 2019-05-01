@@ -17,10 +17,6 @@
   height: 100%;
 }
 
-.relative {
-  position: relative;
-}
-
 .nebula-container {
   position: fixed;
   top: 0;
