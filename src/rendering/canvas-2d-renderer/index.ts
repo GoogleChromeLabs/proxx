@@ -288,6 +288,7 @@ export default class Canvas2DRenderer implements Renderer {
       this._ctx!,
       this._tileSize!
     );
+    staticTextureDrawer!(STATIC_TEXTURE.DOT, this._ctx!, this._tileSize!);
     this._ctx!.restore();
   }
 
