@@ -24,7 +24,7 @@
 }
 
 .top-bar::before {
-  content: '';
+  content: "";
   height: 1px;
   transform-origin: 0 0;
   transform: scaleY(0.5);

@@ -17,7 +17,7 @@
     "watch:rollup": "rollup -c -w",
     "watch": "run-p build:markup watch:rollup",
     "serve": "http-server dist -c-1 -g",
-    "fmt": "prettier --write 'src/**/*.{ts,tsx}' *.{js,json,md} && npm run lintfix",
+    "fmt": "prettier --write 'src/**/*.{ts,tsx,css}' *.{js,json,md} && npm run lintfix",
     "lint": "tslint -t verbose -c tslint.json 'src/**/*.{ts,tsx}'",
     "lintfix": "tslint -t verbose -c tslint.json --fix 'src/**/*.{ts,tsx}'",
     "fmt_test": "test $(prettier -l 'src/**/*.{ts,tsx}' *.{js,json,md} | wc -l) -eq 0",

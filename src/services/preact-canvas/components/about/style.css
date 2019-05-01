@@ -25,12 +25,12 @@
 
 .shortcut-key {
   display: inline-block;
-  border:solid 2px #555;
-  width:24px;
-  height:24px;
+  border: solid 2px #555;
+  width: 24px;
+  height: 24px;
   border-radius: 25%;
   text-align: center;
-  line-height:24px;
+  line-height: 24px;
   margin-right: 24px;
 }
 
@@ -42,27 +42,28 @@
 
 .system-data {
   font-size: 0.6em;
-  padding:0;
-  list-style: none
+  padding: 0;
+  list-style: none;
 }
 
-.icon-guide {}
+.icon-guide {
+}
 
 .icon-guide-row {
-  display:flex;
+  display: flex;
   padding-bottom: 5px;
   margin-bottom: 10px;
 }
 
 .icon-guide-item {
   font-size: 0.9em;
-  width:50%;
+  width: 50%;
   display: flex;
   align-items: center;
 }
 
 .tile {
-  width:60px;
-  height:60px;
-  margin-right:5px;
+  width: 60px;
+  height: 60px;
+  margin-right: 5px;
 }

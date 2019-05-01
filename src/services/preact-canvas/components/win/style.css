@@ -30,7 +30,7 @@
 
 @keyframes spinCCW {
   100% {
-    transform: rotate(-315deg)
+    transform: rotate(-315deg);
   }
 }
 
@@ -58,7 +58,7 @@
 }
 
 .win-square::after {
-  content: '';
+  content: "";
   position: absolute;
   width: var(--size);
   padding-top: var(--size);
@@ -72,7 +72,7 @@
 
 @keyframes spin90 {
   50% {
-    transform: rotate(90deg)
+    transform: rotate(90deg);
   }
 }
 
@@ -115,7 +115,7 @@
 
 .score-row::before,
 .score-row::after {
-  content: '';
+  content: "";
   height: 1px;
   transform-origin: 0 0;
   transform: scaleY(0.5);

@@ -59,8 +59,8 @@
 
   .again-button,
   .main-button {
-  /** PostCSS adding classes in wrong order :( */
-  margin: 0.6rem 0.4rem !important;
+    /** PostCSS adding classes in wrong order :( */
+    margin: 0.6rem 0.4rem !important;
   }
 }
 
