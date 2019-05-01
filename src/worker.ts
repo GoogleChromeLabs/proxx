@@ -25,4 +25,9 @@ export type RemoteServices = typeof services;
 
 expose(services, self);
 performance.mark("State ready");
-self.postMessage("READY");
+
+addEventListener("message", event => {
+  if (event.data === "ready?") {
+    self.postMessage("READY");
+  }
+});
