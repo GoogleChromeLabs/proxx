@@ -40,6 +40,7 @@ import {
 interface Props {
   motion: boolean;
   texturePromise: Promise<any>;
+  supportsSufficientWebGL: boolean;
 }
 
 let navigator: any;
@@ -218,10 +219,21 @@ export default class About extends Component<Props> {
           data is sent to the server.
         </p>
 
+        <h1>Credit</h1>
+        <p>Built by Google Chrome Labs</p>
+        <p>
+          Thanks to <a href="https://www.tokyo-wolf.com/">Tokyo Wolf</a> for
+          graphic design help.
+        </p>
+
         <h1>System Information</h1>
         <ul class={systemDataStyle}>
           <li>Version: {version}</li>
           <li>Motion: {this.props.motion ? "true" : "false"}</li>
+          <li>
+            Supports WebGL:{" "}
+            {this.props.supportsSufficientWebGL ? "true" : "false"}
+          </li>
           <li>Feature Phone: {isFeaturePhone ? "yes" : "no"}</li>
           <li>
             Standalone Mode:{" "}
@@ -229,6 +241,7 @@ export default class About extends Component<Props> {
               ? "yes"
               : "no"}
           </li>
+          <li>Screen Width: {window.innerWidth}px</li>
           <li>Screen Width: {window.innerWidth}px</li>
           <li>Screen Height: {window.innerHeight}px</li>
           <li>DPR: {staticDevicePixelRatio}</li>
