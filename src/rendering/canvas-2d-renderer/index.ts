@@ -13,7 +13,7 @@
 
 import { Cell } from "src/gamelogic/types";
 import { getCanvas } from "src/utils/canvas-pool";
-import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
+import { getBarHeights, getCellSizes } from "src/utils/cell-sizing";
 import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
   AnimationDesc,
@@ -463,9 +463,9 @@ export default class Canvas2DRenderer implements Renderer {
     const ctx = this._ctx!;
     ctx.save();
     ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-    const { verticalPadding, horizontalPadding } = getPaddings();
+    const { topBarHeight, bottomBarHeight } = getBarHeights();
     const { width, height } = this._canvasRect!;
-
+    /*
     const gradients = [
       // Left border gradient
       {
@@ -514,6 +514,7 @@ export default class Canvas2DRenderer implements Renderer {
       return { gradient, rect };
     });
     ctx.restore();
+    */
   }
 
   private _rerenderCell(x: number, y: number, { clear = false } = {}) {

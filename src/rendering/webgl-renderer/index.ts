@@ -16,7 +16,7 @@
 import { Cell } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
 import { getCanvas } from "src/utils/canvas-pool";
-import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
+import { getBarHeights, getCellSizes } from "src/utils/cell-sizing";
 import ShaderBox from "src/utils/shaderbox";
 import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
@@ -130,10 +130,10 @@ export default class WebGlRenderer implements Renderer {
       textureTileSize! * staticDevicePixelRatio
     );
     this._shaderBox!.setUniform1f("idle_frames", idleAnimationNumFrames);
-    const { verticalPadding, horizontalPadding } = getPaddings();
+    const { topBarHeight, bottomBarHeight } = getBarHeights();
     this._shaderBox!.setUniform2f("paddings", [
-      horizontalPadding * staticDevicePixelRatio,
-      verticalPadding * staticDevicePixelRatio
+      topBarHeight * staticDevicePixelRatio,
+      bottomBarHeight * staticDevicePixelRatio
     ]);
 
     this._startRenderLoop();

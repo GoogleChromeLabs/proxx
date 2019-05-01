@@ -174,11 +174,11 @@ void main() {
 
   // Fade out at the border
   {
-    vec2 padding_factor = vec2(0., .5);
-    vec2 border_fade =
-      smoothstep(paddings*padding_factor, paddings, gl_FragCoord.xy) *
-      (vec2(1.) - smoothstep(iResolution2 - paddings, iResolution2 - paddings*padding_factor, gl_FragCoord.xy));
-    gl_FragColor = mix(transparent, gl_FragColor, min(border_fade.x, border_fade.y));
+    vec2 factor = vec2(1.0, 1.3);
+    float border_fade =
+      smoothstep(paddings.y*factor.x, paddings.y*factor.y, gl_FragCoord.y) *
+      (1. - smoothstep(iResolution2.y - paddings.x*factor.y, iResolution2.y - paddings.x*factor.x, gl_FragCoord.y));
+    gl_FragColor = mix(transparent, gl_FragColor, border_fade);
   }
 
 }
