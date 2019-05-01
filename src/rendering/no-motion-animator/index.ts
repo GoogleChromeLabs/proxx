@@ -68,6 +68,7 @@ export default class NoMotionAnimator implements Animator {
     }
     if (
       (cell.revealed &&
+        !cell.hasMine &&
         cell.touchingMines > 0 &&
         cell.touchingFlags >= cell.touchingMines) ||
       (!cell.revealed && cell.flagged)
