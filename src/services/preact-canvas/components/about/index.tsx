@@ -195,8 +195,7 @@ export default class About extends Component<Props> {
           </li>
           <li>
             <RightClick class={shortcutIconStyle} aria-label="Right click" />
-            Do the opposite. Flag when in clear mode, or clear when in flag
-            mode.
+            Flag when in clear mode, or clear when in flag mode.
           </li>
         </ul>
 
