@@ -23,7 +23,8 @@ export interface Renderer {
   onResize(): void;
   updateFirstRect(rect: ClientRect | DOMRect): void;
   setFocus(x: number, y: number): void;
-  beforeRenderFrame(): void;
+  beforeUpdate(): void;
+  afterUpdate(): void;
   beforeCell(
     x: number,
     y: number,

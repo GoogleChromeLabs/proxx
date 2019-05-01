@@ -13,7 +13,7 @@
 
 import { Cell } from "src/gamelogic/types";
 import { getCanvas } from "src/utils/canvas-pool";
-import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
+import { getBarHeights, getCellSizes } from "src/utils/cell-sizing";
 import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
   AnimationDesc,
@@ -106,8 +106,12 @@ export default class Canvas2DRenderer implements Renderer {
     this._rerender();
   }
 
-  beforeRenderFrame() {
+  beforeUpdate() {
     // Nothing to do here
+  }
+
+  afterUpdate() {
+    this._rerender();
   }
 
   beforeCell(
@@ -117,11 +121,6 @@ export default class Canvas2DRenderer implements Renderer {
     animationList: AnimationDesc[],
     ts: number
   ) {
-    this._ctx!.save();
-    this._setupContextForTile(x, y);
-    this._ctx!.clearRect(0, 0, this._tileSize!, this._tileSize!);
-    this._ctx!.restore();
-
     const gridCell = this._grid[y * this._numTilesX! + x];
     gridCell.animationList = animationList.slice();
     gridCell.cell = cell;
@@ -144,14 +143,9 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
-    if (!this._isTileInView(x, y)) {
-      return;
-    }
-    this._ctx!.save();
-    this._setupContextForTile(x, y);
-    // @ts-ignore
-    this[animation.name](x, y, cell, animation, ts);
-    this._ctx!.restore();
+    // Nothing to do here, ironically.
+    // With the 2D renderer, we render the entire field after the entire chunk
+    // has been ingested and call _renderCell for each cell.
   }
 
   setFocus(x: number, y: number) {
@@ -164,6 +158,23 @@ export default class Canvas2DRenderer implements Renderer {
     if (x > -1 && y > -1) {
       this._rerenderCell(x, y, { clear: true });
     }
+  }
+
+  private _renderCell(
+    x: number,
+    y: number,
+    cell: Cell,
+    animation: AnimationDesc,
+    ts: number
+  ) {
+    if (!this._isTileInView(x, y)) {
+      return;
+    }
+    this._ctx!.save();
+    this._setupContextForTile(x, y);
+    // @ts-ignore
+    this[animation.name](x, y, cell, animation, ts);
+    this._ctx!.restore();
   }
 
   private _updateTileSize() {
@@ -438,7 +449,7 @@ export default class Canvas2DRenderer implements Renderer {
         const { cell, animationList } = this._grid[y * this._numTilesX! + x];
         const ts = getTime();
         for (const animation of animationList) {
-          this.render(x, y, cell!, animation, ts);
+          this._renderCell(x, y, cell!, animation, ts);
         }
         this._maybeRenderFocusRing(x, y);
       }
@@ -463,54 +474,45 @@ export default class Canvas2DRenderer implements Renderer {
     const ctx = this._ctx!;
     ctx.save();
     ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
-    const { verticalPadding, horizontalPadding } = getPaddings();
+    const { topBarHeight, bottomBarHeight } = getBarHeights();
     const { width, height } = this._canvasRect!;
-
+    const factor = 1.3;
     const gradients = [
-      // Left border gradient
-      {
-        start: [0, 0],
-        end: [horizontalPadding, 0],
-        rect: new DOMRect(0, 0, horizontalPadding, height),
-        whitePoint: 0
-      },
       // Top border gradient
       {
-        start: [0, 0],
-        end: [0, verticalPadding],
-        rect: new DOMRect(0, 0, width, verticalPadding),
-        whitePoint: 0.5
-      },
-      // Right border gradient
-      {
-        start: [width, height],
-        end: [width - horizontalPadding, height],
-        rect: new DOMRect(
-          width - horizontalPadding,
-          0,
-          horizontalPadding,
-          height
-        ),
-        whitePoint: 0
+        start: [0, topBarHeight],
+        end: [0, topBarHeight * factor],
+        rect: new DOMRect(0, 0, width, topBarHeight * factor)
       },
       // Bottom border gradient
       {
-        start: [width, height],
-        end: [width, height - verticalPadding],
-        rect: new DOMRect(0, height - verticalPadding, width, verticalPadding),
-        whitePoint: 0.5
+        start: [width, height - bottomBarHeight],
+        end: [width, height - bottomBarHeight * factor],
+        rect: new DOMRect(
+          0,
+          height - bottomBarHeight * factor,
+          width,
+          bottomBarHeight * factor
+        )
       }
     ];
 
-    this._gradients = gradients.map(({ start, end, rect, whitePoint }) => {
+    this._gradients = gradients.map(({ start, end, rect }) => {
       const gradient = ctx.createLinearGradient(
         start[0],
         start[1],
         end[0],
         end[1]
       );
-      gradient.addColorStop(whitePoint, "#fff");
-      gradient.addColorStop(1, "transparent");
+      // Implement the same opacity ramp as we have in the WebGL shader.
+      const numStops = 10;
+      for (let i = 0; i < numStops; i++) {
+        const f = i / (numStops - 1);
+        gradient.addColorStop(
+          f,
+          `rgba(255, 255, 255, ${1 - easeInOutCubic(f)})`
+        );
+      }
       return { gradient, rect };
     });
     ctx.restore();

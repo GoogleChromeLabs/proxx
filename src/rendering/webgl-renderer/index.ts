@@ -16,7 +16,7 @@
 import { Cell } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
 import { getCanvas } from "src/utils/canvas-pool";
-import { getCellSizes, getPaddings } from "src/utils/cell-sizing";
+import { getBarHeights, getCellSizes } from "src/utils/cell-sizing";
 import ShaderBox from "src/utils/shaderbox";
 import { staticDevicePixelRatio } from "src/utils/static-display";
 import {
@@ -130,11 +130,7 @@ export default class WebGlRenderer implements Renderer {
       textureTileSize! * staticDevicePixelRatio
     );
     this._shaderBox!.setUniform1f("idle_frames", idleAnimationNumFrames);
-    const { verticalPadding, horizontalPadding } = getPaddings();
-    this._shaderBox!.setUniform2f("paddings", [
-      horizontalPadding * staticDevicePixelRatio,
-      verticalPadding * staticDevicePixelRatio
-    ]);
+    this._updateFadeoutParameters();
 
     this._startRenderLoop();
   }
@@ -159,9 +155,14 @@ export default class WebGlRenderer implements Renderer {
     if (this._updateTileSize()) {
       this._updateGridMesh();
     }
+    this._updateFadeoutParameters();
   }
 
-  beforeRenderFrame() {
+  beforeUpdate() {
+    // Nothing to do here
+  }
+
+  afterUpdate() {
     // Nothing to do here
   }
 
@@ -212,6 +213,14 @@ export default class WebGlRenderer implements Renderer {
       this._updateDynamicTileData(x, y);
       this._lastFocus = [x, y];
     }
+  }
+
+  private _updateFadeoutParameters() {
+    const { topBarHeight, bottomBarHeight } = getBarHeights();
+    this._shaderBox!.setUniform2f("paddings", [
+      topBarHeight * staticDevicePixelRatio,
+      bottomBarHeight * staticDevicePixelRatio
+    ]);
   }
 
   private _updateTileSize() {

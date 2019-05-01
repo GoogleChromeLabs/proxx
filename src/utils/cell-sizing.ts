@@ -11,6 +11,10 @@
  * limitations under the License.
  */
 
+import { bottomBar as bottomBarStyle } from "../services/preact-canvas/components/bottom-bar/style.css";
+import { topBar as topBarStyle } from "../services/preact-canvas/components/top-bar/style.css";
+import toSelector from "./to-selector";
+
 export function getCellSizes() {
   const cellPadding = parseFloat(
     getComputedStyle(document.documentElement).getPropertyValue(
@@ -23,12 +27,20 @@ export function getCellSizes() {
   return { cellSize, cellPadding };
 }
 
-export function getPaddings() {
-  const verticalPadding = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue("--bar-avoid")
-  );
-  const horizontalPadding = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue("--side-margin")
-  );
-  return { verticalPadding, horizontalPadding };
+export function getBarHeights() {
+  const bottomBar = document.querySelector(toSelector(bottomBarStyle))!;
+  const bottomBarRect = bottomBar.getBoundingClientRect();
+  const bottomBarMargins =
+    parseFloat(getComputedStyle(bottomBar).marginTop || "0") +
+    parseFloat(getComputedStyle(bottomBar).marginBottom || "0");
+  const bottomBarHeight = bottomBarRect.height + bottomBarMargins;
+
+  // The top bar has a margin
+  const topBar = document.querySelector(toSelector(topBarStyle))!;
+  const topBarRect = topBar.getBoundingClientRect();
+  const topBarMargins =
+    parseFloat(getComputedStyle(topBar).marginTop || "0") +
+    parseFloat(getComputedStyle(topBar).marginBottom || "0");
+  const topBarHeight = topBarRect.height + topBarMargins;
+  return { topBarHeight, bottomBarHeight };
 }
