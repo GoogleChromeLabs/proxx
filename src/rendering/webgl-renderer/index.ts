@@ -130,11 +130,7 @@ export default class WebGlRenderer implements Renderer {
       textureTileSize! * staticDevicePixelRatio
     );
     this._shaderBox!.setUniform1f("idle_frames", idleAnimationNumFrames);
-    const { topBarHeight, bottomBarHeight } = getBarHeights();
-    this._shaderBox!.setUniform2f("paddings", [
-      topBarHeight * staticDevicePixelRatio,
-      bottomBarHeight * staticDevicePixelRatio
-    ]);
+    this._updateFadeoutParameters();
 
     this._startRenderLoop();
   }
@@ -159,6 +155,7 @@ export default class WebGlRenderer implements Renderer {
     if (this._updateTileSize()) {
       this._updateGridMesh();
     }
+    this._updateFadeoutParameters();
   }
 
   beforeRenderFrame() {
@@ -212,6 +209,14 @@ export default class WebGlRenderer implements Renderer {
       this._updateDynamicTileData(x, y);
       this._lastFocus = [x, y];
     }
+  }
+
+  private _updateFadeoutParameters() {
+    const { topBarHeight, bottomBarHeight } = getBarHeights();
+    this._shaderBox!.setUniform2f("paddings", [
+      topBarHeight * staticDevicePixelRatio,
+      bottomBarHeight * staticDevicePixelRatio
+    ]);
   }
 
   private _updateTileSize() {
