@@ -15,17 +15,17 @@ import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
-import dependencyGraph from "./dependency-graph-plugin.js";
-import chunkNamePlugin from "./chunk-name-plugin.js";
-import resourceListPlugin from "./resource-list-plugin";
+import dependencyGraph from "./lib/dependency-graph-plugin.js";
+import chunkNamePlugin from "./lib/chunk-name-plugin.js";
+import resourceListPlugin from "./lib/resource-list-plugin";
 import postcss from "rollup-plugin-postcss";
-import glsl from "./glsl-plugin.js";
-import cssModuleTypes from "./css-module-types.js";
-import assetPlugin from "./asset-plugin.js";
+import glsl from "./lib/glsl-plugin.js";
+import cssModuleTypes from "./lib/css-module-types.js";
+import assetPlugin from "./lib/asset-plugin.js";
 import { readFileSync } from "fs";
-import constsPlugin from "./consts-plugin.js";
-import ejsAssetPlugin from "./ejs-asset-plugin.js";
-import assetTransformPlugin from "./asset-transform-plugin.js";
+import constsPlugin from "./lib/consts-plugin.js";
+import ejsAssetPlugin from "./lib/ejs-asset-plugin.js";
+import assetTransformPlugin from "./lib/asset-transform-plugin.js";
 import postCSSUrl from "postcss-url";
 
 // Delete 'dist'
@@ -48,7 +48,7 @@ export default {
     postcss({
       minimize: true,
       modules: {
-        generateScopedName: "[hash:base64:5]"
+        //generateScopedName: "[hash:base64:5]"
       },
       namedExports(name) {
         return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
@@ -101,7 +101,7 @@ export default {
     chunkNamePlugin(),
     nodeResolve(),
     loadz0r({
-      loader: readFileSync("./loadz0r-loader.ejs").toString(),
+      loader: readFileSync("./lib/loadz0r-loader.ejs").toString(),
       // `prependLoader` will be called for every chunk. If it returns `true`,
       // the loader code will be prepended.
       prependLoader: (chunk, inputs) => {
@@ -116,6 +116,7 @@ export default {
       }
     }),
     dependencyGraph({
+      manifestName: "lib/dependencygraph.json",
       propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
     }),
     resourceListPlugin(),
