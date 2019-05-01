@@ -1,8 +1,7 @@
 {
-  "name": "minesweeper",
+  "name": "PROXX",
   "version": "0.1.3",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "author": "Surma <surma@surma.link>",
   "contributors": [
     "Jake Archibald",
@@ -11,16 +10,16 @@
   ],
   "license": "Apache-2.0",
   "scripts": {
-    "build:markup": "node ./render_static.js",
+    "build:markup": "node ./lib/render_static.js",
     "gzip": "gzip -k9nr dist",
     "build": "rollup -c && npm run build:markup && npm run gzip",
     "watch:rollup": "rollup -c -w",
     "watch": "run-p build:markup watch:rollup",
     "serve": "http-server dist -c-1 -g",
-    "fmt": "prettier --write 'src/**/*.{ts,tsx,css}' *.{js,json,md} && npm run lintfix",
+    "fmt": "prettier --write 'src/**/*.{ts,tsx,css}' *.{js,json,md} 'lib/**/*.js' && npm run lintfix",
     "lint": "tslint -t verbose -c tslint.json 'src/**/*.{ts,tsx}'",
     "lintfix": "tslint -t verbose -c tslint.json --fix 'src/**/*.{ts,tsx}'",
-    "fmt_test": "test $(prettier -l 'src/**/*.{ts,tsx}' *.{js,json,md} | wc -l) -eq 0",
+    "fmt_test": "test $(prettier -l 'src/**/*.{ts,tsx,css}' *.{js,json,md} 'lib/**/*.js' | wc -l) -eq 0",
     "test": "npm run fmt_test && npm run lint && npm run build"
   },
   "husky": {
@@ -28,27 +27,31 @@
       "pre-commit": "npm test"
     }
   },
-  "dependencies": {
+  "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/polyfill": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
-    "acorn-walk": "^6.1.1",
+    "characterset": "^1.3.0",
     "comlink": "^4.0.0-alpha.10",
     "dat.gui": "^0.7.6",
-    "ecstatic": "^3.3.1",
+    "ecstatic": "^4.1.2",
     "ejs": "^2.6.1",
-    "fast-async": "^7.0.6",
+    "escape-string-regexp": "^2.0.0",
     "find": "^0.3.0",
     "glsl-deparser": "^1.0.0",
     "glsl-min-stream": "^1.0.0",
     "glsl-parser": "^2.0.1",
     "glsl-tokenizer": "^2.1.5",
-    "lit-html": "^1.0.0",
+    "http-server": "^0.11.1",
+    "husky": "^2.1.0",
+    "idb-keyval": "^3.2.0",
     "magic-string": "^0.25.2",
+    "netlify-cli": "^2.11.12",
+    "postcss-url": "^8.0.0",
     "preact": "^8.3.1",
+    "prettier": "^1.17.0",
     "puppeteer": "^1.14.0",
-    "resize-observer-polyfill": "^1.5.1",
     "rimraf": "^2.6.2",
     "rollup": "^1.10.1",
     "rollup-plugin-babel": "^4.3.2",
@@ -56,28 +59,11 @@
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-terser": "^4.0.4",
-    "rollup-plugin-typescript2": "^0.20.1",
+    "rollup-plugin-typescript2": "^0.21.0",
     "rollup-pluginutils": "^2.6.0",
-    "typed-css-modules": "^0.4.2",
-    "typescript": "^3.4.4",
-    "web-streams-polyfill": "^1.3.2"
-  },
-  "devDependencies": {
-    "characterset": "^1.3.0",
-    "escape-string-regexp": "^1.0.5",
-    "http-server": "^0.11.1",
-    "husky": "^1.3.1",
-    "idb-keyval": "^3.2.0",
-    "netlify-cli": "^2.11.12",
-    "npm-run-all": "^4.1.5",
-    "postcss-url": "^8.0.0",
-    "prettier": "^1.17.0",
     "travis-size-report": "^1.0.1",
-    "tslint": "^5.16.0"
-  },
-  "babel": {
-    "presets": [
-      "@babel/env"
-    ]
+    "tslint": "^5.16.0",
+    "typed-css-modules": "^0.4.2",
+    "typescript": "^3.4.4"
   }
 }
