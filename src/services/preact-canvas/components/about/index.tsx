@@ -25,12 +25,12 @@ import {
   isFeaturePhone,
   staticDevicePixelRatio
 } from "../../../../utils/static-display";
-import { Arrow } from "../icons/initial";
+import { RightClick } from "../icons/additional";
 import {
   aboutWrapper as aboutWrapperStyle,
-  iconGuide,
   iconGuideItem,
   iconGuideRow,
+  shortcutIcon as shortcutIconStyle,
   shortcutKey as shortcutKeyStyle,
   shortcutList as shortcutListStyle,
   systemData as systemDataStyle,
@@ -57,108 +57,124 @@ export default class About extends Component<Props> {
   render() {
     return (
       <div class={aboutWrapperStyle}>
-        <h1>About</h1>
+        <h1>How to play</h1>
 
-        <h2>How to play</h2>
-        <p>
-          You are on a space mission to a galaxy far away. Your job is to survey
-          the space field and flag where black holes are.
-        </p>
-        <p>
-          If the square you click on is not a black hole, you'll see how many of
-          its neighboring 8 squares are black holes. Use the right click or
-          change to Flag mode then click to flag where you think the black holes
-          are and clear all of the squares without hitting a black hole to win.
-        </p>
-
-        <div class={iconGuide}>
-          <div class={iconGuideRow}>
-            <div class={iconGuideItem}>
-              <canvas
-                class={tileStyle}
-                ref={this._renderCanvas}
-                width={this._tileSize}
-                height={this._tileSize}
-                data-sprite="idle"
-                data-frame="0"
-                data-highlight="false"
-                data-border="true"
-              />
-              Unrevealed
-            </div>
-            <div class={iconGuideItem}>
-              <canvas
-                class={tileStyle}
-                ref={this._renderCanvas}
-                width={this._tileSize}
-                height={this._tileSize}
-                data-sprite="idle"
-                data-frame="0"
-                data-highlight="true"
-                data-border="true"
-              />
-              Flagged
-            </div>
+        <div class={iconGuideRow}>
+          <div class={iconGuideItem}>
+            <canvas
+              class={tileStyle}
+              ref={this._renderCanvas}
+              width={this._tileSize}
+              height={this._tileSize}
+              data-sprite="idle"
+              data-frame="0"
+              data-highlight="false"
+              data-border="true"
+            />
+            Unrevealed
           </div>
-          <div class={iconGuideRow}>
-            <div class={iconGuideItem}>
-              <canvas
-                class={tileStyle}
-                ref={this._renderCanvas}
-                width={this._tileSize}
-                height={this._tileSize}
-                data-sprite="none"
-                data-frame="0"
-                data-highlight="false"
-                data-border="true"
-              />
-              Revealed
-            </div>
-            <div class={iconGuideItem}>
-              <canvas
-                class={tileStyle}
-                ref={this._renderCanvas}
-                width={this._tileSize}
-                height={this._tileSize}
-                data-sprite="static"
-                data-frame={STATIC_TEXTURE.MINE.toString()}
-                data-highlight="false"
-                data-border="false"
-              />
-              Black hole
-            </div>
-          </div>
-          <div class={iconGuideRow}>
-            <div class={iconGuideItem}>
-              <canvas
-                class={tileStyle}
-                ref={this._renderCanvas}
-                width={this._tileSize}
-                height={this._tileSize}
-                data-sprite="static"
-                data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
-                data-highlight="false"
-                data-border="false"
-              />
-              Clue
-            </div>
-            <div class={iconGuideItem}>
-              <canvas
-                class={tileStyle}
-                ref={this._renderCanvas}
-                width={this._tileSize}
-                height={this._tileSize}
-                data-sprite="static"
-                data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
-                data-highlight="true"
-                data-border="false"
-              />
-              Active clue
-            </div>
+          <div class={iconGuideItem}>
+            <canvas
+              class={tileStyle}
+              ref={this._renderCanvas}
+              width={this._tileSize}
+              height={this._tileSize}
+              data-sprite="static"
+              data-frame={STATIC_TEXTURE.MINE.toString()}
+              data-highlight="false"
+              data-border="false"
+            />
+            Black hole
           </div>
         </div>
 
-        <h2>Keyboard Shortcuts</h2>
+        <p>
+          An unrevealed tile might have a black hole behind it, it might not.
+          The idea is to clear all the tiles that <strong>don't</strong> have
+          black holes behind them.
+        </p>
+
+        <p>
+          But, the thing about a black hole – its main distinguishing feature –
+          is it's black. And the thing about space, the color of space, your
+          basic space color, is black. So how are you supposed to avoid them?
+          Here's how:
+        </p>
+
+        <div class={iconGuideRow}>
+          <div class={iconGuideItem}>
+            <canvas
+              class={tileStyle}
+              ref={this._renderCanvas}
+              width={this._tileSize}
+              height={this._tileSize}
+              data-sprite="none"
+              data-frame="0"
+              data-highlight="false"
+              data-border="true"
+            />
+            Cleared
+          </div>
+          <div class={iconGuideItem}>
+            <canvas
+              class={tileStyle}
+              ref={this._renderCanvas}
+              width={this._tileSize}
+              height={this._tileSize}
+              data-sprite="static"
+              data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
+              data-highlight="false"
+              data-border="false"
+            />
+            Clue
+          </div>
+        </div>
+
+        <p>
+          If you avoid a black hole, the number tells you how many of the 8
+          surrounding tiles is a black hole. If it's blank,{" "}
+          <strong>none</strong> of the surrounding tiles is a black hole.
+        </p>
+
+        <p>If you think you know where a black hole is, flag it!</p>
+
+        <div class={iconGuideRow}>
+          <div class={iconGuideItem}>
+            <canvas
+              class={tileStyle}
+              ref={this._renderCanvas}
+              width={this._tileSize}
+              height={this._tileSize}
+              data-sprite="idle"
+              data-frame="0"
+              data-highlight="true"
+              data-border="true"
+            />
+            Flagged
+          </div>
+          <div class={iconGuideItem}>
+            <canvas
+              class={tileStyle}
+              ref={this._renderCanvas}
+              width={this._tileSize}
+              height={this._tileSize}
+              data-sprite="static"
+              data-frame={STATIC_TEXTURE.NUMBER_1.toString()}
+              data-highlight="true"
+              data-border="false"
+            />
+            Active clue
+          </div>
+        </div>
+
+        <p>
+          Switch into flag mode, and tap the suspected tile. Once you've flagged
+          enough tiles around a clue, it'll become active. Tap an active clue to
+          clear all the non-flagged tiles around it.
+        </p>
+
+        <h1>Shortcuts</h1>
+
         <ul class={shortcutListStyle}>
           <li>
             <span class={shortcutKeyStyle} aria-label="f key">
@@ -166,9 +182,14 @@ export default class About extends Component<Props> {
             </span>
             Switch between Clear and Flag mode
           </li>
+          <li>
+            <RightClick class={shortcutIconStyle} aria-label="Right click" />
+            Do the opposite. Flag when in clear mode, or clear when in flag
+            mode.
+          </li>
         </ul>
 
-        <h2>Github</h2>
+        <h1>Github</h1>
         <p>
           Source code can be found at our{" "}
           <a href="https://github.com/GoogleChromeLabs/proxx">
@@ -177,7 +198,7 @@ export default class About extends Component<Props> {
           .
         </p>
 
-        <h2>Privacy policy</h2>
+        <h1>Privacy policy</h1>
         <p>
           Google Analytics is used to record{" "}
           <a href="https://support.google.com/analytics/answer/6004245?ref_topic=2919631">
@@ -187,16 +208,16 @@ export default class About extends Component<Props> {
           data is sent to the server.
         </p>
 
-        <h2>System Information</h2>
+        <h1>System Information</h1>
         <ul class={systemDataStyle}>
-          <li>Version: {version} </li>
+          <li>Version: {version}</li>
           <li>Motion: {this.props.motion ? "true" : "false"}</li>
           <li>Feature Phone: {isFeaturePhone ? "yes" : "no"}</li>
           <li>
             Standalone Mode:{" "}
             {window.matchMedia("(display-mode: standalone)").matches
               ? "yes"
-              : "no"}{" "}
+              : "no"}
           </li>
           <li>Screen Width: {window.innerWidth}px</li>
           <li>Screen Height: {window.innerHeight}px</li>

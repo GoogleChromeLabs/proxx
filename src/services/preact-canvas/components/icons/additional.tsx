@@ -51,3 +51,9 @@ export const Star = (props: JSX.HTMLAttributes) => (
     <path d="M22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.5 14l-1.7 7 6.2-3.7 6.2 3.7-1.6-7L22 9.2zm-10 6.2l-3.8 2.3 1-4.3L6 10.5l4.4-.4 1.7-4 1.7 4 4.4.4-3.3 2.9 1 4.3-3.8-2.3z" />
   </svg>
 );
+
+export const RightClick = (props: JSX.HTMLAttributes) => (
+  <svg viewBox="0 0 24 24" {...props}>
+    <path d="M13 1v8h7a8 8 0 0 0-7-8zM19 12v3a7 7 0 0 1-14 0v-3h14m1-1H4v4a8 8 0 0 0 16 0v-4zM10 2.3V8H5a7 7 0 0 1 5-5.7m1-1.2A8 8 0 0 0 4 9h7V1z" />
+  </svg>
+);

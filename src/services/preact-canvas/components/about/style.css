@@ -23,15 +23,24 @@
   color: #3ee5ea;
 }
 
+.shortcut-icon,
 .shortcut-key {
+  border: solid 2px transparent;
+  border-radius: 25%;
   display: inline-block;
-  border: solid 2px #555;
   width: 24px;
   height: 24px;
-  border-radius: 25%;
+  margin-right: 24px;
+  fill: currentColor;
+  flex-shrink: 0;
+  position: relative;
+  top: -0.3em;
+}
+
+.shortcut-key {
+  border-color: #555;
   text-align: center;
   line-height: 24px;
-  margin-right: 24px;
 }
 
 .shortcut-list {
@@ -40,26 +49,34 @@
   list-style: none;
 }
 
+.shortcut-list > li {
+  display: flex;
+  margin-bottom: 1em;
+}
+
 .system-data {
   font-size: 0.6em;
   padding: 0;
   list-style: none;
 }
 
-.icon-guide {
-}
-
 .icon-guide-row {
   display: flex;
-  padding-bottom: 5px;
-  margin-bottom: 10px;
+  flex-flow: row wrap;
 }
 
 .icon-guide-item {
   font-size: 0.9em;
-  width: 50%;
+  width: 100%;
   display: flex;
   align-items: center;
+  margin: 0.4em 0;
+}
+
+@media (min-width: 360px) {
+  .icon-guide-item {
+    width: 50%;
+  }
 }
 
 .tile {
