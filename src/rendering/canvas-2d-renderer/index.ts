@@ -465,56 +465,46 @@ export default class Canvas2DRenderer implements Renderer {
     ctx.scale(staticDevicePixelRatio, staticDevicePixelRatio);
     const { topBarHeight, bottomBarHeight } = getBarHeights();
     const { width, height } = this._canvasRect!;
-    /*
+    const factor = 1.3;
     const gradients = [
-      // Left border gradient
-      {
-        start: [0, 0],
-        end: [horizontalPadding, 0],
-        rect: new DOMRect(0, 0, horizontalPadding, height),
-        whitePoint: 0
-      },
       // Top border gradient
       {
-        start: [0, 0],
-        end: [0, verticalPadding],
-        rect: new DOMRect(0, 0, width, verticalPadding),
-        whitePoint: 0.5
-      },
-      // Right border gradient
-      {
-        start: [width, height],
-        end: [width - horizontalPadding, height],
-        rect: new DOMRect(
-          width - horizontalPadding,
-          0,
-          horizontalPadding,
-          height
-        ),
-        whitePoint: 0
+        start: [0, topBarHeight],
+        end: [0, topBarHeight * factor],
+        rect: new DOMRect(0, 0, width, topBarHeight * factor)
       },
       // Bottom border gradient
       {
-        start: [width, height],
-        end: [width, height - verticalPadding],
-        rect: new DOMRect(0, height - verticalPadding, width, verticalPadding),
-        whitePoint: 0.5
+        start: [width, height - bottomBarHeight],
+        end: [width, height - bottomBarHeight * factor],
+        rect: new DOMRect(
+          0,
+          height - bottomBarHeight * factor,
+          width,
+          bottomBarHeight * factor
+        )
       }
     ];
 
-    this._gradients = gradients.map(({ start, end, rect, whitePoint }) => {
+    this._gradients = gradients.map(({ start, end, rect }) => {
       const gradient = ctx.createLinearGradient(
         start[0],
         start[1],
         end[0],
         end[1]
       );
-      gradient.addColorStop(whitePoint, "#fff");
-      gradient.addColorStop(1, "transparent");
+      // Implement the same opacity ramp as we have in the WebGL shader.
+      const numStops = 10;
+      for (let i = 0; i < numStops; i++) {
+        const f = i / (numStops - 1);
+        gradient.addColorStop(
+          f,
+          `rgba(255, 255, 255, ${1 - easeInOutCubic(f)})`
+        );
+      }
       return { gradient, rect };
     });
     ctx.restore();
-    */
   }
 
   private _rerenderCell(x: number, y: number, { clear = false } = {}) {
