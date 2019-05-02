@@ -30,6 +30,7 @@ interface Props {
   motion: boolean;
   disableAnimationBtn: boolean;
   texturePromise: Promise<any>;
+  supportsSufficientWebGL: boolean;
 }
 
 interface State {}
@@ -41,7 +42,8 @@ export default class Settings extends Component<Props, State> {
     onCloseClicked,
     onMotionPrefChange,
     motion,
-    texturePromise
+    texturePromise,
+    supportsSufficientWebGL
   }: Props) {
     return (
       <div role="dialog" aria-label="settings dialog" class={settingsStyle}>
@@ -62,7 +64,11 @@ export default class Settings extends Component<Props, State> {
             >
               Animations {motion ? "on" : "off"}
             </button>
-            <About motion={motion} texturePromise={texturePromise} />
+            <About
+              motion={motion}
+              texturePromise={texturePromise}
+              supportsSufficientWebGL={supportsSufficientWebGL}
+            />
           </div>
         </div>
       </div>
