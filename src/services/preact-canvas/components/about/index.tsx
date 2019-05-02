@@ -230,10 +230,7 @@ export default class About extends Component<Props> {
         <ul class={systemDataStyle}>
           <li>Version: {version}</li>
           <li>Motion: {this.props.motion ? "true" : "false"}</li>
-          <li>
-            Supports WebGL:{" "}
-            {this.props.supportsSufficientWebGL ? "true" : "false"}
-          </li>
+          <li>Supports WebGL: {this.props.supportsSufficientWebGL}</li>
           <li>Feature Phone: {isFeaturePhone ? "yes" : "no"}</li>
           <li>
             Standalone Mode:{" "}
