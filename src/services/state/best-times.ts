@@ -42,3 +42,8 @@ export function getBest(
   const key = getKey(width, height, mines);
   return get(key);
 }
+
+// Trigger Persistent Storage while we are at it.
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist();
+}
