@@ -1,5 +1,7 @@
 # PROXX
 
+![proxx-social-blue-v2 0](https://user-images.githubusercontent.com/234957/57080494-8caff680-6cea-11e9-8477-54ea0e1670e2.png)
+
 This is the repository for [PROXX](https://proxx.app) - a game built for every device with a web browser (including feature phones!)
 
 ## About this repository
