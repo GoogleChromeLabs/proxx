@@ -39,7 +39,7 @@
   font-size: 1.2rem;
   color: #000;
   border-radius: var(--border-radius);
-  padding: 0.9rem;
+  padding: 0.3rem;
   border: 3px solid #fff;
 }
 
@@ -71,4 +71,13 @@
   color: #fff;
   background: #ff274b;
   border-color: #ff274b;
+}
+
+@media (min-width: 320px) {
+  .button,
+  .button-alt,
+  .button-on,
+  .button-off {
+    padding: 0.9rem;
+  }
 }
