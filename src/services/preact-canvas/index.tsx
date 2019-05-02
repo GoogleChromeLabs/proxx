@@ -68,10 +68,10 @@ const stateServicePromise: Promise<
   return remoteServices.stateService;
 })();
 
-const nebulaDangerDark: Color = [53, 0, 0];
-const nebulaDangerLight: Color = [117, 32, 61];
+const nebulaDangerDark: Color = [40, 0, 0];
+const nebulaDangerLight: Color = [131, 23, 71];
 // Looking for nebulaSafeDark? It's defined in lib/nebula-safe-dark.js
-const nebulaSafeLight: Color = [43, 41, 111];
+const nebulaSafeLight: Color = [54, 49, 176];
 const nebulaSettingDark: Color = [0, 0, 0];
 const nebulaSettingLight: Color = [41, 41, 41];
 
