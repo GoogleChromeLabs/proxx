@@ -216,7 +216,6 @@ export default class Root extends Component<Props, State> {
     }: State
   ) {
     let mainComponent: VNode;
-    const supportsWebGL = lazyImport!.supportsSufficientWebGL;
     if (!game) {
       if (awaitingGame) {
         mainComponent = <GameLoading />;
@@ -230,8 +229,10 @@ export default class Root extends Component<Props, State> {
                 onCloseClicked={this._onSettingsCloseClick}
                 motion={motionPreference}
                 onMotionPrefChange={this._onMotionPrefChange}
-                disableAnimationBtn={!supportsWebGL || isFeaturePhone}
-                supportsSufficientWebGL={supportsWebGL}
+                disableAnimationBtn={
+                  !lazyImport!.supportsSufficientWebGL || isFeaturePhone
+                }
+                supportsSufficientWebGL={lazyImport!.supportsSufficientWebGL}
                 texturePromise={texturePromise}
               />
             )}
