@@ -389,10 +389,7 @@ export default class Board extends Component<Props, State> {
     } else {
       cellLabel = `${cell.touchingMines}`;
     }
-    const clickable =
-      !cell.revealed ||
-      (cell.touchingMines && cell.touchingFlags >= cell.touchingMines);
-    btn.disabled = !clickable;
+
     btn.setAttribute("aria-label", cellLabel);
     this._additionalButtonData.get(btn)![2] = cell;
   }
