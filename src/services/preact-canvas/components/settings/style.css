@@ -16,7 +16,6 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: scroll;
 }
 
 .settings .settings-window {
@@ -62,6 +61,7 @@
 .button-on {
   composes: button-on from "../../utils.css";
 }
+
 .button-off {
   composes: button-off from "../../utils.css";
 }
