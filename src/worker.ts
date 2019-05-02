@@ -24,6 +24,7 @@ const services = {
 export type RemoteServices = typeof services;
 
 expose(services, self);
+performance.mark("State ready");
 
 addEventListener("message", event => {
   if (event.data === "ready?") {
