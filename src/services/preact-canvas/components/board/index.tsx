@@ -240,7 +240,6 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private moveFocusWithMouse(event: MouseEvent) {
-    console.log("mouse move!");
     // Find if the mouse is on one of the button
     const targetBtn = event.target as HTMLButtonElement;
     const targetIsBtn = this._additionalButtonData.has(targetBtn);
@@ -369,7 +368,6 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private simulateClick(button: HTMLButtonElement, alt = false) {
-    console.log(button);
     const buttonData = this._additionalButtonData.get(button)!;
     this.props.onCellClick(buttonData, alt);
   }
@@ -391,10 +389,7 @@ export default class Board extends Component<Props, State> {
     } else {
       cellLabel = `${cell.touchingMines}`;
     }
-    const clickable =
-      !cell.revealed ||
-      (cell.touchingMines && cell.touchingFlags >= cell.touchingMines);
-    btn.disabled = !clickable;
+
     btn.setAttribute("aria-label", cellLabel);
     this._additionalButtonData.get(btn)![2] = cell;
   }
