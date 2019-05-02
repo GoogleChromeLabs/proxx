@@ -242,7 +242,6 @@ export default class About extends Component<Props> {
               : "no"}
           </li>
           <li>Screen Width: {window.innerWidth}px</li>
-          <li>Screen Width: {window.innerWidth}px</li>
           <li>Screen Height: {window.innerHeight}px</li>
           <li>DPR: {staticDevicePixelRatio}</li>
           <li>Device Memory: {navigator.deviceMemory}</li>
