@@ -12,6 +12,10 @@
  */
 import { Component, h } from "preact";
 import { bind } from "src/utils/bind";
+import {
+  fullscreenSupported,
+  goFullscreen
+} from "../../../../utils/fullscreen";
 import { isFeaturePhone } from "../../../../utils/static-display";
 import { Back, Fullscreen, Information } from "../icons/initial";
 import {
@@ -26,21 +30,6 @@ import {
   toggle,
   toggleContainer
 } from "./style.css";
-
-// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
-
-function goFullscreen() {
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen();
-  } else if (document.documentElement.webkitRequestFullscreen) {
-    document.documentElement.webkitRequestFullscreen();
-  }
-}
-
-const fullscreenSupported: boolean = !!(
-  document.documentElement.requestFullscreen ||
-  document.documentElement.webkitRequestFullscreen
-);
 
 export interface Props {
   onSettingsClick: () => void;
