@@ -55,19 +55,9 @@ const stateServicePromise: Promise<
 
   // When we get a message back from our worker, we know we're ready.
   const nextMessageEvent = lazyImport!.nextEvent(worker, "message");
-
-  // However, it's possible that we might send a message before the listener is set up in the
-  // worker. It's also possible for the worker to send a message to us before we're listening for
-  // it. So, we'll keep pinging the worker until it responds.
-  let workerTimeoutId: number;
-  const pingWorker = () => {
-    worker.postMessage("ready?");
-    workerTimeoutId = setTimeout(pingWorker, 50);
-  };
-  pingWorker();
+  worker.postMessage("ready?");
 
   await nextMessageEvent;
-  clearTimeout(workerTimeoutId!);
 
   const remoteServices = lazyImport!.comlinkWrap(
     worker

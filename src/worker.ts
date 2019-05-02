@@ -23,13 +23,12 @@ const services = {
 
 export type RemoteServices = typeof services;
 
-function startupMessageListener(event: MessageEvent) {
-  if (event.data !== "ready?") {
-    return;
-  }
-  removeEventListener("message", startupMessageListener);
-  expose(services, self);
-  self.postMessage("READY");
-}
+expose(services, self);
 
-addEventListener("message", startupMessageListener);
+addEventListener("message", event => {
+  if (event.data === "ready?") {
+    self.postMessage("READY");
+  }
+});
+
+self.postMessage("READY");
