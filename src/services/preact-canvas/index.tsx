@@ -46,23 +46,25 @@ const lazyComponents: Promise<typeof import("./lazy-components")> = new Promise(
 const stateServicePromise: Promise<
   import("comlink/src/comlink").Remote<import("../state").default>
 > = (async () => {
+  // The timing of events here is super buggy on iOS, so we need to tread very carefully.
   const worker = new Worker(workerURL);
+  // @ts-ignore - iOS Safari seems to wrongly GC the worker. Throwing it to the global to prevent
+  // that happening.
+  self.w = worker;
   await lazyImportReady;
+
+  // When we get a message back from our worker, we know we're ready.
   const nextMessageEvent = lazyImport!.nextEvent(worker, "message");
   worker.postMessage("ready?");
-  await nextMessageEvent;
 
-  // iOS Safari seems to kill a worker that doesn't receive messages after a while. So we prevent
-  // that by sending dummy keep-alive messages.
-  setInterval(() => {
-    worker.postMessage("");
-  }, 3000);
+  await nextMessageEvent;
 
   const remoteServices = lazyImport!.comlinkWrap(
     worker
   ) as import("comlink/src/comlink").Remote<
     import("src/worker").RemoteServices
   >;
+
   return remoteServices.stateService;
 })();
 

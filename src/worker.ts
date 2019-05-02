@@ -31,3 +31,5 @@ addEventListener("message", event => {
     self.postMessage("READY");
   }
 });
+
+self.postMessage("READY");
