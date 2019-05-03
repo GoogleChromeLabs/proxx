@@ -120,7 +120,6 @@ export default class Intro extends Component<Props, State> {
   private _widthInput?: HTMLInputElement;
   private _heightInput?: HTMLInputElement;
   private _minesInput?: HTMLInputElement;
-  private _form?: HTMLFormElement;
 
   constructor(props: Props) {
     super(props);
@@ -152,7 +151,6 @@ export default class Intro extends Component<Props, State> {
           onSubmit={this._startGame}
           class={startFormStyle}
           aria-label="game settings"
-          ref={el => (this._form = el)}
         >
           <div class={settingsRowStyle}>
             <label class={labelStyle}>
@@ -225,7 +223,7 @@ export default class Intro extends Component<Props, State> {
   @bind
   private _onKeyUp(event: KeyboardEvent) {
     if (event.key === "#") {
-      this._form!.submit();
+      this._startGame(event);
     }
   }
 
