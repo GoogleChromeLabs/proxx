@@ -17,11 +17,6 @@ import {
   presets
 } from "src/services/state/grid-presets.js";
 import { bind } from "../../../../utils/bind.js";
-import {
-  fullscreenSupported,
-  goFullscreen
-} from "../../../../utils/fullscreen";
-import { isFeaturePhone } from "../../../../utils/static-display";
 import { Arrow } from "../icons/initial.js";
 import TopBarSimple from "../top-bar-simple";
 import {
@@ -252,9 +247,6 @@ export default class Intro extends Component<Props, State> {
   @bind
   private _startGame(event: Event) {
     event.preventDefault();
-    if (isFeaturePhone && fullscreenSupported) {
-      goFullscreen();
-    }
     this.props.onStartGame(
       this.state.width!,
       this.state.height!,
