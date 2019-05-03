@@ -17,12 +17,15 @@ import { Back, Fullscreen, Information } from "../icons/initial";
 import {
   bottomBar,
   checkbox,
+  fpToggle,
   fullscreen,
   hidden,
   leftIcon,
+  leftKeyIcon,
   leftToggleLabel,
   noFullscreen,
   rightToggleLabel,
+  shortcutKey,
   toggle,
   toggleContainer
 } from "./style.css";
@@ -74,83 +77,121 @@ export default class BottomBar extends Component<Props, State> {
     }: Props,
     { flagModeAnnouncement }: State
   ) {
+    const backBtn = isFeaturePhone ? (
+      <button
+        class={leftKeyIcon}
+        onClick={onBackClick}
+        aria-label="Back to main menu"
+      >
+        <span class={shortcutKey}>*</span> back
+      </button>
+    ) : (
+      <button
+        class={leftIcon}
+        onClick={onBackClick}
+        aria-label="Back to main menu"
+      >
+        <Back />
+      </button>
+    );
+
+    const infoBtn = isFeaturePhone ? (
+      <button
+        class={leftKeyIcon}
+        onClick={onSettingsClick}
+        aria-label="Open information and settings"
+      >
+        <span class={shortcutKey}>*</span> info
+      </button>
+    ) : (
+      <button
+        class={leftIcon}
+        onClick={onSettingsClick}
+        aria-label="Open information and settings"
+      >
+        <Information />
+      </button>
+    );
+
+    const toggleBtn = isFeaturePhone ? (
+      <div class={fpToggle}>
+        <span class={shortcutKey}>#</span>{" "}
+        <label>
+          <input
+            class={checkbox}
+            type="checkbox"
+            role="switch checkbox"
+            onChange={this._onDangerModeSwitchToggle}
+            checked={!dangerMode}
+            aria-label="flag mode"
+            ref={el => (this._flagCheckbox = el)}
+          />
+          Flag:{dangerMode ? "OFF" : "ON"}
+        </label>
+      </div>
+    ) : (
+      <div class={toggleContainer} onTouchStart={this._onDangerModeTouchStart}>
+        <label>
+          <span aria-hidden="true" class={leftToggleLabel}>
+            Clear
+          </span>
+          <input
+            class={checkbox}
+            type="checkbox"
+            role="switch checkbox"
+            onChange={this._onDangerModeSwitchToggle}
+            checked={!dangerMode}
+            aria-label="flag mode"
+            ref={el => (this._flagCheckbox = el)}
+          />
+          <svg viewBox="0 0 32 16" class={toggle}>
+            <defs>
+              <mask id="flag-toggle-mask">
+                <rect fill="#fff" x="0" y="0" width="32" height="16" />
+                <circle cx={dangerMode ? 8 : 24} cy="8" fill="#000" r="4" />
+              </mask>
+            </defs>
+            <rect
+              fill="#fff"
+              x="0"
+              y="0"
+              width="32"
+              height="16"
+              rx="8"
+              ry="8"
+              mask="url(#flag-toggle-mask)"
+            />
+          </svg>
+          <span aria-hidden="true" class={rightToggleLabel}>
+            Flag
+          </span>
+        </label>
+        <span
+          role="status"
+          aria-live="assertive"
+          aria-label={flagModeAnnouncement}
+        />
+      </div>
+    );
+
+    const fullscreenBtn = isFeaturePhone ? (
+      ""
+    ) : fullscreenSupported ? (
+      <button
+        class={fullscreen}
+        onClick={goFullscreen}
+        aria-label="fullscreen mode"
+      >
+        <Fullscreen />
+      </button>
+    ) : (
+      <div class={noFullscreen} />
+    );
     return (
       <div class={[bottomBar, display ? "" : hidden].join(" ")} role="menubar">
-        {buttonType === "back" ? (
-          <button
-            class={leftIcon}
-            onClick={onBackClick}
-            aria-label="Back to main menu"
-          >
-            <Back />
-          </button>
-        ) : (
-          <button
-            class={leftIcon}
-            onClick={onSettingsClick}
-            aria-label="Open information and settings"
-          >
-            <Information />
-          </button>
-        )}
-        {showDangerModeToggle && (
-          <div
-            class={toggleContainer}
-            onTouchStart={this._onDangerModeTouchStart}
-          >
-            <label>
-              <span aria-hidden="true" class={leftToggleLabel}>
-                Clear
-              </span>
-              <input
-                class={checkbox}
-                type="checkbox"
-                role="switch checkbox"
-                onChange={this._onDangerModeSwitchToggle}
-                checked={!dangerMode}
-                aria-label="flag mode"
-                ref={el => (this._flagCheckbox = el)}
-              />
-              <svg viewBox="0 0 32 16" class={toggle}>
-                <defs>
-                  <mask id="flag-toggle-mask">
-                    <rect fill="#fff" x="0" y="0" width="32" height="16" />
-                    <circle cx={dangerMode ? 8 : 24} cy="8" fill="#000" r="4" />
-                  </mask>
-                </defs>
-                <rect
-                  fill="#fff"
-                  x="0"
-                  y="0"
-                  width="32"
-                  height="16"
-                  rx="8"
-                  ry="8"
-                  mask="url(#flag-toggle-mask)"
-                />
-              </svg>
-              <span aria-hidden="true" class={rightToggleLabel}>
-                Flag
-              </span>
-            </label>
-            <span
-              role="status"
-              aria-live="assertive"
-              aria-label={flagModeAnnouncement}
-            />
-          </div>
-        )}
-        {fullscreenSupported && !isFeaturePhone ? (
-          <button
-            class={fullscreen}
-            onClick={goFullscreen}
-            aria-label="fullscreen mode"
-          >
-            <Fullscreen />
-          </button>
-        ) : (
-          <div class={noFullscreen} />
-        )}
+        {buttonType === "back" ? backBtn : infoBtn}
+        {showDangerModeToggle && toggleBtn}
+        {fullscreenBtn}
       </div>
     );
   }
@@ -165,7 +206,13 @@ export default class BottomBar extends Component<Props, State> {
 
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (
+    if (event.key === "*") {
+      if (this.props.buttonType === "back") {
+        this.props.onBackClick();
+      } else {
+        this.props.onSettingsClick();
+      }
+    } else if (
       this.props.showDangerModeToggle &&
       (event.key === "f" || event.key === "#")
     ) {

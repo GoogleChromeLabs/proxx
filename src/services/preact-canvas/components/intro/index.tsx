@@ -211,7 +211,7 @@ export default class Intro extends Component<Props, State> {
           </div>
           <div class={settingsRowStyle}>
             <button class={startButtonStyle}>
-              <span class={shortcutKeyStyle}>{isFeaturePhone ? "#" : ""}</span>{" "}
+              {isFeaturePhone ? <span class={shortcutKeyStyle}>#</span> : ""}{" "}
               Start
             </button>
           </div>

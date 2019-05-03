@@ -141,13 +141,17 @@ export default class Game extends Component<Props, State> {
                     onClick={this.onRestart}
                     ref={el => (this._tryAgainBtn = el)}
                   >
-                    <span class={[shortcutKey, againShortcutKey].join(" ")}>
-                      {isFeaturePhone ? "#" : ""}
-                    </span>{" "}
+                    {isFeaturePhone ? (
+                      <span class={[shortcutKey, againShortcutKey].join(" ")}>
+                        #
+                      </span>
+                    ) : (
+                      ""
+                    )}{" "}
                     Try again
                   </button>
                   <button class={mainButton} onClick={this.onReset}>
-                    <span class={shortcutKey}>{isFeaturePhone ? "*" : ""}</span>{" "}
+                    {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""}{" "}
                     Main menu
                   </button>
                 </div>
