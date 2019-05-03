@@ -18,6 +18,7 @@ import { getPresetName } from "../../../state/grid-presets";
 import { Timer } from "../icons/additional";
 import {
   againButton,
+  againShortcutKey,
   gridName as gridNameStyle,
   mainButton,
   noMotion,
@@ -114,8 +115,10 @@ export default class End extends Component<Props, State> {
             onClick={onRestart}
             ref={el => (this._playAgainBtn = el)}
           >
-            <span class={shortcutKey}>{isFeaturePhone ? "#" : ""}</span> Play
-            again
+            <span class={[shortcutKey, againShortcutKey].join(" ")}>
+              {isFeaturePhone ? "#" : ""}
+            </span>{" "}
+            Play again
           </button>
           <button class={mainButton} onClick={onMainMenu}>
             <span class={shortcutKey}>{isFeaturePhone ? "*" : ""}</span> Main

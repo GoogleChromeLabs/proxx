@@ -27,6 +27,7 @@ import TopBar from "../top-bar";
 import Win from "../win";
 import {
   againButton,
+  againShortcutKey,
   exitRow,
   exitRowInner,
   game as gameClass,
@@ -140,7 +141,9 @@ export default class Game extends Component<Props, State> {
                     onClick={this.onRestart}
                     ref={el => (this._tryAgainBtn = el)}
                   >
-                    <span class={shortcutKey}>{isFeaturePhone ? "#" : ""}</span>{" "}
+                    <span class={[shortcutKey, againShortcutKey].join(" ")}>
+                      {isFeaturePhone ? "#" : ""}
+                    </span>{" "}
                     Try again
                   </button>
                   <button class={mainButton} onClick={this.onReset}>

@@ -53,6 +53,19 @@
   color: #000;
 }
 
+.keyshortcut {
+  border: solid 1px #fff;
+  font-weight: normal;
+  border-radius: 25%;
+  display: inline-block;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  line-height: var(--icon-size);
+  text-align: center;
+  letter-spacing: 0;
+  box-sizing: border-box;
+}
+
 .button {
   mix-blend-mode: screen;
 }
