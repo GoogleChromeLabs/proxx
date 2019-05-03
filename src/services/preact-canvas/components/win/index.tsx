@@ -65,7 +65,9 @@ export default class End extends Component<Props, State> {
   }
 
   componentDidMount() {
-    window.scrollTo(0, 0);
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
     this._playAgainBtn!.focus();
     window.addEventListener("keyup", this.onKeyUp);
   }
