@@ -69,3 +69,17 @@
   max-width: 33rem;
   margin: 0 auto;
 }
+
+.shortcut-key {
+  border: solid 1px #000;
+  font-weight: normal;
+  border-radius: 25%;
+  display: inline-block;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  flex-shrink: 0;
+  text-align: center;
+  line-height: var(--icon-size);
+  font-size: initial;
+  box-sizing: border-box;
+}
