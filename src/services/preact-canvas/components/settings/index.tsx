@@ -102,9 +102,13 @@ export default class Settings extends Component<Props, State> {
     window.addEventListener("keyup", this._onKeyUp);
   }
 
+  componentWillUnmount() {
+    window.removeEventListener("keyup", this._onKeyUp);
+  }
+
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Escape") {
+    if (event.key === "Escape" || event.key === "*") {
       this.props.onCloseClicked();
     }
   }
