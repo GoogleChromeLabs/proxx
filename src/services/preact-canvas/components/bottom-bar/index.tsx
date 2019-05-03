@@ -12,7 +12,6 @@
  */
 import { Component, h } from "preact";
 import { bind } from "src/utils/bind";
-import { isFeaturePhone } from "../../../../utils/static-display";
 import { Back, Fullscreen, Information } from "../icons/initial";
 import {
   bottomBar,
@@ -140,7 +139,7 @@ export default class BottomBar extends Component<Props, State> {
             />
           </div>
         )}
-        {fullscreenSupported && !isFeaturePhone ? (
+        {fullscreenSupported ? (
           <button
             class={fullscreen}
             onClick={goFullscreen}

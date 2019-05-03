@@ -11,8 +11,6 @@
  * limitations under the License.
  */
 
-import { fpmode } from "../utils/constants";
-
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
 // `devicePixelRatio` can change throughout the lifetime of a page. For example
@@ -37,4 +35,4 @@ const staticScreenHeight = screen.height;
 // so this says nothing about the input interface and may be busted in the future.
 // in Q1 2019, all KaiOS devices ship with QVGA and Xiaomi's Qin1 is also QVGA.
 export const isFeaturePhone =
-  fpmode || Math.min(staticScreenWidth, staticScreenHeight) <= 240;
+  Math.min(staticScreenWidth, staticScreenHeight) <= 240;
