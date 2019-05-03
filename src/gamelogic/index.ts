@@ -313,9 +313,17 @@ export default class MinesweeperGame {
   /**
    * When the user loses, reveal all the mines.
    */
-  private _revealAllMines(): void {
+  private _revealAllMines(initialX: number, initialY: number): void {
+    // Ensure we push the clicked mine first.
+    const initialCell = this.grid[initialY][initialX];
+    initialCell.revealed = true;
+    this._pushGridChange(initialX, initialY);
+
     for (const [x, y] of this._minedCells) {
       const cell = this.grid[y][x];
+      if (cell === initialCell) {
+        continue;
+      }
       cell.revealed = true;
       this._pushGridChange(x, y);
     }
@@ -339,7 +347,7 @@ export default class MinesweeperGame {
         throw Error("Cell already revealed");
       }
       if (cell.hasMine) {
-        this._revealAllMines();
+        this._revealAllMines(x, y);
         this._endGame(PlayMode.Lost);
         break;
       }
