@@ -96,6 +96,7 @@ interface State {
   settingsOpen: boolean;
   motionPreference: boolean;
   gameInPlay: boolean;
+  allowIntroAnim: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -120,7 +121,8 @@ export default class Root extends Component<Props, State> {
     awaitingGame: false,
     settingsOpen: false,
     motionPreference: true,
-    gameInPlay: false
+    gameInPlay: false,
+    allowIntroAnim: true
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -173,7 +175,8 @@ export default class Root extends Component<Props, State> {
                 game.width,
                 game.height,
                 game.mines
-              )
+              ),
+              allowIntroAnim: false
             });
           } else {
             this.setState({ game, gameInPlay: false });
@@ -214,7 +217,8 @@ export default class Root extends Component<Props, State> {
       settingsOpen,
       motionPreference,
       gameInPlay,
-      bestTime
+      bestTime,
+      allowIntroAnim
     }: State
   ) {
     let mainComponent: VNode;
@@ -243,6 +247,7 @@ export default class Root extends Component<Props, State> {
           <Intro
             onStartGame={this._onStartGame}
             defaults={prerender ? undefined : gridDefaults}
+            motion={motionPreference && allowIntroAnim}
           />
         );
       }
@@ -277,9 +282,11 @@ export default class Root extends Component<Props, State> {
           loading={() => (
             <div
               class={nebulaContainer}
-              style={`background: linear-gradient(to bottom, ${toRGB(
-                nebulaSafeLight
-              )}, ${toRGB(nebulaSafeDark)})`}
+              style={{
+                background: `linear-gradient(to bottom, ${toRGB(
+                  nebulaSafeLight
+                )}, ${toRGB(nebulaSafeDark)})`
+              }}
             />
           )}
           // tslint:disable-next-line: variable-name
@@ -363,7 +370,7 @@ export default class Root extends Component<Props, State> {
   @bind
   private _onSettingsClick() {
     this.previousFocus = document.activeElement as HTMLElement;
-    this.setState({ settingsOpen: true });
+    this.setState({ settingsOpen: true, allowIntroAnim: false });
   }
 
   @bind

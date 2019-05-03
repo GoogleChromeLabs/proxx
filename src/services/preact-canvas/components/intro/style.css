@@ -12,17 +12,34 @@
  */
 .intro {
   display: flex;
+  flex-flow: column;
   flex: 1;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   position: relative;
   min-height: min-content;
+  padding-bottom: 3rem;
+}
+
+.showbiz-intro {
+  width: 100%;
+  max-width: 648px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 var(--side-margin);
+  margin: 2.5rem 0;
+}
+
+.showbiz-loading {
+  padding-top: 20%;
 }
 
 .start-form {
   display: flex;
   flex-flow: column;
-  padding: var(--bar-avoid) var(--side-margin) 0;
+  padding: 0 var(--side-margin);
   box-sizing: border-box;
   width: 100%;
   max-width: 33rem;
@@ -117,7 +134,7 @@
 
 @media (min-width: 320px) {
   .settings-row {
-    margin: 1.2rem calc(-1 * var(--item-margin));
+    margin: 0.8rem calc(-1 * var(--item-margin));
   }
 }
 

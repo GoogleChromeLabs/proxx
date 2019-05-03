@@ -16,9 +16,10 @@ import {
   PresetName,
   presets
 } from "src/services/state/grid-presets.js";
+import { prerender } from "src/utils/constants.js";
 import { bind } from "../../../../utils/bind.js";
+import deferred from "../deferred";
 import { Arrow } from "../icons/initial.js";
-import TopBarSimple from "../top-bar-simple";
 import {
   field as fieldStyle,
   intro as introStyle,
@@ -29,6 +30,8 @@ import {
   selectArrow as selectArrowStyle,
   selectField as selectFieldStyle,
   settingsRow as settingsRowStyle,
+  showbizIntro as showbizIntroStyle,
+  showbizLoading as showbizLoadingStyle,
   startButton as startButtonStyle,
   startForm as startFormStyle
 } from "./style.css";
@@ -36,6 +39,15 @@ import {
 type GridType = import("../..").GridType;
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+
+// tslint:disable-next-line: variable-name
+const ShowbizTitleDeferred = deferred(
+  new Promise(resolve => {
+    if (!prerender) {
+      resolve();
+    }
+  }).then(() => import("../../lazy-components").then(m => m.ShowbizTitle))
+);
 
 interface NumberFieldProps extends JSX.HTMLAttributes {
   inputRef: JSX.HTMLAttributes["ref"];
@@ -103,6 +115,7 @@ function getStateUpdateFromDefaults(defaults: GridType) {
 export interface Props {
   onStartGame: (width: number, height: number, mines: number) => void;
   defaults?: GridType;
+  motion: boolean;
 }
 
 interface State {
@@ -136,10 +149,16 @@ export default class Intro extends Component<Props, State> {
     }
   }
 
-  render(_props: Props, { width, height, mines, presetName }: State) {
+  render({ motion }: Props, { width, height, mines, presetName }: State) {
     return (
       <div class={introStyle}>
-        <TopBarSimple />
+        <div class={showbizIntroStyle}>
+          <ShowbizTitleDeferred
+            loading={() => <div class={showbizLoadingStyle} />}
+            // tslint:disable-next-line: variable-name
+            loaded={ShowbizTitle => <ShowbizTitle motion={motion} />}
+          />
+        </div>
         <form
           onSubmit={this._startGame}
           class={startFormStyle}
