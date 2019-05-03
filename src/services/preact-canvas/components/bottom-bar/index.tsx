@@ -23,7 +23,8 @@ import {
   noFullscreen,
   rightToggleLabel,
   toggle,
-  toggleContainer
+  toggleContainer,
+  toggleLabel
 } from "./style.css";
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
@@ -97,7 +98,7 @@ export default class BottomBar extends Component<Props, State> {
             class={toggleContainer}
             onTouchStart={this._onDangerModeTouchStart}
           >
-            <label>
+            <label class={toggleLabel}>
               <span aria-hidden="true" class={leftToggleLabel}>
                 Clear
               </span>

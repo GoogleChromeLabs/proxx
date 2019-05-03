@@ -13,7 +13,7 @@
 .bottom-bar {
   display: flex;
   justify-content: space-between;
-  padding: var(--bar-padding) var(--side-margin) var(--side-margin);
+  padding: 0 var(--side-margin);
   position: relative;
   left: 0;
   right: 0;
@@ -25,6 +25,10 @@
 /* The in-game class is set by the game component */
 :global .in-game :local .bottom-bar {
   position: absolute;
+}
+
+.bottom-bar > button {
+  margin: var(--bar-padding) 0;
 }
 
 .bottom-bar::before {
@@ -93,6 +97,12 @@ html:-webkit-full-screen .fullscreen {
   align-self: center;
 }
 
+.toggle-label {
+  display: flex;
+  align-items: center;
+  padding: var(--bar-padding) 0;
+}
+
 .toggle {
   display: block;
   width: 32px;
@@ -107,24 +117,14 @@ html:-webkit-full-screen .fullscreen {
 
 .checkbox {
   opacity: 0;
+  /* Take the checkbox out of flow */
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
 }
 
 .left-toggle-label,
 .right-toggle-label {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   margin: 0 0.6rem;
   user-select: none;
-}
-
-.left-toggle-label {
-  right: 100%;
-}
-
-.right-toggle-label {
-  left: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
