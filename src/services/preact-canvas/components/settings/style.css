@@ -61,6 +61,7 @@
   width: 100%;
   background-color: #000;
   min-height: min-content;
+  z-index: 1;
 }
 
 .fp-close-container::before {
