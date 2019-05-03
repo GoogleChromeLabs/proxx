@@ -36,14 +36,49 @@
 .close-button {
   composes: circle-button from "../../utils.css";
   fill: #000;
-  position: fixed;
-  right: 20px;
-  top: 20px;
   width: var(--circlebtn-size);
   height: var(--circlebtn-size);
 }
 
-.button,
+.close-container {
+  position: fixed;
+  right: 20px;
+  top: 20px;
+}
+
+.fp-close-button {
+  composes: unbutton from "../../utils.css";
+  height: var(--icon-size);
+  color: #fff;
+  margin: var(--bar-padding) var(--side-margin) !important;
+  text-transform: uppercase;
+}
+
+.fp-close-container {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #000;
+  min-height: min-content;
+}
+
+.fp-close-container::before {
+  content: "";
+  height: 1px;
+  transform-origin: 0 0;
+  transform: scaleY(0.5);
+  position: absolute;
+  top: 0;
+  left: var(--side-margin);
+  right: var(--side-margin);
+  background: white;
+}
+
+.keyshortcut {
+  composes: keyshortcut from "../../utils.css";
+}
+
 .button-on,
 .button-off {
   text-transform: uppercase;
@@ -52,10 +87,6 @@
   margin: 1.2rem 0 0 !important;
   font-size: 1.1rem;
   letter-spacing: 0.2rem;
-}
-
-.button {
-  composes: button from "../../utils.css";
 }
 
 .button-on {
