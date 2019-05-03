@@ -234,7 +234,9 @@ export default class Game extends Component<Props, State> {
   @bind
   private onKeyUp(event: KeyboardEvent) {
     if (event.key === "#") {
-      this.onRestart();
+      if (this.state.playMode === PlayMode.Lost) {
+        this.onRestart();
+      }
     } else if (event.key === "*") {
       this.onReset();
     }

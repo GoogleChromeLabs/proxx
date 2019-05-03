@@ -126,8 +126,13 @@ export default class BottomBar extends Component<Props, State> {
             aria-label="flag mode"
             ref={el => (this._flagCheckbox = el)}
           />
-          Flag:{dangerMode ? "OFF" : "ON"}
+          <span aria-hidden="true">Flag:{dangerMode ? "OFF" : "ON"}</span>
         </label>
+        <span
+          role="status"
+          aria-live="assertive"
+          aria-label={flagModeAnnouncement}
+        />
       </div>
     ) : (
       <div class={toggleContainer} onTouchStart={this._onDangerModeTouchStart}>
