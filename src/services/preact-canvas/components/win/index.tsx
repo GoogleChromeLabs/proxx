@@ -117,10 +117,8 @@ export default class End extends Component<Props, State> {
             onClick={onRestart}
             ref={el => (this._playAgainBtn = el)}
           >
-            {isFeaturePhone ? (
+            {isFeaturePhone && (
               <span class={[shortcutKey, againShortcutKey].join(" ")}>#</span>
-            ) : (
-              ""
             )}{" "}
             Play again
           </button>
