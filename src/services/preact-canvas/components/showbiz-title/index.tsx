@@ -69,7 +69,7 @@ export default class ShowbizTitle extends Component<Props, State> {
   }
 
   componentDidMount() {
-    // Numbers
+    // Random numbers -> PR0XX
     const oneIteration = 266;
     const untilFirstReveal = 2000;
     const untilNextReveal = 70;
