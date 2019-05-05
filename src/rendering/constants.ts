@@ -30,8 +30,8 @@ export const white = "#fff";
 export const idleAnimationLength = 5000;
 export const fadeInAnimationLength = 300;
 export const fadeOutAnimationLength = 300;
-export const flashInAnimationLength = 100;
-export const flashOutAnimationLength = 700;
+export const flashInAnimationLength = 50;
+export const flashOutAnimationLength = 300;
 
 // Texture constants
 export const revealedAlpha = 0.3;
