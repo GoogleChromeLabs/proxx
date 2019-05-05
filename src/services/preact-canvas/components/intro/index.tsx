@@ -17,6 +17,7 @@ import {
   presets
 } from "src/services/state/grid-presets.js";
 import { bind } from "../../../../utils/bind.js";
+import { isFeaturePhone } from "../../../../utils/static-display.js";
 import { Arrow } from "../icons/initial.js";
 import TopBarSimple from "../top-bar-simple";
 import {
@@ -29,6 +30,7 @@ import {
   selectArrow as selectArrowStyle,
   selectField as selectFieldStyle,
   settingsRow as settingsRowStyle,
+  shortcutKey as shortcutKeyStyle,
   startButton as startButtonStyle,
   startForm as startFormStyle
 } from "./style.css";
@@ -128,6 +130,11 @@ export default class Intro extends Component<Props, State> {
 
   componentDidMount() {
     window.scrollTo(0, 0);
+    window.addEventListener("keyup", this._onKeyUp);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keyup", this._onKeyUp);
   }
 
   componentWillReceiveProps({ defaults }: Props) {
@@ -203,11 +210,21 @@ export default class Intro extends Component<Props, State> {
             </NumberField>
           </div>
           <div class={settingsRowStyle}>
-            <button class={startButtonStyle}>Start</button>
+            <button class={startButtonStyle}>
+              {isFeaturePhone ? <span class={shortcutKeyStyle}>#</span> : ""}{" "}
+              Start
+            </button>
           </div>
         </form>
       </div>
     );
+  }
+
+  @bind
+  private _onKeyUp(event: KeyboardEvent) {
+    if (event.key === "#") {
+      this._startGame(event);
+    }
   }
 
   @bind

@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 .bottom-bar {
   display: flex;
   justify-content: space-between;
@@ -138,4 +139,21 @@ html:-webkit-full-screen .fullscreen {
 
 .right-toggle-label {
   left: 100%;
+}
+
+.left-key-icon {
+  composes: unbutton from "../../utils.css";
+  height: var(--icon-size);
+  color: #fff;
+  margin-right: auto !important;
+  text-transform: uppercase;
+}
+
+.fp-toggle {
+  position: relative;
+  align-self: center;
+}
+
+.shortcut-key {
+  composes: keyshortcut from "../../utils.css";
 }

@@ -69,3 +69,12 @@
   max-width: 33rem;
   margin: 0 auto;
 }
+
+.shortcut-key {
+  composes: keyshortcut from "../../utils.css";
+}
+
+.again-shortcut-key {
+  /** PostCSS adding classes in wrong order :( */
+  border-color: #000 !important;
+}

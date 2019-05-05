@@ -39,7 +39,7 @@
   font-size: 1.2rem;
   color: #000;
   border-radius: var(--border-radius);
-  padding: 0.9rem;
+  padding: 0.3rem;
   border: 3px solid #fff;
 }
 
@@ -51,6 +51,19 @@
   background-color: #666;
   border-color: #666;
   color: #000;
+}
+
+.keyshortcut {
+  border: solid 1px #fff;
+  font-weight: normal;
+  border-radius: 25%;
+  display: inline-block;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  line-height: var(--icon-size);
+  text-align: center;
+  letter-spacing: 0;
+  box-sizing: border-box;
 }
 
 .button {
@@ -71,4 +84,13 @@
   color: #fff;
   background: #ff274b;
   border-color: #ff274b;
+}
+
+@media (min-width: 320px) {
+  .button,
+  .button-alt,
+  .button-on,
+  .button-off {
+    padding: 0.9rem;
+  }
 }

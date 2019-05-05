@@ -21,15 +21,18 @@ import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
 import initFocusHandling from "../../../../utils/focus-visible";
+import { isFeaturePhone } from "../../../../utils/static-display";
 import Board from "../board";
 import TopBar from "../top-bar";
 import Win from "../win";
 import {
   againButton,
+  againShortcutKey,
   exitRow,
   exitRowInner,
   game as gameClass,
-  mainButton
+  mainButton,
+  shortcutKey
 } from "./style.css";
 
 export interface Props {
@@ -138,9 +141,15 @@ export default class Game extends Component<Props, State> {
                     onClick={this.onRestart}
                     ref={el => (this._tryAgainBtn = el)}
                   >
+                    {isFeaturePhone && (
+                      <span class={[shortcutKey, againShortcutKey].join(" ")}>
+                        #
+                      </span>
+                    )}{" "}
                     Try again
                   </button>
                   <button class={mainButton} onClick={this.onReset}>
+                    {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""}{" "}
                     Main menu
                   </button>
                 </div>
@@ -161,10 +170,12 @@ export default class Game extends Component<Props, State> {
     if (!this.props.dangerMode) {
       this.props.onDangerModeChange(true);
     }
+    window.addEventListener("keyup", this.onKeyUp);
   }
 
   componentWillUnmount() {
     this.props.gameChangeUnsubscribe(this.onGameChange);
+    window.removeEventListener("keyup", this.onKeyUp);
   }
 
   componentDidUpdate(_: Props, previousState: State) {
@@ -216,6 +227,17 @@ export default class Game extends Component<Props, State> {
     }
 
     this.setState({ renderer, animator });
+  }
+
+  @bind
+  private onKeyUp(event: KeyboardEvent) {
+    if (event.key === "#") {
+      if (this.state.playMode === PlayMode.Lost) {
+        this.onRestart();
+      }
+    } else if (event.key === "*") {
+      this.onReset();
+    }
   }
 
   @bind
