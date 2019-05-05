@@ -71,29 +71,52 @@ export default class ShowbizTitle extends Component<Props, State> {
   componentDidMount() {
     // Numbers
     const oneIteration = 266;
-    const untilFirstReveal = 3000;
-    const untilNextReveal = 600;
+    const untilFirstReveal = 2000;
+    const untilNextReveal = 70;
     const middleInners = [...document.querySelectorAll("." + cellInner)];
+    let indexLeft = 2;
+    let indexRight = 2;
 
     let time = untilFirstReveal;
+    let flashHeight = 600;
 
-    while (middleInners.length) {
-      const inner = removeRandom(middleInners);
-      (inner.querySelector(
-        "." + innerSquareColumn
-      ) as HTMLElement).style.animationIterationCount =
-        time / oneIteration + "";
-      (inner.querySelector(
-        "." + innerSquareFlash
-      ) as HTMLElement).style.animationDelay = time + "ms";
+    while (indexLeft >= 0) {
+      for (const innerIndex of new Set([indexLeft, indexRight])) {
+        const inner = middleInners[innerIndex];
+
+        (inner.querySelector(
+          "." + innerSquareColumn
+        ) as HTMLElement).style.animationIterationCount =
+          time / oneIteration + "";
+
+        const flash = inner.querySelector(
+          "." + innerSquareFlash
+        ) as HTMLElement;
+
+        flash.style.animationDelay = time + "ms";
+        flash.style.height = flashHeight + "%";
+      }
+      indexLeft--;
+      indexRight++;
+      flashHeight /= 1.5;
       time += untilNextReveal;
     }
 
-    time += 400;
-
     // Circles
-    for (const el of document.querySelectorAll("." + innerSquareOutline)) {
-      (el as HTMLElement).style.animationDelay = time + "ms";
+    time += 500;
+    indexLeft = 2;
+    indexRight = 2;
+
+    while (indexLeft >= 0) {
+      for (const index of new Set([indexLeft, indexRight])) {
+        const inner = middleInners[index];
+        (inner.querySelector(
+          "." + innerSquareOutline
+        ) as HTMLElement).style.animationDelay = time + "ms";
+      }
+      indexLeft--;
+      indexRight++;
+      time += 150;
     }
   }
 

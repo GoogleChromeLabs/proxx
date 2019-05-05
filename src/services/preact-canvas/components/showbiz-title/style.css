@@ -13,6 +13,7 @@
 .showbiz-title {
   width: 100%;
   user-select: none;
+  filter: drop-shadow(0 0 9px rgba(255, 255, 255, 0.7));
 }
 
 .showbiz-title.animate {
@@ -42,7 +43,6 @@
 .cell-inner {
   position: relative;
   padding-top: 100%;
-  color: rgb(109, 205, 218);
 }
 
 @keyframes fade-in {
@@ -66,20 +66,10 @@
     opacity: 0.0001;
     transform: scale(0.85);
   }
-
-  60% {
-    opacity: 1;
-    filter: brightness(2);
-    transform: translateZ(0);
-  }
-
-  to {
-    filter: none;
-  }
 }
 
 .animate .inner-square-outline {
-  animation: outline-anim 3s ease-in-out backwards;
+  animation: outline-anim 1.5s ease-in-out backwards;
 }
 
 .inner-square-sizer {
@@ -145,7 +135,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 57%;
+  width: 35%;
   height: 600%;
   opacity: 0.0001;
 }
