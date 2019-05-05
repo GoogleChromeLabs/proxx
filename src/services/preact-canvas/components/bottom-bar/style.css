@@ -98,8 +98,7 @@ html:-webkit-full-screen .fullscreen {
 }
 
 .toggle-label {
-  display: flex;
-  align-items: center;
+  display: block;
   padding: var(--bar-padding) 0;
 }
 
@@ -117,8 +116,9 @@ html:-webkit-full-screen .fullscreen {
 
 .checkbox {
   opacity: 0;
-  /* Take the checkbox out of flow */
   position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .left-toggle-label,
@@ -127,4 +127,15 @@ html:-webkit-full-screen .fullscreen {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.left-toggle-label {
+  right: 100%;
+}
+
+.right-toggle-label {
+  left: 100%;
 }
