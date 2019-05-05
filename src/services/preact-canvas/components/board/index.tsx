@@ -47,6 +47,7 @@ export interface Props {
   dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
+  onDangerModeChange: (v: boolean) => void;
 }
 
 interface State {
@@ -195,6 +196,7 @@ export default class Board extends Component<Props, State> {
     this._table.addEventListener("keyup", this.onKeyUpOnTable);
     this._table.addEventListener("mouseup", this.onMouseUp);
     this._table.addEventListener("mousedown", this.onMouseDown);
+    this._table.addEventListener("dblclick", this.onDblClick);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
@@ -363,6 +365,19 @@ export default class Board extends Component<Props, State> {
   // Same as mouseup, necessary for preventing click event on KaiOS
   @bind
   private onMouseDown(event: MouseEvent) {
+    event.preventDefault();
+  }
+
+  @bind
+  private onDblClick(event: MouseEvent) {
+    const btn = event.target as HTMLButtonElement;
+    if (!this._additionalButtonData.has(btn)) {
+      return;
+    }
+    const [x, y, cell] = this._additionalButtonData.get(btn)!;
+    if (cell.revealed) {
+      this.props.onDangerModeChange(!this.props.dangerMode);
+    }
     event.preventDefault();
   }
 

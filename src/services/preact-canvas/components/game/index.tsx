@@ -132,6 +132,7 @@ export default class Game extends Component<Props, State> {
               gameChangeSubscribe={gameChangeSubscribe}
               gameChangeUnsubscribe={gameChangeUnsubscribe}
               onCellClick={this.onCellClick}
+              onDangerModeChange={this.props.onDangerModeChange}
             />,
             playMode === PlayMode.Lost ? (
               <div class={exitRow}>
