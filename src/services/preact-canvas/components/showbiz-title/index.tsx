@@ -73,7 +73,7 @@ export default class ShowbizTitle extends Component<Props, State> {
     const oneIteration = 266;
     const untilFirstReveal = 2000;
     const untilNextReveal = 70;
-    const middleInners = [...document.querySelectorAll("." + cellInner)];
+    const middleInners = [...this.base!.querySelectorAll("." + cellInner)];
     let indexLeft = 2;
     let indexRight = 2;
 
