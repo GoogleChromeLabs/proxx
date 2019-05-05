@@ -27,7 +27,8 @@ import {
   rightToggleLabel,
   shortcutKey,
   toggle,
-  toggleContainer
+  toggleContainer,
+  toggleLabel
 } from "./style.css";
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
@@ -136,7 +137,7 @@ export default class BottomBar extends Component<Props, State> {
       </div>
     ) : (
       <div class={toggleContainer} onTouchStart={this._onDangerModeTouchStart}>
-        <label>
+        <label class={toggleLabel}>
           <span aria-hidden="true" class={leftToggleLabel}>
             Clear
           </span>
@@ -196,7 +197,7 @@ export default class BottomBar extends Component<Props, State> {
       <div class={[bottomBar, display ? "" : hidden].join(" ")} role="menubar">
         {buttonType === "back" ? backBtn : infoBtn}
         {showDangerModeToggle && toggleBtn}
-        {fullscreenBtn}
+        {fullscreenSupported ? fullscreenBtn : <div class={noFullscreen} />}
       </div>
     );
   }

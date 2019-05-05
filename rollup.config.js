@@ -44,6 +44,11 @@ export default {
     chunkFileNames: "[name]-[hash].js"
   },
   plugins: [
+    {
+      resolveFileUrl({ fileName }) {
+        return JSON.stringify("/" + fileName);
+      }
+    },
     cssModuleTypes("src"),
     postcss({
       minimize: true,

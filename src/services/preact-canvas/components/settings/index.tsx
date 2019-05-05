@@ -47,7 +47,8 @@ export default class Settings extends Component<Props, State> {
     onMotionPrefChange,
     motion,
     texturePromise,
-    supportsSufficientWebGL
+    supportsSufficientWebGL,
+    disableAnimationBtn
   }: Props) {
     const closeBtn = isFeaturePhone ? (
       <button
@@ -82,6 +83,7 @@ export default class Settings extends Component<Props, State> {
             <button
               class={motion ? btnOnStyle : btnOffStyle}
               onClick={onMotionPrefChange}
+              disabled={disableAnimationBtn}
             >
               Animations {motion ? "on" : "off"}
             </button>

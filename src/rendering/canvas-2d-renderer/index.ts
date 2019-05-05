@@ -149,15 +149,8 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   setFocus(x: number, y: number) {
-    if (this._lastFocus[0] > -1 && this._lastFocus[1] > -1) {
-      const [lastX, lastY] = this._lastFocus;
-      this._lastFocus = [-1, -1];
-      this._rerenderCell(lastX, lastY, { clear: true });
-    }
     this._lastFocus = [x, y];
-    if (x > -1 && y > -1) {
-      this._rerenderCell(x, y, { clear: true });
-    }
+    this._rerender();
   }
 
   private _renderCell(
