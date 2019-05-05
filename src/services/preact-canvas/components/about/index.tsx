@@ -187,18 +187,59 @@ export default class About extends Component<Props> {
 
         <h1>Shortcuts</h1>
 
-        <ul class={shortcutListStyle}>
-          <li>
-            <span class={shortcutKeyStyle} aria-label="f key">
-              F
-            </span>
-            Switch between Clear and Flag mode
-          </li>
-          <li>
-            <RightClick class={shortcutIconStyle} aria-label="Right click" />
-            Flag when in clear mode, or clear when in flag mode.
-          </li>
-        </ul>
+        {isFeaturePhone ? (
+          <ul class={shortcutListStyle}>
+            <li>
+              <span class={shortcutKeyStyle} aria-label="5 key">
+                5
+              </span>
+              Move up
+            </li>
+            <li>
+              <span class={shortcutKeyStyle} aria-label="0 key">
+                0
+              </span>
+              Move down
+            </li>
+            <li>
+              <span class={shortcutKeyStyle} aria-label="7 key">
+                7
+              </span>
+              Move left
+            </li>
+            <li>
+              <span class={shortcutKeyStyle} aria-label="9 key">
+                9
+              </span>
+              Move right
+            </li>
+            <li>
+              <span class={shortcutKeyStyle} aria-label="8 key">
+                8
+              </span>
+              Click the highlighted cell
+            </li>
+            <li>
+              <span class={shortcutKeyStyle} aria-label="# key">
+                #
+              </span>
+              Switch between Clear and Flag mode
+            </li>
+          </ul>
+        ) : (
+          <ul class={shortcutListStyle}>
+            <li>
+              <span class={shortcutKeyStyle} aria-label="f key">
+                F
+              </span>
+              Switch between Clear and Flag mode
+            </li>
+            <li>
+              <RightClick class={shortcutIconStyle} aria-label="Right click" />
+              Flag when in clear mode, or clear when in flag mode.
+            </li>
+          </ul>
+        )}
 
         <h1>GitHub</h1>
         <p>

@@ -150,3 +150,9 @@
   text-transform: uppercase;
   letter-spacing: 0.15rem;
 }
+
+.shortcut-key {
+  composes: keyshortcut from "../../utils.css";
+  /** PostCSS adding classes in wrong order :( */
+  border-color: #000 !important;
+}

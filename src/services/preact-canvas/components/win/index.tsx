@@ -11,17 +11,20 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
-
+import { bind } from "../../../../utils/bind";
 import { minSec } from "../../../../utils/format";
+import { isFeaturePhone } from "../../../../utils/static-display";
 import { getPresetName } from "../../../state/grid-presets";
 import { Timer } from "../icons/additional";
 import {
   againButton,
+  againShortcutKey,
   gridName as gridNameStyle,
   mainButton,
   noMotion,
   score,
   scoreRow,
+  shortcutKey,
   time as timeStyle,
   timeLabel,
   timerIcon,
@@ -62,8 +65,15 @@ export default class End extends Component<Props, State> {
   }
 
   componentDidMount() {
-    window.scrollTo(0, 0);
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
     this._playAgainBtn!.focus();
+    window.addEventListener("keyup", this.onKeyUp);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keyup", this.onKeyUp);
   }
 
   render(
@@ -107,13 +117,25 @@ export default class End extends Component<Props, State> {
             onClick={onRestart}
             ref={el => (this._playAgainBtn = el)}
           >
+            {isFeaturePhone && (
+              <span class={[shortcutKey, againShortcutKey].join(" ")}>#</span>
+            )}{" "}
             Play again
           </button>
           <button class={mainButton} onClick={onMainMenu}>
-            Main menu
+            {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""} Main menu
           </button>
         </div>
       </div>
     );
+  }
+
+  @bind
+  private onKeyUp(event: KeyboardEvent) {
+    if (event.key === "#") {
+      this.props.onRestart();
+    } else if (event.key === "*") {
+      this.props.onMainMenu();
+    }
   }
 }

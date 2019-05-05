@@ -14,12 +14,12 @@ html {
   /* Catch any browsers that still overscroll (eg Safari) */
   background-color: #000;
   font-family: "Space Mono", monospace;
-  font-size: 0.7em;
+  font-size: 0.8em;
   font-variant-ligatures: none;
   --cell-size: 25px;
   --cell-padding: 2px;
   --side-margin: 10px;
-  --icon-size: 15px;
+  --icon-size: 20px;
   --circlebtn-size: 24px;
   --bar-avoid: 40px;
   --bar-padding: 5px;

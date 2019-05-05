@@ -13,6 +13,8 @@
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
+import { fpmode } from "../utils/constants";
+
 // `devicePixelRatio` can change throughout the lifetime of a page. For example
 // when a browser window is moved from a low-DPI monitor to a high-DPI monitor.
 // Our rendering relies on dPR to generate the sprite sheets at the right
@@ -34,5 +36,6 @@ const staticScreenHeight = screen.height;
 // Our assumption here is that every feature phone has qvga or less screen size,
 // so this says nothing about the input interface and may be busted in the future.
 // in Q1 2019, all KaiOS devices ship with QVGA and Xiaomi's Qin1 is also QVGA.
+// IF query pram `fpmode` was passed, force the app to be in feature phone mode.
 export const isFeaturePhone =
-  Math.min(staticScreenWidth, staticScreenHeight) <= 240;
+  fpmode || Math.min(staticScreenWidth, staticScreenHeight) <= 240;

@@ -12,13 +12,17 @@
  */
 import { Component, h } from "preact";
 import { bind } from "src/utils/bind.js";
+import { isFeaturePhone } from "src/utils/static-display";
 import About from "../about";
 import { Close } from "../icons/additional";
 import {
-  button as btnStyle,
   buttonOff as btnOffStyle,
   buttonOn as btnOnStyle,
   closeButton as closebtnStyle,
+  closeContainer as closeContainerStyle,
+  fpCloseButton as fpCloseBtnStyle,
+  fpCloseContainer as fpCloseContainerStyle,
+  keyshortcut as keyshortcutStyle,
   settings as settingsStyle,
   settingsContent as settingsContentStyle,
   settingsWindow as settingsWindowStyle
@@ -46,16 +50,33 @@ export default class Settings extends Component<Props, State> {
     supportsSufficientWebGL,
     disableAnimationBtn
   }: Props) {
+    const closeBtn = isFeaturePhone ? (
+      <button
+        aria-label={`close button`}
+        ref={focusItem => (this.focusItem = focusItem)}
+        class={fpCloseBtnStyle}
+        onClick={onCloseClicked}
+      >
+        <span class={keyshortcutStyle}>*</span> close
+      </button>
+    ) : (
+      <button
+        aria-label={`close button`}
+        ref={focusItem => (this.focusItem = focusItem)}
+        class={closebtnStyle}
+        onClick={onCloseClicked}
+      >
+        <Close />
+      </button>
+    );
+
     return (
       <div role="dialog" aria-label="settings dialog" class={settingsStyle}>
-        <button
-          aria-label={`close button`}
-          class={closebtnStyle}
-          ref={focusItem => (this.focusItem = focusItem)}
-          onClick={onCloseClicked}
+        <div
+          class={isFeaturePhone ? fpCloseContainerStyle : closeContainerStyle}
         >
-          <Close />
-        </button>
+          {closeBtn}
+        </div>
         <div class={settingsWindowStyle}>
           <div class={settingsContentStyle}>
             <h1>Settings</h1>
@@ -78,13 +99,18 @@ export default class Settings extends Component<Props, State> {
   }
 
   componentDidMount() {
+    window.scrollTo(0, 0);
     this.focusItem!.focus();
     window.addEventListener("keyup", this._onKeyUp);
   }
 
+  componentWillUnmount() {
+    window.removeEventListener("keyup", this._onKeyUp);
+  }
+
   @bind
   private _onKeyUp(event: KeyboardEvent) {
-    if (event.key === "Escape") {
+    if (event.key === "Escape" || event.key === "*") {
       this.props.onCloseClicked();
     }
   }
