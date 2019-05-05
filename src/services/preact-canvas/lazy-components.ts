@@ -14,5 +14,6 @@
 import Game from "./components/game";
 import Nebula from "./components/nebula";
 import Settings from "./components/settings";
+import ShowbizTitle from "./components/showbiz-title";
 
-export { Game, Nebula, Settings };
+export { Game, Nebula, Settings, ShowbizTitle };

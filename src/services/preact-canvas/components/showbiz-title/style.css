@@ -1,0 +1,145 @@
+/**
+* Copyright 2019 Google Inc. All Rights Reserved.
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*     http://www.apache.org/licenses/LICENSE-2.0
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+.showbiz-title {
+  width: 100%;
+  user-select: none;
+  filter: drop-shadow(0 0 9px rgba(255, 255, 255, 0.7));
+}
+
+.showbiz-title.animate {
+  perspective: 1000px;
+}
+
+@keyframes walk-in {
+  from {
+    transform: translateZ(-500px);
+  }
+}
+
+.animate .showbiz-title-frame {
+  animation: walk-in 8s ease-out, fade-in 2s ease-in-out;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  flex: 1;
+  margin: 2.3%;
+  font: normal 6.5vw "space mono";
+}
+
+.cell-inner {
+  position: relative;
+  padding-top: 100%;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.inner-square-outline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1vw solid currentColor;
+  border-radius: 100%;
+}
+
+@keyframes outline-anim {
+  from {
+    opacity: 0.0001;
+    transform: scale(0.85);
+  }
+}
+
+.animate .inner-square-outline {
+  animation: outline-anim 1.5s ease-in-out backwards;
+}
+
+.inner-square-sizer {
+  position: relative;
+  padding-top: 100%;
+}
+
+.inner-square-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 700px) {
+  .cell,
+  .inner-square-outline {
+    border-width: 7px;
+    font-size: 45.4px;
+  }
+}
+
+@keyframes random-num {
+  from {
+    transform: translateY(-11.11111%);
+  }
+
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+.column-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.animate .inner-square-column {
+  animation: random-num 266ms steps(8) infinite;
+}
+
+@keyframes flash {
+  from {
+    opacity: 1;
+  }
+}
+
+.inner-square-flash {
+  position: absolute;
+  background: radial-gradient(
+    ellipse closest-side,
+    white,
+    rgba(255, 255, 255, 0)
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 35%;
+  height: 600%;
+  opacity: 0.0001;
+}
+
+.animate .inner-square-flash {
+  animation: flash 400ms ease-in-out;
+}

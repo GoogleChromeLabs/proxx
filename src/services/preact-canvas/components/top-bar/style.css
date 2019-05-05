@@ -11,7 +11,28 @@
  * limitations under the License.
  */
 .top-bar {
-  composes: top-bar from "../top-bar-simple/style.css";
+  display: flex;
+  margin: var(--side-margin);
+  margin-bottom: 0;
+  padding: 0 0 var(--bar-padding);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  text-transform: uppercase;
+}
+
+.top-bar::before {
+  content: "";
+  height: 1px;
+  transform-origin: 0 0;
+  transform: scaleY(0.5);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
 }
 
 .squares-left {
@@ -24,7 +45,13 @@
 }
 
 .title {
-  composes: title from "../top-bar-simple/style.css";
+  flex: 1;
+  order: 2;
+  text-align: center;
+  font-size: inherit;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
 }
 
 @media (max-width: 350px) {
