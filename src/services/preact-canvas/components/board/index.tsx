@@ -54,6 +54,10 @@ interface State {
   keyNavigation: boolean;
 }
 
+interface SetFocusOptions {
+  preventScroll?: boolean;
+}
+
 export default class Board extends Component<Props, State> {
   state: State = {
     keyNavigation: false
@@ -67,7 +71,7 @@ export default class Board extends Component<Props, State> {
     HTMLButtonElement,
     [number, number, Cell]
   >();
-  private _currentTabableBtn?: HTMLButtonElement;
+  private _currentTableBtn?: HTMLButtonElement;
   private _tableContainer?: HTMLDivElement;
 
   componentDidMount() {
@@ -181,7 +185,7 @@ export default class Board extends Component<Props, State> {
         // set only 1st cell tab focusable
         if (row === 0 && col === 0) {
           button.setAttribute("tabindex", "0");
-          this._currentTabableBtn = button;
+          this._currentTableBtn = button;
         } else {
           button.setAttribute("tabindex", "-1");
         }
@@ -236,19 +240,42 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private setFocus(newFocusBtn: HTMLButtonElement) {
+  private setFocus(
+    newFocusBtn: HTMLButtonElement,
+    { preventScroll = false }: SetFocusOptions = {}
+  ) {
     // move tab index to targetBtn (necessary for roving tabindex)
-    this._currentTabableBtn!.setAttribute("tabIndex", "-1");
-    newFocusBtn.setAttribute("tabIndex", "0");
-    this._currentTabableBtn = newFocusBtn;
+    this._currentTableBtn!.tabIndex = -1;
+    newFocusBtn.tabIndex = 0;
+    this._currentTableBtn = newFocusBtn;
 
-    newFocusBtn.focus();
-    newFocusBtn.scrollIntoView({
-      behavior: "smooth"
-      //block: "center",
-      //inline: "center"
-    });
+    newFocusBtn.focus({ preventScroll: true });
+
+    if (!preventScroll) {
+      this.scrollBtnIntoView(newFocusBtn);
+    }
     this.setFocusVisual(newFocusBtn);
+  }
+
+  private scrollBtnIntoView(btn: HTMLButtonElement) {
+    // Having to do this manually, as Firefox 48 doesn't support the standard way (boo)
+    const scroller = this._tableContainer!;
+    const containerRect = scroller.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+
+    const containerMiddleX = containerRect.width / 2;
+    const containerMiddleY = containerRect.height / 2;
+    const btnMiddleX = btnRect.left + btnRect.width / 2;
+    const btnMiddleY = btnRect.top + btnRect.height / 2;
+
+    const xDiff = btnMiddleX - containerMiddleX;
+    const yDiff = btnMiddleY - containerMiddleY;
+
+    scroller.scrollTo({
+      left: scroller.scrollLeft + xDiff,
+      top: scroller.scrollTop + yDiff,
+      behavior: "smooth"
+    });
   }
 
   @bind
@@ -269,7 +296,7 @@ export default class Board extends Component<Props, State> {
       // If different button has focus, blur the button.
       activeBtn.blur();
     }
-    this.setFocus(targetBtn);
+    this.setFocus(targetBtn, { preventScroll: true });
   }
 
   @bind
@@ -284,8 +311,8 @@ export default class Board extends Component<Props, State> {
     // If no button has focus, key navigation must have came back to the table.
     // Focus back on tabindex=0 button first.
     if (!btnInfo) {
-      this._currentTabableBtn!.focus();
-      btnInfo = this._additionalButtonData.get(this._currentTabableBtn!)!;
+      this._currentTableBtn!.focus();
+      btnInfo = this._additionalButtonData.get(this._currentTableBtn!)!;
     }
 
     const x = btnInfo[0];
