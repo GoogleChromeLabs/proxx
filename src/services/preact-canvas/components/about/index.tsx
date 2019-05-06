@@ -263,8 +263,8 @@ export default class About extends Component<Props> {
         <h1>Credit</h1>
         <p>Built by Google Chrome Labs</p>
         <p>
-          Thanks to <a href="https://www.tokyo-wolf.com/">Tokyo Wolf</a> for
-          graphic design help.
+          Thanks to <a href="https://www.tokyo-wolf.com/">Tokyo Wolf</a> for the
+          visual design concept.
         </p>
 
         <h1>System Information</h1>
