@@ -78,6 +78,11 @@
   box-sizing: border-box;
 }
 
+/* This prevents a red outline around the form fields during preload in Firefox */
+.field:invalid {
+  box-shadow: none;
+}
+
 .field:focus {
   outline: none;
   border-bottom-color: #4b93ff;
