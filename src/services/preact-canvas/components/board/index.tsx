@@ -243,6 +243,11 @@ export default class Board extends Component<Props, State> {
     this._currentTabableBtn = newFocusBtn;
 
     newFocusBtn.focus();
+    newFocusBtn.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+      inline: "center"
+    });
     this.setFocusVisual(newFocusBtn);
   }
 
@@ -270,6 +275,7 @@ export default class Board extends Component<Props, State> {
   @bind
   private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
     event.stopPropagation();
+    event.preventDefault();
 
     // Find which button has focus
     const currentBtn = document.activeElement as HTMLButtonElement;
