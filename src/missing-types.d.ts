@@ -30,3 +30,10 @@ interface Window {
 interface HTMLElement {
   webkitRequestFullscreen?: () => void;
 }
+
+// tslint:disable-next-line:no-namespace
+declare namespace JSX {
+  interface HTMLAttributes {
+    inputmode?: string;
+  }
+}
