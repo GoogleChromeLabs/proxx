@@ -78,7 +78,7 @@
   box-sizing: border-box;
 }
 
-/* This prevents a red outline around the form fields during preload */
+/* This prevents a red outline around the form fields during preload in Firefox */
 .field:invalid {
   box-shadow: none;
 }
