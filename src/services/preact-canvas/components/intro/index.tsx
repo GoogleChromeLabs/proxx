@@ -184,7 +184,7 @@ export default class Intro extends Component<Props, State> {
               >
                 {presetName && [
                   <option value="easy">Easy</option>,
-                  <option value="normal">Normal</option>,
+                  <option value="medium">Medium</option>,
                   <option value="hard">Hard</option>,
                   <option value="custom">Custom</option>
                 ]}
