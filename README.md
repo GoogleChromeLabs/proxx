@@ -26,14 +26,14 @@ We generate all the sprites for our animations in the background at load time an
 
 ### `/src/gamelogic`
 
-This is the pure game logic for the the app. The game logic is run inside of a web worker through the state service to keep the main thread as free as possible for animation work.
+This is the pure game logic for the app. The game logic is run inside of a web worker through the state service to keep the main thread as free as possible for animation work.
 
 ## Debugging flag
 
 There are few flags you can set as URL query parameter for debugging purposes:
 
-- `prerender`: Loads the app in prerender mode (used for building the static `index.html`).
-- `debug`: Turns on controls for the Nebula animation.
+- `prerender`: Load the app in prerender mode (used for building the static `index.html`).
+- `debug`: Turn on controls for the Nebula animation.
 - `no-cache`: Bypass ServiceWorker and IndexedDB caches.
 - `cell-focus`: Start the game with mouse & key forcus enabled.
 - `motion=0`: Start the game in no animation mode.
