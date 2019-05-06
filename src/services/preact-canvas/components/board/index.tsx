@@ -47,6 +47,7 @@ export interface Props {
   dangerMode: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
+  onDangerModeChange: (v: boolean) => void;
 }
 
 interface State {
@@ -67,6 +68,7 @@ export default class Board extends Component<Props, State> {
     [number, number, Cell]
   >();
   private _currentTabableBtn?: HTMLButtonElement;
+  private _tableContainer?: HTMLDivElement;
 
   componentDidMount() {
     document.documentElement.classList.add("in-game");
@@ -108,7 +110,12 @@ export default class Board extends Component<Props, State> {
   render() {
     return (
       <div class={board}>
-        <div class={containerStyle} onScroll={this._onTableScroll} />
+        <div
+          ref={el => (this._tableContainer = el)}
+          class={containerStyle}
+          onScroll={this._onTableScroll}
+          onDblClick={this.onDblClick}
+        />
       </div>
     );
   }
@@ -195,6 +202,7 @@ export default class Board extends Component<Props, State> {
     this._table.addEventListener("keyup", this.onKeyUpOnTable);
     this._table.addEventListener("mouseup", this.onMouseUp);
     this._table.addEventListener("mousedown", this.onMouseDown);
+    this._table.addEventListener("dblclick", this.onDblClick);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
@@ -364,6 +372,27 @@ export default class Board extends Component<Props, State> {
   @bind
   private onMouseDown(event: MouseEvent) {
     event.preventDefault();
+  }
+
+  private _toggleDangerMode() {
+    this.props.onDangerModeChange(!this.props.dangerMode);
+  }
+
+  @bind
+  private onDblClick(event: MouseEvent) {
+    if (event.target === this._tableContainer) {
+      this._toggleDangerMode();
+      return;
+    }
+    const btn = event.target as HTMLButtonElement;
+    if (!this._additionalButtonData.has(btn)) {
+      return;
+    }
+    const [x, y, cell] = this._additionalButtonData.get(btn)!;
+    if (cell.revealed && cell.touchingMines <= 0) {
+      this._toggleDangerMode();
+      event.stopPropagation();
+    }
   }
 
   @bind
