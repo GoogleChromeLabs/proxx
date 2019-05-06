@@ -29,7 +29,7 @@ export async function getGridDefault(): Promise<GridType> {
   const gridDefault = await get(key);
 
   if (!gridDefault) {
-    return presets.normal;
+    return presets.easy;
   }
 
   return gridDefault as GridType;

@@ -60,6 +60,7 @@ export default class End extends Component<Props, State> {
     this.state = {
       gridName:
         presetName +
+        " mode" +
         (presetName === "custom" ? ` - ${width}x${height}:${mines}` : "")
     };
   }
