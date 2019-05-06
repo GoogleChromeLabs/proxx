@@ -16,13 +16,9 @@
   filter: drop-shadow(0 0 9px rgba(255, 255, 255, 0.7));
 }
 
-.showbiz-title.animate {
-  perspective: 1000px;
-}
-
 @keyframes walk-in {
   from {
-    transform: translateZ(-500px);
+    transform: scale(0.6);
   }
 }
 
