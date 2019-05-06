@@ -71,7 +71,7 @@ export default class Board extends Component<Props, State> {
     HTMLButtonElement,
     [number, number, Cell]
   >();
-  private _currentTableBtn?: HTMLButtonElement;
+  private _currentFocusableBtn?: HTMLButtonElement;
   private _tableContainer?: HTMLDivElement;
 
   componentDidMount() {
@@ -185,7 +185,7 @@ export default class Board extends Component<Props, State> {
         // set only 1st cell tab focusable
         if (row === 0 && col === 0) {
           button.setAttribute("tabindex", "0");
-          this._currentTableBtn = button;
+          this._currentFocusableBtn = button;
         } else {
           button.setAttribute("tabindex", "-1");
         }
@@ -245,9 +245,9 @@ export default class Board extends Component<Props, State> {
     { preventScroll = false }: SetFocusOptions = {}
   ) {
     // move tab index to targetBtn (necessary for roving tabindex)
-    this._currentTableBtn!.tabIndex = -1;
+    this._currentFocusableBtn!.tabIndex = -1;
     newFocusBtn.tabIndex = 0;
-    this._currentTableBtn = newFocusBtn;
+    this._currentFocusableBtn = newFocusBtn;
 
     newFocusBtn.focus({ preventScroll: true });
 
@@ -311,8 +311,8 @@ export default class Board extends Component<Props, State> {
     // If no button has focus, key navigation must have came back to the table.
     // Focus back on tabindex=0 button first.
     if (!btnInfo) {
-      this._currentTableBtn!.focus();
-      btnInfo = this._additionalButtonData.get(this._currentTableBtn!)!;
+      this._currentFocusableBtn!.focus();
+      btnInfo = this._additionalButtonData.get(this._currentFocusableBtn!)!;
     }
 
     const x = btnInfo[0];
