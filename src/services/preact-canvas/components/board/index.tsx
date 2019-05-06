@@ -249,7 +249,7 @@ export default class Board extends Component<Props, State> {
     newFocusBtn.tabIndex = 0;
     this._currentFocusableBtn = newFocusBtn;
 
-    newFocusBtn.focus({ preventScroll: true });
+    newFocusBtn.focus();
 
     if (!preventScroll) {
       this.scrollBtnIntoView(newFocusBtn);
