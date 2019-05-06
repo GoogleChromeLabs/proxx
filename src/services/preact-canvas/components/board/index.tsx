@@ -243,11 +243,11 @@ export default class Board extends Component<Props, State> {
     this._currentTabableBtn = newFocusBtn;
 
     newFocusBtn.focus();
-    /*newFocusBtn.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-      inline: "center"
-    });*/
+    newFocusBtn.scrollIntoView({
+      behavior: "smooth"
+      //block: "center",
+      //inline: "center"
+    });
     this.setFocusVisual(newFocusBtn);
   }
 
