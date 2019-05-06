@@ -48,6 +48,10 @@ body {
   overscroll-behavior: none;
 }
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .main {
   height: 100%;
 }
