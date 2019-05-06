@@ -68,6 +68,7 @@ export default class Board extends Component<Props, State> {
     [number, number, Cell]
   >();
   private _currentTabableBtn?: HTMLButtonElement;
+  private _tableContainer?: HTMLDivElement;
 
   componentDidMount() {
     document.documentElement.classList.add("in-game");
@@ -109,7 +110,12 @@ export default class Board extends Component<Props, State> {
   render() {
     return (
       <div class={board}>
-        <div class={containerStyle} onScroll={this._onTableScroll} />
+        <div
+          ref={el => (this._tableContainer = el)}
+          class={containerStyle}
+          onScroll={this._onTableScroll}
+          onDblClick={this.onDblClick}
+        />
       </div>
     );
   }
@@ -368,17 +374,25 @@ export default class Board extends Component<Props, State> {
     event.preventDefault();
   }
 
+  private _toggleDangerMode() {
+    this.props.onDangerModeChange(!this.props.dangerMode);
+  }
+
   @bind
   private onDblClick(event: MouseEvent) {
+    if (event.target === this._tableContainer) {
+      this._toggleDangerMode();
+      return;
+    }
     const btn = event.target as HTMLButtonElement;
     if (!this._additionalButtonData.has(btn)) {
       return;
     }
     const [x, y, cell] = this._additionalButtonData.get(btn)!;
-    if (cell.revealed) {
-      this.props.onDangerModeChange(!this.props.dangerMode);
+    if (cell.revealed && cell.touchingMines <= 0) {
+      this._toggleDangerMode();
+      event.stopPropagation();
     }
-    event.preventDefault();
   }
 
   @bind
