@@ -17,7 +17,6 @@ import { lazyGenerateTextures } from "../../rendering/animation";
 import { supportsSufficientWebGL } from "../../rendering/renderer";
 import { nextEvent } from "../../utils/scheduling";
 import { getBest, submitTime } from "../state/best-times";
-import { getGridDefault, setGridDefault } from "../state/grid-default";
 import {
   getMotionPreference,
   setMotionPreference,
@@ -29,8 +28,6 @@ export {
   wrap as comlinkWrap,
   proxy as comlinkProxy,
   nextEvent,
-  getGridDefault,
-  setGridDefault,
   getBest as getBestTime,
   submitTime,
   init as initOffline,

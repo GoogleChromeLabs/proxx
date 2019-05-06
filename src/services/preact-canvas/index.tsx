@@ -18,6 +18,7 @@ import { bind } from "src/utils/bind";
 import toRGB from "src/utils/to-rgb";
 import { prerender } from "../../utils/constants";
 import { isFeaturePhone } from "../../utils/static-display";
+import { getGridDefault, setGridDefault } from "../state/grid-default";
 import localStateSubscribe from "../state/local-state-subscribe.js";
 import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
@@ -135,14 +136,15 @@ export default class Root extends Component<Props, State> {
   constructor() {
     super();
 
+    getGridDefault().then(gridDefaults => {
+      this.setState({ gridDefaults });
+    });
+
     lazyImportReady.then(async () => {
       lazyImport!.initOffline();
-      const shouldUseMotionPromise = lazyImport!.shouldUseMotion();
-      const gridDefaultPromise = lazyImport!.getGridDefault();
 
       this.setState({
-        motionPreference: await shouldUseMotionPromise,
-        gridDefaults: await gridDefaultPromise
+        motionPreference: await lazyImport!.shouldUseMotion()
       });
     });
 
@@ -165,7 +167,7 @@ export default class Root extends Component<Props, State> {
 
           if (game) {
             clearTimeout(this._awaitingGameTimeout);
-            lazyImport!.setGridDefault(game.width, game.height, game.mines);
+            setGridDefault(game.width, game.height, game.mines);
             this.setState({
               game,
               awaitingGame: false,

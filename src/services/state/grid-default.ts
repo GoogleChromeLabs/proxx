@@ -15,6 +15,8 @@ import { get, set } from "idb-keyval";
 import { GridType } from "../preact-canvas";
 import { presets } from "./grid-presets";
 
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+
 const key = "default-game";
 
 export async function setGridDefault(
