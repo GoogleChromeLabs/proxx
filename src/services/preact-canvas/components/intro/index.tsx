@@ -75,6 +75,7 @@ class NumberField extends Component<NumberFieldProps, {}> {
           }}
           class={fieldStyle}
           type="number"
+          inputmode="numeric"
           {...inputProps}
         />
       </label>
