@@ -50,6 +50,7 @@ export default class StateService {
   private _game?: MinesweeperGame;
 
   initGame(width: number, height: number, numBombs: number) {
+    console.log("initGame in service");
     let gameActiveChange = false;
 
     if (this._game) {
@@ -61,6 +62,7 @@ export default class StateService {
     this._game = new MinesweeperGame(width, height, numBombs);
 
     if (gameActiveChange) {
+      console.log("sending new game back");
       this._notify({
         game: {
           width,
@@ -79,6 +81,7 @@ export default class StateService {
 
   subscribe(callback: (state: StateChange) => void) {
     this._eventTarget.addEventListener("state-update", (event: Event) => {
+      console.log("state-update");
       callback((event as StateChangeEvent).stateChange);
     });
   }
