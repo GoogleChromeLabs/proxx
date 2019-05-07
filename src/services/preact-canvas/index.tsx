@@ -366,7 +366,11 @@ export default class Root extends Component<Props, State> {
   @bind
   private _onSettingsCloseClick() {
     this.setState({ settingsOpen: false });
-    this.previousFocus!.focus();
+    // Need to wait for the button to be visible.
+    // Should technically use componentDidUpdate here, but this is a quick fix.
+    setTimeout(() => {
+      this.previousFocus!.focus();
+    }, 0);
   }
 
   @bind
