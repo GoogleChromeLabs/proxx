@@ -114,7 +114,7 @@ const texturePromise = lazyImportReady.then(() =>
 );
 
 const gamePerquisites = texturePromise;
-const immedateGameSessionKey = "instantGame";
+const immediateGameSessionKey = "instantGame";
 
 export default class Root extends Component<Props, State> {
   state: State = {
@@ -149,10 +149,10 @@ export default class Root extends Component<Props, State> {
     });
 
     // Is this the reload after an update?
-    const instantGameDataStr = sessionStorage.getItem(immedateGameSessionKey);
+    const instantGameDataStr = sessionStorage.getItem(immediateGameSessionKey);
 
     if (instantGameDataStr) {
-      sessionStorage.removeItem(immedateGameSessionKey);
+      sessionStorage.removeItem(immediateGameSessionKey);
       this.setState({ awaitingGame: true });
     }
 
@@ -384,12 +384,12 @@ export default class Root extends Component<Props, State> {
 
     const { updateReady, skipWaiting } = await lazyImportReady;
 
-    if (updateReady) {
+    if (true) {
       // There's an update available. Let's load it as part of starting the game…
       await skipWaiting();
 
       sessionStorage.setItem(
-        immedateGameSessionKey,
+        immediateGameSessionKey,
         JSON.stringify({ width, height, mines })
       );
 

@@ -13,7 +13,9 @@
 
 import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
-import { terser } from "rollup-plugin-terser";
+import {
+  terser
+} from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
 import dependencyGraph from "./lib/dependency-graph-plugin.js";
 import chunkNamePlugin from "./lib/chunk-name-plugin.js";
@@ -22,7 +24,9 @@ import postcss from "rollup-plugin-postcss";
 import glsl from "./lib/glsl-plugin.js";
 import cssModuleTypes from "./lib/css-module-types.js";
 import assetPlugin from "./lib/asset-plugin.js";
-import { readFileSync } from "fs";
+import {
+  readFileSync
+} from "fs";
 import constsPlugin from "./lib/consts-plugin.js";
 import ejsAssetPlugin from "./lib/ejs-asset-plugin.js";
 import assetTransformPlugin from "./lib/asset-transform-plugin.js";
@@ -43,9 +47,10 @@ export default {
     entryFileNames: "[name].js",
     chunkFileNames: "[name]-[hash].js"
   },
-  plugins: [
-    {
-      resolveFileUrl({ fileName }) {
+  plugins: [{
+      resolveFileUrl({
+        fileName
+      }) {
         return JSON.stringify("/" + fileName);
       }
     },
@@ -53,7 +58,7 @@ export default {
     postcss({
       minimize: true,
       modules: {
-        generateScopedName: "[hash:base64:5]"
+        //generateScopedName: "[hash:base64:5]"
       },
       namedExports(name) {
         return name.replace(/-\w/g, val => val.slice(1).toUpperCase());
@@ -128,6 +133,6 @@ export default {
       propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
     }),
     resourceListPlugin(),
-    terser()
+    //terser()
   ]
 };
