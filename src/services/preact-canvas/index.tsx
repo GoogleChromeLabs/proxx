@@ -365,8 +365,9 @@ export default class Root extends Component<Props, State> {
 
   @bind
   private _onSettingsCloseClick() {
-    this.setState({ settingsOpen: false });
-    this.previousFocus!.focus();
+    this.setState({ settingsOpen: false }, () => {
+      this.previousFocus!.focus();
+    });
   }
 
   @bind

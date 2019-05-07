@@ -52,7 +52,7 @@ export default class Settings extends Component<Props, State> {
   }: Props) {
     const closeBtn = isFeaturePhone ? (
       <button
-        aria-label={`close button`}
+        aria-label="close button"
         ref={focusItem => (this.focusItem = focusItem)}
         class={fpCloseBtnStyle}
         onClick={onCloseClicked}
@@ -61,7 +61,7 @@ export default class Settings extends Component<Props, State> {
       </button>
     ) : (
       <button
-        aria-label={`close button`}
+        aria-label="close button"
         ref={focusItem => (this.focusItem = focusItem)}
         class={closebtnStyle}
         onClick={onCloseClicked}
