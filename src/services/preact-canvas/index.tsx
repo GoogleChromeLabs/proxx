@@ -160,7 +160,7 @@ export default class Root extends Component<Props, State> {
     stateServicePromise.then(async stateService => {
       this._stateService = stateService;
 
-      localStateSubscribe(this._stateService, async stateChange => {
+      await localStateSubscribe(this._stateService, async stateChange => {
         await lazyImportReady;
 
         if ("game" in stateChange) {
