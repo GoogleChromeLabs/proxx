@@ -44,6 +44,11 @@ export function getBest(
 }
 
 // Trigger Persistent Storage while we are at it.
-if (navigator.storage && navigator.storage.persist) {
+// Firefox shows an ugly permission prompt that doesn't really make sense to users, so… nahhhh.
+if (
+  navigator.storage &&
+  navigator.storage.persist &&
+  !navigator.userAgent.includes("Firefox/")
+) {
   navigator.storage.persist();
 }
