@@ -152,6 +152,7 @@ export default class Root extends Component<Props, State> {
     const instantGameDataStr = sessionStorage.getItem(immediateGameSessionKey);
 
     if (instantGameDataStr) {
+      console.log("found instant game");
       sessionStorage.removeItem(immediateGameSessionKey);
       this.setState({ awaitingGame: true });
     }
@@ -163,6 +164,7 @@ export default class Root extends Component<Props, State> {
         await lazyImportReady;
 
         if ("game" in stateChange) {
+          console.log("received game");
           const game = stateChange.game;
 
           if (game) {
@@ -198,6 +200,7 @@ export default class Root extends Component<Props, State> {
 
       if (instantGameDataStr) {
         await gamePerquisites;
+        console.log("got gamePerquisites");
         const { width, height, mines } = JSON.parse(instantGameDataStr) as {
           width: number;
           height: number;
