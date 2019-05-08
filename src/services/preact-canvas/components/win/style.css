@@ -47,6 +47,7 @@
   filter: drop-shadow(0 0 10px #fff);
   margin-bottom: 2rem;
   margin-top: 1.5rem;
+  z-index: 1;
 }
 
 .win-square::after {
