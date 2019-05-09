@@ -47,26 +47,11 @@ const lazyComponents: Promise<typeof import("./lazy-components")> = new Promise(
 const stateServicePromise: Promise<
   import("comlink/src/comlink").Remote<import("../state").default>
 > = (async () => {
-  // The timing of events here is super buggy on iOS, so we need to tread very carefully.
-  const worker = new Worker(workerURL);
-  // @ts-ignore - iOS Safari seems to wrongly GC the worker. Throwing it to the global to prevent
-  // that happening.
-  self.w = worker;
-  await lazyImportReady;
+  const stateService = await import("../state/index.js").then(
+    m => new m.default()
+  );
 
-  // When we get a message back from our worker, we know we're ready.
-  const nextMessageEvent = lazyImport!.nextEvent(worker, "message");
-  worker.postMessage("ready?");
-
-  await nextMessageEvent;
-
-  const remoteServices = lazyImport!.comlinkWrap(
-    worker
-  ) as import("comlink/src/comlink").Remote<
-    import("src/worker").RemoteServices
-  >;
-
-  return remoteServices.stateService;
+  return stateService as any;
 })();
 
 const nebulaDangerDark: Color = [40, 0, 0];
