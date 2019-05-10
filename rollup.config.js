@@ -39,9 +39,11 @@ const minifyOpts = {
     passes: 3,
     global_defs: {
       // see about importing require later on
-    }
+    },
+    booleans_as_integers: true
   },
   mangle: {
+    reserved: ["require", "define"],
     properties: {
       builtins: false,
       debug: false,
@@ -152,7 +154,7 @@ export default {
     resourceListPlugin(),
     {
       name: "terser",
-      async renderChunk(code, chunk, outputOpts) {
+      renderChunk(code, chunk, outputOpts) {
         // async to simplify
         const result = Terser.minify(code, minifyOpts);
         if (result.error) {
