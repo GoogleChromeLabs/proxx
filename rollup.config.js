@@ -47,7 +47,7 @@ const minifyOpts = {
       debug: false,
       keep_quoted: true,
       // regex: null,
-      reserved: ["require"]
+      reserved: ["require", "define"]
     }
   },
   sourceMap: true
