@@ -13,7 +13,6 @@
 
 import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
-import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
 import dependencyGraph from "./lib/dependency-graph-plugin.js";
 import chunkNamePlugin from "./lib/chunk-name-plugin.js";
@@ -31,7 +30,10 @@ import postCSSUrl from "postcss-url";
 // Delete 'dist'
 require("rimraf").sync("dist");
 
-const nameCache = {}
+// Inline for now
+import { codeFrameColumns } from "@babel/code-frame";
+import * as Terser from "terser";
+const minifyOpts = {nameCache: {}, mangle: { properties: true } };
 
 export default {
   input: {
@@ -130,10 +132,19 @@ export default {
       propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
     }),
     resourceListPlugin(),
-    terser({
-      nameCache,
-      mangle: { properties: true },
-      numWorkers: 0
-    })
+    {
+      name: "terser",
+      async renderChunk(code, chunk, outputOpts) {
+        // async to simplify
+        const result = Terser.minify(code, minifyOpts)
+        if (result.error) {
+          const { line, col: column, message } = result.error
+          console.error(
+            codeFrameColumns(code, { start: { line, column } }, { message })
+          )
+          throw result.error
+        } else return result
+      }
+    }
   ]
 };
