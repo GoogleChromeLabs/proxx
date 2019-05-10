@@ -352,7 +352,7 @@ export default class Board extends Component<Props, State> {
         return;
       }
       event.preventDefault();
-      this.simulateClick(button);
+      this.simulateClick(button, event.altKey);
     } else if (event.key === "ArrowRight" || event.key === "9") {
       this.moveFocusByKey(event, 1, 0);
     } else if (event.key === "ArrowLeft" || event.key === "7") {
