@@ -130,6 +130,10 @@ export default {
       propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
     }),
     resourceListPlugin(),
-    terser({ nameCache, mangle: { properties: true } })
+    terser({
+      nameCache,
+      mangle: { properties: true },
+      numWorkers: 0
+    })
   ]
 };
