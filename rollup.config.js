@@ -35,7 +35,21 @@ import { codeFrameColumns } from "@babel/code-frame";
 import * as Terser from "terser";
 const minifyOpts = {
   nameCache: {},
-  mangle: { properties: true },
+  compress: {
+    passes: 3,
+    global_defs: {
+      // see about importing require later on
+    }
+  },
+  mangle: {
+    properties: {
+      builtins: false,
+      debug: false,
+      keep_quoted: true,
+      // regex: null,
+      reserved: ["require"]
+    }
+  },
   sourceMap: true
 };
 
