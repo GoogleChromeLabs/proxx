@@ -77,7 +77,7 @@ export default {
         }
       },
       // We need to set this so we can use async functions in our
-      // plugin code. :shurg:
+      // plugin code. :shrug:
       // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
       clean: true
     }),
