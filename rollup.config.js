@@ -31,6 +31,8 @@ import postCSSUrl from "postcss-url";
 // Delete 'dist'
 require("rimraf").sync("dist");
 
+const nameCache = {}
+
 export default {
   input: {
     bootstrap: "src/bootstrap.tsx",
@@ -128,6 +130,6 @@ export default {
       propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
     }),
     resourceListPlugin(),
-    terser()
+    terser({ nameCache, mangle: { properties: true } })
   ]
 };
