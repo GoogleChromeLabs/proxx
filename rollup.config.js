@@ -33,7 +33,11 @@ require("rimraf").sync("dist");
 // Inline for now
 import { codeFrameColumns } from "@babel/code-frame";
 import * as Terser from "terser";
-const minifyOpts = {nameCache: {}, mangle: { properties: true } };
+const minifyOpts = {
+  nameCache: {},
+  mangle: { properties: true },
+  sourceMap: true
+};
 
 export default {
   input: {
@@ -136,14 +140,14 @@ export default {
       name: "terser",
       async renderChunk(code, chunk, outputOpts) {
         // async to simplify
-        const result = Terser.minify(code, minifyOpts)
+        const result = Terser.minify(code, minifyOpts);
         if (result.error) {
-          const { line, col: column, message } = result.error
+          const { line, col: column, message } = result.error;
           console.error(
             codeFrameColumns(code, { start: { line, column } }, { message })
-          )
-          throw result.error
-        } else return result
+          );
+          throw result.error;
+        } else return result;
       }
     }
   ]
