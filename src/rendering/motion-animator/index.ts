@@ -30,9 +30,7 @@ interface CellDetails {
 
 export default class MotionAnimator implements Animator {
   private _renderLoopRunning = false;
-  // Workaround because TS doesn’t realize that this propp is _definitely_
-  // assigned in the constructor.
-  private _cellDetails: CellDetails[] = null as any;
+  private _cellDetails!: CellDetails[];
   private _changeBuffer: GridChanges = [];
   private _lastTs = getTime();
 
