@@ -25,67 +25,11 @@ import { readFileSync } from "fs";
 import constsPlugin from "./lib/consts-plugin.js";
 import ejsAssetPlugin from "./lib/ejs-asset-plugin.js";
 import assetTransformPlugin from "./lib/asset-transform-plugin.js";
+import { terser } from "./lib/minify.js";
 import postCSSUrl from "postcss-url";
 
 // Delete 'dist'
 require("rimraf").sync("dist");
-
-// Inline for now
-import { codeFrameColumns } from "@babel/code-frame";
-import * as Terser from "terser";
-const minifyOpts = {
-  nameCache: {},
-  compress: {
-    passes: 3,
-    global_defs: {
-      // see about importing require later on
-    },
-    booleans_as_integers: true
-  },
-  mangle: {
-    reserved: ["require", "define", "self"],
-    properties: {
-      builtins: false,
-      debug: false,
-      keep_quoted: true,
-      regex: null,
-      /* */
-      reserved: [
-        // require.js
-        "require",
-        "define",
-        // promises
-        "then",
-        "catch",
-        // regenerator
-        "next",
-        "return",
-        "throw",
-        // sw
-        "skipWaiting",
-        "respondWith",
-        "request",
-        "waitUntil",
-        // cache
-        "open",
-        "addAll",
-        "ignoreSearch",
-        // gl?
-        "iResolution",
-        "shaderBox",
-        // dom
-        "class",
-        "inputmode",
-        "role",
-        // nav
-        "deviceMemory"
-      ]
-      /* Unmaintainable? */
-    }
-    /* Yeah. This is probably unmaintainable. */
-  },
-  sourceMap: true
-};
 
 export default {
   input: {
@@ -184,28 +128,6 @@ export default {
       propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
     }),
     resourceListPlugin(),
-    {
-      name: "terser",
-      laterOut: -1,
-      renderChunk(code, chunk, outputOpts) {
-        // async to simplify
-        const result = Terser.minify(code, minifyOpts);
-        if (this.laterOut !== 0) {
-          clearTimeout(this.laterOut);
-          this.laterOut = 0;
-        } else if (this.laterOut !== -1) {
-          this.laterOut = setTimeout(() =>
-            console.dir(minifyOpts.nameCache, 100)
-          );
-        }
-        if (result.error) {
-          const { line, col: column, message } = result.error;
-          console.error(
-            codeFrameColumns(code, { start: { line, column } }, { message })
-          );
-          throw result.error;
-        } else return result;
-      }
-    }
+    terser
   ]
 };
