@@ -43,14 +43,46 @@ const minifyOpts = {
     booleans_as_integers: true
   },
   mangle: {
-    reserved: ["require", "define"],
+    reserved: ["require", "define", "self"],
     properties: {
       builtins: false,
       debug: false,
       keep_quoted: true,
-      // regex: null,
-      reserved: ["require", "define"]
+      regex: null,
+      /* */
+      reserved: [
+        // require.js
+        "require",
+        "define",
+        // promises
+        "then",
+        "catch",
+        // regenerator
+        "next",
+        "return",
+        "throw",
+        // sw
+        "skipWaiting",
+        "respondWith",
+        "request",
+        "waitUntil",
+        // cache
+        "open",
+        "addAll",
+        "ignoreSearch",
+        // gl?
+        "iResolution",
+        "shaderBox",
+        // dom
+        "class",
+        "inputmode",
+        "role",
+        // nav
+        "deviceMemory"
+      ]
+      /* Unmaintainable? */
     }
+    /* Yeah. This is probably unmaintainable. */
   },
   sourceMap: true
 };
@@ -154,9 +186,18 @@ export default {
     resourceListPlugin(),
     {
       name: "terser",
+      laterOut: -1,
       renderChunk(code, chunk, outputOpts) {
         // async to simplify
         const result = Terser.minify(code, minifyOpts);
+        if (this.laterOut !== 0) {
+          clearTimeout(this.laterOut);
+          this.laterOut = 0;
+        } else if (this.laterOut !== -1) {
+          this.laterOut = setTimeout(() =>
+            console.dir(minifyOpts.nameCache, 100)
+          );
+        }
         if (result.error) {
           const { line, col: column, message } = result.error;
           console.error(
