@@ -20,6 +20,7 @@ import { bind } from "src/utils/bind";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
 import { Cell, PlayMode } from "../../../../gamelogic/types";
+import { vibrationLength } from "../../../../utils/constants";
 import initFocusHandling from "../../../../utils/focus-visible";
 import { isFeaturePhone } from "../../../../utils/static-display";
 import Board from "../board";
@@ -47,7 +48,7 @@ export interface Props {
   toRevealTotal: number;
   useMotion: boolean;
   bestTime?: number;
-  vibrate: boolean;
+  useVibration: boolean;
 }
 
 interface State {
@@ -187,8 +188,8 @@ export default class Game extends Component<Props, State> {
       this._tryAgainBtn
     ) {
       this._tryAgainBtn.focus();
-      if (this.props.vibrate) {
-        window.navigator.vibrate(300);
+      if (this.props.useVibration) {
+        navigator.vibrate(vibrationLength);
       }
     }
   }

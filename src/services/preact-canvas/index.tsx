@@ -246,7 +246,7 @@ export default class Root extends Component<Props, State> {
                 }
                 supportsSufficientWebGL={lazyImport!.supportsSufficientWebGL}
                 texturePromise={texturePromise}
-                vibrate={vibrationPreference}
+                useVibration={vibrationPreference}
                 onVibrationPrefChange={this._onVibrationPrefChange}
               />
             )}
@@ -278,7 +278,7 @@ export default class Root extends Component<Props, State> {
               onDangerModeChange={this._onDangerModeChange}
               useMotion={motionPreference}
               bestTime={bestTime}
-              vibrate={vibrationPreference}
+              useVibration={vibrationPreference}
             />
           )}
         />

@@ -28,3 +28,5 @@ export const forceMotionMode =
     : forceMotionParam === "1"
     ? true
     : undefined;
+
+export const vibrationLength = 300;
