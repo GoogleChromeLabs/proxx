@@ -345,21 +345,38 @@ export default class Board extends Component<Props, State> {
   private onKeyDownOnTable(event: KeyboardEvent) {
     // Since click action is tied to mouseup event,
     // listen to Enter in case of key navigation click.
-    // Key 8 support is for T9 navigation
-    if (event.key === "Enter" || event.key === "8") {
+    // Key 8 support is for T9 navigation.
+    // Space is for hjkl (vim-alike) navigation; and done case-insensitively (code).
+    if (event.key === "Enter" || event.key === "8" || event.key === " ") {
       const button = document.activeElement as HTMLButtonElement;
       if (!button) {
         return;
       }
       event.preventDefault();
       this.simulateClick(button);
-    } else if (event.key === "ArrowRight" || event.key === "9") {
+    } else if (
+      event.key === "ArrowRight" ||
+      event.key === "9" ||
+      event.code === "KeyL"
+    ) {
       this.moveFocusByKey(event, 1, 0);
-    } else if (event.key === "ArrowLeft" || event.key === "7") {
+    } else if (
+      event.key === "ArrowLeft" ||
+      event.key === "7" ||
+      event.code === "KeyH"
+    ) {
       this.moveFocusByKey(event, -1, 0);
-    } else if (event.key === "ArrowUp" || event.key === "5") {
+    } else if (
+      event.key === "ArrowUp" ||
+      event.key === "5" ||
+      event.code === "KeyK"
+    ) {
       this.moveFocusByKey(event, 0, -1);
-    } else if (event.key === "ArrowDown" || event.key === "0") {
+    } else if (
+      event.key === "ArrowDown" ||
+      event.key === "0" ||
+      event.code === "KeyJ"
+    ) {
       this.moveFocusByKey(event, 0, 1);
     }
   }
