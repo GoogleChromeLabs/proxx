@@ -47,6 +47,7 @@ export interface Props {
   toRevealTotal: number;
   useMotion: boolean;
   bestTime?: number;
+  vibrate: boolean;
 }
 
 interface State {
@@ -186,7 +187,9 @@ export default class Game extends Component<Props, State> {
       this._tryAgainBtn
     ) {
       this._tryAgainBtn.focus();
-      window.navigator.vibrate(300);
+      if (this.props.vibrate) {
+        window.navigator.vibrate(300);
+      }
     }
   }
 

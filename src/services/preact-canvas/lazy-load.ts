@@ -22,6 +22,10 @@ import {
   setMotionPreference,
   shouldUseMotion
 } from "../state/motion-preference";
+import {
+  getVibrationPreference,
+  setVibrationPreference
+} from "../state/vibration-preference";
 
 export {
   supportsSufficientWebGL,
@@ -36,5 +40,7 @@ export {
   lazyGenerateTextures,
   setMotionPreference,
   getMotionPreference,
-  shouldUseMotion
+  shouldUseMotion,
+  getVibrationPreference,
+  setVibrationPreference
 };
