@@ -186,6 +186,7 @@ export default class Game extends Component<Props, State> {
       this._tryAgainBtn
     ) {
       this._tryAgainBtn.focus();
+      window.navigator.vibrate(300);
     }
   }
 
