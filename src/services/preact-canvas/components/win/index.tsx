@@ -15,7 +15,7 @@ import { bind } from "../../../../utils/bind";
 import { minSec } from "../../../../utils/format";
 import { isFeaturePhone } from "../../../../utils/static-display";
 import { getPresetName } from "../../../state/grid-presets";
-import { Timer } from "../icons/additional";
+import { Share, Timer } from "../icons/additional";
 import {
   againButton,
   againShortcutKey,
@@ -24,6 +24,7 @@ import {
   noMotion,
   score,
   scoreRow,
+  shareButton,
   shortcutKey,
   time as timeStyle,
   timeLabel,
@@ -126,6 +127,11 @@ export default class End extends Component<Props, State> {
           <button class={mainButton} onClick={onMainMenu}>
             {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""} Main menu
           </button>
+          {navigator.share !== undefined &&
+            <button class={shareButton} onClick={this.onShare}>
+              <Share /> Share
+            </button>
+          }
         </div>
       </div>
     );
@@ -137,6 +143,17 @@ export default class End extends Component<Props, State> {
       this.props.onRestart();
     } else if (event.key === "*") {
       this.props.onMainMenu();
+    }
+  }
+
+  @bind
+  private async onShare() {
+    if (navigator.share !== undefined) {
+      await navigator.share({
+        title: "PROXX",
+        text: `Can you beat my score of ${minSec(this.props.bestTime)} on ${this.state.gridName}? Play PROXX now.`,
+        url: "https://proxx.app"
+      });
     }
   }
 }

@@ -146,7 +146,8 @@
 }
 
 .again-button,
-.main-button {
+.main-button,
+.share-button {
   text-transform: uppercase;
   display: block;
   width: 100%;
@@ -161,6 +162,10 @@
 }
 
 .main-button {
+  composes: button-alt from "../../utils.css";
+}
+
+.share-button {
   composes: button-alt from "../../utils.css";
 }
 
