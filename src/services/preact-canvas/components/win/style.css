@@ -169,6 +169,10 @@
   composes: button-alt from "../../utils.css";
 }
 
+.share-icon {
+  composes: icons from '../../styles.css';
+}
+
 .grid-name {
   display: block;
 }

@@ -86,6 +86,13 @@
   border-color: #ff274b;
 }
 
+.icons {
+  composes: unbutton;
+  fill: #fff;
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
 @media (min-width: 320px) {
   .button,
   .button-alt,

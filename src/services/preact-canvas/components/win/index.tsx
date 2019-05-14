@@ -25,6 +25,7 @@ import {
   score,
   scoreRow,
   shareButton,
+  shareIcon,
   shortcutKey,
   time as timeStyle,
   timeLabel,
@@ -129,7 +130,7 @@ export default class End extends Component<Props, State> {
           </button>
           {navigator.share !== undefined &&
             <button class={shareButton} onClick={this.onShare}>
-              <Share /> Share
+              <Share class={shareIcon}/> Share
             </button>
           }
         </div>
