@@ -1,0 +1,51 @@
+/**
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.label {
+  composes: button from "../../utils.css";
+  text-transform: uppercase;
+  display: block;
+  margin: 1.2rem 0 0 !important;
+  font-size: 1.1rem !important;
+  letter-spacing: 0.2rem;
+  text-align: center;
+}
+
+.check-on {
+  background: #3ee5ea !important;
+  border-color: #3ee5ea !important;
+}
+
+.check-off {
+  background: #ff274b !important;
+  border-color: #ff274b !important;
+  color: #fff !important;
+}
+
+.checkbox:disabled + .label {
+  cursor: default;
+  background-color: #666 !important;
+  border-color: #666 !important;
+  color: #000 !important;
+}
+
+.checkbox:global(.focus-visible) + .label {
+  outline: 5px blue;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+.checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
