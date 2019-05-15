@@ -15,7 +15,6 @@
   composes: button from "../../utils.css";
   text-transform: uppercase;
   display: block;
-  margin: 1.2rem 0 0 !important;
   font-size: 1.1rem !important;
   letter-spacing: 0.2rem;
   text-align: center;

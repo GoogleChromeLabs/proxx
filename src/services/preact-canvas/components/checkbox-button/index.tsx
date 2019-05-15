@@ -19,7 +19,7 @@ import {
 } from "./style.css";
 
 export interface Props {
-  disabled: boolean;
+  disabled?: boolean;
   label: string;
   onChange: () => void;
   checked: boolean;

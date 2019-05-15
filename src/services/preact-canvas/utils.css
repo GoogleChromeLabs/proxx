@@ -30,9 +30,7 @@
 }
 
 .button,
-.button-alt,
-.button-on,
-.button-off {
+.button-alt {
   composes: unbutton;
   background: #fff;
   font-weight: bold;
@@ -44,9 +42,7 @@
 }
 
 .button:disabled,
-.button-alt:disabled,
-.button-on:disabled,
-.button-off:disabled {
+.button-alt:disabled {
   cursor: default;
   background-color: #666;
   border-color: #666;
@@ -75,22 +71,9 @@
   color: #fff;
 }
 
-.button-on {
-  background: #3ee5ea;
-  border-color: #3ee5ea;
-}
-
-.button-off {
-  color: #fff;
-  background: #ff274b;
-  border-color: #ff274b;
-}
-
 @media (min-width: 320px) {
   .button,
-  .button-alt,
-  .button-on,
-  .button-off {
+  .button-alt {
     padding: 0.9rem;
   }
 }
