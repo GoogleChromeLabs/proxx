@@ -98,6 +98,7 @@ interface State {
   motionPreference: boolean;
   gameInPlay: boolean;
   allowIntroAnim: boolean;
+  vibrationPreference: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -123,7 +124,8 @@ export default class Root extends Component<Props, State> {
     settingsOpen: false,
     motionPreference: true,
     gameInPlay: false,
-    allowIntroAnim: true
+    allowIntroAnim: true,
+    vibrationPreference: true
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -144,7 +146,8 @@ export default class Root extends Component<Props, State> {
       lazyImport!.initOffline();
 
       this.setState({
-        motionPreference: await lazyImport!.shouldUseMotion()
+        motionPreference: await lazyImport!.shouldUseMotion(),
+        vibrationPreference: await lazyImport!.getVibrationPreference()
       });
     });
 
@@ -220,7 +223,8 @@ export default class Root extends Component<Props, State> {
       motionPreference,
       gameInPlay,
       bestTime,
-      allowIntroAnim
+      allowIntroAnim,
+      vibrationPreference
     }: State
   ) {
     let mainComponent: VNode;
@@ -242,6 +246,8 @@ export default class Root extends Component<Props, State> {
                 }
                 supportsSufficientWebGL={lazyImport!.supportsSufficientWebGL}
                 texturePromise={texturePromise}
+                useVibration={vibrationPreference}
+                onVibrationPrefChange={this._onVibrationPrefChange}
               />
             )}
           />
@@ -272,6 +278,7 @@ export default class Root extends Component<Props, State> {
               onDangerModeChange={this._onDangerModeChange}
               useMotion={motionPreference}
               bestTime={bestTime}
+              useVibration={vibrationPreference}
             />
           )}
         />
@@ -346,6 +353,14 @@ export default class Root extends Component<Props, State> {
     this.setState({ motionPreference });
     const { setMotionPreference } = await lazyImportReady;
     setMotionPreference(motionPreference);
+  }
+
+  @bind
+  private async _onVibrationPrefChange() {
+    const vibrationPreference = !this.state.vibrationPreference;
+    this.setState({ vibrationPreference });
+    const { setVibrationPreference } = await lazyImportReady;
+    setVibrationPreference(vibrationPreference);
   }
 
   @bind
