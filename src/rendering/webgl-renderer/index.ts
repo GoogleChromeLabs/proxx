@@ -530,6 +530,7 @@ export default class WebGlRenderer implements Renderer {
         "paddings"
       ],
       scaling: staticDevicePixelRatio,
+      antialias: false,
       mesh: [
         {
           dimensions: 2,
