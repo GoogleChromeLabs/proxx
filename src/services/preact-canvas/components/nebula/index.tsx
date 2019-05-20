@@ -100,6 +100,7 @@ export default class Nebula extends Component<Props, State> {
     this._shaderBox = new ShaderBox(vertexShader, fragmentShader, {
       canvas: this.base!.querySelector("canvas")! as HTMLCanvasElement,
       scaling: 1 / 5,
+      antialias: false,
       uniforms: [
         "alt_color",
         "time",
