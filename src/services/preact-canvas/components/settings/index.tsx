@@ -14,10 +14,9 @@ import { Component, h } from "preact";
 import { bind } from "src/utils/bind.js";
 import { isFeaturePhone } from "src/utils/static-display";
 import About from "../about";
+import CheckboxButton from "../checkbox-button";
 import { Close } from "../icons/additional";
 import {
-  buttonOff as btnOffStyle,
-  buttonOn as btnOnStyle,
   closeButton as closebtnStyle,
   closeContainer as closeContainerStyle,
   fpCloseButton as fpCloseBtnStyle,
@@ -84,19 +83,19 @@ export default class Settings extends Component<Props, State> {
         <div class={settingsWindowStyle}>
           <div class={settingsContentStyle}>
             <h1>Settings</h1>
-            <button
-              class={motion ? btnOnStyle : btnOffStyle}
-              onClick={onMotionPrefChange}
+            <CheckboxButton
+              label={`Animations ${motion ? "on" : "off"}`}
+              name="animations"
+              onChange={onMotionPrefChange}
               disabled={disableAnimationBtn}
-            >
-              Animations {motion ? "on" : "off"}
-            </button>
-            <button
-              class={useVibration ? btnOnStyle : btnOffStyle}
-              onClick={onVibrationPrefChange}
-            >
-              Vibrate {useVibration ? "on" : "off"}
-            </button>
+              checked={motion}
+            />
+            <CheckboxButton
+              label={`Vibrate ${useVibration ? "on" : "off"}`}
+              name="vibrate"
+              onChange={onVibrationPrefChange}
+              checked={useVibration}
+            />
             <About
               motion={motion}
               texturePromise={texturePromise}
@@ -118,6 +117,10 @@ export default class Settings extends Component<Props, State> {
     window.removeEventListener("keyup", this._onKeyUp);
   }
 
+  @bind
+  private _onChange() {
+    console.log("change! change!");
+  }
   @bind
   private _onKeyUp(event: KeyboardEvent) {
     if (event.key === "Escape" || event.key === "*") {
