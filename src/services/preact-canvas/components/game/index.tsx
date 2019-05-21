@@ -188,7 +188,7 @@ export default class Game extends Component<Props, State> {
       this._tryAgainBtn
     ) {
       this._tryAgainBtn.focus();
-      if (this.props.useVibration) {
+      if (this.props.useVibration && "vibrate" in navigator) {
         navigator.vibrate(vibrationLength);
       }
     }

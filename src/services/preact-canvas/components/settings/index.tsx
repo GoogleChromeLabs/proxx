@@ -13,6 +13,7 @@
 import { Component, h } from "preact";
 import { bind } from "src/utils/bind.js";
 import { isFeaturePhone } from "src/utils/static-display";
+import { supportsVibration } from "../../../state/vibration-preference";
 import About from "../about";
 import { Close } from "../icons/additional";
 import {
@@ -94,6 +95,7 @@ export default class Settings extends Component<Props, State> {
             <button
               class={useVibration ? btnOnStyle : btnOffStyle}
               onClick={onVibrationPrefChange}
+              disabled={!supportsVibration}
             >
               Vibrate {useVibration ? "on" : "off"}
             </button>
