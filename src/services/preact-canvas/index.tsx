@@ -397,25 +397,14 @@ export default class Root extends Component<Props, State> {
       this.setState({ awaitingGame: true });
     }, loadingScreenTimeout);
 
-    const { updateReady, skipWaiting } = await lazyImportReady;
+    await lazyImportReady;
 
-    if (updateReady) {
-      // There's an update available. Let's load it as part of starting the game…
-      await skipWaiting();
+    sessionStorage.setItem(
+      immedateGameSessionKey,
+      JSON.stringify({ width, height, mines })
+    );
 
-      sessionStorage.setItem(
-        immedateGameSessionKey,
-        JSON.stringify({ width, height, mines })
-      );
-
-      location.reload();
-      return;
-    }
-
-    // Wait for everything to be ready:
-    await gamePerquisites;
-    const stateService = await stateServicePromise;
-    stateService.initGame(width, height, mines);
+    location.reload();
   }
 
   @bind
