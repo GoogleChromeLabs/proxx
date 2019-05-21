@@ -1,6 +1,6 @@
 import { get, set } from "idb-keyval";
 
-const DEFAULT: boolean = true;
+export const supportsVibration = "vibrate" in navigator;
 
 /**
  * Set vibration preference (true means will vibrate)
@@ -17,5 +17,5 @@ export async function getVibrationPreference(): Promise<boolean> {
     return vibrate;
   }
   // if no value is assigned to "vibrate", return default value
-  return DEFAULT;
+  return supportsVibration;
 }

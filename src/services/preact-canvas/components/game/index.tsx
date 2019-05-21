@@ -16,6 +16,7 @@ import { Animator } from "src/rendering/animator";
 import { Renderer } from "src/rendering/renderer";
 import StateService from "src/services/state";
 import { submitTime } from "src/services/state/best-times";
+import { supportsVibration } from "src/services/state/vibration-preference";
 import { bind } from "src/utils/bind";
 import { GameChangeCallback } from "../..";
 import { StateChange } from "../../../../gamelogic";
@@ -188,7 +189,7 @@ export default class Game extends Component<Props, State> {
       this._tryAgainBtn
     ) {
       this._tryAgainBtn.focus();
-      if (this.props.useVibration) {
+      if (this.props.useVibration && supportsVibration) {
         navigator.vibrate(vibrationLength);
       }
     }
