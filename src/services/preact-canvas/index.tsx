@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 import workerURL from "chunk-name:../../worker.js";
-import { nebulaSafeDark } from "consts:";
+import nebulaSafeDark from "consts:nebulaSafeDark";
 import { Component, h, VNode } from "preact";
 import { PlayMode } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";

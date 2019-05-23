@@ -8,9 +8,14 @@ declare module "resource-list:" {
   export default value;
 }
 
-declare module "consts:" {
-  export const version: string;
-  export const nebulaSafeDark: import("src/rendering/constants").Color;
+declare module "consts:version" {
+  const value: string;
+  export default value;
+}
+
+declare module "consts:nebulaSafeDark" {
+  const value: import("src/rendering/constants").Color;
+  export default value;
 }
 
 declare module "*.glsl" {

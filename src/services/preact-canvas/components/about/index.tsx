@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { version } from "consts:";
+import version from "consts:version";
 import { Component, h } from "preact";
 import {
   idleAnimationTextureDrawer,
