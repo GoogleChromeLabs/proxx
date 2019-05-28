@@ -47,6 +47,7 @@ export interface ShaderBoxOpts {
   timing: (ts: number) => number;
   uniforms: string[];
   antialias: boolean;
+  alpha: boolean;
   mesh: Mesh[];
   indices: number[];
   clearColor: Color;
@@ -54,6 +55,7 @@ export interface ShaderBoxOpts {
 
 const defaultOpts: ShaderBoxOpts = {
   antialias: true,
+  alpha: true,
   scaling: devicePixelRatio,
   timing: ts => ts,
   uniforms: [],
@@ -99,7 +101,8 @@ export default class ShaderBox {
 
     this.canvas = this._opts.canvas!;
     this._gl = this.canvas.getContext("webgl", {
-      antialias: this._opts.antialias
+      antialias: this._opts.antialias,
+      alpha: this._opts.alpha
     })!;
     if (!this._gl) {
       throw Error("No support for WebGL");
