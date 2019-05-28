@@ -101,6 +101,7 @@ export default class Nebula extends Component<Props, State> {
       canvas: this.base!.querySelector("canvas")! as HTMLCanvasElement,
       scaling: 1 / 5,
       antialias: false,
+      alpha: false,
       uniforms: [
         "alt_color",
         "time",
