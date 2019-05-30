@@ -170,7 +170,7 @@
 }
 
 .share-icon {
-  composes: icons from '../../styles.css';
+  composes: icons from "../../utils.css";
 }
 
 .grid-name {
