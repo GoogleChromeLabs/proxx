@@ -13,9 +13,7 @@
 
 import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
-import {
-  terser
-} from "rollup-plugin-terser";
+import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
 import dependencyGraph from "./lib/dependency-graph-plugin.js";
 import chunkNamePlugin from "./lib/chunk-name-plugin.js";
@@ -24,23 +22,19 @@ import postcss from "rollup-plugin-postcss";
 import glsl from "./lib/glsl-plugin.js";
 import cssModuleTypes from "./lib/css-module-types.js";
 import assetPlugin from "./lib/asset-plugin.js";
-import {
-  readFileSync
-} from "fs";
+import { readFileSync } from "fs";
 import constsPlugin from "./lib/consts-plugin.js";
 import ejsAssetPlugin from "./lib/ejs-asset-plugin.js";
 import assetTransformPlugin from "./lib/asset-transform-plugin.js";
 import postCSSUrl from "postcss-url";
-import rimraf from 'rimraf';
+import rimraf from "rimraf";
 
 // Delete 'dist'
 rimraf.sync("dist");
 rimraf.sync("dist-prerender");
 rimraf.sync(".rpt2_cache");
 
-function buildConfig({
-  prerender
-} = {}) {
+function buildConfig({ prerender } = {}) {
   return {
     input: {
       bootstrap: "src/bootstrap.tsx",
@@ -53,10 +47,9 @@ function buildConfig({
       entryFileNames: "[name].js",
       chunkFileNames: "[name]-[hash].js"
     },
-    plugins: [{
-        resolveFileUrl({
-          fileName
-        }) {
+    plugins: [
+      {
+        resolveFileUrl({ fileName }) {
           return JSON.stringify("/" + fileName);
         }
       },
@@ -135,18 +128,19 @@ function buildConfig({
           return loadz0r.isEntryModule(chunk, inputs);
         }
       }),
-      !prerender && dependencyGraph({
-        manifestName: "lib/dependencygraph.json",
-        propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
-      }),
+      !prerender &&
+        dependencyGraph({
+          manifestName: "lib/dependencygraph.json",
+          propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
+        }),
       resourceListPlugin(),
       !prerender && terser()
     ].filter(item => item)
-  }
+  };
 }
 
 export default [
   buildConfig({
     prerender: false
-  }),
+  })
 ];
