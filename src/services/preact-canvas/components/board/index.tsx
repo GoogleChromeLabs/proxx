@@ -86,12 +86,10 @@ export default class Board extends Component<Props, State> {
     // overflows the viewport on devices that hide the URL bar on scroll.
     window.scrollTo(0, 0);
 
-    // Center scroll position
-    const scroller = this.base!.querySelector(
-      "." + containerStyle
-    ) as HTMLElement;
-    scroller.scrollLeft = scroller.scrollWidth / 2 - scroller.offsetWidth / 2;
-    scroller.scrollTop = scroller.scrollHeight / 2 - scroller.offsetHeight / 2;
+    // Focus a cell near the center (also centers scroll position).
+    const x = Math.floor(this.props.width * 0.5);
+    const y = Math.floor(this.props.height * 0.5);
+    this.setFocus(this._buttons[y * this.props.width + x]);
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("keyup", this._onKeyUp);
