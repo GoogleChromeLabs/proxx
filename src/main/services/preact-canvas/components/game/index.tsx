@@ -14,7 +14,7 @@ import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import { Animator } from "src/main/rendering/animator";
 import { Renderer } from "src/main/rendering/renderer";
-import StateService from "src/main/services/state";
+import StateService from "../../../../../worker/state-service";
 import { submitTime } from "src/main/services/state/best-times";
 import { supportsVibration } from "src/main/services/state/vibration-preference";
 import { bind } from "src/utils/bind";

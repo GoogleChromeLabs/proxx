@@ -1,3 +1,8 @@
+declare module "consts:nebulaSafeDark" {
+  const value: import("./rendering/constants").Color;
+  export default value;
+}
+
 interface GA {
   (...args: any[]): void;
   q: any[];

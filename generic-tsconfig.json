@@ -7,6 +7,12 @@
     "jsx": "react",
     "jsxFactory": "h",
     "strict": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "outDir": ".ts-tmp",
+    "composite": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "baseUrl": "./src",
+    "rootDir": "./src"
   }
 }

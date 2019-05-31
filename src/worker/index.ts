@@ -11,13 +11,19 @@
  * limitations under the License.
  */
 
-import { expose, proxy } from "comlink/src/comlink.js";
+import { expose, proxy, proxyMarker } from "comlink";
 
-import StateService from "src/main/services/state";
+import StateService from "./state-service";
 
 declare var self: DedicatedWorkerGlobalScope;
 
-const services = {
+interface Services {
+  stateService: StateService & {
+    [proxyMarker]: true;
+  };
+}
+
+const services: Services = {
   stateService: proxy(new StateService())
 };
 

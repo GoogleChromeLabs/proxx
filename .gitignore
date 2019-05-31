@@ -4,3 +4,4 @@ node_modules
 dist
 dist-prerender
 *css.d.ts
+.ts-tmp

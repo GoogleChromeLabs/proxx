@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import workerURL from "chunk-name:../../worker.js";
+import workerURL from "chunk-name:./../../worker";
 import nebulaSafeDark from "consts:nebulaSafeDark";
 import { Component, h, VNode } from "preact";
 import toRGB from "src/main/utils/to-rgb";
@@ -28,7 +28,7 @@ import { game as gameClassName, nebulaContainer } from "./style.css";
 
 type Color = import("src/main/rendering/constants").Color;
 type GameStateChange = import("../../../worker/gamelogic").StateChange;
-type GameType = import("../state").GameType;
+type GameType = import("../../../worker/state-service").GameType;
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
@@ -45,7 +45,9 @@ const lazyComponents: Promise<typeof import("./lazy-components")> = new Promise(
 );
 
 const stateServicePromise: Promise<
-  import("comlink/src/comlink").Remote<import("../state").default>
+  import("comlink/src/comlink").Remote<
+    import("../../../worker/state-service").default
+  >
 > = (async () => {
   // The timing of events here is super buggy on iOS, so we need to tread very carefully.
   const worker = new Worker(workerURL);
@@ -67,7 +69,7 @@ const stateServicePromise: Promise<
   >;
 
   return remoteServices.stateService;
-})();
+})() as any;
 
 const nebulaDangerDark: Color = [40, 0, 0];
 const nebulaDangerLight: Color = [131, 23, 71];
@@ -132,7 +134,7 @@ export default class Root extends Component<Props, State> {
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
   private _awaitingGameTimeout: number = -1;
   private _stateService?: import("comlink/src/comlink").Remote<
-    import("../state").default
+    import("../../../worker/state-service").default
   >;
 
   constructor() {

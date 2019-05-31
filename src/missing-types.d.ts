@@ -13,11 +13,6 @@ declare module "consts:version" {
   export default value;
 }
 
-declare module "consts:nebulaSafeDark" {
-  const value: import("./main/rendering/constants").Color;
-  export default value;
-}
-
 declare module "*.glsl" {
   const content: string;
   export default content;

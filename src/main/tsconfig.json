@@ -1,0 +1,21 @@
+{
+  "extends": "../../generic-tsconfig.json",
+  "compilerOptions": {
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "paths": {
+      "src/*": ["../src/*"]
+    },
+    "types": []
+  },
+  "references": [{
+      "path": "../sw"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../worker"
+    }
+  ],
+  "include": ["../missing-types.d.ts", "./**/*"]
+}

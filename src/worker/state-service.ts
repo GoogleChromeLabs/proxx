@@ -10,9 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import MinesweeperGame, {
-  StateChange as GameStateChange
-} from "../../../worker/gamelogic/index";
+import MinesweeperGame, { StateChange as GameStateChange } from "./gamelogic";
 
 export interface GameType {
   id: number;
