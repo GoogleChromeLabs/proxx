@@ -187,14 +187,8 @@ export default class Board extends Component<Props, State> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-
-        // set only 1st cell tab focusable
-        if (row === 0 && col === 0) {
-          button.setAttribute("tabindex", "0");
-          this._currentFocusableBtn = button;
-        } else {
-          button.setAttribute("tabindex", "-1");
-        }
+        // A button is made focusable in componentDidMount
+        button.setAttribute("tabindex", "-1");
         button.addEventListener("blur", this.removeFocusVisual);
         this._additionalButtonData.set(button, [x, y, defaultCell]);
         this._updateButton(button, defaultCell, x, y);
@@ -241,6 +235,16 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private setFocusVisual(button: HTMLButtonElement) {
+    // We only want to render focus styles for keyboard and feature phone users.
+    const showFocusStyle =
+      button.classList.contains("focus-visible") ||
+      isFeaturePhone ||
+      cellFocusMode;
+
+    if (!showFocusStyle) {
+      this.props.renderer.setFocus(-1, -1);
+      return;
+    }
     const [x, y] = this._additionalButtonData.get(button)!;
     this.props.renderer.setFocus(x, y);
   }
@@ -251,7 +255,9 @@ export default class Board extends Component<Props, State> {
     { preventScroll = false }: SetFocusOptions = {}
   ) {
     // move tab index to targetBtn (necessary for roving tabindex)
-    this._currentFocusableBtn!.tabIndex = -1;
+    if (this._currentFocusableBtn) {
+      this._currentFocusableBtn.tabIndex = -1;
+    }
     newFocusBtn.tabIndex = 0;
     this._currentFocusableBtn = newFocusBtn;
 
