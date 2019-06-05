@@ -201,11 +201,21 @@ export default class Root extends Component<Props, State> {
 
       if (instantGameDataStr) {
         await gamePerquisites;
-        const { width, height, mines } = JSON.parse(instantGameDataStr) as {
+        const { width, height, mines, usedKeyboard } = JSON.parse(
+          instantGameDataStr
+        ) as {
           width: number;
           height: number;
           mines: number;
+          usedKeyboard: boolean;
         };
+
+        if (!usedKeyboard) {
+          // This is a horrible hack to tell focus-visible.js not to initially show focus styles.
+          document.body.dispatchEvent(
+            new MouseEvent("mousemove", { bubbles: true })
+          );
+        }
 
         this._stateService.initGame(width, height, mines);
       }
@@ -403,9 +413,12 @@ export default class Root extends Component<Props, State> {
       // There's an update available. Let's load it as part of starting the game…
       await skipWaiting();
 
+      // Did the user click the start button using keyboard?
+      const usedKeyboard = !!document.querySelector(".focus-visible");
+
       sessionStorage.setItem(
         immedateGameSessionKey,
-        JSON.stringify({ width, height, mines })
+        JSON.stringify({ width, height, mines, usedKeyboard })
       );
 
       location.reload();
