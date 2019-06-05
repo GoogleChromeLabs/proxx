@@ -100,13 +100,13 @@ export default class Board extends Component<Props, State> {
     scroller.scrollTop = scroller.scrollHeight / 2 - scroller.offsetHeight / 2;
 
     window.addEventListener("resize", this._onWindowResize);
-    window.addEventListener("keyup", this._onKeyUp);
+    window.addEventListener("keyup", this._onGlobalKeyUp);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
-    window.removeEventListener("keyup", this._onKeyUp);
+    window.removeEventListener("keyup", this._onGlobalKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -143,7 +143,9 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private _onKeyUp(event: KeyboardEvent) {
+  private _onGlobalKeyUp(event: KeyboardEvent) {
+    // This returns the focus to the board when one of these keys is pressed (on feature phones
+    // only). This means the user doesn't have to manually refocus the board.
     if (
       (isFeaturePhone || cellFocusMode) &&
       (event.key === "9" ||
@@ -153,8 +155,7 @@ export default class Board extends Component<Props, State> {
         event.key === "ArrowLeft" ||
         event.key === "ArrowRight" ||
         event.key === "ArrowUp" ||
-        event.key === "ArrowDown" ||
-        event.key === "Enter")
+        event.key === "ArrowDown")
     ) {
       this.moveFocusByKey(event, 0, 0);
     }
