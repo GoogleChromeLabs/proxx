@@ -149,7 +149,12 @@ export default class Board extends Component<Props, State> {
       (event.key === "9" ||
         event.key === "7" ||
         event.key === "5" ||
-        event.key === "0")
+        event.key === "0" ||
+        event.key === "ArrowLeft" ||
+        event.key === "ArrowRight" ||
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown" ||
+        event.key === "Enter")
     ) {
       this.moveFocusByKey(event, 0, 0);
     }
