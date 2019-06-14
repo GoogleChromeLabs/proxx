@@ -44,15 +44,8 @@
   background: white;
 }
 
-.icons {
-  composes: unbutton from "../../utils.css";
-  fill: #fff;
-  width: var(--icon-size);
-  height: var(--icon-size);
-}
-
 .left-icon {
-  composes: icons;
+  composes: icons from "../../utils.css";
   /* PostCSS gets the order wrong :( */
   margin-right: auto !important;
 }
@@ -64,7 +57,7 @@
 }
 
 .fullscreen {
-  composes: icons;
+  composes: icons from "../../utils.css";
   /* PostCSS gets the order wrong :( */
   margin-left: auto !important;
 }
