@@ -73,6 +73,10 @@ export default class Board extends Component<Props, State> {
   >();
   private _currentFocusableBtn?: HTMLButtonElement;
   private _tableContainer?: HTMLDivElement;
+  private _lastButtonOnTouchStart: HTMLButtonElement | null = null;
+  private _timeoutEvent: number | undefined;
+  private _touchScreen: boolean = false;
+  private _touchMoved: boolean = false;
 
   componentDidMount() {
     document.documentElement.classList.add("in-game");
@@ -211,11 +215,16 @@ export default class Board extends Component<Props, State> {
     this._table.addEventListener("keydown", this.onKeyDownOnTable);
     this._table.addEventListener("keyup", this.onKeyUpOnTable);
     this._table.addEventListener("mouseup", this.onMouseUp);
-    this._table.addEventListener("mousedown", this.onMouseDown);
+    this._table.addEventListener("touchstart", this.onTouchStart);
+    this._table.addEventListener("touchmove", this.onTouchMove);
+    this._table.addEventListener("touchend", this.onTouchEnd);
     this._table.addEventListener("dblclick", this.onDblClick);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
+    this._table.addEventListener("mousedown", event => {
+      event.preventDefault();
+    });
     // On feature phone, show focus visual on mouse hover as well
     // Have to be mousemove on table, instead of mouseenter on buttons to avoid
     // unwanted focus move on scroll.
@@ -387,6 +396,10 @@ export default class Board extends Component<Props, State> {
   // one under the mouse and one that is currently focused
   @bind
   private onMouseUp(event: MouseEvent) {
+    if (this._touchScreen) {
+      return;
+    }
+
     // hit test if the mouse up was on a button if not, cancel.
     let targetButton = event.target as HTMLButtonElement;
     const targetButtonData = this._additionalButtonData.get(targetButton);
@@ -421,8 +434,52 @@ export default class Board extends Component<Props, State> {
 
   // Same as mouseup, necessary for preventing click event on KaiOS
   @bind
-  private onMouseDown(event: MouseEvent) {
-    event.preventDefault();
+  private onTouchStart(event: TouchEvent) {
+    this._touchMoved = false;
+    if (!this._touchScreen) {
+      this._touchScreen = true;
+    }
+
+    const activeButton = event.target as HTMLButtonElement;
+    const isActiveBtn = this._additionalButtonData.has(activeButton);
+    if (!isActiveBtn) {
+      return;
+    }
+
+    this._lastButtonOnTouchStart = activeButton;
+    this._timeoutEvent = setTimeout(this.secondaryAfterHold, 400);
+  }
+
+  @bind
+  private onTouchMove() {
+    if (this._timeoutEvent !== undefined) {
+      clearInterval(this._timeoutEvent);
+    }
+    this._touchMoved = true;
+  }
+
+  @bind
+  private onTouchEnd() {
+    if (
+      !this._touchMoved &&
+      this._lastButtonOnTouchStart !== null &&
+      this._timeoutEvent !== undefined
+    ) {
+      clearInterval(this._timeoutEvent);
+      this.simulateClick(this._lastButtonOnTouchStart);
+      this._lastButtonOnTouchStart = null;
+      this._timeoutEvent = undefined;
+    }
+  }
+
+  @bind
+  private secondaryAfterHold() {
+    this._timeoutEvent = undefined;
+    if (this._lastButtonOnTouchStart === null) {
+      return;
+    }
+    this.simulateClick(this._lastButtonOnTouchStart, true);
+    this._lastButtonOnTouchStart = null;
   }
 
   private _toggleDangerMode() {
