@@ -58,6 +58,11 @@ interface SetFocusOptions {
   preventScroll?: boolean;
 }
 
+interface HoldState {
+  tiomeoutEvent: number;
+  buttonPressed: HTMLButtonElement;
+}
+
 export default class Board extends Component<Props, State> {
   state: State = {
     keyNavigation: false
@@ -73,10 +78,8 @@ export default class Board extends Component<Props, State> {
   >();
   private _currentFocusableBtn?: HTMLButtonElement;
   private _tableContainer?: HTMLDivElement;
-  private _lastButtonOnTouchStart: HTMLButtonElement | null = null;
-  private _timeoutEvent: number | undefined;
   private _touchScreen: boolean = false;
-  private _touchMoved: boolean = false;
+  private _holdState: HoldState | null = null;
 
   componentDidMount() {
     document.documentElement.classList.add("in-game");
@@ -435,7 +438,6 @@ export default class Board extends Component<Props, State> {
   // Same as mouseup, necessary for preventing click event on KaiOS
   @bind
   private onTouchStart(event: TouchEvent) {
-    this._touchMoved = false;
     if (!this._touchScreen) {
       this._touchScreen = true;
     }
@@ -446,40 +448,33 @@ export default class Board extends Component<Props, State> {
       return;
     }
 
-    this._lastButtonOnTouchStart = activeButton;
-    this._timeoutEvent = setTimeout(this.secondaryAfterHold, 400);
+    this._holdState = {
+      buttonPressed: activeButton,
+      tiomeoutEvent: setTimeout(this.secondaryAfterHold, 400)
+    };
   }
 
   @bind
   private onTouchMove() {
-    if (this._timeoutEvent !== undefined) {
-      clearInterval(this._timeoutEvent);
+    if (this._holdState !== null) {
+      clearInterval(this._holdState.tiomeoutEvent);
+      this._holdState = null;
     }
-    this._touchMoved = true;
   }
 
   @bind
   private onTouchEnd() {
-    if (
-      !this._touchMoved &&
-      this._lastButtonOnTouchStart !== null &&
-      this._timeoutEvent !== undefined
-    ) {
-      clearInterval(this._timeoutEvent);
-      this.simulateClick(this._lastButtonOnTouchStart);
-      this._lastButtonOnTouchStart = null;
-      this._timeoutEvent = undefined;
+    if (this._holdState !== null) {
+      clearInterval(this._holdState.tiomeoutEvent);
+      this.simulateClick(this._holdState.buttonPressed);
+      this._holdState = null;
     }
   }
 
   @bind
   private secondaryAfterHold() {
-    this._timeoutEvent = undefined;
-    if (this._lastButtonOnTouchStart === null) {
-      return;
-    }
-    this.simulateClick(this._lastButtonOnTouchStart, true);
-    this._lastButtonOnTouchStart = null;
+    this.simulateClick((this._holdState as HoldState).buttonPressed, true);
+    this._holdState = null;
   }
 
   private _toggleDangerMode() {
