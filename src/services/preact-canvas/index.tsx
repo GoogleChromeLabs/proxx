@@ -99,7 +99,8 @@ interface State {
   gameInPlay: boolean;
   allowIntroAnim: boolean;
   vibrationPreference: boolean;
-  afterHoldFlash: boolean;
+  nebulaFlashTrigger: boolean;
+  canvas2dFlash: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -127,7 +128,8 @@ export default class Root extends Component<Props, State> {
     gameInPlay: false,
     allowIntroAnim: true,
     vibrationPreference: true,
-    afterHoldFlash: false
+    nebulaFlashTrigger: false,
+    canvas2dFlash: false
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -236,7 +238,8 @@ export default class Root extends Component<Props, State> {
       gameInPlay,
       bestTime,
       allowIntroAnim,
-      vibrationPreference
+      vibrationPreference,
+      nebulaFlashTrigger
     }: State
   ) {
     let mainComponent: VNode;
@@ -317,6 +320,9 @@ export default class Root extends Component<Props, State> {
               colorDark={this._nebulaDarkColor()}
               colorLight={this._nebulaLightColor()}
               useMotion={motionPreference}
+              flashTrigger={nebulaFlashTrigger}
+              flashFromDark={dangerMode ? nebulaSafeDark : nebulaDangerDark}
+              flashFromLight={dangerMode ? nebulaSafeLight : nebulaDangerLight}
             />
           )}
         />
@@ -335,11 +341,11 @@ export default class Root extends Component<Props, State> {
   }
 
   private _nebulaLightColor() {
-    if (this.state.afterHoldFlash) {
+    if (this.state.canvas2dFlash) {
       if (this.state.dangerMode) {
-        return this._avgColors(nebulaDangerLight, nebulaSafeLight, 0.65);
+        return avgColors(nebulaDangerLight, nebulaSafeLight, 0.6);
       } else {
-        return this._avgColors(nebulaSafeLight, nebulaDangerLight, 0.65);
+        return avgColors(nebulaSafeLight, nebulaDangerLight, 0.6);
       }
     }
     if (this.state.settingsOpen) {
@@ -355,11 +361,11 @@ export default class Root extends Component<Props, State> {
   }
 
   private _nebulaDarkColor() {
-    if (this.state.afterHoldFlash) {
+    if (this.state.canvas2dFlash) {
       if (this.state.dangerMode) {
-        return this._avgColors(nebulaDangerDark, nebulaSafeDark, 0.65);
+        return avgColors(nebulaDangerDark, nebulaSafeDark, 0.6);
       } else {
-        return this._avgColors(nebulaSafeDark, nebulaDangerDark, 0.65);
+        return avgColors(nebulaSafeDark, nebulaDangerDark, 0.6);
       }
     }
     if (this.state.settingsOpen) {
@@ -420,9 +426,13 @@ export default class Root extends Component<Props, State> {
 
   @bind
   private _afterHoldFlash() {
-    this.setState({ afterHoldFlash: true });
+    if (this.state.motionPreference) {
+      this.setState({ nebulaFlashTrigger: !this.state.nebulaFlashTrigger });
+      return;
+    }
+    this.setState({ canvas2dFlash: true });
     setTimeout(() => {
-      this.setState({ afterHoldFlash: false });
+      this.setState({ canvas2dFlash: false });
     }, 200);
   }
 
@@ -461,12 +471,12 @@ export default class Root extends Component<Props, State> {
     this.setState({ dangerMode: false });
     this._stateService!.reset();
   }
+}
 
-  private _avgColors(c1: Color, c2: Color, ratio: number = 0.5) {
-    const c1Amount = ratio * 100;
-    const c2Amount = 100 - ratio * 100;
-    return c1.map((item, i) =>
-      Math.floor((item * c1Amount + c2[i] * c2Amount) / 100)
-    ) as Color;
-  }
+function avgColors(c1: Color, c2: Color, ratio: number = 0.5) {
+  const c1Amount = ratio * 100;
+  const c2Amount = 100 - c1Amount;
+  return c1.map((item, i) =>
+    Math.floor((item * c1Amount + c2[i] * c2Amount) / 100)
+  ) as Color;
 }

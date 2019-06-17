@@ -28,6 +28,9 @@ export interface Props {
   colorLight: Color;
   colorDark: Color;
   useMotion: boolean;
+  flashTrigger: boolean;
+  flashFromLight: Color;
+  flashFromDark: Color;
 }
 
 const metaTheme = document.querySelector('meta[name="theme-color"]')!;
@@ -50,13 +53,22 @@ export default class Nebula extends Component<Props, State> {
     window.addEventListener("resize", this._onResize);
   }
 
-  shouldComponentUpdate({ colorLight, colorDark, useMotion }: Props) {
+  shouldComponentUpdate({
+    colorLight,
+    colorDark,
+    useMotion,
+    flashTrigger
+  }: Props) {
     if (useMotion !== this.props.useMotion) {
       return true;
     }
     const didLightColorChange = !colorEqual(this.props.colorLight, colorLight);
     const didDarkColorChange = !colorEqual(this.props.colorDark, colorDark);
-    return didLightColorChange || didDarkColorChange;
+    return (
+      didLightColorChange ||
+      didDarkColorChange ||
+      this.props.flashTrigger !== flashTrigger
+    );
   }
 
   componentWillUnmount() {
@@ -68,6 +80,7 @@ export default class Nebula extends Component<Props, State> {
     if (!this._shaderBox) {
       return;
     }
+
     this._prevColors = [this.props.colorLight, this.props.colorDark];
     this._colorBlend = 0;
   }
@@ -79,6 +92,10 @@ export default class Nebula extends Component<Props, State> {
       } else {
         this._stop();
       }
+    }
+    if (oldProps.flashTrigger !== this.props.flashTrigger) {
+      this._flash();
+      return;
     }
     this._updateColors();
   }
@@ -157,6 +174,27 @@ export default class Nebula extends Component<Props, State> {
     this._shaderBox.setUniform4f(
       "main_color_dark",
       toShaderColor(this._prevColors[1])
+    );
+    this._shaderBox.setUniform4f(
+      "alt_color_light",
+      toShaderColor(this.props.colorLight)
+    );
+    this._shaderBox.setUniform4f("alt_color_dark", toShaderColor(colorDark));
+  }
+
+  private _flash() {
+    const colorDark = this.props.colorDark;
+
+    if (!this._shaderBox) {
+      return;
+    }
+    this._shaderBox.setUniform4f(
+      "main_color_light",
+      toShaderColor(this.props.flashFromLight)
+    );
+    this._shaderBox.setUniform4f(
+      "main_color_dark",
+      toShaderColor(this.props.flashFromDark)
     );
     this._shaderBox.setUniform4f(
       "alt_color_light",

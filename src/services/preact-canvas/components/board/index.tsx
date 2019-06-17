@@ -474,7 +474,7 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private secondaryAfterHold() {
-    this.simulateClick((this._holdState as HoldState).buttonPressed, true);
+    this.simulateClick(this._holdState!.buttonPressed, true);
     this.props.afterHoldFlash();
     this._holdState = null;
   }
