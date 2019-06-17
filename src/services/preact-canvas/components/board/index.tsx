@@ -48,6 +48,7 @@ export interface Props {
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
   onDangerModeChange: (v: boolean) => void;
+  afterHoldFlash: () => void;
 }
 
 interface State {
@@ -474,6 +475,7 @@ export default class Board extends Component<Props, State> {
   @bind
   private secondaryAfterHold() {
     this.simulateClick((this._holdState as HoldState).buttonPressed, true);
+    this.props.afterHoldFlash();
     this._holdState = null;
   }
 

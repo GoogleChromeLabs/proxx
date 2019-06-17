@@ -99,6 +99,7 @@ interface State {
   gameInPlay: boolean;
   allowIntroAnim: boolean;
   vibrationPreference: boolean;
+  afterHoldFlash: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -125,7 +126,8 @@ export default class Root extends Component<Props, State> {
     motionPreference: true,
     gameInPlay: false,
     allowIntroAnim: true,
-    vibrationPreference: true
+    vibrationPreference: true,
+    afterHoldFlash: false
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -289,6 +291,7 @@ export default class Root extends Component<Props, State> {
               useMotion={motionPreference}
               bestTime={bestTime}
               useVibration={vibrationPreference}
+              afterHoldFlash={this._afterHoldFlash}
             />
           )}
         />
@@ -332,6 +335,13 @@ export default class Root extends Component<Props, State> {
   }
 
   private _nebulaLightColor() {
+    if (this.state.afterHoldFlash) {
+      if (this.state.dangerMode) {
+        return this._avgColors(nebulaDangerLight, nebulaSafeLight, 0.65);
+      } else {
+        return this._avgColors(nebulaSafeLight, nebulaDangerLight, 0.65);
+      }
+    }
     if (this.state.settingsOpen) {
       return nebulaSettingLight;
     }
@@ -345,6 +355,13 @@ export default class Root extends Component<Props, State> {
   }
 
   private _nebulaDarkColor() {
+    if (this.state.afterHoldFlash) {
+      if (this.state.dangerMode) {
+        return this._avgColors(nebulaDangerDark, nebulaSafeDark, 0.65);
+      } else {
+        return this._avgColors(nebulaSafeDark, nebulaDangerDark, 0.65);
+      }
+    }
     if (this.state.settingsOpen) {
       return nebulaSettingDark;
     }
@@ -402,6 +419,14 @@ export default class Root extends Component<Props, State> {
   }
 
   @bind
+  private _afterHoldFlash() {
+    this.setState({ afterHoldFlash: true });
+    setTimeout(() => {
+      this.setState({ afterHoldFlash: false });
+    }, 200);
+  }
+
+  @bind
   private async _onStartGame(width: number, height: number, mines: number) {
     this._awaitingGameTimeout = setTimeout(() => {
       this.setState({ awaitingGame: true });
@@ -435,5 +460,13 @@ export default class Root extends Component<Props, State> {
   private _onBackClick() {
     this.setState({ dangerMode: false });
     this._stateService!.reset();
+  }
+
+  private _avgColors(c1: Color, c2: Color, ratio: number = 0.5) {
+    const c1Amount = ratio * 100;
+    const c2Amount = 100 - ratio * 100;
+    return c1.map((item, i) =>
+      Math.floor((item * c1Amount + c2[i] * c2Amount) / 100)
+    ) as Color;
   }
 }
