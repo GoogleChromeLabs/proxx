@@ -38,6 +38,8 @@ interface Props {
   supportsSufficientWebGL: boolean;
   useVibration: boolean;
   onVibrationPrefChange: () => void;
+  onHighlightsChange: () => void;
+  highlights: boolean;
 }
 
 interface State {}
@@ -53,7 +55,9 @@ export default class Settings extends Component<Props, State> {
     supportsSufficientWebGL,
     disableAnimationBtn,
     useVibration,
-    onVibrationPrefChange
+    onVibrationPrefChange,
+    onHighlightsChange,
+    highlights
   }: Props) {
     const closeBtn = isFeaturePhone ? (
       <button
@@ -98,6 +102,12 @@ export default class Settings extends Component<Props, State> {
               disabled={!supportsVibration}
             >
               Vibrate {useVibration ? "on" : "off"}
+            </button>
+            <button
+              class={highlights ? btnOnStyle : btnOffStyle}
+              onClick={onHighlightsChange}
+            >
+              Hightlights {highlights ? "on" : "off"}
             </button>
             <About
               motion={motion}

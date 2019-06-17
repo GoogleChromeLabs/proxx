@@ -17,6 +17,7 @@ import { lazyGenerateTextures } from "../../rendering/animation";
 import { supportsSufficientWebGL } from "../../rendering/renderer";
 import { nextEvent } from "../../utils/scheduling";
 import { getBest, submitTime } from "../state/best-times";
+import { getHighlights, setHighlights } from "../state/highlights-preference";
 import {
   getMotionPreference,
   setMotionPreference,
@@ -42,5 +43,7 @@ export {
   getMotionPreference,
   shouldUseMotion,
   getVibrationPreference,
-  setVibrationPreference
+  setVibrationPreference,
+  getHighlights,
+  setHighlights
 };

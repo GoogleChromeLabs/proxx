@@ -15,6 +15,7 @@ import { Cell } from "src/gamelogic/types";
 import { getCanvas } from "src/utils/canvas-pool";
 import { getBarHeights, getCellSizes } from "src/utils/cell-sizing";
 import { staticDevicePixelRatio } from "src/utils/static-display";
+import { getHighlights } from "../../services/state/highlights-preference";
 import {
   AnimationDesc,
   AnimationName,
@@ -61,6 +62,7 @@ export default class Canvas2DRenderer implements Renderer {
   private _numTilesY?: number;
   private _lastFocus = [-1, -1];
   private _gradients?: FadeOutGradient[];
+  private _highlights: boolean = false;
 
   get numTiles() {
     return this._numTilesX! * this._numTilesY!;
@@ -76,6 +78,10 @@ export default class Canvas2DRenderer implements Renderer {
   }
 
   init(numTilesX: number, numTilesY: number) {
+    getHighlights().then(hl => {
+      this._highlights = hl;
+    });
+
     this._numTilesX = numTilesX;
     this._numTilesY = numTilesY;
     this._updateTileSize();
@@ -333,6 +339,10 @@ export default class Canvas2DRenderer implements Renderer {
     animation: AnimationDesc,
     ts: number
   ) {
+    if (!cell.flagged && !this._highlights) {
+      this[AnimationName.HIGHLIGHT_OUT](x, y, cell, animation, ts);
+      return;
+    }
     const start = animation.fadeStart || animation.start;
     const animationLength = fadeInAnimationLength;
     let normalized = (ts - start) / animationLength;
