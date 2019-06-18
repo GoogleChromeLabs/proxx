@@ -81,6 +81,8 @@ export default class Board extends Component<Props, State> {
   private _tableContainer?: HTMLDivElement;
   private _touchScreen: boolean = false;
   private _holdState: HoldState | null = null;
+  private _afterHoldFlag: boolean = false;
+  private _firstClickAfterHold: boolean = false;
 
   componentDidMount() {
     document.documentElement.classList.add("in-game");
@@ -443,6 +445,12 @@ export default class Board extends Component<Props, State> {
       this._touchScreen = true;
     }
 
+    if (!this._firstClickAfterHold && this._afterHoldFlag) {
+      this._afterHoldFlag = false;
+    } else if (this._firstClickAfterHold) {
+      this._firstClickAfterHold = false;
+    }
+
     const activeButton = event.target as HTMLButtonElement;
     const isActiveBtn = this._additionalButtonData.has(activeButton);
     if (!isActiveBtn) {
@@ -477,6 +485,8 @@ export default class Board extends Component<Props, State> {
     this.simulateClick(this._holdState!.buttonPressed, true);
     this.props.afterHoldFlash();
     this._holdState = null;
+    this._afterHoldFlag = true;
+    this._firstClickAfterHold = true;
   }
 
   private _toggleDangerMode() {
@@ -485,6 +495,9 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private onDblClick(event: MouseEvent) {
+    if (this._afterHoldFlag) {
+      return;
+    }
     if (event.target === this._tableContainer) {
       this._toggleDangerMode();
       return;
