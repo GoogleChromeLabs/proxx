@@ -21,7 +21,8 @@ export default class NoMotionAnimator implements Animator {
   constructor(
     private _numTilesX: number,
     private _numTilesY: number,
-    private _renderer: Renderer
+    private _renderer: Renderer,
+    private _highlights: boolean
   ) {
     freeze();
   }
@@ -72,7 +73,8 @@ export default class NoMotionAnimator implements Animator {
       (cell.revealed &&
         !cell.hasMine &&
         cell.touchingMines > 0 &&
-        cell.touchingFlags >= cell.touchingMines) ||
+        cell.touchingFlags >= cell.touchingMines &&
+        this._highlights) ||
       (!cell.revealed && cell.flagged)
     ) {
       animationList.push({

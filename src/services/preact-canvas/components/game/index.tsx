@@ -50,6 +50,7 @@ export interface Props {
   useMotion: boolean;
   bestTime?: number;
   useVibration: boolean;
+  useHighlights: boolean;
 }
 
 interface State {
@@ -213,7 +214,8 @@ export default class Game extends Component<Props, State> {
       animator = new AnimatorClass(
         this.props.width,
         this.props.height,
-        renderer
+        renderer,
+        this.props.useHighlights
       );
     } else {
       // tslint:disable-next-line:variable-name
@@ -229,7 +231,8 @@ export default class Game extends Component<Props, State> {
       animator = new AnimatorClass(
         this.props.width,
         this.props.height,
-        renderer
+        renderer,
+        this.props.useHighlights
       );
     }
 

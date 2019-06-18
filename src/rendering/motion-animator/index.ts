@@ -13,7 +13,6 @@
 
 import { Cell, GridChanges } from "src/gamelogic/types";
 import { bind } from "src/utils/bind";
-import { getHighlights } from "../../services/state/highlights-preference";
 import { AnimationDesc, AnimationName } from "../animation";
 import { removeAnimations } from "../animation-helpers";
 import { Animator } from "../animator";
@@ -34,16 +33,13 @@ export default class MotionAnimator implements Animator {
   private _cellDetails!: CellDetails[];
   private _changeBuffer: GridChanges = [];
   private _lastTs = getTime();
-  private _highlights: boolean = true;
 
   constructor(
     private _numTilesX: number,
     private _numTilesY: number,
-    private _renderer: Renderer
+    private _renderer: Renderer,
+    private _highlights: boolean
   ) {
-    getHighlights().then(hl => {
-      this._highlights = hl;
-    });
     unfreeze();
     this._initCellDetails();
     this._startRenderLoop();
