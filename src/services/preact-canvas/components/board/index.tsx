@@ -452,8 +452,8 @@ export default class Board extends Component<Props, State> {
     }
 
     const activeButton = event.target as HTMLButtonElement;
-    const isActiveBtn = this._additionalButtonData.has(activeButton);
-    if (!isActiveBtn) {
+    const activeButtonData = this._additionalButtonData.get(activeButton);
+    if (!activeButtonData || activeButtonData[2].revealed) {
       return;
     }
 
