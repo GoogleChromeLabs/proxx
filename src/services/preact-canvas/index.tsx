@@ -343,9 +343,9 @@ export default class Root extends Component<Props, State> {
   private _nebulaLightColor() {
     if (this.state.canvas2dFlash) {
       if (this.state.dangerMode) {
-        return avgColors(nebulaDangerLight, nebulaSafeLight, 0.6);
+        return avgColors(nebulaDangerLight, nebulaSafeLight, 0.65);
       } else {
-        return avgColors(nebulaSafeLight, nebulaDangerLight, 0.6);
+        return avgColors(nebulaSafeLight, nebulaDangerLight, 0.65);
       }
     }
     if (this.state.settingsOpen) {
@@ -363,9 +363,9 @@ export default class Root extends Component<Props, State> {
   private _nebulaDarkColor() {
     if (this.state.canvas2dFlash) {
       if (this.state.dangerMode) {
-        return avgColors(nebulaDangerDark, nebulaSafeDark, 0.6);
+        return avgColors(nebulaDangerDark, nebulaSafeDark, 0.65);
       } else {
-        return avgColors(nebulaSafeDark, nebulaDangerDark, 0.6);
+        return avgColors(nebulaSafeDark, nebulaDangerDark, 0.65);
       }
     }
     if (this.state.settingsOpen) {
@@ -474,9 +474,7 @@ export default class Root extends Component<Props, State> {
 }
 
 function avgColors(c1: Color, c2: Color, ratio: number = 0.5) {
-  const c1Amount = ratio * 100;
-  const c2Amount = 100 - c1Amount;
   return c1.map((item, i) =>
-    Math.floor((item * c1Amount + c2[i] * c2Amount) / 100)
+    Math.round(item * ratio + c2[i] * (1 - ratio))
   ) as Color;
 }
