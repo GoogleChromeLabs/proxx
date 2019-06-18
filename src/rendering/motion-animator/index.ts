@@ -37,7 +37,8 @@ export default class MotionAnimator implements Animator {
   constructor(
     private _numTilesX: number,
     private _numTilesY: number,
-    private _renderer: Renderer
+    private _renderer: Renderer,
+    private _highlights: boolean
   ) {
     unfreeze();
     this._initCellDetails();
@@ -124,7 +125,8 @@ export default class MotionAnimator implements Animator {
       if (
         cell.touchingFlags >= cell.touchingMines &&
         cell.touchingMines > 0 &&
-        !isHighlighted
+        !isHighlighted &&
+        this._highlights
       ) {
         animationList.push({
           name: AnimationName.HIGHLIGHT_IN,
