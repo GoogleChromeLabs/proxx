@@ -76,6 +76,12 @@ const nebulaSafeLight: Color = [54, 49, 176];
 const nebulaSettingDark: Color = [0, 0, 0];
 const nebulaSettingLight: Color = [41, 41, 41];
 
+// Color blends for no-animation flashing
+const dangerBlendDark = avgColors(nebulaDangerDark, nebulaSafeDark, 0.65);
+const dangerBlendLight = avgColors(nebulaDangerLight, nebulaSafeLight, 0.65);
+const safeBlendDark = avgColors(nebulaSafeDark, nebulaDangerDark, 0.65);
+const safeBlendLight = avgColors(nebulaSafeLight, nebulaDangerLight, 0.65);
+
 // If the user tries to start a game when we aren't ready, how long do we wait before showing the
 // loading screen?
 const loadingScreenTimeout = 1000;
@@ -100,7 +106,8 @@ interface State {
   allowIntroAnim: boolean;
   vibrationPreference: boolean;
   nebulaFlashTrigger: boolean;
-  canvas2dFlash: boolean;
+  flashColorDark: Color;
+  flashColorLight: Color;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -129,7 +136,8 @@ export default class Root extends Component<Props, State> {
     allowIntroAnim: true,
     vibrationPreference: true,
     nebulaFlashTrigger: false,
-    canvas2dFlash: false
+    flashColorLight: nebulaSafeLight,
+    flashColorDark: nebulaSafeDark
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -239,7 +247,9 @@ export default class Root extends Component<Props, State> {
       bestTime,
       allowIntroAnim,
       vibrationPreference,
-      nebulaFlashTrigger
+      nebulaFlashTrigger,
+      flashColorDark,
+      flashColorLight
     }: State
   ) {
     let mainComponent: VNode;
@@ -321,8 +331,8 @@ export default class Root extends Component<Props, State> {
               colorLight={this._nebulaLightColor()}
               useMotion={motionPreference}
               flashTrigger={nebulaFlashTrigger}
-              flashFromDark={dangerMode ? nebulaSafeDark : nebulaDangerDark}
-              flashFromLight={dangerMode ? nebulaSafeLight : nebulaDangerLight}
+              flashFromDark={flashColorDark}
+              flashFromLight={flashColorLight}
             />
           )}
         />
@@ -341,13 +351,6 @@ export default class Root extends Component<Props, State> {
   }
 
   private _nebulaLightColor() {
-    if (this.state.canvas2dFlash) {
-      if (this.state.dangerMode) {
-        return avgColors(nebulaDangerLight, nebulaSafeLight, 0.65);
-      } else {
-        return avgColors(nebulaSafeLight, nebulaDangerLight, 0.65);
-      }
-    }
     if (this.state.settingsOpen) {
       return nebulaSettingLight;
     }
@@ -361,13 +364,6 @@ export default class Root extends Component<Props, State> {
   }
 
   private _nebulaDarkColor() {
-    if (this.state.canvas2dFlash) {
-      if (this.state.dangerMode) {
-        return avgColors(nebulaDangerDark, nebulaSafeDark, 0.65);
-      } else {
-        return avgColors(nebulaSafeDark, nebulaDangerDark, 0.65);
-      }
-    }
     if (this.state.settingsOpen) {
       return nebulaSettingDark;
     }
@@ -427,13 +423,24 @@ export default class Root extends Component<Props, State> {
   @bind
   private _afterHoldFlash() {
     if (this.state.motionPreference) {
-      this.setState({ nebulaFlashTrigger: !this.state.nebulaFlashTrigger });
-      return;
+      this.setState({
+        nebulaFlashTrigger: !this.state.nebulaFlashTrigger,
+        flashColorDark: this.state.dangerMode
+          ? nebulaSafeDark
+          : nebulaDangerDark,
+        flashColorLight: this.state.dangerMode
+          ? nebulaSafeLight
+          : nebulaDangerLight
+      });
+    } else {
+      this.setState({
+        nebulaFlashTrigger: !this.state.nebulaFlashTrigger,
+        flashColorDark: this.state.dangerMode ? dangerBlendDark : safeBlendDark,
+        flashColorLight: this.state.dangerMode
+          ? dangerBlendLight
+          : safeBlendLight
+      });
     }
-    this.setState({ canvas2dFlash: true });
-    setTimeout(() => {
-      this.setState({ canvas2dFlash: false });
-    }, 200);
   }
 
   @bind

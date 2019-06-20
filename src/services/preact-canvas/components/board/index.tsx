@@ -441,9 +441,7 @@ export default class Board extends Component<Props, State> {
   // Same as mouseup, necessary for preventing click event on KaiOS
   @bind
   private onTouchStart(event: TouchEvent) {
-    if (!this._touchScreen) {
-      this._touchScreen = true;
-    }
+    this._touchScreen = true;
 
     if (!this._firstClickAfterHold && this._afterHoldFlag) {
       this._afterHoldFlag = false;
