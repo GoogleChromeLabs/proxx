@@ -14,7 +14,7 @@
 // @ts-ignore
 import * as dat from "dat.gui/build/dat.gui.module.js";
 
-import ShaderBox from "../../utils/shaderbox.js";
+import ShaderBox from "../../utils/shaderbox";
 import Nebula from "../preact-canvas/components/nebula";
 
 const gui = new dat.GUI();

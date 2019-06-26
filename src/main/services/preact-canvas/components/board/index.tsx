@@ -13,9 +13,9 @@
 import { Component, h } from "preact";
 import { Animator } from "src/main/rendering/animator";
 import { Renderer } from "src/main/rendering/renderer";
-import { putCanvas } from "src/main/utils/canvas-pool.js";
-import { cellFocusMode } from "src/main/utils/constants.js";
-import { isFeaturePhone } from "src/main/utils/static-display.js";
+import { putCanvas } from "src/main/utils/canvas-pool";
+import { cellFocusMode } from "src/main/utils/constants";
+import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import { StateChange } from "src/worker/gamelogic";
 import { Cell } from "src/worker/gamelogic/types";

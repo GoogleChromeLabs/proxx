@@ -21,7 +21,7 @@
     "lintfix": "tslint -t verbose -c tslint.json --fix 'src/**/*.{ts,tsx}'",
     "fmt_test": "test $(prettier -l 'src/**/*.{ts,tsx,css}' *.{js,json,md} 'lib/**/*.js' | wc -l) -eq 0",
     "test": "npm run fmt_test && npm run lint && npm run build",
-    "tmpbuild": "tsc -b src/main"
+    "tmpbuild": "rollup -c"
   },
   "husky": {
     "hooks": {
@@ -65,6 +65,6 @@
     "travis-size-report": "^1.0.1",
     "tslint": "^5.16.0",
     "typed-css-modules": "^0.4.2",
-    "typescript": "^3.5.1"
+    "typescript": "^3.5.2"
   }
 }

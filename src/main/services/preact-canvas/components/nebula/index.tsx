@@ -13,13 +13,13 @@
 
 import { Component, h } from "preact";
 
-import { bind } from "../../../../../utils/bind.js";
+import { bind } from "../../../../../utils/bind";
 
-import ShaderBox from "../../../../utils/shaderbox.js";
+import ShaderBox from "../../../../utils/shaderbox";
 import { nebula as nebulaStyle, nebulaContainer } from "./style.css";
 
 import { Color, toShaderColor } from "src/main/rendering/constants";
-import toRGB from "src/main/utils/to-rgb.js";
+import toRGB from "src/main/utils/to-rgb";
 import { debug } from "../../../../utils/constants";
 import fragmentShader from "./fragment.glsl";
 import vertexShader from "./vertex.glsl";

@@ -11,7 +11,6 @@
  * limitations under the License.
  */
 
-import typescript from "rollup-plugin-typescript2";
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
@@ -28,6 +27,7 @@ import ejsAssetPlugin from "./lib/ejs-asset-plugin.js";
 import assetTransformPlugin from "./lib/asset-transform-plugin.js";
 import postCSSUrl from "postcss-url";
 import rimraf from "rimraf";
+import simpleTS from "./lib/simple-ts.js";
 
 // Delete 'dist'
 rimraf.sync("dist");
@@ -37,7 +37,7 @@ rimraf.sync(".rpt2_cache");
 function buildConfig({ prerender } = {}) {
   return {
     input: {
-      bootstrap: "src/bootstrap.tsx",
+      bootstrap: "src/main/bootstrap.tsx",
       sw: "src/sw/index.ts"
     },
     output: {
@@ -73,19 +73,7 @@ function buildConfig({ prerender } = {}) {
         nebulaSafeDark: require("./lib/nebula-safe-dark").color,
         prerender
       }),
-      typescript({
-        // Make sure we are using our version of TypeScript.
-        typescript: require("typescript"),
-        tsconfigOverride: {
-          compilerOptions: {
-            sourceMap: true
-          }
-        },
-        // We need to set this so we can use async functions in our
-        // plugin code. :shrug:
-        // https://github.com/ezolenko/rollup-plugin-typescript2/issues/105
-        objectHashIgnoreUnknownHack: true
-      }),
+      simpleTS("src/main"),
       glsl(),
       ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
         data: {

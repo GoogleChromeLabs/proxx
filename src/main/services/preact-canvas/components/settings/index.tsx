@@ -12,7 +12,7 @@
  */
 import { Component, h } from "preact";
 import { isFeaturePhone } from "src/main/utils/static-display";
-import { bind } from "src/utils/bind.js";
+import { bind } from "src/utils/bind";
 import { supportsVibration } from "../../../state/vibration-preference";
 import About from "../about";
 import { Close } from "../icons/additional";

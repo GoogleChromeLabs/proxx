@@ -14,7 +14,7 @@
 import { h, render } from "preact";
 import Root from "src/main/services/preact-canvas";
 import { main } from "./style.css";
-import { prerender } from "./utils/constants.js";
+import { prerender } from "./utils/constants";
 
 const container = document.body.querySelector(".app")!;
 container.classList.add(main);

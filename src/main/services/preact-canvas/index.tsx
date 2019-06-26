@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import workerURL from "chunk-name:./../../worker";
+import workerURL from "chunk-name:./../../../worker";
 import nebulaSafeDark from "consts:nebulaSafeDark";
 import { Component, h, VNode } from "preact";
 import toRGB from "src/main/utils/to-rgb";

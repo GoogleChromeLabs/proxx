@@ -16,7 +16,7 @@ import {
   PresetName,
   presets
 } from "src/main/services/state/grid-presets";
-import { prerender } from "src/main/utils/constants.js";
+import { prerender } from "src/main/utils/constants";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import deferred from "../deferred";
