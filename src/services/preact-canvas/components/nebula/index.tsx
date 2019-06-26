@@ -87,6 +87,7 @@ export default class Nebula extends Component<Props, State> {
 
     this._prevColors = [this.props.colorLight, this.props.colorDark];
     this._colorBlend = 0;
+    this._fadeSpeed = 10;
   }
 
   componentDidUpdate(oldProps: Props) {
@@ -98,6 +99,7 @@ export default class Nebula extends Component<Props, State> {
       }
     }
     if (oldProps.flashTrigger !== this.props.flashTrigger) {
+      this._fadeSpeed = 15;
       this._flash();
       return;
     }
