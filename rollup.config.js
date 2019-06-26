@@ -73,7 +73,6 @@ function buildConfig({ prerender } = {}) {
         nebulaSafeDark: require("./lib/nebula-safe-dark").color,
         prerender
       }),
-      simpleTS("src/main"),
       glsl(),
       ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
         data: {
@@ -116,6 +115,7 @@ function buildConfig({ prerender } = {}) {
           return loadz0r.isEntryModule(chunk, inputs);
         }
       }),
+      simpleTS("src/main"),
       !prerender &&
         dependencyGraph({
           manifestName: "lib/dependencygraph.json",

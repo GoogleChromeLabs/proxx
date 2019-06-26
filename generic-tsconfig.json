@@ -12,7 +12,8 @@
     "composite": true,
     "declarationMap": true,
     "sourceMap": true,
-    "baseUrl": "./src",
-    "rootDir": "./src"
+    "importHelpers": true,
+    "baseUrl": "./",
+    "rootDir": "./"
   }
 }
