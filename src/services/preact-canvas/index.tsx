@@ -76,6 +76,12 @@ const nebulaSafeLight: Color = [54, 49, 176];
 const nebulaSettingDark: Color = [0, 0, 0];
 const nebulaSettingLight: Color = [41, 41, 41];
 
+// Color blends for no-animation flashing
+const dangerBlendDark = avgColors(nebulaDangerDark, nebulaSafeDark, 0.65);
+const dangerBlendLight = avgColors(nebulaDangerLight, nebulaSafeLight, 0.65);
+const safeBlendDark = avgColors(nebulaSafeDark, nebulaDangerDark, 0.65);
+const safeBlendLight = avgColors(nebulaSafeLight, nebulaDangerLight, 0.65);
+
 // If the user tries to start a game when we aren't ready, how long do we wait before showing the
 // loading screen?
 const loadingScreenTimeout = 1000;
@@ -99,6 +105,9 @@ interface State {
   gameInPlay: boolean;
   allowIntroAnim: boolean;
   vibrationPreference: boolean;
+  nebulaFlashTrigger: boolean;
+  flashColorDark: Color;
+  flashColorLight: Color;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -125,7 +134,10 @@ export default class Root extends Component<Props, State> {
     motionPreference: true,
     gameInPlay: false,
     allowIntroAnim: true,
-    vibrationPreference: true
+    vibrationPreference: true,
+    nebulaFlashTrigger: false,
+    flashColorLight: nebulaSafeLight,
+    flashColorDark: nebulaSafeDark
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -234,7 +246,10 @@ export default class Root extends Component<Props, State> {
       gameInPlay,
       bestTime,
       allowIntroAnim,
-      vibrationPreference
+      vibrationPreference,
+      nebulaFlashTrigger,
+      flashColorDark,
+      flashColorLight
     }: State
   ) {
     let mainComponent: VNode;
@@ -289,6 +304,7 @@ export default class Root extends Component<Props, State> {
               useMotion={motionPreference}
               bestTime={bestTime}
               useVibration={vibrationPreference}
+              afterHoldFlash={this._afterHoldFlash}
             />
           )}
         />
@@ -314,6 +330,9 @@ export default class Root extends Component<Props, State> {
               colorDark={this._nebulaDarkColor()}
               colorLight={this._nebulaLightColor()}
               useMotion={motionPreference}
+              flashTrigger={nebulaFlashTrigger}
+              flashFromDark={flashColorDark}
+              flashFromLight={flashColorLight}
             />
           )}
         />
@@ -402,6 +421,29 @@ export default class Root extends Component<Props, State> {
   }
 
   @bind
+  private _afterHoldFlash() {
+    if (this.state.motionPreference) {
+      this.setState({
+        nebulaFlashTrigger: !this.state.nebulaFlashTrigger,
+        flashColorDark: this.state.dangerMode
+          ? nebulaSafeDark
+          : nebulaDangerDark,
+        flashColorLight: this.state.dangerMode
+          ? nebulaSafeLight
+          : nebulaDangerLight
+      });
+    } else {
+      this.setState({
+        nebulaFlashTrigger: !this.state.nebulaFlashTrigger,
+        flashColorDark: this.state.dangerMode ? dangerBlendDark : safeBlendDark,
+        flashColorLight: this.state.dangerMode
+          ? dangerBlendLight
+          : safeBlendLight
+      });
+    }
+  }
+
+  @bind
   private async _onStartGame(width: number, height: number, mines: number) {
     this._awaitingGameTimeout = setTimeout(() => {
       this.setState({ awaitingGame: true });
@@ -436,4 +478,10 @@ export default class Root extends Component<Props, State> {
     this.setState({ dangerMode: false });
     this._stateService!.reset();
   }
+}
+
+function avgColors(c1: Color, c2: Color, ratio: number = 0.5) {
+  return c1.map((item, i) =>
+    Math.round(item * ratio + c2[i] * (1 - ratio))
+  ) as Color;
 }

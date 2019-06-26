@@ -28,13 +28,21 @@ export interface Props {
   colorLight: Color;
   colorDark: Color;
   useMotion: boolean;
+  flashTrigger: boolean;
+  flashFromLight: Color;
+  flashFromDark: Color;
 }
 
 const metaTheme = document.querySelector('meta[name="theme-color"]')!;
 
-interface State {}
+interface State {
+  noAnimationFlash: boolean;
+}
 
 export default class Nebula extends Component<Props, State> {
+  state: State = {
+    noAnimationFlash: false
+  };
   private _timePeriod = 60000;
   private _fadeSpeed = 10;
   private _colorBlend = 0;
@@ -50,13 +58,21 @@ export default class Nebula extends Component<Props, State> {
     window.addEventListener("resize", this._onResize);
   }
 
-  shouldComponentUpdate({ colorLight, colorDark, useMotion }: Props) {
+  shouldComponentUpdate(
+    { colorLight, colorDark, useMotion, flashTrigger }: Props,
+    { noAnimationFlash }: State
+  ) {
     if (useMotion !== this.props.useMotion) {
       return true;
     }
     const didLightColorChange = !colorEqual(this.props.colorLight, colorLight);
     const didDarkColorChange = !colorEqual(this.props.colorDark, colorDark);
-    return didLightColorChange || didDarkColorChange;
+    return (
+      didLightColorChange ||
+      didDarkColorChange ||
+      this.props.flashTrigger !== flashTrigger ||
+      this.state.noAnimationFlash !== noAnimationFlash
+    );
   }
 
   componentWillUnmount() {
@@ -68,8 +84,10 @@ export default class Nebula extends Component<Props, State> {
     if (!this._shaderBox) {
       return;
     }
+
     this._prevColors = [this.props.colorLight, this.props.colorDark];
     this._colorBlend = 0;
+    this._fadeSpeed = 10;
   }
 
   componentDidUpdate(oldProps: Props) {
@@ -80,16 +98,30 @@ export default class Nebula extends Component<Props, State> {
         this._stop();
       }
     }
+    if (oldProps.flashTrigger !== this.props.flashTrigger) {
+      this._fadeSpeed = 15;
+      this._flash();
+      return;
+    }
     this._updateColors();
   }
 
-  render({ colorLight, colorDark, useMotion }: Props) {
+  render(
+    { colorLight, colorDark, useMotion, flashFromDark, flashFromLight }: Props,
+    { noAnimationFlash }: State
+  ) {
     return (
       <div
         class={nebulaContainer}
-        style={`background: linear-gradient(to bottom, ${toRGB(
-          colorLight
-        )}, ${toRGB(colorDark)}`}
+        style={
+          noAnimationFlash
+            ? `background: linear-gradient(to bottom, ${toRGB(
+                flashFromLight
+              )}, ${toRGB(flashFromDark)}`
+            : `background: linear-gradient(to bottom, ${toRGB(
+                colorLight
+              )}, ${toRGB(colorDark)}`
+        }
       >
         {useMotion && <canvas class={nebulaStyle} aria-hidden="true" />}
       </div>
@@ -163,6 +195,34 @@ export default class Nebula extends Component<Props, State> {
       toShaderColor(this.props.colorLight)
     );
     this._shaderBox.setUniform4f("alt_color_dark", toShaderColor(colorDark));
+  }
+
+  private _flash() {
+    if (this._loopRunning) {
+      const colorDark = this.props.colorDark;
+
+      if (!this._shaderBox) {
+        return;
+      }
+      this._shaderBox.setUniform4f(
+        "main_color_light",
+        toShaderColor(this.props.flashFromLight)
+      );
+      this._shaderBox.setUniform4f(
+        "main_color_dark",
+        toShaderColor(this.props.flashFromDark)
+      );
+      this._shaderBox.setUniform4f(
+        "alt_color_light",
+        toShaderColor(this.props.colorLight)
+      );
+      this._shaderBox.setUniform4f("alt_color_dark", toShaderColor(colorDark));
+      return;
+    }
+    this.setState({ noAnimationFlash: true });
+    setTimeout(() => {
+      this.setState({ noAnimationFlash: false });
+    }, 200);
   }
 
   private _start() {

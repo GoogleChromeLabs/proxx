@@ -48,6 +48,7 @@ export interface Props {
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
   onDangerModeChange: (v: boolean) => void;
+  afterHoldFlash: () => void;
 }
 
 interface State {
@@ -56,6 +57,11 @@ interface State {
 
 interface SetFocusOptions {
   preventScroll?: boolean;
+}
+
+interface HoldState {
+  tiomeoutEvent: number;
+  buttonPressed: HTMLButtonElement;
 }
 
 export default class Board extends Component<Props, State> {
@@ -73,6 +79,10 @@ export default class Board extends Component<Props, State> {
   >();
   private _currentFocusableBtn?: HTMLButtonElement;
   private _tableContainer?: HTMLDivElement;
+  private _touchScreen: boolean = false;
+  private _holdState: HoldState | null = null;
+  private _afterHoldFlag: boolean = false;
+  private _firstClickAfterHold: boolean = false;
 
   componentDidMount() {
     document.documentElement.classList.add("in-game");
@@ -211,11 +221,16 @@ export default class Board extends Component<Props, State> {
     this._table.addEventListener("keydown", this.onKeyDownOnTable);
     this._table.addEventListener("keyup", this.onKeyUpOnTable);
     this._table.addEventListener("mouseup", this.onMouseUp);
-    this._table.addEventListener("mousedown", this.onMouseDown);
+    this._table.addEventListener("touchstart", this.onTouchStart);
+    this._table.addEventListener("touchmove", this.onTouchMove);
+    this._table.addEventListener("touchend", this.onTouchEnd);
     this._table.addEventListener("dblclick", this.onDblClick);
     this._table.addEventListener("contextmenu", event =>
       event.preventDefault()
     );
+    this._table.addEventListener("mousedown", event => {
+      event.preventDefault();
+    });
     // On feature phone, show focus visual on mouse hover as well
     // Have to be mousemove on table, instead of mouseenter on buttons to avoid
     // unwanted focus move on scroll.
@@ -387,6 +402,10 @@ export default class Board extends Component<Props, State> {
   // one under the mouse and one that is currently focused
   @bind
   private onMouseUp(event: MouseEvent) {
+    if (this._touchScreen) {
+      return;
+    }
+
     // hit test if the mouse up was on a button if not, cancel.
     let targetButton = event.target as HTMLButtonElement;
     const targetButtonData = this._additionalButtonData.get(targetButton);
@@ -421,8 +440,51 @@ export default class Board extends Component<Props, State> {
 
   // Same as mouseup, necessary for preventing click event on KaiOS
   @bind
-  private onMouseDown(event: MouseEvent) {
-    event.preventDefault();
+  private onTouchStart(event: TouchEvent) {
+    this._touchScreen = true;
+
+    if (!this._firstClickAfterHold && this._afterHoldFlag) {
+      this._afterHoldFlag = false;
+    } else if (this._firstClickAfterHold) {
+      this._firstClickAfterHold = false;
+    }
+
+    const activeButton = event.target as HTMLButtonElement;
+    const activeButtonData = this._additionalButtonData.get(activeButton);
+    if (!activeButtonData || activeButtonData[2].revealed) {
+      return;
+    }
+
+    this._holdState = {
+      buttonPressed: activeButton,
+      tiomeoutEvent: setTimeout(this.secondaryAfterHold, 400)
+    };
+  }
+
+  @bind
+  private onTouchMove() {
+    if (this._holdState !== null) {
+      clearInterval(this._holdState.tiomeoutEvent);
+      this._holdState = null;
+    }
+  }
+
+  @bind
+  private onTouchEnd() {
+    if (this._holdState !== null) {
+      clearInterval(this._holdState.tiomeoutEvent);
+      this.simulateClick(this._holdState.buttonPressed);
+      this._holdState = null;
+    }
+  }
+
+  @bind
+  private secondaryAfterHold() {
+    this.simulateClick(this._holdState!.buttonPressed, true);
+    this.props.afterHoldFlash();
+    this._holdState = null;
+    this._afterHoldFlag = true;
+    this._firstClickAfterHold = true;
   }
 
   private _toggleDangerMode() {
@@ -431,6 +493,9 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private onDblClick(event: MouseEvent) {
+    if (this._afterHoldFlag) {
+      return;
+    }
     if (event.target === this._tableContainer) {
       this._toggleDangerMode();
       return;

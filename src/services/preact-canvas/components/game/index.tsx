@@ -50,6 +50,7 @@ export interface Props {
   useMotion: boolean;
   bestTime?: number;
   useVibration: boolean;
+  afterHoldFlash: () => void;
 }
 
 interface State {
@@ -136,6 +137,7 @@ export default class Game extends Component<Props, State> {
               gameChangeUnsubscribe={gameChangeUnsubscribe}
               onCellClick={this.onCellClick}
               onDangerModeChange={this.props.onDangerModeChange}
+              afterHoldFlash={this.props.afterHoldFlash}
             />,
             playMode === PlayMode.Lost ? (
               <div class={exitRow}>
