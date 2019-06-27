@@ -11,15 +11,17 @@
  * limitations under the License.
  */
 
+import prerender from "consts:prerender";
 import { h, render } from "preact";
 import Root from "src/main/services/preact-canvas";
 import { main } from "./style.css";
-import { prerender } from "./utils/constants";
 
 const container = document.body.querySelector(".app")!;
 container.classList.add(main);
 render(<Root />, container, container.firstChild as any);
-performance.mark("UI ready");
+if (!prerender) {
+  performance.mark("UI ready");
+}
 
 if (!prerender) {
   window.ga = window.ga || ((...args: any[]) => (ga.q = ga.q || []).push(args));

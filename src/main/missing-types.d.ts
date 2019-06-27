@@ -3,6 +3,11 @@ declare module "consts:nebulaSafeDark" {
   export default value;
 }
 
+declare module "consts:prerender" {
+  const value: boolean;
+  export default value;
+}
+
 interface GA {
   (...args: any[]): void;
   q: any[];
@@ -11,6 +16,8 @@ declare var ga: GA;
 interface Window {
   ga: GA;
 }
+
+declare var prerenderDone: () => void;
 
 interface HTMLElement {
   webkitRequestFullscreen?: () => void;

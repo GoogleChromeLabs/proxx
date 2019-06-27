@@ -10,13 +10,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import prerender from "consts:prerender";
 import { Component, h } from "preact";
 import {
   getPresetName,
   PresetName,
   presets
 } from "src/main/services/state/grid-presets";
-import { prerender } from "src/main/utils/constants";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import deferred from "../deferred";
@@ -144,7 +144,7 @@ export default class Intro extends Component<Props, State> {
   }
 
   componentDidMount() {
-    window.scrollTo(0, 0);
+      window.scrollTo(0, 0);
     window.addEventListener("keyup", this._onKeyUp);
   }
 

@@ -28,6 +28,9 @@ import assetTransformPlugin from "./lib/asset-transform-plugin.js";
 import postCSSUrl from "postcss-url";
 import rimraf from "rimraf";
 import simpleTS from "./lib/simple-ts.js";
+import renderStaticPlugin from "./lib/render-static.js";
+import { color as nebulaColor, hex as nebulaHex } from "./lib/nebula-safe-dark";
+import pkg from "./package.json";
 
 // Delete 'dist'
 rimraf.sync("dist");
@@ -41,7 +44,7 @@ function buildConfig({ prerender } = {}) {
       sw: "src/sw/index.ts"
     },
     output: {
-      dir: prerender ? "dist-prerender" : "dist",
+      dir: "dist",
       format: "amd",
       sourcemap: !prerender,
       entryFileNames: "[name].js",
@@ -69,14 +72,14 @@ function buildConfig({ prerender } = {}) {
         ]
       }),
       constsPlugin({
-        version: require("./package.json").version,
-        nebulaSafeDark: require("./lib/nebula-safe-dark").color,
+        version: pkg.version,
+        nebulaSafeDark: nebulaColor,
         prerender
       }),
       glsl(),
       ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
         data: {
-          nebulaSafeDark: require("./lib/nebula-safe-dark").hex
+          nebulaSafeDark: nebulaHex
         }
       }),
       assetPlugin({
@@ -122,13 +125,14 @@ function buildConfig({ prerender } = {}) {
           propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
         }),
       resourceListPlugin(),
-      !prerender && terser()
+      terser(),
+      renderStaticPlugin() // TODO: prerender only
     ].filter(item => item)
   };
 }
 
 export default [
   buildConfig({
-    prerender: false
+    prerender: true
   })
 ];

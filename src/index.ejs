@@ -62,9 +62,9 @@ html {
 <% } %>
 <div class="app"></div>
 <script>
-  <%- fs.readFileSync("./dist/"+bootstrapFile); %>
-  <% for(const dep of dependencygraph[bootstrapFile].imports) {%>
-    <%-dependencygraph[dep].code;%>
+  <%- bootstrap.code %>
+  <% for(const dep of bundle[bootstrap.fileName].imports) {%>
+    <%-bundle[dep].code;%>
   <% } %>
 </script>
 </html>

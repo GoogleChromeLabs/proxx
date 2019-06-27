@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import prerender from "consts:prerender";
 import { get, set } from "idb-keyval";
 import { GridType } from "../preact-canvas";
 import { presets } from "./grid-presets";
@@ -28,6 +28,10 @@ export async function setGridDefault(
 }
 
 export async function getGridDefault(): Promise<GridType> {
+  // The prerenderer doesn't have IndexedDB
+  if (prerender) {
+    return presets.easy;
+  }
   const gridDefault = await get(key);
 
   if (!gridDefault) {

@@ -12,11 +12,11 @@
  */
 import workerURL from "chunk-name:./../../../worker";
 import nebulaSafeDark from "consts:nebulaSafeDark";
+import prerender from "consts:prerender";
 import { Component, h, VNode } from "preact";
 import toRGB from "src/main/utils/to-rgb";
 import { bind } from "src/utils/bind";
 import { PlayMode } from "src/worker/gamelogic/types";
-import { prerender } from "../../utils/constants";
 import { isFeaturePhone } from "../../utils/static-display";
 import { getGridDefault, setGridDefault } from "../state/grid-default";
 import localStateSubscribe from "../state/local-state-subscribe";
@@ -49,6 +49,12 @@ const stateServicePromise: Promise<
     import("../../../worker/state-service").default
   >
 > = (async () => {
+  // We don't need the worker if we're prerendering
+  if (prerender) {
+    // tslint:disable-next-line: no-empty
+    return new Promise(() => {});
+  }
+
   // The timing of events here is super buggy on iOS, so we need to tread very carefully.
   const worker = new Worker(workerURL);
   // @ts-ignore - iOS Safari seems to wrongly GC the worker. Throwing it to the global to prevent
@@ -154,7 +160,9 @@ export default class Root extends Component<Props, State> {
     });
 
     // Is this the reload after an update?
-    const instantGameDataStr = sessionStorage.getItem(immedateGameSessionKey);
+    const instantGameDataStr = prerender
+      ? false
+      : sessionStorage.getItem(immedateGameSessionKey);
 
     if (instantGameDataStr) {
       sessionStorage.removeItem(immedateGameSessionKey);
@@ -212,6 +220,12 @@ export default class Root extends Component<Props, State> {
         this._stateService.initGame(width, height, mines);
       }
     });
+  }
+
+  componentDidMount() {
+    if (prerender) {
+      prerenderDone();
+    }
   }
 
   render(
