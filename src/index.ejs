@@ -42,7 +42,6 @@ html {
 
 <link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
 <link rel="manifest" href="/manifest.json">
-<link rel="prefetch" href="<%=workerFile%>">
 <% for (const { asset, weight, inline, inlineRange } of fonts) { %>
   <link rel="prefetch" as="font" href="<%= asset %>" crossorigin>
   <style>
