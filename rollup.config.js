@@ -37,7 +37,7 @@ rimraf.sync("dist");
 rimraf.sync("dist-prerender");
 rimraf.sync(".rpt2_cache");
 
-function buildConfig({ prerender } = {}) {
+function buildConfig({ prerender, watch } = {}) {
   return {
     input: {
       bootstrap: "src/main/bootstrap.tsx",
@@ -50,6 +50,7 @@ function buildConfig({ prerender } = {}) {
       entryFileNames: "[name].js",
       chunkFileNames: "[name]-[hash].js"
     },
+    watch: { clearScreen: false },
     plugins: [
       {
         resolveFileUrl({ fileName }) {
@@ -76,7 +77,7 @@ function buildConfig({ prerender } = {}) {
         nebulaSafeDark: nebulaColor,
         prerender
       }),
-      glsl(),
+      glsl({ minify: !prerender }),
       ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
         data: {
           nebulaSafeDark: nebulaHex
@@ -116,7 +117,7 @@ function buildConfig({ prerender } = {}) {
           );
         }
       }),
-      simpleTS("src/main"),
+      simpleTS("src/main", { build: !prerender, watch }),
       resourceListPlugin(),
       !prerender && terser(),
       prerender ? renderStaticPlugin() : createHTMLPlugin()
@@ -124,7 +125,9 @@ function buildConfig({ prerender } = {}) {
   };
 }
 
-export default [
-  buildConfig({ prerender: false }),
-  buildConfig({ prerender: true })
-];
+export default function({ watch }) {
+  return [
+    buildConfig({ watch, prerender: false }),
+    buildConfig({ watch, prerender: true })
+  ];
+}
