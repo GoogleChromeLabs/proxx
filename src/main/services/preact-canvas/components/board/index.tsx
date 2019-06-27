@@ -86,6 +86,12 @@ export default class Board extends Component<Props, State> {
     // overflows the viewport on devices that hide the URL bar on scroll.
     window.scrollTo(0, 0);
 
+    // Set focus on a cell near the center of the board.
+    const x = Math.floor(this.props.width * 0.5);
+    const y = Math.floor(this.props.height * 0.5);
+    const btn = this._buttons[y * this.props.width + x];
+    this.setFocus(btn, { preventScroll: true });
+
     // Center scroll position
     const scroller = this.base!.querySelector(
       "." + containerStyle
@@ -94,13 +100,13 @@ export default class Board extends Component<Props, State> {
     scroller.scrollTop = scroller.scrollHeight / 2 - scroller.offsetHeight / 2;
 
     window.addEventListener("resize", this._onWindowResize);
-    window.addEventListener("keyup", this._onKeyUp);
+    window.addEventListener("keyup", this._onGlobalKeyUp);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
-    window.removeEventListener("keyup", this._onKeyUp);
+    window.removeEventListener("keyup", this._onGlobalKeyUp);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -137,13 +143,19 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private _onKeyUp(event: KeyboardEvent) {
+  private _onGlobalKeyUp(event: KeyboardEvent) {
+    // This returns the focus to the board when one of these keys is pressed (on feature phones
+    // only). This means the user doesn't have to manually refocus the board.
     if (
       (isFeaturePhone || cellFocusMode) &&
       (event.key === "9" ||
         event.key === "7" ||
         event.key === "5" ||
-        event.key === "0")
+        event.key === "0" ||
+        event.key === "ArrowLeft" ||
+        event.key === "ArrowRight" ||
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown")
     ) {
       this.moveFocusByKey(event, 0, 0);
     }
@@ -181,14 +193,8 @@ export default class Board extends Component<Props, State> {
         td.classList.add(gameCell);
         const button = document.createElement("button");
         button.classList.add(buttonStyle);
-
-        // set only 1st cell tab focusable
-        if (row === 0 && col === 0) {
-          button.setAttribute("tabindex", "0");
-          this._currentFocusableBtn = button;
-        } else {
-          button.setAttribute("tabindex", "-1");
-        }
+        // A button is made focusable in componentDidMount
+        button.setAttribute("tabindex", "-1");
         button.addEventListener("blur", this.removeFocusVisual);
         this._additionalButtonData.set(button, [x, y, defaultCell]);
         this._updateButton(button, defaultCell, x, y);
@@ -235,6 +241,16 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private setFocusVisual(button: HTMLButtonElement) {
+    // We only want to render focus styles for keyboard and feature phone users.
+    const showFocusStyle =
+      button.classList.contains("focus-visible") ||
+      isFeaturePhone ||
+      cellFocusMode;
+
+    if (!showFocusStyle) {
+      this.props.renderer.setFocus(-1, -1);
+      return;
+    }
     const [x, y] = this._additionalButtonData.get(button)!;
     this.props.renderer.setFocus(x, y);
   }
@@ -245,7 +261,9 @@ export default class Board extends Component<Props, State> {
     { preventScroll = false }: SetFocusOptions = {}
   ) {
     // move tab index to targetBtn (necessary for roving tabindex)
-    this._currentFocusableBtn!.tabIndex = -1;
+    if (this._currentFocusableBtn) {
+      this._currentFocusableBtn.tabIndex = -1;
+    }
     newFocusBtn.tabIndex = 0;
     this._currentFocusableBtn = newFocusBtn;
 

@@ -1,6 +1,6 @@
 {
   "name": "PROXX",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
   "author": "Surma <surma@surma.link>",
   "contributors": [
@@ -50,9 +50,9 @@
     "prettier": "^1.17.0",
     "puppeteer": "^1.14.0",
     "rimraf": "^2.6.2",
-    "rollup": "^1.11.0",
+    "rollup": "^1.15.2",
     "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-loadz0r": "^0.7.1",
+    "rollup-plugin-loadz0r": "^0.7.2",
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-terser": "^4.0.4",
