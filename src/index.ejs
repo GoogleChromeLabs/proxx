@@ -61,10 +61,5 @@ html {
   </style>
 <% } %>
 <div class="app"></div>
-<script>
-  <%- bootstrap.code %>
-  <% for(const dep of bundle[bootstrap.fileName].imports) {%>
-    <%-bundle[dep].code;%>
-  <% } %>
-</script>
+<script><%- inlineCode %></script>
 </html>

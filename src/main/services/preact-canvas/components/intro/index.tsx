@@ -144,7 +144,7 @@ export default class Intro extends Component<Props, State> {
   }
 
   componentDidMount() {
-      window.scrollTo(0, 0);
+    window.scrollTo(0, 0);
     window.addEventListener("keyup", this._onKeyUp);
   }
 

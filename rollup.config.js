@@ -14,7 +14,6 @@
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
-import dependencyGraph from "./lib/dependency-graph-plugin.js";
 import chunkNamePlugin from "./lib/chunk-name-plugin.js";
 import resourceListPlugin from "./lib/resource-list-plugin";
 import postcss from "rollup-plugin-postcss";
@@ -31,6 +30,7 @@ import simpleTS from "./lib/simple-ts.js";
 import renderStaticPlugin from "./lib/render-static.js";
 import { color as nebulaColor, hex as nebulaHex } from "./lib/nebula-safe-dark";
 import pkg from "./package.json";
+import createHTMLPlugin from "./lib/create-html";
 
 // Delete 'dist'
 rimraf.sync("dist");
@@ -108,31 +108,23 @@ function buildConfig({ prerender } = {}) {
         // `prependLoader` will be called for every chunk. If it returns `true`,
         // the loader code will be prepended.
         prependLoader: (chunk, inputs) => {
-          // If the filename ends with `worker`, prepend the loader.
-          if (
-            Object.keys(chunk.modules).some(mod => /worker\.[jt]s$/.test(mod))
-          ) {
-            return true;
-          }
-          // If not, fall back to the default behavior.
-          return loadz0r.isEntryModule(chunk, inputs);
+          // If the filename ends with `index/worker`, prepend the loader.
+          return (
+            Object.keys(chunk.modules).some(mod =>
+              /worker\/index\.[jt]s$/.test(mod)
+            ) || loadz0r.isEntryModule(chunk, inputs)
+          );
         }
       }),
       simpleTS("src/main"),
-      !prerender &&
-        dependencyGraph({
-          manifestName: "lib/dependencygraph.json",
-          propList: ["facadeModuleId", "fileName", "imports", "code", "isAsset"]
-        }),
       resourceListPlugin(),
-      terser(),
-      renderStaticPlugin() // TODO: prerender only
+      !prerender && terser(),
+      prerender ? renderStaticPlugin() : createHTMLPlugin()
     ].filter(item => item)
   };
 }
 
 export default [
-  buildConfig({
-    prerender: true
-  })
+  buildConfig({ prerender: false }),
+  buildConfig({ prerender: true })
 ];
