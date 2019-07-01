@@ -44,11 +44,11 @@ const lazyComponents: Promise<typeof import("./lazy-components")> = new Promise(
   }
 );
 
-const stateServicePromise: Promise<
-  import("comlink/src/comlink").Remote<
-    import("../../../worker/state-service").default
-  >
-> = (async () => {
+type StateService = import("comlink/src/comlink").Remote<
+  import("src/worker/state-service").default
+>;
+
+const stateServicePromise: Promise<StateService> = (async () => {
   // We don't need the worker if we're prerendering
   if (prerender) {
     // tslint:disable-next-line: no-empty
@@ -139,9 +139,7 @@ export default class Root extends Component<Props, State> {
 
   private _gameChangeSubscribers = new Set<GameChangeCallback>();
   private _awaitingGameTimeout: number = -1;
-  private _stateService?: import("comlink/src/comlink").Remote<
-    import("../../../worker/state-service").default
-  >;
+  private _stateService?: StateService;
 
   constructor() {
     super();

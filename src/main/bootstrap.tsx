@@ -19,9 +19,7 @@ import { main } from "./style.css";
 const container = document.body.querySelector(".app")!;
 container.classList.add(main);
 render(<Root />, container, container.firstChild as any);
-if (!prerender) {
-  performance.mark("UI ready");
-}
+performance.mark("UI ready");
 
 if (!prerender) {
   window.ga = window.ga || ((...args: any[]) => (ga.q = ga.q || []).push(args));
