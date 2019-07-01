@@ -45,16 +45,7 @@
   <link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
   <link rel="manifest" href="/manifest.json">
   <link rel="prefetch" href="<%=workerFile%>">
-  <% for (const { asset, weight, inline, inlineRange } of fonts) { %>
-    <link rel="preload" as="font" href="<%= asset %>" crossorigin>
-    <style>
-      @font-face {
-        font-family: 'Space Mono';
-        font-weight: <%= weight %>;
-        src: url('<%= asset %>') format('woff2');
-      }
-    </style>
-  <% } %>
+  <link href="https://fonts.googleapis.com/css?family=Space+Mono:400,700" rel="stylesheet">
 </head>
 <body>
   <div class="app"></div>
