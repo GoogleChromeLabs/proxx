@@ -27,7 +27,6 @@ import assetTransformPlugin from "./lib/asset-transform-plugin";
 import postCSSUrl from "postcss-url";
 import rimraf from "rimraf";
 import simpleTS from "./lib/simple-ts";
-import renderStaticPlugin from "./lib/render-static";
 import { color as nebulaColor, hex as nebulaHex } from "./lib/nebula-safe-dark";
 import pkg from "./package.json";
 import createHTMLPlugin from "./lib/create-html";
@@ -38,7 +37,7 @@ rimraf.sync("dist");
 rimraf.sync("dist-prerender");
 rimraf.sync(".rpt2_cache");
 
-function buildConfig({ prerender, watch } = {}) {
+function buildConfig({ watch } = {}) {
   return {
     input: {
       bootstrap: "src/main/bootstrap.tsx",
@@ -47,7 +46,7 @@ function buildConfig({ prerender, watch } = {}) {
     output: {
       dir: "dist",
       format: "amd",
-      sourcemap: !prerender,
+      sourcemap: true,
       entryFileNames: "[name].js",
       chunkFileNames: "[name]-[hash].js"
     },
@@ -58,7 +57,7 @@ function buildConfig({ prerender, watch } = {}) {
           return JSON.stringify("/" + fileName);
         }
       },
-      !prerender && cssModuleTypes("src"),
+      cssModuleTypes("src"),
       postcss({
         minimize: true,
         modules: {
@@ -76,9 +75,9 @@ function buildConfig({ prerender, watch } = {}) {
       constsPlugin({
         version: pkg.version,
         nebulaSafeDark: nebulaColor,
-        prerender
+        prerender: false
       }),
-      glsl({ minify: !prerender }),
+      glsl(),
       ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
         data: {
           nebulaSafeDark: nebulaHex
@@ -122,17 +121,14 @@ function buildConfig({ prerender, watch } = {}) {
         }
       }),
       // noBuild if we're prerendering. The non-prerender build takes care of the TS building.
-      simpleTS("src/main", { noBuild: prerender, watch }),
+      simpleTS("src/main", { watch }),
       resourceListPlugin(),
-      !prerender && terser(),
-      prerender ? renderStaticPlugin() : createHTMLPlugin()
+      terser(),
+      createHTMLPlugin()
     ].filter(item => item)
   };
 }
 
 export default function({ watch }) {
-  return [
-    buildConfig({ watch, prerender: false }),
-    buildConfig({ watch, prerender: true })
-  ];
+  return buildConfig({ watch });
 }
