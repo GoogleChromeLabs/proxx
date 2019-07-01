@@ -232,7 +232,10 @@ export default class Intro extends Component<Props, State> {
             </NumberField>
           </div>
           <div class={settingsRowStyle}>
-            <button class={startButtonStyle}>
+            <button
+              class={startButtonStyle}
+              style={{ opacity: prerender ? 0 : 1 }}
+            >
               {isFeaturePhone ? <span class={shortcutKeyStyle}>#</span> : ""}{" "}
               Start
             </button>

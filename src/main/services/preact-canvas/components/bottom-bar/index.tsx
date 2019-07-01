@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import prerender from "consts:prerender";
 import { Component, h } from "preact";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
@@ -109,6 +110,7 @@ export default class BottomBar extends Component<Props, State> {
         class={leftIcon}
         onClick={onSettingsClick}
         aria-label="Open information and settings"
+        style={{ opacity: prerender ? 0 : 1 }}
       >
         <Information />
       </button>
@@ -187,6 +189,7 @@ export default class BottomBar extends Component<Props, State> {
         class={fullscreen}
         onClick={goFullscreen}
         aria-label="fullscreen mode"
+        style={{ opacity: prerender ? 0 : 1 }}
       >
         <Fullscreen />
       </button>

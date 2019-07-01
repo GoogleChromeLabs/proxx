@@ -1,3 +1,4 @@
+import prerender from "consts:prerender";
 import { noCache } from "../utils/constants";
 
 /** Tell the service worker to skip waiting. Resolves once the controller has changed. */
@@ -69,6 +70,9 @@ async function watchForUpdate() {
 
 /** Set up the service worker and monitor changes */
 export async function init() {
+  if (prerender) {
+    return;
+  }
   if (noCache) {
     const reg = await navigator.serviceWorker.getRegistration();
     if (reg) {
