@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { comlinkProxy } from "../preact-canvas/lazy-load";
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
@@ -21,6 +22,5 @@ export default async function localStateSubscribe(
     stateChanges: import("../../../worker/state-service").StateChange
   ) => void
 ) {
-  const { comlinkProxy } = await import("../preact-canvas/lazy-load");
   stateService.subscribe(comlinkProxy(callback));
 }

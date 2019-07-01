@@ -21,6 +21,7 @@ import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import deferred from "../deferred";
 import { Arrow } from "../icons/initial";
+import ShowbizTitle from "../showbiz-title";
 import {
   field as fieldStyle,
   intro as introStyle,
@@ -48,7 +49,7 @@ const ShowbizTitleDeferred = deferred(
     if (!prerender) {
       resolve();
     }
-  }).then(() => import("../../lazy-components").then(m => m.ShowbizTitle))
+  }).then(() => ShowbizTitle)
 );
 
 interface NumberFieldProps extends JSX.HTMLAttributes {

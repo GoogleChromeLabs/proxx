@@ -13,6 +13,7 @@
 import { Remote } from "comlink/src/comlink";
 import { Component, h } from "preact";
 import { Animator } from "src/main/rendering/animator";
+import MotionAnimator from "src/main/rendering/motion-animator";
 import { Renderer } from "src/main/rendering/renderer";
 import { GameChangeCallback } from "src/main/services/preact-canvas";
 import { submitTime } from "src/main/services/state/best-times";
@@ -23,6 +24,9 @@ import { bind } from "src/utils/bind";
 import { StateChange } from "src/worker/gamelogic";
 import { Cell, PlayMode } from "src/worker/gamelogic/types";
 import StateService from "src/worker/state-service";
+import Canvas2DRenderer from "../../../../rendering/canvas-2d-renderer";
+import NoMotionAnimator from "../../../../rendering/no-motion-animator";
+import WebGlRenderer from "../../../../rendering/webgl-renderer";
 import initFocusHandling from "../../../../utils/focus-visible";
 import Board from "../board";
 import TopBar from "../top-bar";
@@ -202,8 +206,8 @@ export default class Game extends Component<Props, State> {
     if (this.props.useMotion) {
       // tslint:disable-next-line:variable-name
       const [RendererClass, AnimatorClass] = await Promise.all([
-        import("src/main/rendering/webgl-renderer").then(m => m.default),
-        import("src/main/rendering/motion-animator").then(m => m.default)
+        WebGlRenderer,
+        MotionAnimator
       ]);
       renderer = new RendererClass();
       animator = new AnimatorClass(
@@ -214,8 +218,8 @@ export default class Game extends Component<Props, State> {
     } else {
       // tslint:disable-next-line:variable-name
       const [RendererClass, AnimatorClass] = await Promise.all([
-        import("src/main/rendering/canvas-2d-renderer").then(m => m.default),
-        import("src/main/rendering/no-motion-animator").then(m => m.default)
+        Canvas2DRenderer,
+        NoMotionAnimator
       ]);
       renderer = new RendererClass();
       animator = new AnimatorClass(

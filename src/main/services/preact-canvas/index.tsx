@@ -24,6 +24,8 @@ import BottomBar from "./components/bottom-bar";
 import deferred from "./components/deferred";
 import GameLoading from "./components/game-loading";
 import Intro from "./components/intro";
+import * as lc from "./lazy-components";
+import * as lazyImport from "./lazy-load";
 import { game as gameClassName, nebulaContainer } from "./style.css";
 
 type Color = import("src/main/rendering/constants").Color;
@@ -32,17 +34,8 @@ type GameType = import("../../../worker/state-service").GameType;
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
-let lazyImport: typeof import("./lazy-load") | undefined;
-const lazyImportReady = import("./lazy-load").then(m => (lazyImport = m));
-const lazyComponents: Promise<typeof import("./lazy-components")> = new Promise(
-  resolve => {
-    // Prevent component CSS loading in prerender mode
-    if (!prerender) {
-      const lazyComponentImport = import("./lazy-components");
-      resolve(lazyImportReady.then(() => lazyComponentImport));
-    }
-  }
-);
+const lazyImportReady = Promise.resolve(lazyImport);
+const lazyComponents = Promise.resolve(lc);
 
 type StateService = import("comlink/src/comlink").Remote<
   import("src/worker/state-service").default
