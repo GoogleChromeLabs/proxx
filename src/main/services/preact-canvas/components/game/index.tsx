@@ -18,7 +18,7 @@ import { GameChangeCallback } from "src/main/services/preact-canvas";
 import { submitTime } from "src/main/services/state/best-times";
 import { supportsVibration } from "src/main/services/state/vibration-preference";
 import { vibrationLength } from "src/main/utils/constants";
-import initFocusHandling from "src/main/utils/focus-visible";
+import initFocusHandling from "../../../../utils/focus-visible";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import { StateChange } from "src/worker/gamelogic";
