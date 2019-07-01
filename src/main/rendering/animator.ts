@@ -10,25 +10,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const moduleStart = "consts:";
 
-export default function constsPlugin(consts) {
-  return {
-    name: "consts-plugin",
-    resolveId(id) {
-      if (!id.startsWith(moduleStart)) return;
-      return id;
-    },
-    load(id) {
-      if (!id.startsWith(moduleStart)) return;
-      const key = id.slice(moduleStart.length);
+import { GridChanges } from "src/worker/gamelogic/types";
 
-      if (!(key in consts)) {
-        this.error(`Cannot find const: ${key}`);
-        return;
-      }
-
-      return `export default ${JSON.stringify(consts[key])}`;
-    }
-  };
+export interface Animator {
+  updateCells(changes: GridChanges): void;
+  stop(): void;
 }

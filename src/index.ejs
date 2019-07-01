@@ -43,7 +43,7 @@ html {
 <link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
 <link rel="manifest" href="/manifest.json">
 <link rel="prefetch" href="<%=workerFile%>">
-<% for (const { asset, weight, inline, inlineRange, assetRange } of fonts) { %>
+<% for (const { asset, weight, inline, inlineRange } of fonts) { %>
   <link rel="prefetch" as="font" href="<%= asset %>" crossorigin>
   <style>
     @font-face {
@@ -55,16 +55,11 @@ html {
     @font-face {
       font-family: 'Space Mono';
       font-weight: <%= weight %>;
-      src: url('data:font/woff2;base64,<%= inline %>') format('woff2'), url(<%= asset %>) format('woff2');
+      src: url('data:font/woff2;base64,<%= inline %>') format('woff2');
       unicode-range: <%= inlineRange %>;
     }
   </style>
 <% } %>
 <div class="app"></div>
-<script>
-  <%- fs.readFileSync("./dist/"+bootstrapFile); %>
-  <% for(const dep of dependencygraph[bootstrapFile].imports) {%>
-    <%-dependencygraph[dep].code;%>
-  <% } %>
-</script>
+<script><%- inlineCode %></script>
 </html>

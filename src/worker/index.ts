@@ -10,25 +10,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const moduleStart = "consts:";
 
-export default function constsPlugin(consts) {
-  return {
-    name: "consts-plugin",
-    resolveId(id) {
-      if (!id.startsWith(moduleStart)) return;
-      return id;
-    },
-    load(id) {
-      if (!id.startsWith(moduleStart)) return;
-      const key = id.slice(moduleStart.length);
+import { expose, proxy, proxyMarker } from "comlink";
 
-      if (!(key in consts)) {
-        this.error(`Cannot find const: ${key}`);
-        return;
-      }
+import StateService from "./state-service";
 
-      return `export default ${JSON.stringify(consts[key])}`;
-    }
+declare var self: DedicatedWorkerGlobalScope;
+
+interface Services {
+  stateService: StateService & {
+    [proxyMarker]: true;
   };
 }
+
+const services: Services = {
+  stateService: proxy(new StateService())
+};
+
+export type RemoteServices = typeof services;
+
+expose(services, self);
+performance.mark("State ready");
+
+addEventListener("message", event => {
+  if (event.data === "ready?") {
+    self.postMessage("READY");
+  }
+});
+
+self.postMessage("READY");

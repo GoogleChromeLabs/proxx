@@ -10,25 +10,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const moduleStart = "consts:";
 
-export default function constsPlugin(consts) {
-  return {
-    name: "consts-plugin",
-    resolveId(id) {
-      if (!id.startsWith(moduleStart)) return;
-      return id;
-    },
-    load(id) {
-      if (!id.startsWith(moduleStart)) return;
-      const key = id.slice(moduleStart.length);
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
-      if (!(key in consts)) {
-        this.error(`Cannot find const: ${key}`);
-        return;
-      }
+const url = new URL(location.href);
 
-      return `export default ${JSON.stringify(consts[key])}`;
-    }
-  };
-}
+export const debug = url.searchParams.has("debug");
+export const noCache = url.searchParams.has("no-cache");
+export const cellFocusMode = url.searchParams.has("cell-focus");
+export const fpmode = url.searchParams.has("fpmode");
+
+const forceMotionParam = url.searchParams.get("motion");
+export const forceMotionMode =
+  forceMotionParam === "0"
+    ? false
+    : forceMotionParam === "1"
+    ? true
+    : undefined;
+
+export const vibrationLength = 300;
