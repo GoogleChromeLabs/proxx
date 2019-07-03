@@ -14,23 +14,24 @@
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
-import chunkNamePlugin from "./lib/chunk-name-plugin.js";
+import chunkNamePlugin from "./lib/chunk-name-plugin";
 import resourceListPlugin from "./lib/resource-list-plugin";
 import postcss from "rollup-plugin-postcss";
-import glsl from "./lib/glsl-plugin.js";
-import cssModuleTypes from "./lib/css-module-types.js";
-import assetPlugin from "./lib/asset-plugin.js";
+import glsl from "./lib/glsl-plugin";
+import cssModuleTypes from "./lib/css-module-types";
+import assetPlugin from "./lib/asset-plugin";
 import { readFileSync } from "fs";
-import constsPlugin from "./lib/consts-plugin.js";
-import ejsAssetPlugin from "./lib/ejs-asset-plugin.js";
-import assetTransformPlugin from "./lib/asset-transform-plugin.js";
+import constsPlugin from "./lib/consts-plugin";
+import ejsAssetPlugin from "./lib/ejs-asset-plugin";
+import assetTransformPlugin from "./lib/asset-transform-plugin";
 import postCSSUrl from "postcss-url";
 import rimraf from "rimraf";
-import simpleTS from "./lib/simple-ts.js";
-import renderStaticPlugin from "./lib/render-static.js";
+import simpleTS from "./lib/simple-ts";
+import renderStaticPlugin from "./lib/render-static";
 import { color as nebulaColor, hex as nebulaHex } from "./lib/nebula-safe-dark";
 import pkg from "./package.json";
 import createHTMLPlugin from "./lib/create-html";
+import addFilesPlugin from "./lib/add-files-plugin";
 
 // Delete 'dist'
 rimraf.sync("dist");
@@ -88,18 +89,21 @@ function buildConfig({ prerender, watch } = {}) {
           "./src/assets/space-mono-normal.woff2",
           "./src/assets/space-mono-bold.woff2",
           "./src/assets/favicon.png",
-          "./src/assets/social-cover.jpg",
-          "./src/assets/assetlinks.json"
+          "./src/assets/social-cover.jpg"
         ]
+      }),
+      addFilesPlugin({
+        "./src/_headers": "_headers",
+        "./src/.well-known/assetlinks.json": ".well-known/assetlinks.json"
       }),
       assetTransformPlugin(asset => {
         if (asset.fileName.includes("manifest-")) {
           // Remove name hashing
           asset.fileName = "manifest.json";
+        }
+        if (asset.fileName.endsWith(".json")) {
           // Minify
           asset.source = JSON.stringify(JSON.parse(asset.source));
-        } else if (asset.fileName.includes("assetlinks")) {
-          asset.fileName = ".well-known/assetlinks.json";
         }
       }),
       chunkNamePlugin(),

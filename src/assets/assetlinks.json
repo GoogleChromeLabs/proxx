@@ -1,5 +1,0 @@
-[{
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target" : { "namespace": "android_app", "package_name": "app.proxx.twa",
-                 "sha256_cert_fingerprints": ["CB:81:C7:A2:0B:BF:E3:54:9F:2E:D5:85:E5:FD:3D:44:21:5D:DD:9C:AF:69:1F:CE:B0:3C:EA:20:47:B7:CE:CD"] }
-  }]
