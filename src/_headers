@@ -1,0 +1,19 @@
+# Long-term cache by default.
+/*
+  Cache-Control: max-age=31536000
+
+# And here are the exceptions:
+/
+  Cache-Control: no-cache
+
+/no-prerender.html
+  Cache-Control: no-cache
+
+/sw.js
+  Cache-Control: no-cache
+
+/.well-known/*
+  Cache-Control: no-cache
+
+/manifest.json
+  Cache-Control: must-revalidate, max-age=3600
