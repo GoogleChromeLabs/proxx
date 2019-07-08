@@ -11,7 +11,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "gzip": "gzip -k1nr dist",
-    "brotli": "brotli -8 dist/index.html",
+    "brotli": "bread-compressor -a brotli dist/index.html",
     "build": "rollup -c && npm run gzip && npm run brotli",
     "watch": "rollup -c -w",
     "serve": "http-server dist -c-1 -g",
