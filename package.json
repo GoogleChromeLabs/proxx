@@ -10,8 +10,9 @@
   ],
   "license": "Apache-2.0",
   "scripts": {
-    "gzip": "gzip -k9nr dist",
-    "build": "rollup -c && npm run gzip",
+    "gzip": "gzip -k1nr dist",
+    "brotli": "brotli -8 dist/index.html",
+    "build": "rollup -c && npm run gzip && npm run brotli",
     "watch": "rollup -c -w",
     "serve": "http-server dist -c-1 -g",
     "fmt": "prettier --write 'src/**/*.{ts,tsx,css}' *.{js,json,md} 'lib/**/*.js' && npm run lintfix",
@@ -61,5 +62,8 @@
     "tslint": "^5.16.0",
     "typed-css-modules": "^0.4.2",
     "typescript": "^3.5.2"
+  },
+  "dependencies": {
+    "brotli": "^1.3.2"
   }
 }
