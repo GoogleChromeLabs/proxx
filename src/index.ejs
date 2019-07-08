@@ -1,65 +1,69 @@
 <!doctype html>
 <html lang="en">
-<title><%=title%></title>
-<style>
-html {
-  touch-action: manipulation;
-}
-</style>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-<meta name="theme-color" content="<%= nebulaSafeDark %>">
-<link rel="shortcut icon" href="<%=favicon%>" type="image/png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta charset="utf-8">
-
-<meta name="description" content="<%=description%>">
-<meta name="image" content="<%=image_url%>">
-
-<meta itemprop="name" content="<%=title%>">
-<meta itemprop="description" content="<%=description%>">
-<meta itemprop="image" content="<%=image_url%>">
-
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="<%=title%>">
-<meta name="twitter:description" content="<%=description%>">
-<meta name="twitter:site" content="<%=twitter_account%>">
-<meta name="twitter:creator" content="<%=twitter_account%>">
-<meta name="twitter:image:src" content="<%=image_url%>">
-<meta name="twitter:image:alt" content="<%=image_alt%>">
-
-<meta name="og:title" content="<%=title%>">
-<meta name="og:description" content="<%=description%>">
-<meta name="og:image" content="<%=image_url%>">
-<meta name="og:image:width" content="<%=image_width%>">
-<meta name="og:image:height" content="<%=image_height%>">
-<meta name="og:image:type" content="<%=image_type%>">
-<meta name="og:url" content="<%=url%>">
-<meta name="og:site_name" content="<%=title%>">
-<meta name="og:locale" content="<%=locale%>">
-<meta name="og:type" content="website">
-
-<link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
-<link rel="manifest" href="/manifest.json">
-<link rel="prefetch" href="<%=workerFile%>">
-<% for (const { asset, weight, inline, inlineRange } of fonts) { %>
-  <link rel="prefetch" as="font" href="<%= asset %>" crossorigin>
+<head>
+  <title><%=title%></title>
   <style>
-    @font-face {
-      font-family: 'Space Mono';
-      font-weight: <%= weight %>;
-      src: url('<%= asset %>') format('woff2');
-    }
-
-    @font-face {
-      font-family: 'Space Mono';
-      font-weight: <%= weight %>;
-      src: url('data:font/woff2;base64,<%= inline %>') format('woff2');
-      unicode-range: <%= inlineRange %>;
+    html {
+      touch-action: manipulation;
     }
   </style>
-<% } %>
-<div class="app"></div>
-<script><%- inlineCode %></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <meta name="theme-color" content="<%= nebulaSafeDark %>">
+  <link rel="shortcut icon" href="<%=favicon%>" type="image/png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="utf-8">
+
+  <meta name="description" content="<%=description%>">
+  <meta name="image" content="<%=image_url%>">
+
+  <meta itemprop="name" content="<%=title%>">
+  <meta itemprop="description" content="<%=description%>">
+  <meta itemprop="image" content="<%=image_url%>">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%=title%>">
+  <meta name="twitter:description" content="<%=description%>">
+  <meta name="twitter:site" content="<%=twitter_account%>">
+  <meta name="twitter:creator" content="<%=twitter_account%>">
+  <meta name="twitter:image:src" content="<%=image_url%>">
+  <meta name="twitter:image:alt" content="<%=image_alt%>">
+
+  <meta name="og:title" content="<%=title%>">
+  <meta name="og:description" content="<%=description%>">
+  <meta name="og:image" content="<%=image_url%>">
+  <meta name="og:image:width" content="<%=image_width%>">
+  <meta name="og:image:height" content="<%=image_height%>">
+  <meta name="og:image:type" content="<%=image_type%>">
+  <meta name="og:url" content="<%=url%>">
+  <meta name="og:site_name" content="<%=title%>">
+  <meta name="og:locale" content="<%=locale%>">
+  <meta name="og:type" content="website">
+
+  <link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="prefetch" href="<%=workerFile%>">
+  <% for (const { asset, weight, inline, inlineRange } of fonts) { %>
+    <link rel="prefetch" as="font" href="<%= asset %>" crossorigin>
+    <style>
+      @font-face {
+        font-family: 'Space Mono';
+        font-weight: <%= weight %>;
+        src: url('<%= asset %>') format('woff2');
+      }
+
+      @font-face {
+        font-family: 'Space Mono';
+        font-weight: <%= weight %>;
+        src: url('data:font/woff2;base64,<%= inline %>') format('woff2');
+        unicode-range: <%= inlineRange %>;
+      }
+    </style>
+  <% } %>
+</head>
+<body>
+  <div class="app"></div>
+  <script><%- inlineCode %></script>
+</body>
 </html>
