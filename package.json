@@ -11,7 +11,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "gzip": "gzip -k9nr dist",
-    "build": "rollup -c && npm run gzip",
+    "build": "echo hi",
     "watch": "rollup -c -w",
     "serve": "http-server dist -c-1 -g",
     "fmt": "prettier --write 'src/**/*.{ts,tsx,css}' *.{js,json,md} 'lib/**/*.js' && npm run lintfix",
