@@ -39,14 +39,16 @@ rimraf.sync("dist");
 rimraf.sync("dist-prerender");
 rimraf.sync(".rpt2_cache");
 
-function buildConfig({ prerender, watch } = {}) {
+function buildConfig({ prerender, watch, lang } = {}) {
+  const topLevelOutput = lang === "en-us";
+
   return {
     input: {
       bootstrap: "src/main/bootstrap.tsx",
       sw: "src/sw/index.ts"
     },
     output: {
-      dir: "dist",
+      dir: topLevelOutput ? "dist" : `dist/${lang}`,
       format: "amd",
       sourcemap: !prerender,
       entryFileNames: "[name].js",
@@ -74,7 +76,7 @@ function buildConfig({ prerender, watch } = {}) {
           })
         ]
       }),
-      l20nPlugin("en-us"),
+      l20nPlugin(lang),
       constsPlugin({
         version: pkg.version,
         nebulaSafeDark: nebulaColor,
@@ -94,10 +96,12 @@ function buildConfig({ prerender, watch } = {}) {
           "./src/assets/social-cover.jpg"
         ]
       }),
-      addFilesPlugin({
-        "./src/_headers": "_headers",
-        "./src/.well-known/assetlinks.json": ".well-known/assetlinks.json"
-      }),
+      topLevelOutput &&
+        addFilesPlugin({
+          "./src/_headers": "_headers",
+          "./src/_redirects": "_redirects",
+          "./src/.well-known/assetlinks.json": ".well-known/assetlinks.json"
+        }),
       assetTransformPlugin(asset => {
         if (asset.fileName.includes("manifest-")) {
           // Remove name hashing
@@ -133,8 +137,19 @@ function buildConfig({ prerender, watch } = {}) {
 }
 
 export default function({ watch }) {
-  return [
-    buildConfig({ watch, prerender: false }),
-    buildConfig({ watch, prerender: true })
-  ];
+  if (watch) {
+    return [
+      buildConfig({ watch, lang: "en-us", prerender: false }),
+      buildConfig({ watch, lang: "en-us", prerender: true })
+    ];
+  }
+
+  const langs = ["en-us", "en-gb"];
+
+  return langs
+    .map(lang => [
+      buildConfig({ watch, lang, prerender: false }),
+      buildConfig({ watch, lang, prerender: true })
+    ])
+    .flat();
 }

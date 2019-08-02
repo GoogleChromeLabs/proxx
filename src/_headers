@@ -1,6 +1,7 @@
 # Long-term cache by default.
 /*
   Cache-Control: max-age=31536000
+  Vary: Accept-Language
 
 # And here are the exceptions:
 /
