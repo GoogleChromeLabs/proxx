@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 import prerender from "consts:prerender";
+import { strDifficulty } from "l20n:main";
 import { Component, h } from "preact";
 import {
   getPresetName,
@@ -175,7 +176,7 @@ export default class Intro extends Component<Props, State> {
         >
           <div class={settingsRowStyle}>
             <label class={labelStyle}>
-              <span class={labelTextStyle}>Difficulty</span>
+              <span class={labelTextStyle}>{strDifficulty}</span>
               <Arrow class={selectArrowStyle} />
               <select
                 required

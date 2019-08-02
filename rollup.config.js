@@ -32,6 +32,7 @@ import { color as nebulaColor, hex as nebulaHex } from "./lib/nebula-safe-dark";
 import pkg from "./package.json";
 import createHTMLPlugin from "./lib/create-html";
 import addFilesPlugin from "./lib/add-files-plugin";
+import l20nPlugin from "./lib/l20n-plugin";
 
 // Delete 'dist'
 rimraf.sync("dist");
@@ -73,6 +74,7 @@ function buildConfig({ prerender, watch } = {}) {
           })
         ]
       }),
+      l20nPlugin("en-us"),
       constsPlugin({
         version: pkg.version,
         nebulaSafeDark: nebulaColor,
