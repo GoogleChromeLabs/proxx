@@ -131,7 +131,11 @@ function buildConfig({ prerender, watch, lang } = {}) {
       simpleTS("src/main", { noBuild: prerender, watch }),
       resourceListPlugin(),
       !prerender && terser(),
-      prerender ? renderStaticPlugin() : createHTMLPlugin()
+      prerender
+        ? renderStaticPlugin(
+            `dist${topLevelOutput ? "" : "/" + lang}/no-prerender.html`
+          )
+        : createHTMLPlugin()
     ].filter(item => item)
   };
 }
