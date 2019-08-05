@@ -44,3 +44,5 @@ export const strEasyMode = "Bollocks";
 export const strMediumMode = "Bollocks";
 export const strHardMode = "Bollocks";
 export const strCustomMode = "Bollocks";
+export const strPageTitle = "Bollocks";
+export const strPageDescription = "Bollocks";

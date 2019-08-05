@@ -1,17 +1,19 @@
 # Long-term cache by default.
 /*
   Cache-Control: max-age=31536000
-  Vary: Accept-Language
 
 # And here are the exceptions:
 /
   Cache-Control: no-cache
+  Vary: Accept-Language
 
 /no-prerender.html
   Cache-Control: no-cache
+  Vary: Accept-Language
 
 /sw.js
   Cache-Control: no-cache
+  Vary: Accept-Language
 
 /.well-known/*
   Cache-Control: no-cache

@@ -153,7 +153,7 @@ function buildConfig({ prerender, watch, lang } = {}) {
         ? renderStaticPlugin(
             `dist${topLevelOutput ? "" : "/" + lang}/no-prerender.html`
           )
-        : createHTMLPlugin()
+        : createHTMLPlugin(lang)
     ].filter(item => item)
   };
 }

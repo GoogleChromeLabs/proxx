@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="en">
+<html lang="<%=lang %>">
 <head>
-  <title><%=title%></title>
+  <title><%=title %></title>
   <style>
     html {
       touch-action: manipulation;
@@ -38,7 +38,7 @@
   <meta name="og:image:type" content="<%=image_type%>">
   <meta name="og:url" content="<%=url%>">
   <meta name="og:site_name" content="<%=title%>">
-  <meta name="og:locale" content="<%=locale%>">
+  <meta name="og:locale" content="<%=lang.replace(/-/g, '_')%>">
   <meta name="og:type" content="website">
 
   <link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
@@ -53,12 +53,14 @@
         src: url('<%= asset %>') format('woff2');
       }
 
-      @font-face {
-        font-family: 'Space Mono';
-        font-weight: <%= weight %>;
-        src: url('data:font/woff2;base64,<%= inline %>') format('woff2');
-        unicode-range: <%= inlineRange %>;
-      }
+      <% if (inline) { %>
+        @font-face {
+          font-family: 'Space Mono';
+          font-weight: <%= weight %>;
+          src: url('data:font/woff2;base64,<%= inline %>') format('woff2');
+          unicode-range: <%= inlineRange %>;
+        }
+      <% } %>
     </style>
   <% } %>
 </head>
