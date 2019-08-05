@@ -10,22 +10,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { readFileSync, readdirSync } from "fs";
+import { join } from "path";
 
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
+import postCSSUrl from "postcss-url";
+import postcss from "rollup-plugin-postcss";
+import rimraf from "rimraf";
+
 import chunkNamePlugin from "./lib/chunk-name-plugin";
 import resourceListPlugin from "./lib/resource-list-plugin";
-import postcss from "rollup-plugin-postcss";
 import glsl from "./lib/glsl-plugin";
 import cssModuleTypes from "./lib/css-module-types";
 import assetPlugin from "./lib/asset-plugin";
-import { readFileSync } from "fs";
 import constsPlugin from "./lib/consts-plugin";
 import ejsAssetPlugin from "./lib/ejs-asset-plugin";
 import assetTransformPlugin from "./lib/asset-transform-plugin";
-import postCSSUrl from "postcss-url";
-import rimraf from "rimraf";
 import simpleTS from "./lib/simple-ts";
 import renderStaticPlugin from "./lib/render-static";
 import { color as nebulaColor, hex as nebulaHex } from "./lib/nebula-safe-dark";
@@ -39,8 +41,14 @@ rimraf.sync("dist");
 rimraf.sync("dist-prerender");
 rimraf.sync(".rpt2_cache");
 
+const langs = readdirSync(join("src", "l20n"), { withFileTypes: true })
+  .filter(item => item.isDirectory())
+  .map(item => item.name);
+
+const primaryLang = "en-us";
+
 function buildConfig({ prerender, watch, lang } = {}) {
-  const topLevelOutput = lang === "en-us";
+  const topLevelOutput = lang === primaryLang;
 
   return {
     input: {
@@ -83,29 +91,39 @@ function buildConfig({ prerender, watch, lang } = {}) {
         prerender
       }),
       glsl({ minify: !prerender }),
-      ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
-        data: {
-          nebulaSafeDark: nebulaHex
-        }
-      }),
+      topLevelOutput &&
+        ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
+          data: {
+            nebulaSafeDark: nebulaHex
+          }
+        }),
+      topLevelOutput &&
+        ejsAssetPlugin("./src/_redirects.ejs", "_redirects", {
+          data: { langs: langs.filter(l => l !== primaryLang) }
+        }),
       assetPlugin({
         initialAssets: [
           "./src/assets/space-mono-normal.woff2",
           "./src/assets/space-mono-bold.woff2",
           "./src/assets/favicon.png",
-          "./src/assets/social-cover.jpg"
+          "./src/assets/social-cover.jpg",
+          "./src/assets/icon-maskable.png",
+          "./src/assets/icon.png"
         ]
       }),
       topLevelOutput &&
         addFilesPlugin({
           "./src/_headers": "_headers",
-          "./src/_redirects": "_redirects",
           "./src/.well-known/assetlinks.json": ".well-known/assetlinks.json"
         }),
       assetTransformPlugin(asset => {
         if (asset.fileName.includes("manifest-")) {
           // Remove name hashing
           asset.fileName = "manifest.json";
+        }
+        if (asset.fileName.includes("_redirects-")) {
+          // Remove name hashing
+          asset.fileName = "_redirects";
         }
         if (asset.fileName.endsWith(".json")) {
           // Minify
@@ -143,12 +161,10 @@ function buildConfig({ prerender, watch, lang } = {}) {
 export default function({ watch }) {
   if (watch) {
     return [
-      buildConfig({ watch, lang: "en-us", prerender: false }),
-      buildConfig({ watch, lang: "en-us", prerender: true })
+      buildConfig({ watch, lang: primaryLang, prerender: false }),
+      buildConfig({ watch, lang: primaryLang, prerender: true })
     ];
   }
-
-  const langs = ["en-us", "en-gb"];
 
   return langs
     .map(lang => [
