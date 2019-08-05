@@ -87,3 +87,7 @@ export const strNewHighScore = "New high score!";
 export const strScore = "Score";
 export const strBest = "Best";
 export const strPlayAgain = "Play again";
+export const strEasyMode = "Easy mode";
+export const strMediumMode = "Medium mode";
+export const strHardMode = "Hard mode";
+export const strCustomMode = "Custom mode";

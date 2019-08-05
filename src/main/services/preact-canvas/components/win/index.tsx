@@ -12,7 +12,11 @@
  */
 import {
   strBest,
+  strCustomMode,
+  strEasyMode,
+  strHardMode,
   strMainMenu,
+  strMediumMode,
   strNewHighScore,
   strPlayAgain,
   strScore,
@@ -57,18 +61,25 @@ interface State {
   gridName: string;
 }
 
+const localPresetNames = {
+  easy: strEasyMode,
+  medium: strMediumMode,
+  hard: strHardMode,
+  custom: strCustomMode
+};
+
 export default class End extends Component<Props, State> {
   private _playAgainBtn?: HTMLButtonElement;
   constructor(props: Props) {
     super(props);
 
     const { width, height, mines } = props;
-    const presetName: string = getPresetName(width, height, mines);
+    const presetName = getPresetName(width, height, mines);
+    const localPresetName = localPresetNames[presetName];
 
     this.state = {
       gridName:
-        presetName +
-        " mode" +
+        localPresetName +
         (presetName === "custom" ? ` - ${width}x${height}:${mines}` : "")
     };
   }

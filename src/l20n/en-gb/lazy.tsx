@@ -40,3 +40,7 @@ export const strNewHighScore = "Bollocks";
 export const strScore = "Bollocks";
 export const strBest = "Bollocks";
 export const strPlayAgain = "Bollocks";
+export const strEasyMode = "Bollocks";
+export const strMediumMode = "Bollocks";
+export const strHardMode = "Bollocks";
+export const strCustomMode = "Bollocks";
