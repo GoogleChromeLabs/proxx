@@ -12,6 +12,10 @@ declare module "l20n:main" {
   export * from "src/l20n/en-us/main";
 }
 
+declare module "l20n:lazy" {
+  export * from "src/l20n/en-us/lazy";
+}
+
 interface GA {
   (...args: any[]): void;
   q: any[];

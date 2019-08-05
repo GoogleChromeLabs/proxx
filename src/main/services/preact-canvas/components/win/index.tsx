@@ -10,6 +10,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  strBest,
+  strMainMenu,
+  strNewHighScore,
+  strPlayAgain,
+  strScore,
+  strYouWin
+} from "l20n:lazy";
 import { Component, h } from "preact";
 import { bind } from "../../../../../utils/bind";
 import { minSec } from "../../../../utils/format";
@@ -99,17 +107,17 @@ export default class End extends Component<Props, State> {
             </div>
           </div>
           <h2 class={winState}>
-            {time === bestTime ? "New high score!" : "You win!"}{" "}
+            {time === bestTime ? strNewHighScore : strYouWin}{" "}
             <span class={gridNameStyle}>({gridName})</span>
           </h2>
           <div class={scoreRow}>
             <div class={score}>
-              <div class={timeLabel}>Score</div>
+              <div class={timeLabel}>{strScore}</div>
               <div class={timeStyle}>{timeStr}</div>
             </div>
             <Timer class={timerIcon} />
             <div class={score}>
-              <div class={timeLabel}>Best</div>
+              <div class={timeLabel}>{strBest}</div>
               <div class={timeStyle}>{bestTimeStr}</div>
             </div>
           </div>
@@ -121,10 +129,11 @@ export default class End extends Component<Props, State> {
             {isFeaturePhone && (
               <span class={[shortcutKey, againShortcutKey].join(" ")}>#</span>
             )}{" "}
-            Play again
+            {strPlayAgain}
           </button>
           <button class={mainButton} onClick={onMainMenu}>
-            {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""} Main menu
+            {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""}{" "}
+            {strMainMenu}
           </button>
         </div>
       </div>

@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 import { Remote } from "comlink/src/comlink";
+import { strMainMenu, strTryAgain } from "l20n:lazy";
 import { Component, h } from "preact";
 import { Animator } from "src/main/rendering/animator";
 import { Renderer } from "src/main/rendering/renderer";
@@ -150,11 +151,11 @@ export default class Game extends Component<Props, State> {
                         #
                       </span>
                     )}{" "}
-                    Try again
+                    {strTryAgain}
                   </button>
                   <button class={mainButton} onClick={this.onReset}>
                     {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""}{" "}
-                    Main menu
+                    {strMainMenu}
                   </button>
                 </div>
               </div>

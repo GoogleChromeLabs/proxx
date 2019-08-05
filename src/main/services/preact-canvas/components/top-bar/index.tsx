@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { strGameOver, strRemaining, strYouWin } from "l20n:lazy";
 import { Component, h } from "preact";
 import { PlayMode } from "../../../../../worker/gamelogic/types";
 import { minSec } from "../../../../utils/format";
@@ -80,15 +81,13 @@ class Time extends Component<TimeProps, {}> {
 }
 
 function gameStatusText(playMode?: PlayMode) {
-  let text: string;
   if (playMode === PlayMode.Won) {
-    text = "You win";
+    return strYouWin;
   } else if (playMode === PlayMode.Lost) {
-    text = "Game over";
+    return strGameOver;
   } else {
-    text = "Remaining";
+    return strRemaining;
   }
-  return text;
 }
 
 export interface Props {

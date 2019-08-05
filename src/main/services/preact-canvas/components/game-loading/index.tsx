@@ -10,6 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { strLoading } from "l20n:main";
 import { Component, h } from "preact";
 import { loading, loadingInner } from "./style.css";
 
@@ -19,7 +20,7 @@ export default class GameLoading extends Component<{}, {}> {
   render() {
     return (
       <div class={loading}>
-        <div class={loadingInner}>…Loading…</div>
+        <div class={loadingInner}>…{strLoading}…</div>
       </div>
     );
   }
