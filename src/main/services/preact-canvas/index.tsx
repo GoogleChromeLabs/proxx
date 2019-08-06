@@ -83,10 +83,7 @@ function gameTypeToURL(
   mines: number,
   usedKeyboard: boolean
 ) {
-  return (
-    `/game/${width}:${height}:${mines}:${usedKeyboard ? "k" : "m"}` +
-    location.search
-  );
+  return `/game/${width}:${height}:${mines}:${usedKeyboard ? "k" : "m"}`;
 }
 
 const nebulaDangerDark: Color = [40, 0, 0];
@@ -188,7 +185,7 @@ export default class Root extends Component<Props, State> {
       history.pushState(
         {},
         "",
-        gameTypeToURL(width, height, mines, usedKeyboard)
+        gameTypeToURL(width, height, mines, usedKeyboard) + location.search
       );
     }
     // /TODO
@@ -196,6 +193,10 @@ export default class Root extends Component<Props, State> {
     // We're going to try to jump straight into a game.
     if (location.pathname.startsWith("/game/")) {
       this.setState({ awaitingGame: true });
+    }
+
+    if (!prerender) {
+      this._handleCurrentURL();
     }
 
     stateServicePromise.then(async stateService => {
@@ -237,8 +238,6 @@ export default class Root extends Component<Props, State> {
           }
         }
       });
-
-      this._handleCurrentURL();
     });
   }
 
@@ -422,15 +421,14 @@ export default class Root extends Component<Props, State> {
 
   @bind
   private _onSettingsCloseClick() {
-    this.setState({ settingsOpen: false }, () => {
-      this.previousFocus!.focus();
-    });
+    this._pushPath("/");
   }
 
   @bind
   private _onSettingsClick() {
     this.previousFocus = document.activeElement as HTMLElement;
-    this.setState({ settingsOpen: true, allowIntroAnim: false });
+    this._pushPath("/about/");
+    this._handleCurrentURL();
   }
 
   @bind
@@ -438,30 +436,71 @@ export default class Root extends Component<Props, State> {
     this._handleCurrentURL();
   }
 
-  private async _handleCurrentURL() {
-    const bail = () => {
-      history.replaceState({}, "", "/" + location.search);
-      this.setState({ awaitingGame: false, dangerMode: false });
-      this._stateService!.reset();
-    };
+  private _pushPath(path: string) {
+    history.pushState({}, "", path + location.search);
+    this._handleCurrentURL();
+  }
 
-    if (!location.pathname.startsWith("/game/")) {
-      bail();
+  private _resetToStartScreen() {
+    history.replaceState({}, "", "/" + location.search);
+    this.setState(
+      {
+        awaitingGame: false,
+        dangerMode: false,
+        settingsOpen: false
+      },
+      () => {
+        if (this.previousFocus) {
+          this.previousFocus.focus();
+          this.previousFocus = null;
+        }
+      }
+    );
+    this._stateService!.reset();
+  }
+
+  private async _handleCurrentURL() {
+    if (location.pathname === "/") {
+      this._resetToStartScreen();
       return;
     }
 
+    if (location.pathname === "/about/") {
+      this.setState({ settingsOpen: true, allowIntroAnim: false });
+      return;
+    }
+
+    if (!location.pathname.startsWith("/game/")) {
+      this._resetToStartScreen();
+      return;
+    }
+
+    // The rest of this function handles /game/etc-etc
     const gameStr = location.pathname.slice("/game/".length);
     const gameStrParts = gameStr.split(":");
     const [width, height, mines] = gameStrParts.slice(0, 3).map(n => Number(n));
 
     if (!width || !height || !mines) {
-      bail();
+      this._resetToStartScreen();
       return;
     }
 
-    const usedKeyboard = gameStrParts[3] === "k";
+    this._awaitingGameTimeout = setTimeout(() => {
+      this.setState({ awaitingGame: true });
+    }, loadingScreenTimeout);
+
+    const { updateReady, skipWaiting } = await lazyImportReady;
+
+    if (updateReady) {
+      // There's an update available. Let's load it as part of starting the game…
+      await skipWaiting();
+      location.reload();
+      return;
+    }
 
     await gamePerquisites;
+
+    const usedKeyboard = gameStrParts[3] === "k";
 
     if (!usedKeyboard) {
       // This is a horrible hack to tell focus-visible.js not to initially show focus styles.
@@ -476,37 +515,14 @@ export default class Root extends Component<Props, State> {
 
   @bind
   private async _onStartGame(width: number, height: number, mines: number) {
-    this._awaitingGameTimeout = setTimeout(() => {
-      this.setState({ awaitingGame: true });
-    }, loadingScreenTimeout);
-
-    const { updateReady, skipWaiting } = await lazyImportReady;
-
     // Did the user click the start button using keyboard?
     // This is important if the page is reloaded (eg, if updateReady)
     const usedKeyboard = !!document.querySelector(".focus-visible");
-    history.pushState(
-      {},
-      "",
-      gameTypeToURL(width, height, mines, usedKeyboard)
-    );
-
-    if (updateReady) {
-      // There's an update available. Let's load it as part of starting the game…
-      await skipWaiting();
-      location.reload();
-      return;
-    }
-
-    // Wait for everything to be ready:
-    await gamePerquisites;
-    const stateService = await stateServicePromise;
-    stateService.initGame(width, height, mines);
+    this._pushPath(gameTypeToURL(width, height, mines, usedKeyboard));
   }
 
   @bind
   private _onBackClick() {
-    this.setState({ dangerMode: false });
-    this._stateService!.reset();
+    this._resetToStartScreen();
   }
 }
