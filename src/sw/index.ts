@@ -13,6 +13,7 @@ self.addEventListener("install", event => {
       item !== "bootstrap.js" &&
       item !== "_headers" &&
       !item.includes("manifest-") &&
+      !item.includes("_redirects-") &&
       !item.includes("icon-") &&
       !item.includes("assetlinks-") &&
       !item.includes("social-")
