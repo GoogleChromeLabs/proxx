@@ -91,15 +91,18 @@ function buildConfig({ prerender, watch, lang } = {}) {
         prerender
       }),
       glsl({ minify: !prerender }),
-      topLevelOutput &&
-        ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
-          data: {
-            nebulaSafeDark: nebulaHex
-          }
-        }),
+      ejsAssetPlugin("./src/manifest.ejs", "manifest.json", {
+        data: {
+          nebulaSafeDark: nebulaHex
+        }
+      }),
       topLevelOutput &&
         ejsAssetPlugin("./src/_redirects.ejs", "_redirects", {
           data: { langs: langs.filter(l => l !== primaryLang) }
+        }),
+      topLevelOutput &&
+        addFilesPlugin({
+          "./src/_headers": "_headers"
         }),
       assetPlugin({
         initialAssets: [
@@ -111,11 +114,9 @@ function buildConfig({ prerender, watch, lang } = {}) {
           "./src/assets/icon.png"
         ]
       }),
-      topLevelOutput &&
-        addFilesPlugin({
-          "./src/_headers": "_headers",
-          "./src/.well-known/assetlinks.json": ".well-known/assetlinks.json"
-        }),
+      addFilesPlugin({
+        "./src/.well-known/assetlinks.json": ".well-known/assetlinks.json"
+      }),
       assetTransformPlugin(asset => {
         if (asset.fileName.includes("manifest-")) {
           // Remove name hashing
