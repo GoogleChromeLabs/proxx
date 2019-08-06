@@ -77,6 +77,18 @@ const stateServicePromise: Promise<StateService> = (async () => {
   return remoteServices.stateService;
 })() as any;
 
+function gameTypeToURL(
+  width: number,
+  height: number,
+  mines: number,
+  usedKeyboard: boolean
+) {
+  return (
+    `/game/${width}:${height}:${mines}:${usedKeyboard ? "k" : "m"}` +
+    location.search
+  );
+}
+
 const nebulaDangerDark: Color = [40, 0, 0];
 const nebulaDangerLight: Color = [131, 23, 71];
 // Looking for nebulaSafeDark? It's defined in lib/nebula-safe-dark.js
@@ -157,13 +169,32 @@ export default class Root extends Component<Props, State> {
       });
     });
 
-    // Is this the reload after an update?
+    // Is this the reload after an old update?
+    // TODO: we should be able to remove this after a few months.
     const instantGameDataStr = prerender
       ? false
       : sessionStorage.getItem(immedateGameSessionKey);
 
     if (instantGameDataStr) {
-      sessionStorage.removeItem(immedateGameSessionKey);
+      const { width, height, mines, usedKeyboard } = JSON.parse(
+        instantGameDataStr
+      ) as {
+        width: number;
+        height: number;
+        mines: number;
+        usedKeyboard: boolean;
+      };
+
+      history.pushState(
+        {},
+        "",
+        gameTypeToURL(width, height, mines, usedKeyboard)
+      );
+    }
+    // /TODO
+
+    // We're going to try to jump straight into a game.
+    if (location.pathname.startsWith("/game/")) {
       this.setState({ awaitingGame: true });
     }
 
@@ -207,26 +238,7 @@ export default class Root extends Component<Props, State> {
         }
       });
 
-      if (instantGameDataStr) {
-        await gamePerquisites;
-        const { width, height, mines, usedKeyboard } = JSON.parse(
-          instantGameDataStr
-        ) as {
-          width: number;
-          height: number;
-          mines: number;
-          usedKeyboard: boolean;
-        };
-
-        if (!usedKeyboard) {
-          // This is a horrible hack to tell focus-visible.js not to initially show focus styles.
-          document.body.dispatchEvent(
-            new MouseEvent("mousemove", { bubbles: true })
-          );
-        }
-
-        this._stateService.initGame(width, height, mines);
-      }
+      this._handleCurrentURL();
     });
   }
 
@@ -234,6 +246,12 @@ export default class Root extends Component<Props, State> {
     if (prerender) {
       prerenderDone();
     }
+
+    addEventListener("popstate", this._onPopState);
+  }
+
+  componentWillUnmount() {
+    removeEventListener("popstate", this._onPopState);
   }
 
   render(
@@ -416,6 +434,47 @@ export default class Root extends Component<Props, State> {
   }
 
   @bind
+  private _onPopState() {
+    this._handleCurrentURL();
+  }
+
+  private async _handleCurrentURL() {
+    const bail = () => {
+      history.replaceState({}, "", "/" + location.search);
+      this.setState({ awaitingGame: false, dangerMode: false });
+      this._stateService!.reset();
+    };
+
+    if (!location.pathname.startsWith("/game/")) {
+      bail();
+      return;
+    }
+
+    const gameStr = location.pathname.slice("/game/".length);
+    const gameStrParts = gameStr.split(":");
+    const [width, height, mines] = gameStrParts.slice(0, 3).map(n => Number(n));
+
+    if (!width || !height || !mines) {
+      bail();
+      return;
+    }
+
+    const usedKeyboard = gameStrParts[3] === "k";
+
+    await gamePerquisites;
+
+    if (!usedKeyboard) {
+      // This is a horrible hack to tell focus-visible.js not to initially show focus styles.
+      document.body.dispatchEvent(
+        new MouseEvent("mousemove", { bubbles: true })
+      );
+    }
+
+    const stateService = await stateServicePromise;
+    stateService.initGame(width, height, mines);
+  }
+
+  @bind
   private async _onStartGame(width: number, height: number, mines: number) {
     this._awaitingGameTimeout = setTimeout(() => {
       this.setState({ awaitingGame: true });
@@ -423,18 +482,18 @@ export default class Root extends Component<Props, State> {
 
     const { updateReady, skipWaiting } = await lazyImportReady;
 
+    // Did the user click the start button using keyboard?
+    // This is important if the page is reloaded (eg, if updateReady)
+    const usedKeyboard = !!document.querySelector(".focus-visible");
+    history.pushState(
+      {},
+      "",
+      gameTypeToURL(width, height, mines, usedKeyboard)
+    );
+
     if (updateReady) {
       // There's an update available. Let's load it as part of starting the game…
       await skipWaiting();
-
-      // Did the user click the start button using keyboard?
-      const usedKeyboard = !!document.querySelector(".focus-visible");
-
-      sessionStorage.setItem(
-        immedateGameSessionKey,
-        JSON.stringify({ width, height, mines, usedKeyboard })
-      );
-
       location.reload();
       return;
     }
