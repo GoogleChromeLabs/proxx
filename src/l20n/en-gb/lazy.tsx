@@ -46,3 +46,4 @@ export const strHardMode = "Bollocks";
 export const strCustomMode = "Bollocks";
 export const strPageTitle = "Bollocks";
 export const strPageDescription = "Bollocks";
+export const strRightClick = "Bollocks";

@@ -18,6 +18,8 @@ import {
   strFlagMode,
   strFlagModeOff,
   strFlagModeOn,
+  strFlagOff,
+  strFlagOn,
   strFullscreenMode,
   strInfo,
   strInformationAndSettings
@@ -139,9 +141,7 @@ export default class BottomBar extends Component<Props, State> {
             aria-label={strFlagMode}
             ref={el => (this._flagCheckbox = el)}
           />
-          <span aria-hidden="true">
-            {strFlag}:{dangerMode ? "OFF" : "ON"}
-          </span>
+          <span aria-hidden="true">{dangerMode ? strFlagOff : strFlagOn}</span>
         </label>
         <span
           role="status"

@@ -31,6 +31,7 @@ import {
   strMoveRight,
   strMoveUp,
   strPrivacyPolicy,
+  strRightClick,
   strRightClickInstruction,
   strShortcuts,
   strSwitchBetweenClearAndFlagMode,
@@ -240,7 +241,10 @@ export default class About extends Component<Props> {
               {strSwitchBetweenClearAndFlagMode}
             </li>
             <li>
-              <RightClick class={shortcutIconStyle} aria-label="Right click" />
+              <RightClick
+                class={shortcutIconStyle}
+                aria-label={strRightClick}
+              />
               {strRightClickInstruction}
             </li>
           </ul>

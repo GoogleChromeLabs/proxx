@@ -93,3 +93,4 @@ export const strHardMode = "Hard mode";
 export const strCustomMode = "Custom mode";
 export const strPageTitle = "PROXX — a game of proximity";
 export const strPageDescription = "Navigate space and avoid the black holes.";
+export const strRightClick = "Right click";
