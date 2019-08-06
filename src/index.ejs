@@ -10,7 +10,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
   <meta name="theme-color" content="<%= nebulaSafeDark %>">
-  <link rel="shortcut icon" href="<%=favicon%>" type="image/png">
+  <link rel="shortcut icon" href="/<%=favicon%>" type="image/png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta charset="utf-8">
@@ -41,16 +41,16 @@
   <meta name="og:locale" content="<%=lang.replace(/-/g, '_')%>">
   <meta name="og:type" content="website">
 
-  <link rel="apple-touch-icon" sizes="1024x1024" href="<%=icon%>">
+  <link rel="apple-touch-icon" sizes="1024x1024" href="/<%=icon%>">
   <link rel="manifest" href="/manifest.json">
-  <link rel="prefetch" href="<%=workerFile%>">
+  <link rel="prefetch" href="/<%=workerFile%>">
   <% for (const { asset, weight, inline, inlineRange } of fonts) { %>
-    <link rel="prefetch" as="font" href="<%= asset %>" crossorigin>
+    <link rel="prefetch" as="font" href="/<%= asset %>" crossorigin>
     <style>
       @font-face {
         font-family: 'Space Mono';
         font-weight: <%= weight %>;
-        src: url('<%= asset %>') format('woff2');
+        src: url('/<%= asset %>') format('woff2');
       }
 
       <% if (inline) { %>
