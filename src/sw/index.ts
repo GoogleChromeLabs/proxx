@@ -51,9 +51,26 @@ self.addEventListener("fetch", event => {
   }
   event.respondWith(
     (async function() {
-      const cachedResponse = await caches.match(event.request, {
+      let cachedResponse: Response | undefined;
+
+      // Handle the URLs that just go to the root page
+      if (event.request.mode === "navigate") {
+        const url = new URL(event.request.url);
+        if (
+          url.pathname === "/" ||
+          url.pathname === "/about/" ||
+          url.pathname.startsWith("/game/")
+        ) {
+          cachedResponse = await caches.match("/");
+        }
+      }
+
+      if (!cachedResponse) {
+        cachedResponse = await caches.match(event.request, {
         ignoreSearch: true
       });
+      }
+
       return cachedResponse || fetch(event.request);
     })()
   );

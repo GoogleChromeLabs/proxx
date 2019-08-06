@@ -441,7 +441,7 @@ export default class Root extends Component<Props, State> {
     this._handleCurrentURL();
   }
 
-  private _resetToStartScreen() {
+  private async _resetToStartScreen() {
     history.replaceState({}, "", "/" + location.search);
     this.setState(
       {
@@ -456,7 +456,8 @@ export default class Root extends Component<Props, State> {
         }
       }
     );
-    this._stateService!.reset();
+    const stateService = await stateServicePromise;
+    stateService.reset();
   }
 
   private async _handleCurrentURL() {
