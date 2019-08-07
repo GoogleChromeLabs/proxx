@@ -234,7 +234,7 @@ export default class BottomBar extends Component<Props, State> {
       }
     } else if (
       this.props.showDangerModeToggle &&
-      (event.key === "f" || event.key === "#" || event.key === "SoftRight")
+      (event.key === "f" || event.key === "#")
     ) {
       this._dangerModeChange(!this.props.dangerMode, true);
     }
