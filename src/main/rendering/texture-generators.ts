@@ -11,7 +11,10 @@
  * limitations under the License.
  */
 
-import { staticDevicePixelRatio } from "../utils/static-display";
+import {
+  isFeaturePhone,
+  staticDevicePixelRatio
+} from "../utils/static-display";
 import { deg2rad, remap, smoothpulse } from "./animation-helpers";
 import { roundedRectangle } from "./canvas-helper";
 
@@ -23,8 +26,8 @@ import {
   blackHoleRadius,
   borderRadius,
   flagCircleRadius,
-  glowAlpha,
-  glowFactor,
+  glowAlpha as constantGlowAlpha,
+  glowFactor as constantGlowFactor,
   innerCircleRadius,
   numberCircleRadius,
   numberFontSizeFactor,
@@ -35,6 +38,11 @@ import {
   thinLine,
   white
 } from "./constants";
+
+// The blur effect takes up a ton of CPU time on feature phones (like, 8 seconds).
+// Kill it:
+const glowFactor = isFeaturePhone ? 0 : constantGlowFactor;
+const glowAlpha = isFeaturePhone ? 0 : constantGlowAlpha;
 
 export type TextureGenerator = (
   idx: number,
