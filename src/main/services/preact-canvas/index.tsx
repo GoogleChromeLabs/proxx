@@ -320,6 +320,7 @@ export default class Root extends Component<Props, State> {
               useMotion={motionPreference}
               bestTime={bestTime}
               useVibration={vibrationPreference}
+              onBack={this._onBackClick}
             />
           )}
         />
