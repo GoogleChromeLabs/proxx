@@ -152,7 +152,7 @@ function buildConfig({ prerender, watch, lang } = {}) {
       !prerender && terser(),
       prerender
         ? renderStaticPlugin(
-            `dist${topLevelOutput ? "" : "/" + lang}/no-prerender.html`
+            join('dist', topLevelOutput ? "" : lang, 'no-prerender.html')
           )
         : createHTMLPlugin(lang)
     ].filter(item => item)
