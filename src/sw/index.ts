@@ -11,6 +11,7 @@ self.addEventListener("install", event => {
     item =>
       item !== "sw.js" &&
       item !== "bootstrap.js" &&
+      item !== "_headers" &&
       !item.includes("manifest-") &&
       !item.includes("icon-") &&
       !item.includes("assetlinks-") &&
