@@ -24,7 +24,7 @@ interface Props {
 
 export default class Row extends Component<Props, State> {
   shouldComponentUpdate(nextProps: Props) {
-    return this.props.row !== nextProps.row;
+    return true; //this.props.row !== nextProps.row;
   }
 
   render({ row, onClick }: Props) {

@@ -13,10 +13,11 @@
 
 import { wrap } from "comlink";
 
+import StateService from "./services/state.js";
 import PreactService from "./services/preact";
 
 // @ts-ignore
-import workerURL from "chunk-name:./worker.js";
+//import workerURL from "chunk-name:./worker.js";
 
 const logEl = document.querySelector("#log")!;
 function log(msg: string) {
@@ -26,15 +27,17 @@ function log(msg: string) {
 async function bootstrap() {
   log("Booting!");
   try {
-    const worker = new Worker(workerURL);
-    worker.addEventListener("error", e => {
-      log(`Worker error: ${e.toString()}`);
-    });
+    // const worker = new Worker(workerURL);
+    // worker.addEventListener("error", e => {
+    //   log(`Worker error: ${e.toString()}`);
+    // });
 
-    const { stateService } = wrap(worker);
+    //const { stateService } = wrap(worker);
+    const stateService = new StateService();
+
 
     // tslint:disable-next-line:no-unused-expression
-    new PreactService(stateService);
+    new PreactService(stateService as any);
   } catch (e) {
     log(`Caught throw: ${e.message}\n${e.stack}`);
   }

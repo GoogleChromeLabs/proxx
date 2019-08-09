@@ -63,7 +63,7 @@ const Item = ({ cell, onUnrevealedClick, onTouchingClick }: ItemProps) => {
 
 export default class GridCell extends Component<Props, State> {
   shouldComponentUpdate(nextProps: Props) {
-    return this.props.cell !== nextProps.cell;
+    return true;// this.props.cell !== nextProps.cell;
   }
 
   @bind
