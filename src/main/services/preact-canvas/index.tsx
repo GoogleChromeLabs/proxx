@@ -77,6 +77,15 @@ const stateServicePromise: Promise<StateService> = (async () => {
   return remoteServices.stateService;
 })() as any;
 
+function gameTypeToURL(
+  width: number,
+  height: number,
+  mines: number,
+  usedKeyboard: boolean
+) {
+  return `/game/${width}:${height}:${mines}:${usedKeyboard ? "k" : "m"}`;
+}
+
 const nebulaDangerDark: Color = [40, 0, 0];
 const nebulaDangerLight: Color = [131, 23, 71];
 // Looking for nebulaSafeDark? It's defined in lib/nebula-safe-dark.js
@@ -157,14 +166,37 @@ export default class Root extends Component<Props, State> {
       });
     });
 
-    // Is this the reload after an update?
+    // Is this the reload after an old update?
+    // TODO: we should be able to remove this after a few months.
     const instantGameDataStr = prerender
       ? false
       : sessionStorage.getItem(immedateGameSessionKey);
 
     if (instantGameDataStr) {
-      sessionStorage.removeItem(immedateGameSessionKey);
+      const { width, height, mines, usedKeyboard } = JSON.parse(
+        instantGameDataStr
+      ) as {
+        width: number;
+        height: number;
+        mines: number;
+        usedKeyboard: boolean;
+      };
+
+      history.pushState(
+        {},
+        "",
+        gameTypeToURL(width, height, mines, usedKeyboard) + location.search
+      );
+    }
+    // /TODO
+
+    // We're going to try to jump straight into a game.
+    if (location.pathname.startsWith("/game/")) {
       this.setState({ awaitingGame: true });
+    }
+
+    if (!prerender) {
+      this._handleCurrentURL();
     }
 
     stateServicePromise.then(async stateService => {
@@ -206,27 +238,6 @@ export default class Root extends Component<Props, State> {
           }
         }
       });
-
-      if (instantGameDataStr) {
-        await gamePerquisites;
-        const { width, height, mines, usedKeyboard } = JSON.parse(
-          instantGameDataStr
-        ) as {
-          width: number;
-          height: number;
-          mines: number;
-          usedKeyboard: boolean;
-        };
-
-        if (!usedKeyboard) {
-          // This is a horrible hack to tell focus-visible.js not to initially show focus styles.
-          document.body.dispatchEvent(
-            new MouseEvent("mousemove", { bubbles: true })
-          );
-        }
-
-        this._stateService.initGame(width, height, mines);
-      }
     });
   }
 
@@ -234,6 +245,12 @@ export default class Root extends Component<Props, State> {
     if (prerender) {
       prerenderDone();
     }
+
+    addEventListener("popstate", this._onPopState);
+  }
+
+  componentWillUnmount() {
+    removeEventListener("popstate", this._onPopState);
   }
 
   render(
@@ -303,6 +320,7 @@ export default class Root extends Component<Props, State> {
               useMotion={motionPreference}
               bestTime={bestTime}
               useVibration={vibrationPreference}
+              onBack={this._onBackClick}
             />
           )}
         />
@@ -404,19 +422,71 @@ export default class Root extends Component<Props, State> {
 
   @bind
   private _onSettingsCloseClick() {
-    this.setState({ settingsOpen: false }, () => {
-      this.previousFocus!.focus();
-    });
+    this._pushPath("/");
   }
 
   @bind
   private _onSettingsClick() {
     this.previousFocus = document.activeElement as HTMLElement;
-    this.setState({ settingsOpen: true, allowIntroAnim: false });
+    this._pushPath("/about/");
+    this._handleCurrentURL();
   }
 
   @bind
-  private async _onStartGame(width: number, height: number, mines: number) {
+  private _onPopState() {
+    this._handleCurrentURL();
+  }
+
+  private _pushPath(path: string) {
+    history.pushState({}, "", path + location.search);
+    this._handleCurrentURL();
+  }
+
+  private async _resetToStartScreen() {
+    history.replaceState({}, "", "/" + location.search);
+    this.setState(
+      {
+        awaitingGame: false,
+        dangerMode: false,
+        settingsOpen: false
+      },
+      () => {
+        if (this.previousFocus) {
+          this.previousFocus.focus();
+          this.previousFocus = null;
+        }
+      }
+    );
+    const stateService = await stateServicePromise;
+    stateService.reset();
+  }
+
+  private async _handleCurrentURL() {
+    if (location.pathname === "/") {
+      this._resetToStartScreen();
+      return;
+    }
+
+    if (location.pathname === "/about/") {
+      this.setState({ settingsOpen: true, allowIntroAnim: false });
+      return;
+    }
+
+    if (!location.pathname.startsWith("/game/")) {
+      this._resetToStartScreen();
+      return;
+    }
+
+    // The rest of this function handles /game/etc-etc
+    const gameStr = location.pathname.slice("/game/".length);
+    const gameStrParts = gameStr.split(":");
+    const [width, height, mines] = gameStrParts.slice(0, 3).map(n => Number(n));
+
+    if (!width || !height || !mines) {
+      this._resetToStartScreen();
+      return;
+    }
+
     this._awaitingGameTimeout = setTimeout(() => {
       this.setState({ awaitingGame: true });
     }, loadingScreenTimeout);
@@ -426,28 +496,35 @@ export default class Root extends Component<Props, State> {
     if (updateReady) {
       // There's an update available. Let's load it as part of starting the game…
       await skipWaiting();
-
-      // Did the user click the start button using keyboard?
-      const usedKeyboard = !!document.querySelector(".focus-visible");
-
-      sessionStorage.setItem(
-        immedateGameSessionKey,
-        JSON.stringify({ width, height, mines, usedKeyboard })
-      );
-
       location.reload();
       return;
     }
 
-    // Wait for everything to be ready:
     await gamePerquisites;
+
+    const usedKeyboard = gameStrParts[3] === "k";
+
+    if (!usedKeyboard) {
+      // This is a horrible hack to tell focus-visible.js not to initially show focus styles.
+      document.body.dispatchEvent(
+        new MouseEvent("mousemove", { bubbles: true })
+      );
+    }
+
     const stateService = await stateServicePromise;
     stateService.initGame(width, height, mines);
   }
 
   @bind
+  private async _onStartGame(width: number, height: number, mines: number) {
+    // Did the user click the start button using keyboard?
+    // This is important if the page is reloaded (eg, if updateReady)
+    const usedKeyboard = !!document.querySelector(".focus-visible");
+    this._pushPath(gameTypeToURL(width, height, mines, usedKeyboard));
+  }
+
+  @bind
   private _onBackClick() {
-    this.setState({ dangerMode: false });
-    this._stateService!.reset();
+    this._resetToStartScreen();
   }
 }

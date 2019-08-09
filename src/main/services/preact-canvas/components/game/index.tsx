@@ -51,6 +51,7 @@ export interface Props {
   useMotion: boolean;
   bestTime?: number;
   useVibration: boolean;
+  onBack: () => void;
 }
 
 interface State {
@@ -97,7 +98,8 @@ export default class Game extends Component<Props, State> {
       gameChangeUnsubscribe,
       toRevealTotal,
       useMotion,
-      bestTime: previousBestTime
+      bestTime: previousBestTime,
+      onBack
     }: Props,
     { playMode, toReveal, animator, renderer, completeTime, bestTime }: State
   ) {
@@ -116,7 +118,7 @@ export default class Game extends Component<Props, State> {
         />
         {playMode === PlayMode.Won ? (
           <Win
-            onMainMenu={this.onReset}
+            onMainMenu={onBack}
             onRestart={this.onRestart}
             time={completeTime}
             bestTime={bestTime}
@@ -153,7 +155,7 @@ export default class Game extends Component<Props, State> {
                     )}{" "}
                     {strTryAgain}
                   </button>
-                  <button class={mainButton} onClick={this.onReset}>
+                  <button class={mainButton} onClick={onBack}>
                     {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""}{" "}
                     {strMainMenu}
                   </button>
@@ -236,13 +238,8 @@ export default class Game extends Component<Props, State> {
         this.onRestart();
       }
     } else if (event.key === "*") {
-      this.onReset();
+      this.props.onBack();
     }
-  }
-
-  @bind
-  private onReset() {
-    this.props.stateService.reset();
   }
 
   @bind
