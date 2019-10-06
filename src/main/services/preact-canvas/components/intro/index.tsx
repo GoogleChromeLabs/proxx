@@ -11,6 +11,18 @@
  * limitations under the License.
  */
 import prerender from "consts:prerender";
+import {
+  strBlackHoles,
+  strCustom,
+  strDifficulty,
+  strEasy,
+  strGameSettings,
+  strHard,
+  strHeight,
+  strMedium,
+  strStart,
+  strWidth
+} from "l20n:main";
 import { Component, h } from "preact";
 import {
   getPresetName,
@@ -171,11 +183,11 @@ export default class Intro extends Component<Props, State> {
         <form
           onSubmit={this._startGame}
           class={startFormStyle}
-          aria-label="game settings"
+          aria-label={strGameSettings}
         >
           <div class={settingsRowStyle}>
             <label class={labelStyle}>
-              <span class={labelTextStyle}>Difficulty</span>
+              <span class={labelTextStyle}>{strDifficulty}</span>
               <Arrow class={selectArrowStyle} />
               <select
                 required
@@ -185,10 +197,10 @@ export default class Intro extends Component<Props, State> {
                 value={presetName || ""}
               >
                 {presetName && [
-                  <option value="easy">Easy</option>,
-                  <option value="medium">Medium</option>,
-                  <option value="hard">Hard</option>,
-                  <option value="custom">Custom</option>
+                  <option value="easy">{strEasy}</option>,
+                  <option value="medium">{strMedium}</option>,
+                  <option value="hard">{strHard}</option>,
+                  <option value="custom">{strCustom}</option>
                 ]}
               </select>
             </label>
@@ -203,7 +215,7 @@ export default class Intro extends Component<Props, State> {
               inputRef={el => (this._widthInput = el)}
               onChange={this._onSettingInput}
             >
-              Width
+              {strWidth}
             </NumberField>
             <NumberField
               required
@@ -214,7 +226,7 @@ export default class Intro extends Component<Props, State> {
               inputRef={el => (this._heightInput = el)}
               onChange={this._onSettingInput}
             >
-              Height
+              {strHeight}
             </NumberField>
           </div>
           <div class={settingsRowStyle}>
@@ -227,13 +239,13 @@ export default class Intro extends Component<Props, State> {
               inputRef={el => (this._minesInput = el)}
               onChange={this._onSettingInput}
             >
-              Black holes
+              {strBlackHoles}
             </NumberField>
           </div>
           <div class={settingsRowStyle}>
             <button class={startButtonStyle}>
               {isFeaturePhone ? <span class={shortcutKeyStyle}>#</span> : ""}{" "}
-              Start
+              {strStart}
             </button>
           </div>
         </form>

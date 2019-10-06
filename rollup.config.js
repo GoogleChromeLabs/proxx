@@ -10,42 +10,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { readFileSync, readdirSync } from "fs";
+import { join } from "path";
 
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
+import postCSSUrl from "postcss-url";
+import postcss from "rollup-plugin-postcss";
+import rimraf from "rimraf";
+
 import chunkNamePlugin from "./lib/chunk-name-plugin";
 import resourceListPlugin from "./lib/resource-list-plugin";
-import postcss from "rollup-plugin-postcss";
 import glsl from "./lib/glsl-plugin";
 import cssModuleTypes from "./lib/css-module-types";
 import assetPlugin from "./lib/asset-plugin";
-import { readFileSync } from "fs";
 import constsPlugin from "./lib/consts-plugin";
 import ejsAssetPlugin from "./lib/ejs-asset-plugin";
 import assetTransformPlugin from "./lib/asset-transform-plugin";
-import postCSSUrl from "postcss-url";
-import rimraf from "rimraf";
 import simpleTS from "./lib/simple-ts";
 import renderStaticPlugin from "./lib/render-static";
 import { color as nebulaColor, hex as nebulaHex } from "./lib/nebula-safe-dark";
 import pkg from "./package.json";
 import createHTMLPlugin from "./lib/create-html";
 import addFilesPlugin from "./lib/add-files-plugin";
+import l20nPlugin from "./lib/l20n-plugin";
 
 // Delete 'dist'
 rimraf.sync("dist");
 rimraf.sync("dist-prerender");
 rimraf.sync(".rpt2_cache");
 
-function buildConfig({ prerender, watch } = {}) {
+const langs = readdirSync(join("src", "l20n"), { withFileTypes: true })
+  .filter(item => item.isDirectory())
+  .map(item => item.name);
+
+const primaryLang = "en-us";
+
+function buildConfig({ prerender, watch, lang } = {}) {
+  const topLevelOutput = lang === primaryLang;
+
   return {
     input: {
       bootstrap: "src/main/bootstrap.tsx",
       sw: "src/sw/index.ts"
     },
     output: {
-      dir: "dist",
+      dir: topLevelOutput ? "dist" : `dist/${lang}`,
       format: "amd",
       sourcemap: !prerender,
       entryFileNames: "[name].js",
@@ -73,6 +84,7 @@ function buildConfig({ prerender, watch } = {}) {
           })
         ]
       }),
+      l20nPlugin(lang),
       constsPlugin({
         version: pkg.version,
         nebulaSafeDark: nebulaColor,
@@ -84,22 +96,35 @@ function buildConfig({ prerender, watch } = {}) {
           nebulaSafeDark: nebulaHex
         }
       }),
+      topLevelOutput &&
+        ejsAssetPlugin("./src/_redirects.ejs", "_redirects", {
+          data: { langs: langs.filter(l => l !== primaryLang) }
+        }),
+      topLevelOutput &&
+        addFilesPlugin({
+          "./src/_headers": "_headers"
+        }),
       assetPlugin({
         initialAssets: [
           "./src/assets/space-mono-normal.woff2",
           "./src/assets/space-mono-bold.woff2",
           "./src/assets/favicon.png",
-          "./src/assets/social-cover.jpg"
+          "./src/assets/social-cover.jpg",
+          "./src/assets/icon-maskable.png",
+          "./src/assets/icon.png"
         ]
       }),
       addFilesPlugin({
-        "./src/_headers": "_headers",
         "./src/.well-known/assetlinks.json": ".well-known/assetlinks.json"
       }),
       assetTransformPlugin(asset => {
         if (asset.fileName.includes("manifest-")) {
           // Remove name hashing
           asset.fileName = "manifest.json";
+        }
+        if (asset.fileName.includes("_redirects-")) {
+          // Remove name hashing
+          asset.fileName = "_redirects";
         }
         if (asset.fileName.endsWith(".json")) {
           // Minify
@@ -125,14 +150,27 @@ function buildConfig({ prerender, watch } = {}) {
       simpleTS("src/main", { noBuild: prerender, watch }),
       resourceListPlugin(),
       !prerender && terser(),
-      prerender ? renderStaticPlugin() : createHTMLPlugin()
+      prerender
+        ? renderStaticPlugin(
+            join('dist', topLevelOutput ? "" : lang, 'no-prerender.html')
+          )
+        : createHTMLPlugin(lang)
     ].filter(item => item)
   };
 }
 
 export default function({ watch }) {
-  return [
-    buildConfig({ watch, prerender: false }),
-    buildConfig({ watch, prerender: true })
-  ];
+  if (watch) {
+    return [
+      buildConfig({ watch, lang: primaryLang, prerender: false }),
+      buildConfig({ watch, lang: primaryLang, prerender: true })
+    ];
+  }
+
+  return langs
+    .map(lang => [
+      buildConfig({ watch, lang, prerender: false }),
+      buildConfig({ watch, lang, prerender: true })
+    ])
+    .flat();
 }

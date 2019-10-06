@@ -11,6 +11,33 @@
  * limitations under the License.
  */
 import version from "consts:version";
+import {
+  about1,
+  about2,
+  about3,
+  aboutCredit,
+  aboutPrivacy,
+  aboutSource,
+  strActiveClue,
+  strBlackHole,
+  strCleared,
+  strClickTheHighlightedCell,
+  strClue,
+  strCredit,
+  strFlagged,
+  strHowToPlay,
+  strMoveDown,
+  strMoveLeft,
+  strMoveRight,
+  strMoveUp,
+  strPrivacyPolicy,
+  strRightClick,
+  strRightClickInstruction,
+  strShortcuts,
+  strSwitchBetweenClearAndFlagMode,
+  strSystemInformation,
+  strUnrevealed
+} from "l20n:lazy";
 import { Component, h } from "preact";
 import {
   idleAnimationTextureDrawer,
@@ -58,7 +85,7 @@ export default class About extends Component<Props> {
   render() {
     return (
       <div class={aboutWrapperStyle}>
-        <h1>How to play</h1>
+        <h1>{strHowToPlay}</h1>
 
         <div class={iconGuideRow}>
           <div class={iconGuideItem}>
@@ -74,7 +101,7 @@ export default class About extends Component<Props> {
               data-circle="true"
               data-dot="false"
             />
-            Unrevealed
+            {strUnrevealed}
           </div>
           <div class={iconGuideItem}>
             <canvas
@@ -89,22 +116,11 @@ export default class About extends Component<Props> {
               data-circle="false"
               data-dot="false"
             />
-            Black hole
+            {strBlackHole}
           </div>
         </div>
 
-        <p>
-          An unrevealed tile might have a black hole behind it, it might not.
-          The idea is to clear all the tiles that <strong>don't</strong> have
-          black holes behind them.
-        </p>
-
-        <p>
-          But, the thing about a black hole – its main distinguishing feature –
-          is it's black. And the thing about space, the color of space, your
-          basic space color, is black. So how are you supposed to avoid them?
-          Here's how:
-        </p>
+        {about1}
 
         <div class={iconGuideRow}>
           <div class={iconGuideItem}>
@@ -119,7 +135,7 @@ export default class About extends Component<Props> {
               data-border="true"
               data-circle="false"
             />
-            Cleared
+            {strCleared}
           </div>
           <div class={iconGuideItem}>
             <canvas
@@ -134,17 +150,11 @@ export default class About extends Component<Props> {
               data-circle="false"
               data-dot="false"
             />
-            Clue
+            {strClue}
           </div>
         </div>
 
-        <p>
-          If you avoid a black hole, the number tells you how many of the 8
-          surrounding tiles are a black hole. If it's blank,{" "}
-          <strong>none</strong> of the surrounding tiles is a black hole.
-        </p>
-
-        <p>If you think you know where a black hole is, flag it!</p>
+        {about2}
 
         <div class={iconGuideRow}>
           <div class={iconGuideItem}>
@@ -160,7 +170,7 @@ export default class About extends Component<Props> {
               data-circle="true"
               data-dot="true"
             />
-            Flagged
+            {strFlagged}
           </div>
           <div class={iconGuideItem}>
             <canvas
@@ -175,17 +185,13 @@ export default class About extends Component<Props> {
               data-circle="false"
               data-dot="false"
             />
-            Active clue
+            {strActiveClue}
           </div>
         </div>
 
-        <p>
-          Switch into flag mode, and tap the suspected tile. Once you've flagged
-          enough tiles around a clue, it'll become active. Tap an active clue to
-          clear all the non-flagged tiles around it.
-        </p>
+        {about3}
 
-        <h1>Shortcuts</h1>
+        <h1>{strShortcuts}</h1>
 
         {isFeaturePhone ? (
           <ul class={shortcutListStyle}>
@@ -193,37 +199,37 @@ export default class About extends Component<Props> {
               <span class={shortcutKeyStyle} aria-label="5 key">
                 5
               </span>
-              Move up
+              {strMoveUp}
             </li>
             <li>
               <span class={shortcutKeyStyle} aria-label="0 key">
                 0
               </span>
-              Move down
+              {strMoveDown}
             </li>
             <li>
               <span class={shortcutKeyStyle} aria-label="7 key">
                 7
               </span>
-              Move left
+              {strMoveLeft}
             </li>
             <li>
               <span class={shortcutKeyStyle} aria-label="9 key">
                 9
               </span>
-              Move right
+              {strMoveRight}
             </li>
             <li>
               <span class={shortcutKeyStyle} aria-label="8 key">
                 8
               </span>
-              Click the highlighted cell
+              {strClickTheHighlightedCell}
             </li>
             <li>
               <span class={shortcutKeyStyle} aria-label="# key">
                 #
               </span>
-              Switch between Clear and Flag mode
+              {strSwitchBetweenClearAndFlagMode}
             </li>
           </ul>
         ) : (
@@ -232,42 +238,28 @@ export default class About extends Component<Props> {
               <span class={shortcutKeyStyle} aria-label="f key">
                 F
               </span>
-              Switch between Clear and Flag mode
+              {strSwitchBetweenClearAndFlagMode}
             </li>
             <li>
-              <RightClick class={shortcutIconStyle} aria-label="Right click" />
-              Flag when in clear mode, or clear when in flag mode.
+              <RightClick
+                class={shortcutIconStyle}
+                aria-label={strRightClick}
+              />
+              {strRightClickInstruction}
             </li>
           </ul>
         )}
 
         <h1>GitHub</h1>
-        <p>
-          Source code can be found at our{" "}
-          <a href="https://github.com/GoogleChromeLabs/proxx">
-            GitHub repository
-          </a>
-          .
-        </p>
+        {aboutSource}
 
-        <h1>Privacy policy</h1>
-        <p>
-          Google Analytics is used to record{" "}
-          <a href="https://support.google.com/analytics/answer/6004245?ref_topic=2919631">
-            basic visit data
-          </a>
-          . Highscores and your user preference are saved locally. No additional
-          data is sent to the server.
-        </p>
+        <h1>{strPrivacyPolicy}</h1>
+        {aboutPrivacy}
 
-        <h1>Credit</h1>
-        <p>Built by Google Chrome Labs</p>
-        <p>
-          Thanks to <a href="https://www.tokyo-wolf.com/">Tokyo Wolf</a> for the
-          visual design concept.
-        </p>
+        <h1>{strCredit}</h1>
+        {aboutCredit}
 
-        <h1>System Information</h1>
+        <h1>{strSystemInformation}</h1>
         <ul class={systemDataStyle}>
           <li>Version: {version}</li>
           <li>Motion: {this.props.motion ? "true" : "false"}</li>

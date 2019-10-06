@@ -18,7 +18,8 @@
     "lint": "tslint -t verbose -c tslint.json 'src/**/*.{ts,tsx}'",
     "lintfix": "tslint -t verbose -c tslint.json --fix 'src/**/*.{ts,tsx}'",
     "fmt_test": "test $(prettier -l 'src/**/*.{ts,tsx,css}' *.{js,json,md} 'lib/**/*.js' | wc -l) -eq 0",
-    "test": "npm run fmt_test && npm run lint && npm run build"
+    "test": "npm run fmt_test && npm run lint && npm run build",
+    "update-lang": "tsc -b src/l20n"
   },
   "husky": {
     "hooks": {
@@ -37,6 +38,7 @@
     "ecstatic": "^4.1.2",
     "ejs": "^2.6.1",
     "escape-string-regexp": "^2.0.0",
+    "esm": "^3.2.25",
     "find": "^0.3.0",
     "glsl-deparser": "^1.0.0",
     "glsl-min-stream": "^1.0.0",

@@ -10,6 +10,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  strAnimationsOff,
+  strAnimationsOn,
+  strCloseButton,
+  strSettings,
+  strSettingsDialog,
+  strVibrateOff,
+  strVibrateOn
+} from "l20n:lazy";
 import { Component, h } from "preact";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
@@ -57,7 +66,7 @@ export default class Settings extends Component<Props, State> {
   }: Props) {
     const closeBtn = isFeaturePhone ? (
       <button
-        aria-label="close button"
+        aria-label={strCloseButton}
         ref={focusItem => (this.focusItem = focusItem)}
         class={fpCloseBtnStyle}
         onClick={onCloseClicked}
@@ -66,7 +75,7 @@ export default class Settings extends Component<Props, State> {
       </button>
     ) : (
       <button
-        aria-label="close button"
+        aria-label={strCloseButton}
         ref={focusItem => (this.focusItem = focusItem)}
         class={closebtnStyle}
         onClick={onCloseClicked}
@@ -76,7 +85,7 @@ export default class Settings extends Component<Props, State> {
     );
 
     return (
-      <div role="dialog" aria-label="settings dialog" class={settingsStyle}>
+      <div role="dialog" aria-label={strSettingsDialog} class={settingsStyle}>
         <div
           class={isFeaturePhone ? fpCloseContainerStyle : closeContainerStyle}
         >
@@ -84,20 +93,20 @@ export default class Settings extends Component<Props, State> {
         </div>
         <div class={settingsWindowStyle}>
           <div class={settingsContentStyle}>
-            <h1>Settings</h1>
+            <h1>{strSettings}</h1>
             <button
               class={motion ? btnOnStyle : btnOffStyle}
               onClick={onMotionPrefChange}
               disabled={disableAnimationBtn}
             >
-              Animations {motion ? "on" : "off"}
+              {motion ? strAnimationsOn : strAnimationsOff}
             </button>
             <button
               class={useVibration ? btnOnStyle : btnOffStyle}
               onClick={onVibrationPrefChange}
               disabled={!supportsVibration}
             >
-              Vibrate {useVibration ? "on" : "off"}
+              {useVibration ? strVibrateOn : strVibrateOff}
             </button>
             <About
               motion={motion}

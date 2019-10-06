@@ -10,6 +10,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  strBack,
+  strBackToMainMenu,
+  strClear,
+  strFlag,
+  strFlagMode,
+  strFlagModeOff,
+  strFlagModeOn,
+  strFlagOff,
+  strFlagOn,
+  strFullscreenMode,
+  strInfo,
+  strInformationAndSettings
+} from "l20n:main";
 import { Component, h } from "preact";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
@@ -82,15 +96,15 @@ export default class BottomBar extends Component<Props, State> {
       <button
         class={leftKeyIcon}
         onClick={onBackClick}
-        aria-label="Back to main menu"
+        aria-label={strBackToMainMenu}
       >
-        <span class={shortcutKey}>*</span> back
+        <span class={shortcutKey}>*</span> {strBack}
       </button>
     ) : (
       <button
         class={leftIcon}
         onClick={onBackClick}
-        aria-label="Back to main menu"
+        aria-label={strBackToMainMenu}
       >
         <Back />
       </button>
@@ -100,15 +114,15 @@ export default class BottomBar extends Component<Props, State> {
       <button
         class={leftKeyIcon}
         onClick={onSettingsClick}
-        aria-label="Open information and settings"
+        aria-label={strInformationAndSettings}
       >
-        <span class={shortcutKey}>*</span> info
+        <span class={shortcutKey}>*</span> {strInfo}
       </button>
     ) : (
       <button
         class={leftIcon}
         onClick={onSettingsClick}
-        aria-label="Open information and settings"
+        aria-label={strInformationAndSettings}
       >
         <Information />
       </button>
@@ -124,10 +138,10 @@ export default class BottomBar extends Component<Props, State> {
             role="switch checkbox"
             onChange={this._onDangerModeSwitchToggle}
             checked={!dangerMode}
-            aria-label="flag mode"
+            aria-label={strFlagMode}
             ref={el => (this._flagCheckbox = el)}
           />
-          <span aria-hidden="true">Flag:{dangerMode ? "OFF" : "ON"}</span>
+          <span aria-hidden="true">{dangerMode ? strFlagOff : strFlagOn}</span>
         </label>
         <span
           role="status"
@@ -139,7 +153,7 @@ export default class BottomBar extends Component<Props, State> {
       <div class={toggleContainer} onTouchStart={this._onDangerModeTouchStart}>
         <label class={toggleLabel}>
           <span aria-hidden="true" class={leftToggleLabel}>
-            Clear
+            {strClear}
           </span>
           <input
             class={checkbox}
@@ -147,7 +161,7 @@ export default class BottomBar extends Component<Props, State> {
             role="switch checkbox"
             onChange={this._onDangerModeSwitchToggle}
             checked={!dangerMode}
-            aria-label="flag mode"
+            aria-label={strFlagMode}
             ref={el => (this._flagCheckbox = el)}
           />
           <svg viewBox="0 0 32 16" class={toggle}>
@@ -169,7 +183,7 @@ export default class BottomBar extends Component<Props, State> {
             />
           </svg>
           <span aria-hidden="true" class={rightToggleLabel}>
-            Flag
+            {strFlag}
           </span>
         </label>
         <span
@@ -186,7 +200,7 @@ export default class BottomBar extends Component<Props, State> {
       <button
         class={fullscreen}
         onClick={goFullscreen}
-        aria-label="fullscreen mode"
+        aria-label={strFullscreenMode}
       >
         <Fullscreen />
       </button>
@@ -235,7 +249,7 @@ export default class BottomBar extends Component<Props, State> {
     let flagModeAnnouncement = "";
 
     if (announce) {
-      flagModeAnnouncement = newVal ? "flag mode off" : "flag mode on";
+      flagModeAnnouncement = newVal ? strFlagModeOff : strFlagModeOn;
     }
 
     this.setState({ flagModeAnnouncement });
