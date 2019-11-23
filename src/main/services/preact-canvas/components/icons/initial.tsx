@@ -13,6 +13,7 @@
 import { h } from "preact";
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+// rollup-plugin-bundle-guard: group=entry
 
 // tslint:disable:max-line-length variable-name
 

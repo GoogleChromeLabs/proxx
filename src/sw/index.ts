@@ -1,3 +1,5 @@
+// rollup-plugin-bundle-guard: group=swEntry
+
 import version from "consts:version";
 import resourceList from "resource-list:";
 // Give TypeScript the correct global.

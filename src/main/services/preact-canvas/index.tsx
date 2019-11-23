@@ -10,6 +10,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+// rollup-plugin-bundle-guard: group=entry
+
 import workerURL from "chunk-name:./../../../worker";
 import nebulaSafeDark from "consts:nebulaSafeDark";
 import prerender from "consts:prerender";
@@ -29,8 +33,6 @@ import { game as gameClassName, nebulaContainer } from "./style.css";
 type Color = import("src/main/rendering/constants").Color;
 type GameStateChange = import("../../../worker/gamelogic").StateChange;
 type GameType = import("../../../worker/state-service").GameType;
-
-// WARNING: This module is part of the main bundle. Avoid adding to it if possible.
 
 let lazyImport: typeof import("./lazy-load") | undefined;
 const lazyImportReady = import("./lazy-load").then(m => (lazyImport = m));

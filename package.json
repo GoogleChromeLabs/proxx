@@ -52,6 +52,7 @@
     "rimraf": "^2.6.2",
     "rollup": "^1.15.2",
     "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-bundle-guard": "^2.2.0",
     "rollup-plugin-loadz0r": "^0.7.2",
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-postcss": "^2.0.3",

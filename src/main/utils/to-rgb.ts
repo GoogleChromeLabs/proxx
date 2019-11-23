@@ -12,6 +12,7 @@
  */
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+// rollup-plugin-bundle-guard: group=entry
 
 export default function toRGB(
   color: import("src/main/rendering/constants").Color
