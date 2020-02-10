@@ -1,6 +1,24 @@
 {
-  "extends": "../../generic-tsconfig.json",
+  // "extends": "../../generic-tsconfig.json",
   "compilerOptions": {
-    "lib": ["esnext", "webworker"],
+    "experimentalDecorators": true,
+    "target": "es5",
+    "downlevelIteration": true,
+    "module": "esnext",
+    "jsx": "react",
+    "jsxFactory": "h",
+    "strict": true,
+    "moduleResolution": "node",
+    "outDir": ".ts-tmp",
+    "composite": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "importHelpers": true,
+    "baseUrl": "./",
+    "rootDir": "./",
+    "lib": [
+      "esnext",
+      "webworker"
+    ],
   }
 }

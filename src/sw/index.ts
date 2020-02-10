@@ -3,6 +3,9 @@ import resourceList from "resource-list:";
 // Give TypeScript the correct global.
 declare var self: ServiceWorkerGlobalScope;
 
+// const version = 2;
+// const resourceList: Array<string> = [];
+
 const staticCache = `static-${version}`;
 const expectedCaches = [staticCache];
 
