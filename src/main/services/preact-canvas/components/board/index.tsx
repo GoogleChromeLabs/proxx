@@ -363,8 +363,9 @@ export default class Board extends Component<Props, State> {
   private onKeyDownOnTable(event: KeyboardEvent) {
     // Since click action is tied to mouseup event,
     // listen to Enter in case of key navigation click.
-    // Key 8 support is for T9 navigation
-    if (event.key === "Enter" || event.key === "8") {
+    // Key 8 support is for T9 navigation.
+    // Space key support provides ease-of-use for keyboard users.
+    if (event.key === "Enter" || event.key === "8" || event.key === " ") {
       const button = document.activeElement as HTMLButtonElement;
       if (!button) {
         return;
