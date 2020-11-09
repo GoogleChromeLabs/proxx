@@ -65,7 +65,7 @@ export default class End extends Component<Props, State> {
     };
 
     if (presetName === "hard" && props.time < 10 * 60) {
-      window.opener.postMessage({
+      window.opener && window.opener.postMessage({
         action: "game-completed",
         url: "https://proxx.app/"
       });
