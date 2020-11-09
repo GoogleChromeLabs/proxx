@@ -64,11 +64,21 @@ export default class End extends Component<Props, State> {
         (presetName === "custom" ? ` - ${width}x${height}:${mines}` : "")
     };
 
-    if (presetName === "hard" && props.time < 10 * 60) {
-      window.opener && window.opener.postMessage({
-        action: "game-completed",
-        url: "https://proxx.app/"
-      }, "*");
+    console.log({ presetName, time: props.time });
+    if (
+      (presetName === "hard" && props.time < 10 * 60 * 1000) ||
+      (presetName === "medium" && props.time < 5 * 60 * 1000) ||
+      (presetName === "easy" && props.time < 40 * 1000)
+    ) {
+      if (window.opener) {
+        window.opener.postMessage(
+          {
+            action: "game-completed",
+            url: "https://proxx.app/"
+          },
+          "*"
+        );
+      }
     }
   }
 
