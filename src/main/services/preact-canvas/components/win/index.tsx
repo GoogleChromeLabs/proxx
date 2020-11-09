@@ -63,6 +63,13 @@ export default class End extends Component<Props, State> {
         " mode" +
         (presetName === "custom" ? ` - ${width}x${height}:${mines}` : "")
     };
+
+    if (presetName === "hard" && props.time < 10 * 60) {
+      window.opener.postMessage({
+        action: "game-completed",
+        url: "https://proxx.app/"
+      });
+    }
   }
 
   componentDidMount() {
