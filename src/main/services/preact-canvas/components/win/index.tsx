@@ -64,7 +64,6 @@ export default class End extends Component<Props, State> {
         (presetName === "custom" ? ` - ${width}x${height}:${mines}` : "")
     };
 
-    console.log({ presetName, time: props.time });
     if (
       (presetName === "hard" && props.time < 10 * 60 * 1000) ||
       (presetName === "medium" && props.time < 5 * 60 * 1000) ||
