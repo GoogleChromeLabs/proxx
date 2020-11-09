@@ -68,7 +68,7 @@ export default class End extends Component<Props, State> {
       window.opener && window.opener.postMessage({
         action: "game-completed",
         url: "https://proxx.app/"
-      });
+      }, "*");
     }
   }
 
