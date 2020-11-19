@@ -52,7 +52,8 @@ interface State {
 const allowedEmbedderOrigins = [
   "https://developer.chrome.com/devsummit/adventure/",
   "https://cds-adventure.firebaseapp.com",
-  "https://cds-adventure.web.app"
+  "https://cds-adventure.web.app",
+  "http://snailsfordinner.com"
 ];
 
 export default class End extends Component<Props, State> {
