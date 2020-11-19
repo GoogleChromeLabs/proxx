@@ -49,6 +49,12 @@ interface State {
   gridName: string;
 }
 
+const allowedEmbedderOrigins = [
+  "https://developer.chrome.com/devsummit/adventure/",
+  "https://cds-adventure.firebaseapp.com",
+  "https://cds-adventure.web.app"
+];
+
 export default class End extends Component<Props, State> {
   private _playAgainBtn?: HTMLButtonElement;
   constructor(props: Props) {
@@ -70,13 +76,15 @@ export default class End extends Component<Props, State> {
       (presetName === "easy" && props.time < 40 * 1000)
     ) {
       if (window.opener) {
-        window.opener.postMessage(
-          {
-            action: "game-completed",
-            url: "https://proxx.app/"
-          },
-          "*"
-        );
+        for (const origin of allowedEmbedderOrigins) {
+          window.opener.postMessage(
+            {
+              action: "game-completed",
+              url: "https://proxx.app/"
+            },
+            origin
+          );
+        }
       }
     }
   }
