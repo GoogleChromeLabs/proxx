@@ -41,6 +41,7 @@ import {
 type GridType = import("../../../preact-canvas").GridType;
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+// rollup-plugin-bundle-guard: group=entry
 
 // tslint:disable-next-line: variable-name
 const ShowbizTitleDeferred = deferred(

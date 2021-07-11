@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+// rollup-plugin-bundle-guard: group=entry
+
 import prerender from "consts:prerender";
 import { h, render } from "preact";
 import Root from "src/main/services/preact-canvas";

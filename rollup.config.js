@@ -14,6 +14,7 @@
 import nodeResolve from "rollup-plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import loadz0r from "rollup-plugin-loadz0r";
+import rollupPluginBundleGuard from "rollup-plugin-bundle-guard";
 import chunkNamePlugin from "./lib/chunk-name-plugin";
 import resourceListPlugin from "./lib/resource-list-plugin";
 import postcss from "rollup-plugin-postcss";
@@ -108,6 +109,20 @@ function buildConfig({ prerender, watch } = {}) {
       }),
       chunkNamePlugin(),
       nodeResolve(),
+      rollupPluginBundleGuard({
+        modules: [
+          { module: /^consts:/, allowedImportFrom: ["entry", "swEntry"] },
+          { module: "tslib", allowedImportFrom: ["entry", "swEntry"] },
+          { module: /^chunk-name:/, allowedImportFrom: ["entry"] },
+          { module: "preact", allowedImportFrom: ["entry"] },
+          { module: /\.css$/, allowedImportFrom: ["entry"] },
+          { module: "idb-keyval", allowedImportFrom: ["entry"] },
+          {
+            module: /^resource-list:/,
+            allowedImportFrom: ["swEntry"]
+          }
+        ]
+      }),
       loadz0r({
         loader: readFileSync("./lib/loadz0r-loader.ejs").toString(),
         // `prependLoader` will be called for every chunk. If it returns `true`,

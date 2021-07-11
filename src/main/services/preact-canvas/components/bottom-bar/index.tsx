@@ -32,6 +32,7 @@ import {
 } from "./style.css";
 
 // WARNING: This module is part of the main bundle. Avoid adding to it if possible.
+// rollup-plugin-bundle-guard: group=entry
 
 function goFullscreen() {
   if (document.documentElement.requestFullscreen) {
