@@ -11,6 +11,8 @@
  * limitations under the License.
  */
 
+// @ts-ignore
+import { Random } from "./prng.js";
 import { Cell, State, Tag } from "./types.js";
 
 function newCell(id: number): Cell {
@@ -37,11 +39,13 @@ export default class MinesweeperGame {
   private _state = State.Pending;
   private _toReveal = 0;
   private _flags = 0;
+  private rng: Random;
 
   constructor(
     private _width: number,
     private _height: number,
-    private _mines: number
+    private _mines: number,
+    seed: number = performance.now()
   ) {
     if (_mines < 1) {
       throw Error("Invalid number of mines");
@@ -52,6 +56,7 @@ export default class MinesweeperGame {
     if (_mines >= _width * _height) {
       throw Error("Number of mines cannot fit in grid");
     }
+    this.rng = Random.withSeed(seed);
 
     this._toReveal = _width * _height - _mines;
 
@@ -163,7 +168,7 @@ export default class MinesweeperGame {
     let minesToPlace = this._mines;
 
     while (minesToPlace) {
-      const index = Math.floor(Math.random() * cells.length);
+      const index = Math.floor(this.rng.nextNumber() * cells.length);
       const cell = cells[index];
       cells.splice(index, 1);
       cell.hasMine = true;

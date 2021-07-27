@@ -16,9 +16,12 @@ import StateService from "./services/state.js";
 
 declare var self: DedicatedWorkerGlobalScope;
 
-expose(
-  {
-    stateService: new StateService()
-  },
-  self
-);
+addEventListener("message", ({ data }) => {
+  const { size, seed } = data;
+  expose(
+    {
+      stateService: new StateService(size, seed)
+    },
+    self
+  );
+});

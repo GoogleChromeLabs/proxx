@@ -22,35 +22,43 @@ function log(msg: string) {
 
 async function bootstrap() {
   log("Booting!");
+  const params = new URL(location.toString()).searchParams;
+  const ui = params.get("ui") || "preact";
+  let seed = Number(params.get("seed") || "XXX");
+  if (Number.isNaN(seed)) {
+    seed = performance.now();
+  }
+  let size = Number(params.get("size") || "XXX");
+  if (Number.isNaN(size)) {
+    size = 40;
+  }
   try {
     const worker = new Worker(workerURL);
     worker.addEventListener("error", e => {
       log(`Worker error: ${e.toString()}`);
     });
+    worker.postMessage({ seed, size });
 
     const { stateService } = wrap(worker);
-    const uiServiceName = (
-      new URL(location.toString()).searchParams.get("ui") || "preact"
-    ).toLowerCase();
-    switch (uiServiceName) {
+    switch (ui) {
       case "preact":
         {
           const preactService = await import("./services/preact/index.js");
-          preactService.game(stateService);
+          preactService.game(stateService as any);
         }
         break;
       case "canvas":
         {
           const canvasService = await import("./services/canvas/index.js");
           // tslint:disable-next-line:no-unused-expression
-          new canvasService.default(stateService);
+          new canvasService.default(stateService as any);
         }
         break;
       case "lit":
         {
           const litService = await import("./services/lit-element/index.js");
           // tslint:disable-next-line:no-unused-expression
-          new litService.default(stateService);
+          new litService.default(stateService as any);
         }
         break;
       default:

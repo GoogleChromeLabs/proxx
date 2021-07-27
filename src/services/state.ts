@@ -25,11 +25,15 @@ const DENSITY = 0.1;
 export default class StateService {
   private port = new MessageChannel().port1;
 
-  private game: MinesweeperGame = new MinesweeperGame(
-    BOARD_SIZE,
-    BOARD_SIZE,
-    Math.floor(BOARD_SIZE * BOARD_SIZE * DENSITY)
-  );
+  private game: MinesweeperGame;
+  constructor(private size: number, private seed: number) {
+    this.game = new MinesweeperGame(
+      this.size,
+      this.size,
+      Math.floor(this.size * this.size * DENSITY),
+      seed
+    );
+  }
 
   get state(): State {
     return {
