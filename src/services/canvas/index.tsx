@@ -133,8 +133,8 @@ export default class CanvasService {
     }
 
     const target = event.target as HTMLCanvasElement;
-    const row = Math.floor(event.x / 10);
-    const col = Math.floor(event.y / 10);
+    const row = Math.floor(event.offsetX / 10);
+    const col = Math.floor(event.offsetY / 10);
 
     const cell: Cell = this._state.grid[row][col];
 
