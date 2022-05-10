@@ -18,6 +18,7 @@ import { GameChangeCallback } from "src/main/services/preact-canvas";
 import { submitTime } from "src/main/services/state/best-times";
 import { supportsVibration } from "src/main/services/state/vibration-preference";
 import { vibrationLength } from "src/main/utils/constants";
+import { gamepad } from "src/main/utils/gamepad";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import { StateChange } from "src/worker/gamelogic";
@@ -33,6 +34,9 @@ import {
   exitRow,
   exitRowInner,
   game as gameClass,
+  gamepadButton,
+  gamepadButtonA,
+  gamepadButtonB,
   mainButton,
   shortcutKey
 } from "./style.css";
@@ -50,6 +54,7 @@ export interface Props {
   useMotion: boolean;
   bestTime?: number;
   useVibration: boolean;
+  isGamepadConnected: boolean;
 }
 
 interface State {
@@ -96,7 +101,8 @@ export default class Game extends Component<Props, State> {
       gameChangeUnsubscribe,
       toRevealTotal,
       useMotion,
-      bestTime: previousBestTime
+      bestTime: previousBestTime,
+      isGamepadConnected
     }: Props,
     { playMode, toReveal, animator, renderer, completeTime, bestTime }: State
   ) {
@@ -123,6 +129,7 @@ export default class Game extends Component<Props, State> {
             height={height}
             mines={mines}
             useMotion={this.props.useMotion}
+            isGamepadConnected={isGamepadConnected}
           />
         ) : renderer && animator ? (
           [
@@ -132,6 +139,9 @@ export default class Game extends Component<Props, State> {
               dangerMode={dangerMode}
               animator={animator}
               renderer={renderer}
+              interactive={
+                playMode === PlayMode.Pending || playMode === PlayMode.Playing
+              }
               gameChangeSubscribe={gameChangeSubscribe}
               gameChangeUnsubscribe={gameChangeUnsubscribe}
               onCellClick={this.onCellClick}
@@ -150,10 +160,24 @@ export default class Game extends Component<Props, State> {
                         #
                       </span>
                     )}{" "}
+                    {isGamepadConnected ? (
+                      <span class={[gamepadButton, gamepadButtonA].join(" ")}>
+                        A
+                      </span>
+                    ) : (
+                      ""
+                    )}{" "}
                     Try again
                   </button>
                   <button class={mainButton} onClick={this.onReset}>
                     {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""}{" "}
+                    {isGamepadConnected ? (
+                      <span class={[gamepadButton, gamepadButtonB].join(" ")}>
+                        B
+                      </span>
+                    ) : (
+                      ""
+                    )}{" "}
                     Main menu
                   </button>
                 </div>
@@ -175,11 +199,13 @@ export default class Game extends Component<Props, State> {
       this.props.onDangerModeChange(true);
     }
     window.addEventListener("keyup", this.onKeyUp);
+    gamepad.addButtonDownCallback(this.onGamepadButtonDown);
   }
 
   componentWillUnmount() {
     this.props.gameChangeUnsubscribe(this.onGameChange);
     window.removeEventListener("keyup", this.onKeyUp);
+    gamepad.removeButtonDownCallback(this.onGamepadButtonDown);
   }
 
   componentDidUpdate(_: Props, previousState: State) {
@@ -230,12 +256,31 @@ export default class Game extends Component<Props, State> {
 
   @bind
   private onKeyUp(event: KeyboardEvent) {
-    if (event.key === "#") {
-      if (this.state.playMode === PlayMode.Lost) {
+    if (
+      this.state.playMode === PlayMode.Won ||
+      this.state.playMode === PlayMode.Lost
+    ) {
+      if (event.key === "#") {
         this.onRestart();
+      } else if (event.key === "*") {
+        this.onReset();
       }
-    } else if (event.key === "*") {
-      this.onReset();
+    }
+  }
+
+  @bind
+  private onGamepadButtonDown(buttonId: number) {
+    if (
+      this.state.playMode === PlayMode.Won ||
+      this.state.playMode === PlayMode.Lost
+    ) {
+      if (buttonId === 0) {
+        // A
+        this.onRestart();
+      } else if (buttonId === 1) {
+        // B
+        this.onReset();
+      }
     }
   }
 

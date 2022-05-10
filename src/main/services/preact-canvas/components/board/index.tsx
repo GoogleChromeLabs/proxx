@@ -15,10 +15,11 @@ import { Animator } from "src/main/rendering/animator";
 import { Renderer } from "src/main/rendering/renderer";
 import { putCanvas } from "src/main/utils/canvas-pool";
 import { cellFocusMode } from "src/main/utils/constants";
+import { gamepad } from "src/main/utils/gamepad";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import { StateChange } from "src/worker/gamelogic";
-import { Cell } from "src/worker/gamelogic/types";
+import { Cell, PlayMode } from "src/worker/gamelogic/types";
 import { GameChangeCallback } from "../../index";
 import {
   board,
@@ -45,24 +46,17 @@ export interface Props {
   renderer: Renderer;
   animator: Animator;
   dangerMode: boolean;
+  interactive: boolean;
   gameChangeSubscribe: (f: GameChangeCallback) => void;
   gameChangeUnsubscribe: (f: GameChangeCallback) => void;
   onDangerModeChange: (v: boolean) => void;
-}
-
-interface State {
-  keyNavigation: boolean;
 }
 
 interface SetFocusOptions {
   preventScroll?: boolean;
 }
 
-export default class Board extends Component<Props, State> {
-  state: State = {
-    keyNavigation: false
-  };
-
+export default class Board extends Component<Props, {}> {
   private _canvas?: HTMLCanvasElement;
   private _table?: HTMLTableElement;
   private _buttons: HTMLButtonElement[] = [];
@@ -101,12 +95,16 @@ export default class Board extends Component<Props, State> {
 
     window.addEventListener("resize", this._onWindowResize);
     window.addEventListener("keyup", this._onGlobalKeyUp);
+    gamepad.addButtonDownCallback(this._onGamepadButtonDown);
+    gamepad.addButtonPressCallback(this._onGamepadButtonPress);
   }
 
   componentWillUnmount() {
     document.documentElement.classList.remove("in-game");
     window.removeEventListener("resize", this._onWindowResize);
     window.removeEventListener("keyup", this._onGlobalKeyUp);
+    gamepad.removeButtonDownCallback(this._onGamepadButtonDown);
+    gamepad.removeButtonPressCallback(this._onGamepadButtonPress);
     this.props.gameChangeUnsubscribe(this._doManualDomHandling);
     this.props.renderer.stop();
     this.props.animator.stop();
@@ -144,6 +142,9 @@ export default class Board extends Component<Props, State> {
 
   @bind
   private _onGlobalKeyUp(event: KeyboardEvent) {
+    if (!this.props.interactive) {
+      return;
+    }
     // This returns the focus to the board when one of these keys is pressed (on feature phones
     // only). This means the user doesn't have to manually refocus the board.
     if (
@@ -158,6 +159,57 @@ export default class Board extends Component<Props, State> {
         event.key === "ArrowDown")
     ) {
       this.moveFocusByKey(event, 0, 0);
+    }
+  }
+
+  @bind
+  private _onGamepadButtonDown(buttonId: number) {
+    if (!this.props.interactive) {
+      return;
+    }
+    switch (buttonId) {
+      case 0: // A
+      case 4: /* Left Shoulder Button */ {
+        const button = document.activeElement as HTMLButtonElement;
+        if (!button) {
+          return;
+        }
+        this.simulateClick(button);
+        break;
+      }
+      case 2: // X
+      case 5: /* Right Shoulder Button */ {
+        const button = document.activeElement as HTMLButtonElement;
+        if (!button) {
+          return;
+        }
+        this.simulateClick(button, true);
+        break;
+      }
+      case 1: // B
+        this._toggleDangerMode();
+        break;
+    }
+  }
+
+  @bind
+  private _onGamepadButtonPress(buttonId: number) {
+    if (!this.props.interactive) {
+      return;
+    }
+    switch (buttonId) {
+      case 15: // Right
+        this.moveFocusByKey(new Event(""), 1, 0);
+        break;
+      case 14: // Left
+        this.moveFocusByKey(new Event(""), -1, 0);
+        break;
+      case 12: // Up
+        this.moveFocusByKey(new Event(""), 0, -1);
+        break;
+      case 13: // Down
+        this.moveFocusByKey(new Event(""), 0, 1);
+        break;
     }
   }
 
@@ -245,7 +297,8 @@ export default class Board extends Component<Props, State> {
     const showFocusStyle =
       button.classList.contains("focus-visible") ||
       isFeaturePhone ||
-      cellFocusMode;
+      cellFocusMode ||
+      gamepad.isGamepadConnected;
 
     if (!showFocusStyle) {
       this.props.renderer.setFocus(-1, -1);
@@ -318,7 +371,7 @@ export default class Board extends Component<Props, State> {
   }
 
   @bind
-  private moveFocusByKey(event: KeyboardEvent, h: number, v: number) {
+  private moveFocusByKey(event: Event, h: number, v: number) {
     event.stopPropagation();
     event.preventDefault();
 
