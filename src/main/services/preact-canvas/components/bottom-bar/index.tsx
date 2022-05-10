@@ -13,12 +13,19 @@
 import { Component, h } from "preact";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
-import { Back, Fullscreen, Information } from "../icons/initial";
+import {
+  Back,
+  FullscreenEnter,
+  FullscreenExit,
+  Information
+} from "../icons/initial";
 import {
   bottomBar,
   checkbox,
   fpToggle,
   fullscreen,
+  fullscreenEnter,
+  fullscreenExit,
   hidden,
   leftIcon,
   leftKeyIcon,
@@ -38,6 +45,12 @@ function goFullscreen() {
     document.documentElement.requestFullscreen();
   } else if (document.documentElement.webkitRequestFullscreen) {
     document.documentElement.webkitRequestFullscreen();
+  }
+}
+
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
   }
 }
 
@@ -184,20 +197,30 @@ export default class BottomBar extends Component<Props, State> {
       ""
     ) : fullscreenSupported ? (
       <button
-        class={fullscreen}
+        class={fullscreenEnter}
         onClick={goFullscreen}
-        aria-label="fullscreen mode"
+        aria-label="enter fullscreen mode"
       >
-        <Fullscreen />
+        <FullscreenEnter />
       </button>
     ) : (
       <div class={noFullscreen} />
     );
+
     return (
       <div class={[bottomBar, display ? "" : hidden].join(" ")} role="menubar">
         {buttonType === "back" ? backBtn : infoBtn}
         {showDangerModeToggle && toggleBtn}
-        {fullscreenSupported ? fullscreenBtn : <div class={noFullscreen} />}
+        <div class={fullscreen}>
+          <button
+            class={fullscreenExit}
+            onClick={exitFullscreen}
+            aria-label="exit fullscreen mode"
+          >
+            <FullscreenExit />
+          </button>
+          {fullscreenSupported ? fullscreenBtn : <div class={noFullscreen} />}
+        </div>
       </div>
     );
   }

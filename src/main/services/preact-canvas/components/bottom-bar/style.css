@@ -28,7 +28,8 @@
   position: absolute;
 }
 
-.bottom-bar > button {
+.bottom-bar > button,
+.bottom-bar > .fullscreen {
   margin: var(--bar-padding) 0;
 }
 
@@ -64,9 +65,20 @@
 }
 
 .fullscreen {
-  composes: icons;
+  display: flex;
+  align-items: center;
+
   /* PostCSS gets the order wrong :( */
   margin-left: auto !important;
+}
+
+.fullscreen-enter {
+  composes: icons;
+}
+
+.fullscreen-exit {
+  composes: icons;
+  display: none;
 }
 
 .no-fullscreen {
@@ -75,19 +87,33 @@
   height: var(--icon-size);
 }
 
-html:fullscreen .fullscreen {
-  visibility: hidden;
+html:fullscreen .fullscreen-enter {
+  display: none;
 }
 
 /* For Safari. This can't be combined with the rule above, as Safari sees :fullscreen as invalid,
 and craps itself. */
-html:-webkit-full-screen .fullscreen {
-  visibility: hidden;
+html:-webkit-full-screen .fullscreen-enter {
+  display: none;
+}
+
+html:fullscreen .fullscreen-exit {
+  display: block;
+}
+
+/* For Safari. This can't be combined with the rule above, as Safari sees :fullscreen as invalid,
+and craps itself. */
+html:-webkit-full-screen .fullscreen-exit {
+  display: block;
 }
 
 @media (display-mode: fullscreen) {
-  .fullscreen {
-    visibility: hidden;
+  .fullscreen-enter {
+    display: none;
+  }
+
+  .fullscreen-exit {
+    display: block;
   }
 }
 
