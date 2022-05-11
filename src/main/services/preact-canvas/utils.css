@@ -66,6 +66,20 @@
   box-sizing: border-box;
 }
 
+.gamepadbutton {
+  border: solid 1px #fff;
+  background-color: #000;
+  font-weight: bold;
+  border-radius: 100%;
+  display: inline-block;
+  width: calc(var(--gamepadbtn-size) + 2px);
+  height: calc(var(--gamepadbtn-size) + 2px);
+  line-height: var(--gamepadbtn-size);
+  text-align: center;
+  letter-spacing: 0;
+  box-sizing: border-box;
+}
+
 .button {
   mix-blend-mode: screen;
 }

@@ -161,3 +161,8 @@
   /** PostCSS adding classes in wrong order :( */
   border-color: #000 !important;
 }
+
+.gamepad-button {
+  composes: gamepadbutton from "../../utils.css";
+  color: var(--color-gamepad-a);
+}

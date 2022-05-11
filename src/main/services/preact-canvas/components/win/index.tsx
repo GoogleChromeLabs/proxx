@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 import { Component, h } from "preact";
+import { gamepad } from "src/main/utils/gamepad";
 import { bind } from "../../../../../utils/bind";
 import { minSec } from "../../../../utils/format";
 import { isFeaturePhone } from "../../../../utils/static-display";
@@ -19,6 +20,9 @@ import { Timer } from "../icons/additional";
 import {
   againButton,
   againShortcutKey,
+  gamepadButton,
+  gamepadButtonA,
+  gamepadButtonB,
   gridName as gridNameStyle,
   mainButton,
   noMotion,
@@ -43,6 +47,7 @@ interface Props {
   height: number;
   mines: number;
   useMotion: boolean;
+  isGamepadConnected: boolean;
 }
 
 interface State {
@@ -95,15 +100,17 @@ export default class End extends Component<Props, State> {
       window.scrollTo(0, 0);
     }, 0);
     this._playAgainBtn!.focus();
-    window.addEventListener("keyup", this.onKeyUp);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("keyup", this.onKeyUp);
   }
 
   render(
-    { onRestart, onMainMenu, time, bestTime, useMotion }: Props,
+    {
+      onRestart,
+      onMainMenu,
+      time,
+      bestTime,
+      useMotion,
+      isGamepadConnected
+    }: Props,
     { gridName }: State
   ) {
     const timeStr = minSec(time);
@@ -146,22 +153,24 @@ export default class End extends Component<Props, State> {
             {isFeaturePhone && (
               <span class={[shortcutKey, againShortcutKey].join(" ")}>#</span>
             )}{" "}
+            {isGamepadConnected ? (
+              <span class={[gamepadButton, gamepadButtonA].join(" ")}>A</span>
+            ) : (
+              ""
+            )}{" "}
             Play again
           </button>
           <button class={mainButton} onClick={onMainMenu}>
-            {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""} Main menu
+            {isFeaturePhone ? <span class={shortcutKey}>*</span> : ""}
+            {isGamepadConnected ? (
+              <span class={[gamepadButton, gamepadButtonB].join(" ")}>B</span>
+            ) : (
+              ""
+            )}{" "}
+            Main menu
           </button>
         </div>
       </div>
     );
-  }
-
-  @bind
-  private onKeyUp(event: KeyboardEvent) {
-    if (event.key === "#") {
-      this.props.onRestart();
-    } else if (event.key === "*") {
-      this.props.onMainMenu();
-    }
   }
 }

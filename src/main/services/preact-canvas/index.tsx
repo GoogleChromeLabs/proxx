@@ -14,6 +14,7 @@ import workerURL from "chunk-name:./../../../worker";
 import nebulaSafeDark from "consts:nebulaSafeDark";
 import prerender from "consts:prerender";
 import { Component, h, VNode } from "preact";
+import { gamepad } from "src/main/utils/gamepad";
 import toRGB from "src/main/utils/to-rgb";
 import { bind } from "src/utils/bind";
 import { PlayMode } from "src/worker/gamelogic/types";
@@ -107,6 +108,7 @@ interface State {
   gameInPlay: boolean;
   allowIntroAnim: boolean;
   vibrationPreference: boolean;
+  isGamepadConnected: boolean;
 }
 
 export type GameChangeCallback = (stateChange: GameStateChange) => void;
@@ -133,7 +135,8 @@ export default class Root extends Component<Props, State> {
     motionPreference: true,
     gameInPlay: false,
     allowIntroAnim: true,
-    vibrationPreference: true
+    vibrationPreference: true,
+    isGamepadConnected: gamepad.isGamepadConnected
   };
   private previousFocus: HTMLElement | null = null;
 
@@ -234,6 +237,11 @@ export default class Root extends Component<Props, State> {
     if (prerender) {
       prerenderDone();
     }
+    gamepad.addConnectedCallback(this._onGamepadConnected);
+  }
+
+  componentWillUnmount() {
+    gamepad.removeConnectedCallback(this._onGamepadConnected);
   }
 
   render(
@@ -248,7 +256,8 @@ export default class Root extends Component<Props, State> {
       gameInPlay,
       bestTime,
       allowIntroAnim,
-      vibrationPreference
+      vibrationPreference,
+      isGamepadConnected
     }: State
   ) {
     let mainComponent: VNode;
@@ -280,6 +289,7 @@ export default class Root extends Component<Props, State> {
             onStartGame={this._onStartGame}
             defaults={prerender ? undefined : gridDefaults}
             motion={motionPreference && allowIntroAnim}
+            isGamepadConnected={isGamepadConnected}
           />
         );
       }
@@ -303,6 +313,7 @@ export default class Root extends Component<Props, State> {
               useMotion={motionPreference}
               bestTime={bestTime}
               useVibration={vibrationPreference}
+              isGamepadConnected={isGamepadConnected}
             />
           )}
         />
@@ -343,6 +354,11 @@ export default class Root extends Component<Props, State> {
         />
       </div>
     );
+  }
+
+  @bind
+  private _onGamepadConnected() {
+    this.setState({ isGamepadConnected: gamepad.isGamepadConnected });
   }
 
   private _nebulaLightColor() {

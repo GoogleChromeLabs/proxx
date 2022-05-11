@@ -20,10 +20,14 @@ html {
   --cell-padding: 2px;
   --side-margin: 10px;
   --icon-size: 20px;
+  --gamepadbtn-size: 20px;
   --circlebtn-size: 24px;
   --bar-avoid: 40px;
   --bar-padding: 5px;
   --border-radius: 7px;
+
+  --color-gamepad-a: #3cdb4e;
+  --color-gamepad-b: #d04242;
 }
 
 /* We're assuming (totally safe, right?) that widths below 320 are feature phones */
@@ -34,6 +38,7 @@ html {
     --cell-padding: 5px;
     --side-margin: 24px;
     --icon-size: 24px;
+    --gamepadbtn-size: 28px;
     --circlebtn-size: 48px;
     --bar-avoid: 78px;
     --bar-padding: 18px;

@@ -17,12 +17,14 @@ import {
   PresetName,
   presets
 } from "src/main/services/state/grid-presets";
+import { gamepad } from "src/main/utils/gamepad";
 import { isFeaturePhone } from "src/main/utils/static-display";
 import { bind } from "src/utils/bind";
 import deferred from "../deferred";
 import { Arrow } from "../icons/initial";
 import {
   field as fieldStyle,
+  gamepadButton as gamepadButtonStyle,
   intro as introStyle,
   label as labelStyle,
   labelText as labelTextStyle,
@@ -120,6 +122,7 @@ export interface Props {
   onStartGame: (width: number, height: number, mines: number) => void;
   defaults?: GridType;
   motion: boolean;
+  isGamepadConnected: boolean;
 }
 
 interface State {
@@ -146,10 +149,12 @@ export default class Intro extends Component<Props, State> {
   componentDidMount() {
     window.scrollTo(0, 0);
     window.addEventListener("keyup", this._onKeyUp);
+    gamepad.addButtonDownCallback(this._onGamepadButtonDown);
   }
 
   componentWillUnmount() {
     window.removeEventListener("keyup", this._onKeyUp);
+    gamepad.removeButtonDownCallback(this._onGamepadButtonDown);
   }
 
   componentWillReceiveProps({ defaults }: Props) {
@@ -158,7 +163,10 @@ export default class Intro extends Component<Props, State> {
     }
   }
 
-  render({ motion }: Props, { width, height, mines, presetName }: State) {
+  render(
+    { motion, isGamepadConnected }: Props,
+    { width, height, mines, presetName }: State
+  ) {
     return (
       <div class={introStyle}>
         <div class={showbizIntroStyle}>
@@ -233,6 +241,11 @@ export default class Intro extends Component<Props, State> {
           <div class={settingsRowStyle}>
             <button class={startButtonStyle}>
               {isFeaturePhone ? <span class={shortcutKeyStyle}>#</span> : ""}{" "}
+              {isGamepadConnected ? (
+                <span class={gamepadButtonStyle}>A</span>
+              ) : (
+                ""
+              )}{" "}
               Start
             </button>
           </div>
@@ -245,6 +258,14 @@ export default class Intro extends Component<Props, State> {
   private _onKeyUp(event: KeyboardEvent) {
     if (event.key === "#") {
       this._startGame(event);
+    }
+  }
+
+  @bind
+  private _onGamepadButtonDown(buttonId: number) {
+    if (buttonId === 0) {
+      // A
+      this._startGame(new Event(""));
     }
   }
 
