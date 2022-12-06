@@ -42,7 +42,7 @@
     "glsl-min-stream": "^1.0.0",
     "glsl-parser": "^2.0.1",
     "glsl-tokenizer": "^2.1.5",
-    "http-server": "^0.11.1",
+    "http-server": "^0.11.2",
     "husky": "^2.2.0",
     "idb-keyval": "^3.2.0",
     "postcss-url": "^8.0.0",
