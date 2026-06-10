@@ -45,7 +45,7 @@
     "http-server": "^0.11.1",
     "husky": "^2.2.0",
     "idb-keyval": "^3.2.0",
-    "postcss-url": "^8.0.0",
+    "postcss-url": "^10.1.4",
     "preact": "^8.3.1",
     "prettier": "^1.17.0",
     "puppeteer": "^1.14.0",
@@ -54,12 +54,12 @@
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-loadz0r": "^0.7.2",
     "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-terser": "^4.0.4",
     "rollup-pluginutils": "^2.6.0",
     "travis-size-report": "^1.0.1",
     "tslint": "^5.16.0",
-    "typed-css-modules": "^0.4.2",
+    "typed-css-modules": "^0.9.1",
     "typescript": "^3.5.2"
   }
 }
